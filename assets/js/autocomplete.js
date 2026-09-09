@@ -12,7 +12,9 @@ const Autocomplete = (function () {
         "/download/download-User/ISO/",
         "/download/download-User/Sandbox/",
         "/download/download-User/LogDB/",
-        "/download/download-User/imageClone/"
+        "/download/download-User/imageClone/",
+        "/download/download-User/Documents/",
+        "/download/download-User/files/"
     ];
 
     let cache = []; // Cached file/folder index
