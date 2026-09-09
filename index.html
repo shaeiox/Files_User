@@ -4,7 +4,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CloudAvid • File Portal</title>
+  <meta name="theme-color" content="#090a0f" />
+  <title>AVID Download • File Portal</title>
+
+  <script>
+    (function () {
+      try {
+        var s = localStorage.getItem('cav_theme');
+        var t = (s === 'light' || s === 'dark') ? s
+          : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..900&display=swap" rel="stylesheet">
@@ -19,18 +34,31 @@
 <body>
   <div class="page">
 
-    <!-- NAV — always visible, never destroyed -->
     <nav class="nav">
       <div class="nav-bar">
         <a class="nav-logo" href="/" data-link>
-          <img src="/assets/icon/logo.png" alt="CloudAvid">
+          <img src="/assets/icon/logo.png" alt="AVID">
           <div class="nav-logo-text">
-            <strong data-i18n="brand">CloudAvid</strong>
-            <span data-i18n="subtitle">File Portal</span>
+            <strong data-i18n="brand">AVID</strong>
+            <span data-i18n="subtitle">Download</span>
           </div>
         </a>
         <div class="nav-actions">
           <a class="btn btn-sm" href="https://cloudavid.com" data-i18n="website">Website</a>
+
+          <button class="theme-btn" id="themeBtn" type="button" title="Toggle theme" aria-label="Toggle theme">
+            <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="4" />
+              <path
+                d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+            </svg>
+            <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+            </svg>
+          </button>
+
           <button class="btn btn-sm btn-icon" id="langBtn" type="button" title="Toggle language">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
@@ -43,17 +71,15 @@
       </div>
     </nav>
 
-    <!-- MAIN CONTENT — this is the only part that changes -->
     <main id="app"></main>
 
-    <!-- FOOTER — always visible, never destroyed -->
     <footer class="footer">
       <span>© 2025 CloudAvid Co</span>
       <a href="https://cloudavid.com">cloudavid.com</a>
     </footer>
-
   </div>
 
+  <script src="/assets/js/theme.js"></script>
   <script src="/assets/js/i18n.js"></script>
   <script src="/assets/js/banner.js"></script>
   <script src="/assets/js/home.js"></script>

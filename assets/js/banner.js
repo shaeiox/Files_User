@@ -33,13 +33,13 @@ const CavBanner = (function () {
         content: {
             en: {
                 title: "Explore CloudAvid Docs",
-                message: "Setup guides, API references, and architecture documentation.",
+                message: "Setup guides, SysAdmin Skills, and architecture documentation.",
                 actionText: "Open Docs",
                 actionUrl: "https://docs.cloudavid.com",
             },
             fa: {
                 title: "مستندات کلوداوید",
-                message: "راهنمای نصب، مرجع API و مستندات معماری زیرساخت.",
+                message: "راهنمای نصب، آموزش و ارتقای مهارت ادمین و مستندات معماری زیرساخت.",
                 actionText: "مشاهده مستندات",
                 actionUrl: "https://docs.cloudavid.com",
             },

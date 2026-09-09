@@ -1,11 +1,5 @@
 /* ═══════════════════════════════════════════════
-   home.js — Home Page Renderer
-
-   Renders the home page content (hero + category
-   cards + search) into a given container element.
-
-   Does NOT touch the DOM on load — only when
-   Router calls HomePage.render().
+   home.js — AVID Download Center (Pro Max)
    ═══════════════════════════════════════════════ */
 
 const HomePage = (function () {
@@ -14,57 +8,58 @@ const HomePage = (function () {
     const rootsToScan = ["/download/download-User/", "/download/download-Avid/"];
     let stopFlag = false;
 
-    /**
-     * Render the home page HTML into the given container.
-     */
     function render(container) {
-        document.title = getDict().pageTitle || "CloudAvid • File Portal";
+        document.title = getDict().pageTitle || "AVID Download • File Portal";
 
         container.innerHTML = `
-      <div class="home-layout anim-fade-up">
+      <div class="home-layout">
 
-        <!-- Hero -->
-        <section class="hero">
-          <div class="hero-inner">
-            <div class="hero-text">
-              <div class="status-chip">
-                <span class="status-dot"></span>
-                <span data-i18n="portalStatus">Portal Online</span>
-              </div>
-              <h1 data-i18n="title">Download Center</h1>
-              <p class="hero-desc" data-i18n="desc">Access software packages, ISO images, templates and system logs — provided by CloudAvid infrastructure team.</p>
+
+        <section class="hero-max">
+        <div class="hero-content">
+            <div class="status-chip">
+            <span class="status-dot"></span>
+            <span data-i18n="portalStatus">AVID Servers Online</span>
             </div>
+
+            <h1 data-i18n-html="heroTitle">AVID <span>Download</span> Infrastructure</h1>
+            
+            <p class="hero-desc" data-i18n="desc">Secure, high-speed access to software packages, OS ISO images, and infrastructure templates.</p>
+            
             <div class="hero-search">
-              <div class="input-wrap">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <div class="input-wrap">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                 <input id="globalSearch" type="text" autocomplete="off" data-i18n-ph="searchPh"/>
                 <div class="search-keys"><kbd>⌘</kbd><kbd>K</kbd></div>
-              </div>
-              <button class="btn btn-primary" id="searchBtn" type="button" data-i18n="searchBtn">Search</button>
-              <button class="btn btn-danger-text" id="stopBtn" type="button" style="display:none" data-i18n="stopBtn">Stop</button>
             </div>
-          </div>
+            <button class="btn btn-primary" id="searchBtn" type="button" data-i18n="searchBtn">Search</button>
+            <button class="btn btn-danger-text" id="stopBtn" type="button" style="display:none" data-i18n="stopBtn">Stop</button>
+            </div>
+        </div>
+
+        <div class="hero-visual">
+            <div class="logo-shader"></div>
+            <div class="logo-swap" id="logoSwap">
+            <img class="logo-layer logo-dark" src="/assets/icon/avid-logo-dark.png" alt="AVID Download" draggable="false">
+            <img class="logo-layer logo-light" src="/assets/icon/avid-logo-light.png" alt="AVID Download" draggable="false">
+            </div>
+        </div>
         </section>
 
-        <!-- Section label -->
-        <div class="section-label">
-          <h2 data-i18n="categories">Directories</h2>
-        </div>
-
-        <!-- Category grid -->
+        <!-- 5-COLUMN COMPACT CATEGORY GRID -->
         <div class="cat-grid stagger">
-          ${categoryCard("/download/download-User/Template/", "template.png", "ci-teal", "template", "templateDesc")}
-          ${categoryCard("/download/download-User/Sandbox/", "sandbox.png", "ci-violet", "sandbox", "sandboxDesc")}
-          ${categoryCard("/download/download-User/LogDB/", "Log.png", "ci-amber", "logServer", "logServerDesc")}
-          ${categoryCard("/download/download-User/ISO/", "iso.png", "ci-rose", "iso", "isoDesc")}
-          ${categoryCard("/download/download-User/imageClone/", "images.png", "ci-sky", "imageClone", "images")}
+          ${categoryCard("/download/download-User/Template/", "template.png", "Template", "Common templates")}
+          ${categoryCard("/download/download-User/Sandbox/", "sandbox.png", "Sandbox", "Internal sandbox")}
+          ${categoryCard("/download/download-User/LogDB/", "Log.png", "Log Server", "Database exports")}
+          ${categoryCard("/download/download-User/ISO/", "iso.png", "ISO Images", "OS installers")}
+          ${categoryCard("/download/download-User/imageClone/", "images.png", "VM Images", "Virtual machine disks")}
         </div>
 
-        <!-- Search results -->
+        <!-- SEARCH RESULTS -->
         <section class="results-panel" id="resultsBox" style="display:none">
           <div class="results-bar">
             <div class="results-bar-title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
               <span id="resultsTitle">Results</span>
             </div>
             <div class="results-bar-meta" id="progress"></div>
@@ -78,26 +73,20 @@ const HomePage = (function () {
         bindEvents();
     }
 
-    /**
-     * Generate a category card HTML string.
-     */
-    function categoryCard(href, icon, colorClass, titleKey, descKey) {
+    // Card Generator (Sleek layout)
+    function categoryCard(href, icon, title, desc) {
         return `
       <a class="cat-card" href="${href}">
-        <div class="cat-icon ${colorClass}"><img src="/assets/icon/${icon}" alt=""></div>
+        <div class="cat-icon"><img src="/assets/icon/${icon}" alt="${title}"></div>
         <div class="cat-meta">
-          <h3 data-i18n="${titleKey}">${titleKey}</h3>
-          <p data-i18n="${descKey}">${descKey}</p>
+          <h3>${title}</h3>
+          <p>${desc}</p>
         </div>
-        <svg class="cat-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
       </a>
     `;
     }
 
-    /**
-     * Bind search-related event listeners.
-     * Called after render() injects the HTML.
-     */
+    // --- Logic remains the same (Search & Fetch) ---
     function bindEvents() {
         const qInput = document.getElementById("globalSearch");
         const searchBtn = document.getElementById("searchBtn");
@@ -107,13 +96,11 @@ const HomePage = (function () {
 
         searchBtn.addEventListener("click", () => scanAll(qInput.value || ""));
         stopBtn.addEventListener("click", () => { stopFlag = true; });
-
         qInput.addEventListener("keydown", (e) => {
             if (e.key === "Enter") scanAll(qInput.value || "");
             if (e.key === "Escape") clearResults();
         });
 
-        // Ctrl+K / Cmd+K shortcut
         window._homeKeyHandler = (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
                 e.preventDefault();
@@ -123,10 +110,7 @@ const HomePage = (function () {
         window.addEventListener("keydown", window._homeKeyHandler);
     }
 
-    function isHidden(n) {
-        const l = (n || "").toLowerCase();
-        return l === "index.html" || l === "index.php" || l.startsWith(".");
-    }
+    function isHidden(n) { return (n || "").toLowerCase() === "index.html" || (n || "").startsWith("."); }
 
     function clearResults() {
         const box = document.getElementById("resultsList");
@@ -138,20 +122,18 @@ const HomePage = (function () {
     function addResult(item) {
         const list = document.getElementById("resultsList");
         if (!list) return;
-
         const row = document.createElement("div");
-        row.className = "res-row";
+        row.className = "res-row anim-fade-up";
         row.innerHTML = `
       <div class="res-info">
         <a href="${item.href}">${item.name}</a>
-        <span class="res-path">${item.href}</span>
+        <div class="res-path">${item.href}</div>
       </div>
       <div>
         <span class="badge ${item.type === 'directory' ? 'badge-dir' : 'badge-file'}">
           ${item.type === 'directory' ? 'DIR' : 'FILE'}
         </span>
-      </div>
-    `;
+      </div>`;
         list.appendChild(row);
     }
 
@@ -159,7 +141,6 @@ const HomePage = (function () {
         stopFlag = false;
         const resultsBox = document.getElementById("resultsBox");
         const resultsList = document.getElementById("resultsList");
-        const resultsTitle = document.getElementById("resultsTitle");
         const progressEl = document.getElementById("progress");
         const searchBtn = document.getElementById("searchBtn");
         const stopBtn = document.getElementById("stopBtn");
@@ -169,10 +150,7 @@ const HomePage = (function () {
 
         resultsList.innerHTML = "";
         resultsBox.style.display = "block";
-
-        const d = getDict();
-        resultsTitle.textContent = d.results;
-        progressEl.textContent = d.scanning;
+        progressEl.textContent = "Scanning AVID Servers...";
         stopBtn.style.display = "inline-flex";
         searchBtn.disabled = true;
         qInput.disabled = true;
@@ -191,7 +169,6 @@ const HomePage = (function () {
                 const res = await fetch("/__list" + dir, { cache: "no-store" });
                 if (!res.ok) continue;
                 const entries = await res.json();
-                if (!Array.isArray(entries)) continue;
 
                 for (const e of entries) {
                     if (stopFlag) break;
@@ -210,11 +187,10 @@ const HomePage = (function () {
                     }
                 }
             } catch { }
-
-            progressEl.textContent = `${d.scanning} ${scanned}`;
+            progressEl.textContent = `Scanned ${scanned} directories...`;
         }
 
-        progressEl.textContent = d.done + ` · ${found}`;
+        progressEl.textContent = `Search Complete · ${found} found`;
         stopBtn.style.display = "none";
         searchBtn.disabled = false;
         qInput.disabled = false;
