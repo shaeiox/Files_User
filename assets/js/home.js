@@ -5,7 +5,11 @@
 const HomePage = (function () {
     'use strict';
 
-    const rootsToScan = ["/download/download-User/", "/download/download-Avid/"];
+    const rootsToScan = [
+        "/download/download-User/",
+        "/download/download-Avid/",
+        "/files/"
+    ];
     let stopFlag = false;
 
     function render(container) {
@@ -40,19 +44,20 @@ const HomePage = (function () {
             <div class="hero-visual">
             <div class="logo-shader" aria-hidden="true"></div>
             <div class="logo-swap" id="logoSwap">
-                <img class="logo-layer logo-dark" src="/assets/icon/avid-logo-dark.png" alt="AVID Download" draggable="false">
-                <img class="logo-layer logo-light" src="/assets/icon/avid-logo-light.png" alt="AVID Download" draggable="false">
+                <img class="logo-layer logo-dark" src="/assets/icon/avid-logo-dark.webp" alt="AVID Download" draggable="false">
+                <img class="logo-layer logo-light" src="/assets/icon/avid-logo-light.webp" alt="AVID Download" draggable="false">
             </div>
             </div>
         </section>
 
         <!-- 5-COLUMN COMPACT CATEGORY GRID -->
         <div class="cat-grid stagger">
-          ${categoryCard("/download/download-User/Template/", "template.png", "Template", "Common templates")}
-          ${categoryCard("/download/download-User/Sandbox/", "sandbox.png", "Sandbox", "Internal sandbox")}
-          ${categoryCard("/download/download-User/LogDB/", "Log.png", "Log Server", "Database exports")}
-          ${categoryCard("/download/download-User/ISO/", "iso.png", "ISO Images", "OS installers")}
-          ${categoryCard("/download/download-User/imageClone/", "images.png", "VM Images", "Virtual machine disks")}
+        ${categoryCard("/files/", "files-logo.webp", "System Files", "Public system files")}
+          ${categoryCard("/download/download-User/Template/", "template.webp", "Template", "Common templates")}
+          ${categoryCard("/download/download-User/Sandbox/", "sandbox.webp", "Sandbox", "Internal sandbox")}
+          ${categoryCard("/download/download-User/LogDB/", "Log.webp", "Log Server", "Database exports")}
+          ${categoryCard("/download/download-User/ISO/", "iso.webp", "ISO Images", "OS installers")}
+          ${categoryCard("/download/download-User/imageClone/", "images.webp", "VM Images", "Virtual machine disks")}
         </div>
 
         <!-- SEARCH RESULTS -->

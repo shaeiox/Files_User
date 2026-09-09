@@ -8,6 +8,7 @@ const Autocomplete = (function () {
     const rootsToPreCache = [
         "/download/download-User/",
         "/download/download-Avid/",
+        "/files/",
         "/download/download-User/Template/",
         "/download/download-User/ISO/",
         "/download/download-User/Sandbox/",
