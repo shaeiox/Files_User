@@ -1,0 +1,284 @@
+/* ═══════════════════════════════════════
+   banner.css — In-App Banner Component
+   Standalone DOM element — always works
+   ═══════════════════════════════════════ */
+
+.cav-banner-host {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    max-width: calc(100% - 48px);
+}
+
+html[dir="rtl"] .cav-banner-host {
+    right: auto;
+    left: 24px;
+    align-items: flex-start;
+}
+
+/* ── Banner card ── */
+.cav-banner {
+    pointer-events: auto;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    width: 400px;
+    max-width: 100%;
+    padding: 16px 18px 16px 16px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #1a1a20, #131318);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.92);
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    overflow: hidden;
+
+    animation: cav-banner-in 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    will-change: transform, opacity;
+}
+
+/* Accent line on top */
+.cav-banner::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 20%;
+    right: 20%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #2dd4bf, transparent);
+    opacity: 0.5;
+}
+
+.cav-banner.cav-out {
+    animation: cav-banner-out 220ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+@keyframes cav-banner-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.94);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes cav-banner-out {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(10px) scale(0.96);
+    }
+}
+
+/* ── Icon ── */
+.cav-banner-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(20, 184, 166, 0.15), rgba(20, 184, 166, 0.05));
+    border: 1px solid rgba(20, 184, 166, 0.20);
+    color: #2dd4bf;
+    position: relative;
+}
+
+/* subtle glow */
+.cav-banner-icon::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 10px;
+    background: radial-gradient(circle at 50% 0%, rgba(45, 212, 191, 0.25), transparent 70%);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* ── Body ── */
+.cav-banner-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding-top: 2px;
+}
+
+.cav-banner-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.98);
+    letter-spacing: -0.005em;
+}
+
+.cav-banner-msg {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+
+/* ── Action button ── */
+.cav-banner-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 7px;
+    background: rgba(20, 184, 166, 0.12);
+    border: 1px solid rgba(20, 184, 166, 0.22);
+    color: #5eead4;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+    width: fit-content;
+    transition:
+        background 150ms ease,
+        border-color 150ms ease,
+        transform 150ms ease;
+}
+
+.cav-banner-action:hover {
+    background: rgba(20, 184, 166, 0.20);
+    border-color: rgba(20, 184, 166, 0.35);
+    color: #99f6e4;
+}
+
+.cav-banner-action:active {
+    transform: scale(0.97);
+}
+
+.cav-banner-action svg {
+    flex-shrink: 0;
+    transition: transform 150ms ease;
+}
+
+.cav-banner-action:hover svg {
+    transform: translateX(2px);
+}
+
+html[dir="rtl"] .cav-banner-action svg {
+    transform: scaleX(-1);
+}
+
+html[dir="rtl"] .cav-banner-action:hover svg {
+    transform: scaleX(-1) translateX(2px);
+}
+
+/* ── Close ── */
+.cav-banner-close {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.35);
+    cursor: pointer;
+    transition: background 120ms, color 120ms;
+    padding: 0;
+    margin: -3px -6px 0 0;
+}
+
+html[dir="rtl"] .cav-banner-close {
+    margin: -3px 0 0 -6px;
+}
+
+.cav-banner-close:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.cav-banner-close:active {
+    transform: scale(0.9);
+}
+
+/* ── Timer bar ── */
+.cav-banner-timer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.04);
+    overflow: hidden;
+}
+
+.cav-banner-timer-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #14b8a6, #2dd4bf, #5eead4);
+    transform-origin: left center;
+    animation: cav-timer-shrink var(--cav-duration, 8s) linear both;
+}
+
+html[dir="rtl"] .cav-banner-timer-bar {
+    transform-origin: right center;
+}
+
+@keyframes cav-timer-shrink {
+    from {
+        transform: scaleX(1);
+    }
+
+    to {
+        transform: scaleX(0);
+    }
+}
+
+.cav-banner:hover .cav-banner-timer-bar {
+    animation-play-state: paused;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+    .cav-banner-host {
+        right: 12px;
+        left: 12px;
+        bottom: 12px;
+        max-width: none;
+        align-items: stretch;
+    }
+
+    html[dir="rtl"] .cav-banner-host {
+        right: 12px;
+        left: 12px;
+    }
+
+    .cav-banner {
+        width: auto;
+    }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+
+    .cav-banner,
+    .cav-banner.cav-out,
+    .cav-banner-timer-bar {
+        animation-duration: 0.01ms !important;
+    }
+}

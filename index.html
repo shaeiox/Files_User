@@ -12,16 +12,17 @@
   <link rel="stylesheet" href="/assets/css/base.css">
   <link rel="stylesheet" href="/assets/css/components.css">
   <link rel="stylesheet" href="/assets/css/home.css">
+  <link rel="stylesheet" href="/assets/css/browse.css">
   <link rel="icon" href="/assets/icon/files-logo.png">
 </head>
 
 <body>
   <div class="page">
 
-    <!-- NAV -->
+    <!-- NAV — always visible, never destroyed -->
     <nav class="nav">
       <div class="nav-bar">
-        <a class="nav-logo" href="https://cloudavid.com">
+        <a class="nav-logo" href="/" data-link>
           <img src="/assets/icon/logo.png" alt="CloudAvid">
           <div class="nav-logo-text">
             <strong data-i18n="brand">CloudAvid</strong>
@@ -42,136 +43,22 @@
       </div>
     </nav>
 
-    <!-- MAIN -->
-    <main class="home-layout">
+    <!-- MAIN CONTENT — this is the only part that changes -->
+    <main id="app"></main>
 
-      <!-- Hero -->
-      <section class="hero">
-        <div class="hero-inner">
-          <div class="hero-text">
-            <div class="status-chip">
-              <span class="status-dot"></span>
-              <span data-i18n="portalStatus">Portal Online</span>
-            </div>
-            <h1 data-i18n="title">Download Center</h1>
-            <p class="hero-desc" data-i18n="desc">Access software packages, ISO images, templates and system logs —
-              provided by CloudAvid infrastructure team.</p>
-          </div>
-          <div class="hero-search">
-            <div class="input-wrap">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.3-4.3" />
-              </svg>
-              <input id="globalSearch" type="text" autocomplete="off" data-i18n-ph="searchPh" />
-              <div class="search-keys"><kbd>⌘</kbd><kbd>K</kbd></div>
-            </div>
-            <button class="btn btn-primary" id="searchBtn" type="button" data-i18n="searchBtn">Search</button>
-            <button class="btn btn-danger-text" id="stopBtn" type="button" style="display:none"
-              data-i18n="stopBtn">Stop</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- Categories -->
-      <div class="section-label">
-        <h2 data-i18n="categories">Directories</h2>
-      </div>
-
-      <div class="cat-grid stagger">
-        <a class="cat-card" href="/download/download-User/Template/">
-          <div class="cat-icon ci-teal"><img src="/assets/icon/template.png" alt=""></div>
-          <div class="cat-meta">
-            <h3 data-i18n="template">Template</h3>
-            <p data-i18n="templateDesc">Common templates & starter files</p>
-          </div>
-          <svg class="cat-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12h14" />
-            <path d="m12 5 7 7-7 7" />
-          </svg>
-        </a>
-
-        <a class="cat-card" href="/download/download-User/Sandbox/">
-          <div class="cat-icon ci-violet"><img src="/assets/icon/sandbox.png" alt=""></div>
-          <div class="cat-meta">
-            <h3 data-i18n="sandbox">Sandbox</h3>
-            <p data-i18n="sandboxDesc">Internal sandbox downloads</p>
-          </div>
-          <svg class="cat-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12h14" />
-            <path d="m12 5 7 7-7 7" />
-          </svg>
-        </a>
-
-        <a class="cat-card" href="/download/download-User/LogDB/">
-          <div class="cat-icon ci-amber"><img src="/assets/icon/Log.png" alt=""></div>
-          <div class="cat-meta">
-            <h3 data-i18n="logServer">Log Server</h3>
-            <p data-i18n="logServerDesc">Logs & database exports</p>
-          </div>
-          <svg class="cat-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12h14" />
-            <path d="m12 5 7 7-7 7" />
-          </svg>
-        </a>
-
-        <a class="cat-card" href="/download/download-User/ISO/">
-          <div class="cat-icon ci-rose"><img src="/assets/icon/iso.png" alt=""></div>
-          <div class="cat-meta">
-            <h3 data-i18n="iso">ISO Images</h3>
-            <p data-i18n="isoDesc">OS images & installers</p>
-          </div>
-          <svg class="cat-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12h14" />
-            <path d="m12 5 7 7-7 7" />
-          </svg>
-        </a>
-
-        <a class="cat-card" href="/download/download-User/imageClone/">
-          <div class="cat-icon ci-sky"><img src="/assets/icon/images.png" alt=""></div>
-          <div class="cat-meta">
-            <h3 data-i18n="imageClone">VM Images</h3>
-            <p data-i18n="images">Virtual machine disk images</p>
-          </div>
-          <svg class="cat-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12h14" />
-            <path d="m12 5 7 7-7 7" />
-          </svg>
-        </a>
-      </div>
-
-      <!-- Search Results -->
-      <section class="results-panel" id="resultsBox" style="display:none">
-        <div class="results-bar">
-          <div class="results-bar-title">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
-            <span id="resultsTitle">Results</span>
-          </div>
-          <div class="results-bar-meta" id="progress"></div>
-        </div>
-        <div class="results-body" id="resultsList"></div>
-      </section>
-
-    </main>
-
+    <!-- FOOTER — always visible, never destroyed -->
     <footer class="footer">
       <span>© 2025 CloudAvid Co</span>
       <a href="https://cloudavid.com">cloudavid.com</a>
     </footer>
+
   </div>
 
   <script src="/assets/js/i18n.js"></script>
+  <script src="/assets/js/banner.js"></script>
   <script src="/assets/js/home.js"></script>
+  <script src="/assets/js/browse.js"></script>
+  <script src="/assets/js/router.js"></script>
 </body>
 
 </html>

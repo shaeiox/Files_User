@@ -60,7 +60,7 @@ const mimes = {
 http.createServer((req, res) => {
     const url = decodeURIComponent(req.url.split('?')[0]);
 
-    // JSON API
+    // JSON API for file listing
     if (url.startsWith('/__list/')) {
         const p = url.replace('/__list', '');
         const k = p.endsWith('/') ? p : p + '/';
@@ -69,23 +69,17 @@ http.createServer((req, res) => {
         return;
     }
 
-    // Directory → browse.html
+    // All /download/ paths serve index.html (SPA shell)
     if (url.startsWith('/download/')) {
-        const k = url.endsWith('/') ? url : url + '/';
-        if (mock[k]) {
-            fs.readFile(path.join(__dirname, 'browse.html'), (e, c) => {
-                if (e) { res.writeHead(500); res.end('browse.html missing'); return; }
-                res.writeHead(200, { 'Content-Type': 'text/html' });
-                res.end(c);
-            });
-            return;
-        }
-        res.writeHead(200, { 'Content-Type': 'text/plain' });
-        res.end('[Mock Download] ' + url);
+        fs.readFile(path.join(__dirname, 'index.html'), (e, c) => {
+            if (e) { res.writeHead(500); res.end('index.html missing'); return; }
+            res.writeHead(200, { 'Content-Type': 'text/html' });
+            res.end(c);
+        });
         return;
     }
 
-    // Static
+    // Static files
     const fp = path.join(__dirname, url === '/' ? 'index.html' : url);
     const ext = path.extname(fp).toLowerCase();
 
@@ -96,7 +90,9 @@ http.createServer((req, res) => {
                 res.end(`<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="%2314b8a6" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`);
                 return;
             }
-            res.writeHead(404); res.end('404 — ' + url); return;
+            res.writeHead(404);
+            res.end('404 — ' + url);
+            return;
         }
         res.writeHead(200, { 'Content-Type': mimes[ext] || 'application/octet-stream' });
         res.end(data);
@@ -104,7 +100,7 @@ http.createServer((req, res) => {
 }).listen(PORT, () => {
     console.log(`
   ╔═══════════════════════════════════════╗
-  ║   CloudAvid File Portal — Dev        ║
+  ║   CloudAvid File Portal — SPA Mode   ║
   ║   http://localhost:${PORT}              ║
   ╚═══════════════════════════════════════╝
 
