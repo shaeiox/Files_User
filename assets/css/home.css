@@ -29,7 +29,9 @@
     border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
     box-shadow: var(--shadow-lg, 0 20px 40px rgba(0, 0, 0, 0.4));
     position: relative;
-    overflow: hidden;
+    z-index: 20;
+    overflow: visible;
+
     animation: fadeUp var(--dur-3, 400ms) var(--ease-out-cubic) both;
     transition: background-color var(--dur-2, 200ms) ease, border-color var(--dur-2, 200ms) ease;
 }
@@ -38,10 +40,12 @@
     content: "";
     position: absolute;
     inset: 0 0 auto 0;
-    height: 1px;
+    height: 2px;
     background: linear-gradient(90deg, transparent, var(--a-5, #ffb800), transparent);
     opacity: 0.75;
     pointer-events: none;
+    border-top-left-radius: var(--r6, 20px);
+    border-top-right-radius: var(--r6, 20px);
 }
 
 .hero-content {
@@ -111,6 +115,8 @@
     margin-top: clamp(2px, 0.5vh, 8px);
     width: 100%;
     max-width: 580px;
+    position: relative;
+    z-index: 50;
 }
 
 .hero-search .input-wrap {
@@ -347,6 +353,8 @@
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: clamp(12px, 1.2vw, 16px);
     width: 100%;
+    position: relative;
+    z-index: 1;
 }
 
 .cat-card {
@@ -460,6 +468,9 @@
     background: var(--bg-card, #131822);
     border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
     overflow: hidden;
+    position: relative;
+    z-index: 1;
+
     animation: scaleIn var(--dur-3, 300ms) var(--ease-out-cubic) both;
 }
 

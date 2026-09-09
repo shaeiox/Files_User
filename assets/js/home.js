@@ -112,6 +112,15 @@ const HomePage = (function () {
 
         if (!qInput || !searchBtn) return;
 
+        if (typeof Autocomplete !== "undefined") {
+            Autocomplete.bind(qInput);
+        }
+
+        searchBtn.addEventListener("click", () => {
+            if (typeof Autocomplete !== "undefined") Autocomplete.hide();
+            scanAll(qInput.value || "");
+        });
+
         searchBtn.addEventListener("click", () => scanAll(qInput.value || ""));
         stopBtn.addEventListener("click", () => { stopFlag = true; });
         qInput.addEventListener("keydown", (e) => {
