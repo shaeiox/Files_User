@@ -37,13 +37,13 @@ const HomePage = (function () {
             </div>
         </div>
 
-        <div class="hero-visual">
-            <div class="logo-shader"></div>
+            <div class="hero-visual">
+            <div class="logo-shader" aria-hidden="true"></div>
             <div class="logo-swap" id="logoSwap">
-            <img class="logo-layer logo-dark" src="/assets/icon/avid-logo-dark.png" alt="AVID Download" draggable="false">
-            <img class="logo-layer logo-light" src="/assets/icon/avid-logo-light.png" alt="AVID Download" draggable="false">
+                <img class="logo-layer logo-dark" src="/assets/icon/avid-logo-dark.png" alt="AVID Download" draggable="false">
+                <img class="logo-layer logo-light" src="/assets/icon/avid-logo-light.png" alt="AVID Download" draggable="false">
             </div>
-        </div>
+            </div>
         </section>
 
         <!-- 5-COLUMN COMPACT CATEGORY GRID -->
@@ -71,6 +71,24 @@ const HomePage = (function () {
     `;
 
         bindEvents();
+    }
+
+    const logo = document.getElementById('logoSwap');
+    if (logo && !logo.dataset.bound) {
+        logo.dataset.bound = '1';
+        let busy = false;
+        logo.addEventListener('mouseenter', () => {
+            if (busy || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            busy = true;
+            logo.classList.remove('is-flipping');
+            void logo.offsetWidth;
+            logo.classList.add('is-flipping');
+        });
+        logo.addEventListener('animationend', (e) => {
+            if (e.animationName !== 'logoFlip') return;
+            logo.classList.remove('is-flipping');
+            busy = false;
+        });
     }
 
     // Card Generator (Sleek layout)
