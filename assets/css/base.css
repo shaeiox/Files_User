@@ -12,20 +12,17 @@ html {
 }
 
 body {
+    background-color: var(--n-1);
     font-family: var(--font);
     font-size: 15px;
     line-height: 1.6;
     color: var(--text);
-    background-color: var(--bg);
-    background-image:
-        radial-gradient(ellipse 1000px 600px at 50% -10%, var(--glow), transparent 80%),
-        radial-gradient(ellipse 800px 800px at 85% 110%, var(--glow), transparent 70%);
-    background-attachment: fixed;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
     transition: background-color var(--dur-2), color var(--dur-2);
 }
+
 
 ::selection {
     background: rgba(255, 184, 0, 0.3);
@@ -51,9 +48,152 @@ img {
 }
 
 .page {
+    position: relative;
+    z-index: 1;
     width: min(1140px, 100% - var(--s6));
     margin: 0 auto;
     padding: var(--s6) 0 var(--s16);
+}
+
+
+/* ═══════════════════════════════════════════════
+   AVID SIGNATURE BACKDROP
+   Enterprise gold + subtle depth
+   Lightweight: 4 layers, GPU-accelerated
+   ═══════════════════════════════════════════════ */
+
+.aura-backdrop {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── Layer 1: Deep base gradient ── */
+.aura-base {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(180deg,
+            #0a0b12 0%,
+            #08090e 45%,
+            #0b0c14 100%);
+    pointer-events: none;
+}
+
+/* ── Layer 2: Primary gold aura (top-right) ── */
+.aura-glow-1 {
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 65%;
+    height: 75%;
+    background:
+        radial-gradient(ellipse at center,
+            rgba(255, 184, 0, 0.10) 0%,
+            rgba(255, 184, 0, 0.05) 25%,
+            rgba(255, 184, 0, 0.02) 50%,
+            transparent 75%);
+    filter: blur(60px);
+    transform: translateZ(0);
+    will-change: transform;
+    pointer-events: none;
+}
+
+/* ── Layer 3: Cool ambient (bottom-left) — creates contrast ── */
+.aura-glow-2 {
+    position: absolute;
+    bottom: -25%;
+    left: -15%;
+    width: 70%;
+    height: 80%;
+    background:
+        radial-gradient(ellipse at center,
+            rgba(88, 108, 220, 0.08) 0%,
+            rgba(100, 90, 200, 0.04) 30%,
+            rgba(60, 80, 180, 0.02) 55%,
+            transparent 78%);
+    filter: blur(80px);
+    transform: translateZ(0);
+    will-change: transform;
+    pointer-events: none;
+}
+
+/* ── Layer 4: Edge vignette — focuses attention on content ── */
+.aura-vignette {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 90% 70% at 50% 40%,
+            transparent 40%,
+            rgba(0, 0, 0, 0.15) 75%,
+            rgba(0, 0, 0, 0.4) 100%);
+    pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════
+   LIGHT THEME ADAPTATION
+   ═══════════════════════════════════════════════ */
+
+[data-theme="light"] .aura-base {
+    background:
+        linear-gradient(180deg,
+            #fafbfe 0%,
+            #f5f6fa 45%,
+            #eef0f5 100%);
+}
+
+[data-theme="light"] .aura-glow-1 {
+    background:
+        radial-gradient(ellipse at center,
+            rgba(255, 184, 0, 0.15) 0%,
+            rgba(255, 184, 0, 0.08) 25%,
+            rgba(255, 184, 0, 0.03) 50%,
+            transparent 75%);
+}
+
+[data-theme="light"] .aura-glow-2 {
+    background:
+        radial-gradient(ellipse at center,
+            rgba(88, 108, 220, 0.10) 0%,
+            rgba(100, 90, 200, 0.06) 30%,
+            rgba(60, 80, 180, 0.03) 55%,
+            transparent 78%);
+}
+
+[data-theme="light"] .aura-vignette {
+    background:
+        radial-gradient(ellipse 90% 70% at 50% 40%,
+            transparent 40%,
+            rgba(15, 19, 31, 0.04) 75%,
+            rgba(15, 19, 31, 0.10) 100%);
+}
+
+/* ═══════════════════════════════════════════════
+   PERFORMANCE OPTIMIZATIONS
+   ═══════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .aura-glow-1,
+    .aura-glow-2 {
+        will-change: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .aura-glow-1 {
+        filter: blur(40px);
+        width: 90%;
+        height: 60%;
+    }
+
+    .aura-glow-2 {
+        filter: blur(50px);
+        width: 90%;
+        height: 60%;
+    }
 }
 
 @keyframes fadeUp {
