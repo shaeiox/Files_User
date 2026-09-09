@@ -1,0 +1,85 @@
+:root {
+    /* ── Space: 4px grid ── */
+    --s1: 4px;
+    --s2: 8px;
+    --s3: 12px;
+    --s4: 16px;
+    --s5: 20px;
+    --s6: 24px;
+    --s7: 28px;
+    --s8: 32px;
+    --s10: 40px;
+    --s12: 48px;
+    --s14: 56px;
+    --s16: 64px;
+    --s20: 80px;
+    --s24: 96px;
+
+    /* ── Radius ── */
+    --r1: 4px;
+    --r2: 8px;
+    --r3: 12px;
+    --r4: 16px;
+    --r5: 20px;
+    --r6: 24px;
+    --r-full: 9999px;
+
+    /* ── Neutral Palette ── */
+    --n-0: #000000;
+    --n-1: #09090b;
+    --n-2: #0f0f12;
+    --n-3: #16161a;
+    --n-4: #1c1c21;
+    --n-5: #25252b;
+    --n-6: #2e2e36;
+    --n-7: #3b3b44;
+    --n-8: #52525e;
+    --n-9: #71717e;
+    --n-10: #a0a0ad;
+    --n-11: #ccccd4;
+    --n-12: #eeeeF2;
+    --n-13: #ffffff;
+
+    /* ── Accent: Teal ── */
+    --a-1: #042f2e;
+    --a-2: #0d3d3b;
+    --a-3: #115e5b;
+    --a-4: #0f766e;
+    --a-5: #14b8a6;
+    --a-6: #2dd4bf;
+    --a-7: #5eead4;
+    --a-8: #99f6e4;
+
+    /* ── Semantic ── */
+    --bg: var(--n-1);
+    --bg-card: var(--n-3);
+    --bg-hover: var(--n-4);
+    --bg-input: var(--n-2);
+    --border: var(--n-5);
+    --border-hover: var(--n-7);
+    --border-focus: var(--a-5);
+    --text: var(--n-12);
+    --text-2: var(--n-10);
+    --text-3: var(--n-9);
+    --text-4: var(--n-8);
+    --text-accent: var(--a-6);
+    --badge-dir-bg: rgba(245, 158, 11, 0.08);
+    --badge-dir-border: rgba(245, 158, 11, 0.20);
+    --badge-dir-text: #fbbf24;
+    --badge-file-bg: rgba(20, 184, 166, 0.08);
+    --badge-file-border: rgba(20, 184, 166, 0.20);
+    --badge-file-text: var(--a-6);
+    --danger: #f87171;
+
+    /* ── Motion ── */
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --dur-1: 120ms;
+    --dur-2: 200ms;
+    --dur-3: 300ms;
+    --dur-4: 450ms;
+
+    /* ── Type ── */
+    --font: 'Inter', -apple-system, system-ui, sans-serif;
+    --mono: 'SF Mono', 'Cascadia Code', 'Fira Code', ui-monospace, monospace;
+}

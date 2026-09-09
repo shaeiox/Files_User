@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Downloads • CloudAvid</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/tokens.css">
+    <link rel="stylesheet" href="/assets/css/base.css">
+    <link rel="stylesheet" href="/assets/css/components.css">
+    <link rel="stylesheet" href="/assets/css/browse.css">
+    <link rel="icon" href="/assets/icon/files-logo.png">
+</head>
+
+<body>
+    <div class="page">
+
+        <!-- NAV -->
+        <nav class="nav">
+            <div class="nav-bar">
+                <a class="nav-logo" href="/">
+                    <img src="/assets/icon/logo.png" alt="CloudAvid">
+                    <div class="nav-logo-text">
+                        <strong data-i18n="brand">CloudAvid</strong>
+                        <span data-i18n="subtitle">Downloads</span>
+                    </div>
+                </a>
+                <div class="nav-actions">
+                    <div class="input-wrap" style="max-width:260px" title="Ctrl+K">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.3-4.3" />
+                        </svg>
+                        <input id="search-input" type="text" autocomplete="off" data-i18n-ph="searchPh" />
+                        <kbd>⌘K</kbd>
+                    </div>
+                    <a class="btn btn-sm" href="/" data-i18n="home">Home</a>
+                    <button class="btn btn-sm btn-icon" id="langBtn" type="button">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="2" y1="12" x2="22" y2="12" />
+                            <path
+                                d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="browse-layout">
+
+            <!-- Browse Header -->
+            <header class="browse-head">
+                <nav class="crumbs" id="breadcrumb" aria-label="Breadcrumb"></nav>
+                <div class="browse-title-row">
+                    <div>
+                        <h1 id="folderName">—</h1>
+                        <div class="browse-stats">
+                            <span class="stat-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z" />
+                                </svg>
+                                <span class="stat-val" id="folderCount">0</span>
+                                <span data-i18n="folders">folders</span>
+                            </span>
+                            <span class="stat-dot">·</span>
+                            <span class="stat-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+                                    <path d="M13 2v7h7" />
+                                </svg>
+                                <span class="stat-val" id="fileCount">0</span>
+                                <span data-i18n="files">files</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="view-toggle" role="tablist">
+                        <button class="vt-btn active" id="viewList" aria-label="List view">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="8" y1="6" x2="21" y2="6" />
+                                <line x1="8" y1="12" x2="21" y2="12" />
+                                <line x1="8" y1="18" x2="21" y2="18" />
+                                <line x1="3" y1="6" x2="3.01" y2="6" />
+                                <line x1="3" y1="12" x2="3.01" y2="12" />
+                                <line x1="3" y1="18" x2="3.01" y2="18" />
+                            </svg>
+                        </button>
+                        <button class="vt-btn" id="viewGrid" aria-label="Grid view">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7" />
+                                <rect x="14" y="3" width="7" height="7" />
+                                <rect x="14" y="14" width="7" height="7" />
+                                <rect x="3" y="14" width="7" height="7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- File Table -->
+            <section class="file-tbl" id="tableContainer">
+                <div class="trow thead">
+                    <div></div>
+                    <div data-i18n="name">Name</div>
+                    <div data-i18n="type">Type</div>
+                    <div data-i18n="modified">Modified</div>
+                    <div data-i18n="size">Size</div>
+                </div>
+                <div id="rows"></div>
+                <div class="empty-box" id="empty" style="display:none"></div>
+            </section>
+
+        </main>
+
+        <footer class="footer">
+            <span>© 2025 CloudAvid Co</span>
+            <a href="https://cloudavid.com">cloudavid.com</a>
+        </footer>
+    </div>
+
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/browse.js"></script>
+</body>
+
+</html>
