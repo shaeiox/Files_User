@@ -23,7 +23,7 @@ const CavBanner = (function () {
         displayDuration: 9000,
 
         // Storage keys
-        shownKey: "cav_banner_shown_v1",   // localStorage — permanent "shown once" flag
+        shownKey: "session_cav_banner_shown",   // localStorage — permanent "shown once" flag
         startKey: "cav_banner_session",     // sessionStorage — session start timestamp
 
         // Set to false in production to respect "show once" rule
@@ -114,12 +114,12 @@ const CavBanner = (function () {
 
     /* ── Storage helpers ── */
     function wasShownBefore() {
-        try { return localStorage.getItem(CONFIG.shownKey) === "1"; }
+        try { return sessionStorage.getItem(CONFIG.shownKey) === "1"; }
         catch { return false; }
     }
 
     function markAsShown() {
-        try { localStorage.setItem(CONFIG.shownKey, "1"); }
+        try { sessionStorage.setItem(CONFIG.shownKey, "1"); }
         catch { }
     }
 
