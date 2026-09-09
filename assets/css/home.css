@@ -1,0 +1,120 @@
+/* Home tweaks (keeps your base theme) */
+.home-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.home-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, .10);
+    background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .03));
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+    backdrop-filter: blur(10px);
+}
+
+.home-hero h1 {
+    margin: 0;
+    font-size: 1.25rem;
+    letter-spacing: .2px;
+}
+
+.home-hero p {
+    margin: 6px 0 0;
+    color: rgba(255, 255, 255, .60);
+    font-size: .95rem;
+}
+
+.home-hero .right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.results {
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, .10);
+    background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .03));
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+    overflow: hidden;
+}
+
+.results-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+    color: rgba(255, 255, 255, .70);
+    font-size: .9rem;
+}
+
+.results-list {
+    padding: 8px 0;
+}
+
+.r-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+
+.r-item:last-child {
+    border-bottom: none;
+}
+
+.r-left {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.r-left a {
+    text-decoration: none;
+    font-weight: 650;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.r-left .sub {
+    color: rgba(255, 255, 255, .55);
+    font-size: .85rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.r-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.muted {
+    color: rgba(255, 255, 255, .60);
+}
+
+@media (max-width:720px) {
+    .home-hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .home-hero .right {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
