@@ -4,9 +4,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#08090e" />
+  <meta name="theme-color" content="#f1f3f6" />
   <title>AVID Download • File Portal</title>
-
   <script>
     (function () {
       try {
@@ -14,12 +13,9 @@
         var t = (s === 'light' || s === 'dark') ? s
           : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', t);
-      } catch (e) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
+      } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); }
     })();
   </script>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..900&display=swap" rel="stylesheet">
@@ -32,48 +28,78 @@
 </head>
 
 <body>
-
-  <!-- AVID SIGNATURE BACKDROP -->
   <div class="aura-backdrop" aria-hidden="true">
     <div class="aura-base"></div>
     <div class="aura-glow-1"></div>
     <div class="aura-glow-2"></div>
-    <div class="aura-vignette"></div>
   </div>
 
-  <!-- MAIN APP CONTAINER -->
   <div class="page">
     <nav class="nav">
       <div class="nav-bar">
         <a class="nav-logo" href="/" data-link>
-          <img src="/assets/icon/logo.webp" alt="AVID">
+          <img src="/assets/icon/logo.webp" alt="CloudAvid" onerror="this.style.display='none'">
           <div class="nav-logo-text">
-            <strong data-i18n="brand">AVID</strong>
-            <span data-i18n="subtitle">Download</span>
+            <strong data-i18n="brand">CloudAvid</strong>
+            <span data-i18n="subtitle">FILE PORTAL</span>
           </div>
         </a>
-        <div class="nav-actions">
-          <a class="btn btn-sm" href="https://cloudavid.com" data-i18n="website">Website</a>
 
+        <div class="nav-tabs" role="tablist" aria-label="Primary">
+          <a class="nav-tab" href="https://cloudavid.com" target="_blank" rel="noopener">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+            <span data-i18n="website">Website</span>
+          </a>
+          <a class="nav-tab" href="https://docs.cloudavid.com" target="_blank" rel="noopener">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>
+            <span>Docs</span>
+          </a>
+          <a class="nav-tab active" href="/" aria-current="page">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            <span>Downloads</span>
+          </a>
+        </div>
+
+        <div class="nav-actions">
           <button class="theme-btn" id="themeBtn" type="button" title="Toggle theme" aria-label="Toggle theme">
-            <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="4" />
               <path
                 d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
             </svg>
-            <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
             </svg>
           </button>
-
-          <button class="btn btn-sm btn-icon" id="langBtn" type="button" title="Toggle language">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          <button class="lang-pill" id="langBtn" type="button" title="Toggle language">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10" />
               <line x1="2" y1="12" x2="22" y2="12" />
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+            <span>EN</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9" />
             </svg>
           </button>
         </div>
@@ -82,7 +108,7 @@
 
     <main id="app"></main>
 
-    <footer class="footer">
+    <footer class="footer" style="display:none">
       <span>© 2025 CloudAvid Co</span>
       <a href="https://cloudavid.com">cloudavid.com</a>
     </footer>

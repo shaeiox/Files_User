@@ -1,3 +1,8 @@
+/* ═══════════════════════════════════════════════════════════════
+   base.css — Foundation & Layout (shadcn structure)
+   Reset, typography, page container, backdrop
+   ═══════════════════════════════════════════════════════════════ */
+
 *,
 *::before,
 *::after {
@@ -9,24 +14,24 @@
 html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    font-family: var(--font);
 }
 
 body {
-    background-color: var(--n-1);
+    background: var(--bg);
     font-family: var(--font);
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.6;
     color: var(--text);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
-    transition: background-color var(--dur-2), color var(--dur-2);
+    transition: background-color var(--dur-2) ease, color var(--dur-2) ease;
 }
 
-
 ::selection {
-    background: rgba(255, 184, 0, 0.3);
-    color: inherit;
+    background: rgba(255, 184, 0, 0.22);
 }
 
 a {
@@ -36,10 +41,7 @@ a {
 
 button {
     font-family: inherit;
-    border: none;
-    background: none;
     cursor: pointer;
-    color: inherit;
 }
 
 img {
@@ -47,21 +49,23 @@ img {
     max-width: 100%;
 }
 
+/* ── Page container — wider to match mock (1240px) ── */
 .page {
     position: relative;
     z-index: 1;
-    width: min(1140px, 100% - var(--s6));
+    width: min(1240px, calc(100% - 32px));
     margin: 0 auto;
-    padding: var(--s6) 0 var(--s16);
+    padding: 16px 0 32px;
 }
 
+@media (max-width: 768px) {
+    .page {
+        width: min(100% - 20px, 100%);
+        padding: 12px 0 24px;
+    }
+}
 
-/* ═══════════════════════════════════════════════
-   AVID SIGNATURE BACKDROP
-   Enterprise gold + subtle depth
-   Lightweight: 4 layers, GPU-accelerated
-   ═══════════════════════════════════════════════ */
-
+/* ── AVID Signature Backdrop — subtle, light-first ── */
 .aura-backdrop {
     position: fixed;
     inset: 0;
@@ -70,136 +74,59 @@ img {
     z-index: 0;
 }
 
-/* ── Layer 1: Deep base gradient ── */
 .aura-base {
     position: absolute;
     inset: 0;
-    background:
-        linear-gradient(180deg,
-            #0a0b12 0%,
-            #08090e 45%,
-            #0b0c14 100%);
-    pointer-events: none;
+    background: var(--bg);
 }
 
-/* ── Layer 2: Primary gold aura (top-right) ── */
 .aura-glow-1 {
     position: absolute;
-    top: -20%;
-    right: -10%;
-    width: 65%;
-    height: 75%;
-    background:
-        radial-gradient(ellipse at center,
-            rgba(255, 184, 0, 0.10) 0%,
-            rgba(255, 184, 0, 0.05) 25%,
-            rgba(255, 184, 0, 0.02) 50%,
-            transparent 75%);
-    filter: blur(60px);
-    transform: translateZ(0);
-    will-change: transform;
-    pointer-events: none;
+    top: -15%;
+    right: -8%;
+    width: 60%;
+    height: 55%;
+    background: radial-gradient(ellipse at center,
+            rgba(255, 184, 0, 0.07) 0%,
+            rgba(255, 184, 0, 0.03) 35%,
+            transparent 70%);
+    filter: blur(40px);
 }
 
-/* ── Layer 3: Cool ambient (bottom-left) — creates contrast ── */
 .aura-glow-2 {
     position: absolute;
-    bottom: -25%;
-    left: -15%;
-    width: 70%;
-    height: 80%;
-    background:
-        radial-gradient(ellipse at center,
-            rgba(88, 108, 220, 0.08) 0%,
-            rgba(100, 90, 200, 0.04) 30%,
-            rgba(60, 80, 180, 0.02) 55%,
-            transparent 78%);
-    filter: blur(80px);
-    transform: translateZ(0);
-    will-change: transform;
-    pointer-events: none;
+    bottom: -20%;
+    left: -10%;
+    width: 65%;
+    height: 60%;
+    background: radial-gradient(ellipse at center,
+            rgba(148, 163, 184, 0.08) 0%,
+            transparent 65%);
+    filter: blur(50px);
 }
 
-/* ── Layer 4: Edge vignette — focuses attention on content ── */
 .aura-vignette {
-    position: absolute;
-    inset: 0;
-    background:
-        radial-gradient(ellipse 90% 70% at 50% 40%,
-            transparent 40%,
-            rgba(0, 0, 0, 0.15) 75%,
-            rgba(0, 0, 0, 0.4) 100%);
-    pointer-events: none;
+    display: none;
 }
 
-/* ═══════════════════════════════════════════════
-   LIGHT THEME ADAPTATION
-   ═══════════════════════════════════════════════ */
-
-[data-theme="light"] .aura-base {
-    background:
-        linear-gradient(180deg,
-            #fafbfe 0%,
-            #f5f6fa 45%,
-            #eef0f5 100%);
+[data-theme="dark"] .aura-glow-1 {
+    background: radial-gradient(ellipse at center,
+            rgba(255, 184, 0, 0.10) 0%,
+            rgba(255, 184, 0, 0.04) 35%,
+            transparent 70%);
 }
 
-[data-theme="light"] .aura-glow-1 {
-    background:
-        radial-gradient(ellipse at center,
-            rgba(255, 184, 0, 0.15) 0%,
-            rgba(255, 184, 0, 0.08) 25%,
-            rgba(255, 184, 0, 0.03) 50%,
-            transparent 75%);
+[data-theme="dark"] .aura-glow-2 {
+    background: radial-gradient(ellipse at center,
+            rgba(30, 41, 59, 0.5) 0%,
+            transparent 70%);
 }
 
-[data-theme="light"] .aura-glow-2 {
-    background:
-        radial-gradient(ellipse at center,
-            rgba(88, 108, 220, 0.10) 0%,
-            rgba(100, 90, 200, 0.06) 30%,
-            rgba(60, 80, 180, 0.03) 55%,
-            transparent 78%);
-}
-
-[data-theme="light"] .aura-vignette {
-    background:
-        radial-gradient(ellipse 90% 70% at 50% 40%,
-            transparent 40%,
-            rgba(15, 19, 31, 0.04) 75%,
-            rgba(15, 19, 31, 0.10) 100%);
-}
-
-/* ═══════════════════════════════════════════════
-   PERFORMANCE OPTIMIZATIONS
-   ═══════════════════════════════════════════════ */
-
-@media (prefers-reduced-motion: reduce) {
-
-    .aura-glow-1,
-    .aura-glow-2 {
-        will-change: auto;
-    }
-}
-
-@media (max-width: 768px) {
-    .aura-glow-1 {
-        filter: blur(40px);
-        width: 90%;
-        height: 60%;
-    }
-
-    .aura-glow-2 {
-        filter: blur(50px);
-        width: 90%;
-        height: 60%;
-    }
-}
-
+/* ── Animations (reduced-motion aware) ── */
 @keyframes fadeUp {
     from {
         opacity: 0;
-        transform: translateY(16px);
+        transform: translateY(8px);
     }
 
     to {
@@ -211,7 +138,7 @@ img {
 @keyframes scaleIn {
     from {
         opacity: 0;
-        transform: scale(0.96);
+        transform: scale(0.98);
     }
 
     to {
@@ -220,60 +147,46 @@ img {
     }
 }
 
-@keyframes pulse {
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%)
+    }
 
-    0%,
     100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.35;
-    }
-}
-
-@keyframes floatLogo {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-12px);
+        transform: translateX(100%)
     }
 }
 
 .anim-fade-up {
-    animation: fadeUp var(--dur-3) var(--ease) both;
-}
-
-.anim-scale-in {
-    animation: scaleIn var(--dur-3) var(--ease) both;
+    animation: fadeUp 220ms var(--ease) both;
 }
 
 .stagger>* {
-    animation: fadeUp var(--dur-3) var(--ease) both;
+    animation: fadeUp 220ms var(--ease) both;
 }
 
 .stagger>*:nth-child(1) {
-    animation-delay: 0ms;
+    animation-delay: 0
 }
 
 .stagger>*:nth-child(2) {
-    animation-delay: 40ms;
+    animation-delay: 40ms
 }
 
 .stagger>*:nth-child(3) {
-    animation-delay: 80ms;
+    animation-delay: 80ms
 }
 
 .stagger>*:nth-child(4) {
-    animation-delay: 120ms;
+    animation-delay: 120ms
 }
 
 .stagger>*:nth-child(5) {
-    animation-delay: 160ms;
+    animation-delay: 160ms
+}
+
+.stagger>*:nth-child(6) {
+    animation-delay: 200ms
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -286,8 +199,10 @@ img {
     }
 }
 
+/* ── Scrollbar ── */
 ::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -296,7 +211,7 @@ img {
 
 ::-webkit-scrollbar-thumb {
     background: var(--n-5);
-    border-radius: var(--r-full);
+    border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {

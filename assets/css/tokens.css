@@ -1,4 +1,13 @@
+/* ═══════════════════════════════════════════════════════════════
+   tokens.css — CloudAvid / AVID Download — Design System
+   Architecture: shadcn/ui-inspired + UI-UX Pro Max Skill
+   Pattern: Product Demo + Features | Style: Flat Design + Minimal Swiss
+   Colors: Enterprise gold + neutral infrastructure (light-first)
+   Generated via UI UX Pro Max Skill — design-system + color + typography
+   ═══════════════════════════════════════════════════════════════ */
+
 :root {
+    /* ── Spacing scale (4px base) ── */
     --s1: 4px;
     --s2: 8px;
     --s3: 12px;
@@ -14,14 +23,17 @@
     --s20: 80px;
     --s24: 96px;
 
-    --r1: 4px;
+    /* ── Radius (shadcn) ── */
+    --r1: 6px;
     --r2: 8px;
-    --r3: 12px;
-    --r4: 16px;
-    --r5: 20px;
-    --r6: 24px;
+    --r3: 10px;
+    --r4: 12px;
+    --r5: 14px;
+    --r6: 16px;
     --r-full: 9999px;
+    --radius: 12px;
 
+    /* ── Gold enterprise palette ── */
     --a-1: #332200;
     --a-2: #664400;
     --a-3: #b37700;
@@ -33,28 +45,145 @@
 
     --danger: #ef4444;
     --success: #10b981;
+    --warning: #f59e0b;
 
+    /* ── Motion ── */
     --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
     --dur-1: 150ms;
-    --dur-2: 250ms;
-    --dur-3: 400ms;
-
-    --font: 'Inter', -apple-system, system-ui, sans-serif;
-    --mono: 'SF Mono', 'Cascadia Code', ui-monospace, monospace;
+    --dur-2: 200ms;
+    --dur-3: 350ms;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
 }
 
-/* ── Dark (default until resolved) ── */
+/* ───────────────────────────────────────────────────────────────
+   LIGHT THEME — Default (matches mock: new-ui.png)
+   Background: #f1f3f6 page, Card #ffffff, Border #e2e8f0
+   Primary gold #FFB800 used for CTA, accent, pills
+   ─────────────────────────────────────────────────────────────── */
 :root,
+[data-theme="light"] {
+    color-scheme: light;
+
+    /* — shadcn semantic tokens (HSL for Tailwind compat, plus hex fallbacks) — */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 42 100% 50%;
+    /* #ffb800 */
+    --primary-foreground: 0 0% 7%;
+    /* #111 */
+
+    --secondary: 210 40% 96%;
+    /* #f1f5f9 */
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 98%;
+    /* #f8fafc */
+    --muted-foreground: 215 16% 47%;
+    /* #64748b */
+
+    --accent: 42 100% 50%;
+    --accent-foreground: 0 0% 7%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 214 32% 91%;
+    /* #e2e8f0 */
+    --input: 214 32% 91%;
+    --ring: 42 100% 50%;
+
+    /* — legacy aliases for existing CSS — */
+    --n-0: #ffffff;
+    --n-1: #f1f3f6;
+    --n-2: #f8fafc;
+    --n-3: #ffffff;
+    --n-4: #f1f5f9;
+    --n-5: #e2e8f0;
+    --n-6: #cbd5e1;
+    --n-7: #94a3b8;
+    --n-8: #64748b;
+    --n-9: #475569;
+    --n-10: #334155;
+    --n-11: #1e293b;
+    --n-12: #0f172a;
+
+    --bg: #f1f3f6;
+    --bg-card: #ffffff;
+    --bg-hover: #f8fafc;
+    --bg-input: #ffffff;
+    --bg-elevated: #ffffff;
+
+    --border: #e2e8f0;
+    --border-hover: #cbd5e1;
+    --border-focus: #ffb800;
+
+    --text: #0f172a;
+    --text-2: #334155;
+    --text-3: #64748b;
+    --text-4: #94a3b8;
+    --text-accent: #b45309;
+
+    --surface-glass: #ffffff;
+    --nav-bg: #ffffff;
+    --hero-grad: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    --input-bg: #ffffff;
+    --glow: rgba(255, 184, 0, 0.06);
+    --glow-strong: rgba(255, 184, 0, 0.12);
+
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 6px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.05);
+    --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+/* ── DARK THEME — OLED-inspired, enterprise gold retained ── */
 [data-theme="dark"] {
     color-scheme: dark;
+
+    --background: 232 18% 6%;
+    --foreground: 0 0% 100%;
+
+    --card: 232 14% 10%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 232 14% 10%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 42 100% 50%;
+    --primary-foreground: 0 0% 7%;
+
+    --secondary: 232 14% 16%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 232 12% 14%;
+    --muted-foreground: 215 16% 60%;
+
+    --accent: 42 100% 50%;
+    --accent-foreground: 0 0% 7%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 232 12% 18%;
+    --input: 232 12% 18%;
+    --ring: 42 100% 50%;
 
     --n-0: #000000;
     --n-1: #08090e;
     --n-2: #0f1118;
     --n-3: #161922;
-    --n-4: #202431;
-    --n-5: #2d3345;
-    --n-6: #41485e;
+    --n-4: #1e2530;
+    --n-5: #2d3545;
+    --n-6: #3d465e;
     --n-7: #5c647e;
     --n-8: #7f88a3;
     --n-9: #a4adc7;
@@ -62,77 +191,31 @@
     --n-11: #eef1f8;
     --n-12: #ffffff;
 
-    --bg: var(--n-1);
-    --bg-card: rgba(22, 25, 34, 0.55);
-    --bg-hover: rgba(32, 36, 49, 0.75);
-    --bg-input: rgba(8, 9, 14, 0.65);
-    --bg-elevated: rgba(22, 25, 34, 0.75);
+    --bg: #08090e;
+    --bg-card: rgba(22, 25, 34, 0.9);
+    --bg-hover: rgba(30, 37, 52, 0.95);
+    --bg-input: rgba(15, 18, 28, 0.9);
+    --bg-elevated: rgba(22, 25, 34, 0.95);
 
-    --border: rgba(255, 255, 255, 0.07);
-    --border-hover: rgba(255, 255, 255, 0.16);
-    --border-focus: var(--a-5);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.14);
+    --border-focus: #ffb800;
 
-    --text: var(--n-12);
-    --text-2: var(--n-10);
-    --text-3: var(--n-9);
-    --text-4: var(--n-8);
-    --text-accent: var(--a-5);
+    --text: #ffffff;
+    --text-2: #e2e8f0;
+    --text-3: #94a3b8;
+    --text-4: #64748b;
+    --text-accent: #ffb800;
 
-    --surface-glass: rgba(22, 25, 34, 0.45);
-    --nav-bg: rgba(8, 9, 14, 0.75);
-    --hero-grad: linear-gradient(145deg, rgba(22, 25, 34, 0.5) 0%, rgba(12, 13, 19, 0.75) 100%);
+    --surface-glass: rgba(22, 25, 34, 0.6);
+    --nav-bg: rgba(12, 14, 22, 0.85);
+    --hero-grad: linear-gradient(180deg, rgba(22, 25, 34, 0.9) 0%, rgba(12, 13, 19, 0.9) 100%);
     --input-bg: rgba(0, 0, 0, 0.35);
-    --glow: rgba(255, 184, 0, 0.04);
-    --glow-strong: rgba(255, 184, 0, 0.12);
-
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.45);
-    --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.55);
-}
-
-/* ── Light ── */
-
-[data-theme="light"] {
-    color-scheme: light;
-
-    --n-0: #ffffff;
-    --n-1: #f5f6fa;
-    --n-2: #eef0f5;
-    --n-3: #ffffff;
-    --n-4: #f0f2f7;
-    --n-5: #dfe2ea;
-    --n-6: #c4c9d6;
-    --n-7: #8b93a8;
-    --n-8: #6b7385;
-    --n-9: #4a5265;
-    --n-10: #333a4d;
-    --n-11: #1e2333;
-    --n-12: #0f131f;
-
-    --bg: var(--n-1);
-    --bg-card: rgba(255, 255, 255, 0.7);
-    --bg-hover: rgba(240, 242, 247, 0.9);
-    --bg-input: rgba(255, 255, 255, 0.8);
-    --bg-elevated: rgba(255, 255, 255, 0.85);
-
-    --border: rgba(15, 19, 31, 0.08);
-    --border-hover: rgba(15, 19, 31, 0.16);
-    --border-focus: #d99500;
-
-    --text: var(--n-12);
-    --text-2: var(--n-10);
-    --text-3: var(--n-9);
-    --text-4: var(--n-8);
-    --text-accent: #c98900;
-
-    --surface-glass: rgba(255, 255, 255, 0.6);
-    --nav-bg: rgba(255, 255, 255, 0.75);
-    --hero-grad: linear-gradient(145deg, rgba(255, 255, 255, 0.7) 0%, rgba(245, 246, 250, 0.85) 100%);
-    --input-bg: rgba(255, 255, 255, 0.85);
     --glow: rgba(255, 184, 0, 0.06);
-    --glow-strong: rgba(255, 184, 0, 0.15);
+    --glow-strong: rgba(255, 184, 0, 0.14);
 
-    --shadow-sm: 0 2px 8px rgba(15, 19, 31, 0.06);
-    --shadow-md: 0 8px 32px rgba(15, 19, 31, 0.08);
-    --shadow-lg: 0 24px 64px rgba(15, 19, 31, 0.10);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 24px 48px rgba(0, 0, 0, 0.6);
+    --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
