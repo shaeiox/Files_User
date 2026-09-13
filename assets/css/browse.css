@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   browse.css — File Browser (light-first, shadcn)
+   browse.css — File Browser Styles (Enterprise Layout)
    ═══════════════════════════════════════════════════════════════ */
 
 .browse-layout {
@@ -9,7 +9,7 @@
     margin-top: 16px;
 }
 
-/* — Browse header — */
+/* ── BROWSE HEADER ── */
 .browse-head {
     display: flex;
     flex-direction: column;
@@ -21,7 +21,7 @@
     box-shadow: var(--shadow-card);
 }
 
-/* breadcrumb */
+/* Breadcrumbs */
 .crumbs {
     display: flex;
     align-items: center;
@@ -62,15 +62,16 @@ html[dir="rtl"] .crumb-sep svg {
     transform: scaleX(-1);
 }
 
-/* title row */
+/* Title & Controls Row */
 .browse-title-row {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
     gap: 16px;
+    flex-wrap: wrap;
 }
 
-.browse-title-row h1 {
+.browse-title-left h1 {
     font-size: 20px;
     font-weight: 800;
     letter-spacing: -0.02em;
@@ -103,7 +104,137 @@ html[dir="rtl"] .crumb-sep svg {
     color: var(--border);
 }
 
-/* view toggle — reuses .view-toggle from home.css */
+/* ── CONTROLS (Search, Dropdowns, View Toggle) ── */
+.browse-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Local Search Input */
+.browse-search {
+    height: 32px;
+    padding: 0 10px 0 12px;
+    border-radius: 6px;
+    width: 180px;
+    background: var(--bg-card);
+    transition: width var(--dur-2) ease, border-color var(--dur-1) ease;
+}
+
+.browse-search:focus-within {
+    width: 220px;
+}
+
+.browse-search input {
+    font-size: 12px;
+}
+
+/* Custom Filter Dropdowns */
+.filter-dropdown-wrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 6px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-3);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: all var(--dur-1) ease;
+}
+
+.filter-pill:hover,
+.filter-dropdown-wrap.show .filter-pill {
+    border-color: var(--border-hover);
+    background: var(--bg-hover);
+    color: var(--text);
+}
+
+.filter-pill svg {
+    color: var(--text-4);
+    transition: transform var(--dur-1) ease;
+}
+
+.filter-dropdown-wrap.show .filter-pill svg {
+    transform: rotate(180deg);
+}
+
+.filter-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 100%;
+    padding: 4px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px) scale(0.98);
+    transition: all 0.15s ease;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    white-space: nowrap;
+}
+
+[dir="rtl"] .filter-dropdown-menu {
+    left: auto;
+    right: 0;
+}
+
+.filter-dropdown-wrap.show .filter-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.filter-option {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--text-2);
+    font-size: 12px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.12s ease;
+}
+
+[dir="rtl"] .filter-option {
+    text-align: right;
+}
+
+.filter-option:hover {
+    background: var(--bg-hover);
+    color: var(--text);
+}
+
+.filter-option.active {
+    font-weight: 700;
+    color: var(--text);
+    background: var(--bg-hover);
+}
+
+[data-theme="dark"] .filter-option.active {
+    background: rgba(255, 184, 0, 0.12);
+    color: #ffb800;
+}
+
+/* View Toggle */
 .view-toggle {
     display: flex;
     padding: 3px;
@@ -114,15 +245,20 @@ html[dir="rtl"] .crumb-sep svg {
 }
 
 .vt-btn {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
+    border-radius: 5px;
     color: var(--text-4);
     background: transparent;
     border: none;
+    transition: all 120ms ease;
+}
+
+.vt-btn:hover {
+    color: var(--text);
 }
 
 .vt-btn.active {
@@ -131,7 +267,13 @@ html[dir="rtl"] .crumb-sep svg {
     border: 1px solid #fde68a;
 }
 
-/* — File table — */
+[data-theme="dark"] .vt-btn.active {
+    background: rgba(255, 184, 0, 0.18);
+    color: #fbbf24;
+    border-color: rgba(255, 184, 0, 0.3);
+}
+
+/* ── FILE TABLE ── */
 .file-tbl {
     border-radius: 12px;
     background: var(--bg-card);
@@ -239,7 +381,7 @@ html[dir="rtl"] .crumb-sep svg {
     font-variant-numeric: tabular-nums;
 }
 
-/* empty */
+/* Empty State */
 .empty-box {
     display: flex;
     flex-direction: column;
@@ -278,7 +420,7 @@ html[dir="rtl"] .crumb-sep svg {
     margin-bottom: 2px;
 }
 
-/* grid mode */
+/* Grid Mode */
 .file-tbl.grid-mode .thead {
     display: none;
 }
@@ -307,6 +449,10 @@ html[dir="rtl"] .crumb-sep svg {
     transform: translateY(-2px);
 }
 
+[data-theme="dark"] .file-tbl.grid-mode .trow:hover {
+    border-color: rgba(255, 184, 0, 0.3);
+}
+
 .file-tbl.grid-mode .f-icon {
     width: 40px;
     height: 40px;
@@ -318,9 +464,31 @@ html[dir="rtl"] .crumb-sep svg {
     display: none;
 }
 
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+    .browse-search {
+        width: 100%;
+        order: 1;
+        /* Push search to bottom row */
+    }
+
+    .browse-search:focus-within {
+        width: 100%;
+    }
+}
+
 @media (max-width: 640px) {
     .browse-head {
         padding: 14px;
+    }
+
+    .browse-title-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .browse-controls {
+        justify-content: space-between;
     }
 
     .file-tbl .trow {
@@ -337,10 +505,5 @@ html[dir="rtl"] .crumb-sep svg {
 
     .thead {
         display: none;
-    }
-
-    .browse-title-row {
-        flex-direction: column;
-        align-items: stretch;
     }
 }

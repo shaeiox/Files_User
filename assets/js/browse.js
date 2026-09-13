@@ -1,25 +1,36 @@
-/* ═══════════════════════════════════════════════
-   browse.js — File Browser Page Renderer
-
-   Renders directory listing into #app container.
-   Fetches file list from /__list/ API endpoint.
-   Includes Full Multi-Language (i18n) & Skeleton Loading.
-   ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   browse.js — Enterprise File Browser Renderer
+   Skill: UI UX Pro Max — Data Pipeline (Search + Filter + Sort)
+   
+   Responsibilities:
+   - Render directory contents (Grid / List)
+   - Handle Breadcrumb navigation
+   - Unified Data Pipeline: Local Search + Type Filter + Sort
+   - Custom Dropdowns with Click-Outside handling
+   - Skeleton Loaders & Empty States
+   ═══════════════════════════════════════════════════════════════ */
 
 const BrowsePage = (function () {
     'use strict';
 
-    let allFiles = [];
+    /* ── Internal State ── */
+    let allFiles = [];         // Raw fetched directory contents
     let currentPath = "/";
+    let activeType = "all";    // 'all' | 'directory' | 'file'
+    let activeSort = "name-asc"; // 'name-asc' | 'name-desc' | 'date-desc' | 'size-desc'
+    let searchQuery = "";      // Local search query
 
-    /**
-     * Render the browse page into the given container.
-     */
+    /* ═══════════════════════════════════════════════
+       MAIN RENDERER
+       ═══════════════════════════════════════════════ */
     function render(container, path) {
-        const d = getDict(); // 🌍 Fetch dictionary for the current language
+        const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
 
-        currentPath = path;
-        if (!currentPath.endsWith("/")) currentPath += "/";
+        // Reset state for new path
+        currentPath = path.endsWith("/") ? path : path + "/";
+        activeType = "all";
+        activeSort = "name-asc";
+        searchQuery = "";
 
         document.title = d.browseTitle || "Downloads • CloudAvid";
 
@@ -28,8 +39,9 @@ const BrowsePage = (function () {
 
         <header class="browse-head">
           <nav class="crumbs" id="breadcrumb" aria-label="Breadcrumb"></nav>
+          
           <div class="browse-title-row">
-            <div>
+            <div class="browse-title-left">
               <h1 id="folderName">—</h1>
               <div class="browse-stats">
                 <span class="stat-item">
@@ -45,13 +57,50 @@ const BrowsePage = (function () {
                 </span>
               </div>
             </div>
-            <div class="view-toggle" role="tablist">
-              <button class="vt-btn active" id="viewList" aria-label="List view">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-              </button>
-              <button class="vt-btn" id="viewGrid" aria-label="Grid view">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-              </button>
+
+            <div class="browse-controls">
+              <!-- Local Search -->
+              <div class="input-wrap browse-search">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input id="localSearchInput" type="text" autocomplete="off" placeholder="${d.searchPh || 'Search folder...'}" aria-label="Search in folder" />
+              </div>
+
+              <!-- Type Filter Dropdown -->
+              <div class="filter-dropdown-wrap" id="typeFilterWrap">
+                <button class="filter-pill" type="button" aria-haspopup="true">
+                  <span class="filter-value" data-val="all">${d.allTypes || "All Types"}</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="filter-dropdown-menu">
+                  <button class="filter-option active" data-val="all" type="button">${d.allTypes || "All Types"}</button>
+                  <button class="filter-option" data-val="directory" type="button">${d.folders || "Folders"}</button>
+                  <button class="filter-option" data-val="file" type="button">${d.files || "Files"}</button>
+                </div>
+              </div>
+
+              <!-- Sort Dropdown -->
+              <div class="filter-dropdown-wrap" id="sortFilterWrap">
+                <button class="filter-pill" type="button" aria-haspopup="true">
+                  <span class="filter-value" data-val="name-asc">${d.sortName || "Name (A-Z)"}</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="filter-dropdown-menu">
+                  <button class="filter-option active" data-val="name-asc" type="button">${d.sortName || "Name (A-Z)"}</button>
+                  <button class="filter-option" data-val="name-desc" type="button">${d.sortNameDesc || "Name (Z-A)"}</button>
+                  <button class="filter-option" data-val="date-desc" type="button">${d.sortLatest || "Newest First"}</button>
+                  <button class="filter-option" data-val="size-desc" type="button">${d.sortSize || "Largest First"}</button>
+                </div>
+              </div>
+
+              <!-- View Toggles -->
+              <div class="view-toggle" role="tablist" aria-label="View mode">
+                <button class="vt-btn active" id="viewList" aria-label="List view" type="button">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                </button>
+                <button class="vt-btn" id="viewGrid" aria-label="Grid view" type="button">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </button>
+              </div>
             </div>
           </div>
         </header>
@@ -73,11 +122,251 @@ const BrowsePage = (function () {
 
         buildCrumbs();
         bindEvents();
-        renderSkeletons(); // 🚀 1. Show skeleton animations first
-        fetchList();       // 🚀 2. Then fetch data
+        renderSkeletons();
+        fetchList();
     }
 
-    /* ── Helpers ── */
+    /* ═══════════════════════════════════════════════
+       DATA FETCHING
+       ═══════════════════════════════════════════════ */
+    async function fetchList() {
+        const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
+        try {
+            const res = await fetch("/__list" + currentPath, { cache: "no-store" });
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            const data = await res.json();
+            if (!Array.isArray(data)) throw new Error("Bad JSON");
+
+            allFiles = data
+                .filter(x => x && x.name && x.name !== "." && x.name !== "..")
+                .filter(x => !isHidden(x.name))
+                .map(x => ({
+                    name: String(x.name),
+                    type: x.type === "directory" ? "directory" : "file",
+                    size: Number(x.size || 0),
+                    modified: x.mtime || x.modified || x.time || 0
+                }));
+
+            // Initial render
+            applyFiltersAndRender();
+
+        } catch (e) {
+            console.error(e);
+            showEmpty(`<strong>${d.loadErrTitle || "Failed to load"}</strong><div style="margin-top:8px">${d.loadErrHint || "Check API endpoint."}</div>`, true);
+        }
+    }
+
+    /* ═══════════════════════════════════════════════
+       DATA PIPELINE (Filter -> Search -> Sort -> Render)
+       ═══════════════════════════════════════════════ */
+    function applyFiltersAndRender() {
+        const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
+        let filtered = [...allFiles];
+
+        // 1. Apply Search Query
+        if (searchQuery) {
+            filtered = filtered.filter(f => f.name.toLowerCase().includes(searchQuery));
+        }
+
+        // 2. Apply Type Filter
+        if (activeType !== "all") {
+            filtered = filtered.filter(f => f.type === activeType);
+        }
+
+        // Update counts visually (based on un-searched but type-filtered data)
+        const dirsCount = allFiles.filter(f => f.type === "directory").length;
+        const filesCount = allFiles.filter(f => f.type === "file").length;
+        const fcEl = document.getElementById("folderCount");
+        const flcEl = document.getElementById("fileCount");
+        if (fcEl) fcEl.textContent = dirsCount;
+        if (flcEl) flcEl.textContent = filesCount;
+
+        // 3. Apply Sorting (Directories ALWAYS first, then sort logic)
+        filtered.sort((a, b) => {
+            const isDirA = a.type === "directory" ? 1 : 0;
+            const isDirB = b.type === "directory" ? 1 : 0;
+
+            // Directories always bubble to the top
+            if (isDirA !== isDirB) return isDirB - isDirA;
+
+            if (activeSort === "name-asc") {
+                return a.name.localeCompare(b.name);
+            } else if (activeSort === "name-desc") {
+                return b.name.localeCompare(a.name);
+            } else if (activeSort === "size-desc") {
+                return b.size - a.size;
+            } else if (activeSort === "date-desc") {
+                const tA = new Date(a.modified).getTime();
+                const tB = new Date(b.modified).getTime();
+                return tB - tA;
+            }
+            return 0;
+        });
+
+        renderFilesList(filtered, d);
+    }
+
+    function renderFilesList(files, d) {
+        const lang = typeof window.getLang === 'function' ? window.getLang() : getLang();
+        const rowsEl = document.getElementById("rows");
+        if (!rowsEl) return;
+        rowsEl.innerHTML = "";
+
+        if (files.length === 0) {
+            showEmpty(searchQuery ? (d.emptySearch || "No files matched.") : (d.empty || "This folder is empty."));
+            return;
+        }
+
+        hideEmpty();
+        const frag = document.createDocumentFragment();
+
+        files.forEach((f, idx) => {
+            const href = currentPath + f.name + (f.type === "directory" ? "/" : "");
+            const row = document.createElement("div");
+            row.className = "trow anim-fade-up";
+            row.style.animationDelay = Math.min(idx * 15, 300) + "ms";
+
+            const linkAttr = f.type === "directory" ? `href="${href}"` : `href="${href}" data-file="true"`;
+            const iconStr = f.type === "directory" ? 'f-icon-dir' : 'f-icon-file';
+            const badgeStr = f.type === "directory" ? 'badge-dir' : 'badge-file';
+            const badgeLabel = f.type === "directory" ? (d.folder || 'Folder') : (d.file || 'File');
+
+            row.innerHTML = `
+                <div class="f-icon ${iconStr}">${svgIcon(f.type)}</div>
+                <div class="f-name"><a class="f-link" ${linkAttr} title="${f.name}">${f.name}</a></div>
+                <div><span class="badge ${badgeStr}">${badgeLabel}</span></div>
+                <div class="f-sub">${fmtDate(f.modified, lang)}</div>
+                <div class="f-sub">${f.type === 'directory' ? '—' : humanSize(f.size, lang)}</div>
+            `;
+            frag.appendChild(row);
+        });
+
+        rowsEl.appendChild(frag);
+    }
+
+    /* ═══════════════════════════════════════════════
+       EVENT BINDINGS
+       ═══════════════════════════════════════════════ */
+    function bindEvents() {
+        const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
+
+        // 1. Search Input Binding
+        const searchInput = document.getElementById("localSearchInput");
+        if (searchInput) {
+            searchInput.addEventListener("input", (e) => {
+                searchQuery = e.target.value.trim().toLowerCase();
+                applyFiltersAndRender();
+            });
+        }
+
+        // 2. Custom Dropdowns Binding
+        const filterWraps = document.querySelectorAll(".filter-dropdown-wrap");
+        filterWraps.forEach(wrap => {
+            const pill = wrap.querySelector(".filter-pill");
+            const valueSpan = pill.querySelector(".filter-value");
+            const options = wrap.querySelectorAll(".filter-option");
+
+            pill.addEventListener("click", (e) => {
+                e.stopPropagation();
+                filterWraps.forEach(w => { if (w !== wrap) w.classList.remove("show"); });
+                wrap.classList.toggle("show");
+            });
+
+            options.forEach(opt => {
+                opt.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const val = opt.getAttribute("data-val");
+                    const text = opt.textContent;
+
+                    valueSpan.textContent = text;
+                    options.forEach(o => o.classList.remove("active"));
+                    opt.classList.add("active");
+
+                    if (wrap.id === "typeFilterWrap") activeType = val;
+                    if (wrap.id === "sortFilterWrap") activeSort = val;
+
+                    wrap.classList.remove("show");
+                    applyFiltersAndRender();
+                });
+            });
+        });
+
+        // Close dropdowns on outside click
+        document.addEventListener("click", () => {
+            filterWraps.forEach(w => w.classList.remove("show"));
+        });
+
+        // 3. View Toggles Binding
+        const listBtn = document.getElementById("viewList");
+        const gridBtn = document.getElementById("viewGrid");
+        const tableEl = document.getElementById("tableContainer");
+
+        if (listBtn && gridBtn && tableEl) {
+            listBtn.addEventListener("click", () => {
+                tableEl.classList.remove("grid-mode");
+                listBtn.classList.add("active");
+                gridBtn.classList.remove("active");
+                try { localStorage.setItem("view_mode", "list"); } catch { }
+            });
+
+            gridBtn.addEventListener("click", () => {
+                tableEl.classList.add("grid-mode");
+                gridBtn.classList.add("active");
+                listBtn.classList.remove("active");
+                try { localStorage.setItem("view_mode", "grid"); } catch { }
+            });
+
+            // Restore preference
+            try {
+                if (localStorage.getItem("view_mode") === "grid") gridBtn.click();
+            } catch { }
+        }
+    }
+
+    /* ═══════════════════════════════════════════════
+       HELPERS & UI COMPONENTS
+       ═══════════════════════════════════════════════ */
+    function buildCrumbs() {
+        const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
+        const el = document.getElementById("breadcrumb");
+        if (!el) return;
+        el.innerHTML = "";
+
+        const home = document.createElement("a");
+        home.href = "/";
+        home.className = "crumb";
+        home.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>${d.root || "Home"}</span>`;
+        el.appendChild(home);
+
+        const parts = currentPath.split("/").filter(Boolean);
+        let acc = "";
+
+        parts.forEach((part, i) => {
+            acc += "/" + part;
+            const sep = document.createElement("span");
+            sep.className = "crumb-sep";
+            sep.innerHTML = d.dir === "rtl"
+                ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`
+                : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+            el.appendChild(sep);
+
+            if (i === parts.length - 1) {
+                const cur = document.createElement("span");
+                cur.className = "crumb crumb-active";
+                cur.textContent = decodeURIComponent(part);
+                el.appendChild(cur);
+                const fn = document.getElementById("folderName");
+                if (fn) fn.textContent = decodeURIComponent(part);
+            } else {
+                const link = document.createElement("a");
+                link.href = acc + "/";
+                link.className = "crumb";
+                link.textContent = decodeURIComponent(part);
+                el.appendChild(link);
+            }
+        });
+    }
+
     function isHidden(n) {
         const l = (n || "").toLowerCase();
         return l === "index.html" || l === "index.php" || l.startsWith(".");
@@ -107,19 +396,15 @@ const BrowsePage = (function () {
             : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>`;
     }
 
-    /* ── Skeleton Loading ── */
     function renderSkeletons() {
         const rowsEl = document.getElementById("rows");
         if (!rowsEl) return;
-
-        // Setup mock counts while loading
         document.getElementById("folderCount").innerHTML = `<span class="skeleton-line" style="display:inline-block; width:16px; height:12px; margin:0"></span>`;
         document.getElementById("fileCount").innerHTML = `<span class="skeleton-line" style="display:inline-block; width:16px; height:12px; margin:0"></span>`;
 
         let html = "";
-        // Generate 6 fake skeleton rows
         for (let i = 0; i < 6; i++) {
-            const randomWidth = Math.floor(Math.random() * 40 + 30); // 30% to 70%
+            const randomWidth = Math.floor(Math.random() * 40 + 30);
             html += `
             <div class="trow anim-fade-up" style="animation-delay: ${i * 30}ms; pointer-events: none;">
                 <div class="f-icon skeleton-box" style="width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0; margin-right: 8px;"></div>
@@ -132,54 +417,10 @@ const BrowsePage = (function () {
         rowsEl.innerHTML = html;
     }
 
-    /* ── Breadcrumb ── */
-    function buildCrumbs() {
-        const d = getDict();
-        const el = document.getElementById("breadcrumb");
-        if (!el) return;
-        el.innerHTML = "";
-
-        const home = document.createElement("a");
-        home.href = "/";
-        home.className = "crumb";
-        home.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>${d.root || "Home"}</span>`;
-        el.appendChild(home);
-
-        const parts = currentPath.split("/").filter(Boolean);
-        let acc = "";
-
-        parts.forEach((part, i) => {
-            acc += "/" + part;
-
-            const sep = document.createElement("span");
-            sep.className = "crumb-sep";
-            sep.innerHTML = d.dir === "rtl"
-                ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`
-                : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
-            el.appendChild(sep);
-
-            if (i === parts.length - 1) {
-                const cur = document.createElement("span");
-                cur.className = "crumb crumb-active";
-                cur.textContent = decodeURIComponent(part);
-                el.appendChild(cur);
-                const fn = document.getElementById("folderName");
-                if (fn) fn.textContent = decodeURIComponent(part);
-            } else {
-                const link = document.createElement("a");
-                link.href = acc + "/";
-                link.className = "crumb";
-                link.textContent = decodeURIComponent(part);
-                el.appendChild(link);
-            }
-        });
-    }
-
-    /* ── Empty / Error states ── */
-    function showEmpty(msg, isErr) {
+    function showEmpty(msg, isErr = false) {
         const el = document.getElementById("empty");
         const rowsEl = document.getElementById("rows");
-        if (rowsEl) rowsEl.innerHTML = ""; // clear skeletons
+        if (rowsEl) rowsEl.innerHTML = "";
         if (!el) return;
         el.style.display = "flex";
         el.innerHTML = `
@@ -194,133 +435,6 @@ const BrowsePage = (function () {
     function hideEmpty() {
         const el = document.getElementById("empty");
         if (el) el.style.display = "none";
-    }
-
-    /* ── Render file rows ── */
-    function renderFiles(files) {
-        const lang = getLang();
-        const d = getDict();
-        allFiles = files;
-
-        const rowsEl = document.getElementById("rows");
-        if (!rowsEl) return;
-        rowsEl.innerHTML = "";
-
-        files.sort((a, b) => {
-            if (a.type === "directory" && b.type !== "directory") return -1;
-            if (a.type !== "directory" && b.type === "directory") return 1;
-            return a.name.localeCompare(b.name);
-        });
-
-        const dirs = files.filter(f => f.type === "directory").length;
-        const fc = document.getElementById("folderCount");
-        const flc = document.getElementById("fileCount");
-        if (fc) fc.textContent = dirs;
-        if (flc) flc.textContent = files.length - dirs;
-
-        if (!files.length) { showEmpty(d.empty || "This folder is empty."); return; }
-        hideEmpty();
-
-        const frag = document.createDocumentFragment();
-
-        files.forEach((f, idx) => {
-            const href = currentPath + f.name + (f.type === "directory" ? "/" : "");
-            const row = document.createElement("div");
-            row.className = "trow anim-fade-up";
-            row.dataset.name = f.name.toLowerCase();
-            row.style.animationDelay = Math.min(idx * 25, 300) + "ms";
-
-            const linkAttr = f.type === "directory" ? `href="${href}"` : `href="${href}" data-file="true"`;
-
-            row.innerHTML = `
-        <div class="f-icon ${f.type === 'directory' ? 'f-icon-dir' : 'f-icon-file'}">${svgIcon(f.type)}</div>
-        <div class="f-name"><a class="f-link" ${linkAttr} title="${f.name}">${f.name}</a></div>
-        <div><span class="badge ${f.type === 'directory' ? 'badge-dir' : 'badge-file'}">${f.type === 'directory' ? (d.folder || 'Folder') : (d.file || 'File')}</span></div>
-        <div class="f-sub">${fmtDate(f.modified, lang)}</div>
-        <div class="f-sub">${f.type === 'directory' ? '—' : humanSize(f.size, lang)}</div>`;
-
-            frag.appendChild(row);
-        });
-
-        rowsEl.appendChild(frag);
-        filterRows();
-    }
-
-    /* ── Search filter ── */
-    function filterRows() {
-        const d = getDict();
-        const searchEl = document.getElementById("search-input");
-        const q = searchEl ? (searchEl.value || "").trim().toLowerCase() : "";
-        const rowsEl = document.getElementById("rows");
-        if (!rowsEl) return;
-
-        const rows = rowsEl.querySelectorAll(".trow");
-        let shown = 0;
-
-        rows.forEach(r => {
-            const ok = !q || (r.dataset.name || "").includes(q);
-            r.style.display = ok ? "" : "none";
-            if (ok) shown++;
-        });
-
-        if (!shown && rows.length) showEmpty(q ? (d.emptySearch || "No files matched.") : (d.empty || "This folder is empty."));
-        else if (shown) hideEmpty();
-    }
-
-    /* ── Fetch directory listing from API ── */
-    async function fetchList() {
-        const d = getDict();
-        try {
-            const res = await fetch("/__list" + currentPath, { cache: "no-store" });
-            if (!res.ok) throw new Error("HTTP " + res.status);
-            const data = await res.json();
-            if (!Array.isArray(data)) throw new Error("Bad JSON");
-
-            const items = data
-                .filter(x => x && x.name && x.name !== "." && x.name !== "..")
-                .filter(x => !isHidden(x.name))
-                .map(x => ({
-                    name: String(x.name),
-                    type: x.type === "directory" ? "directory" : "file",
-                    size: Number(x.size || 0),
-                    modified: x.mtime || x.modified || x.time || ""
-                }));
-
-            renderFiles(items);
-        } catch (e) {
-            console.error(e);
-            showEmpty(`<strong>${d.loadErrTitle || "Failed to load"}</strong><div style="margin-top:8px">${d.loadErrHint || "Check API endpoint."}</div>`, true);
-        }
-    }
-
-    /* ── View toggle + search binding ── */
-    function bindEvents() {
-        const listBtn = document.getElementById("viewList");
-        const gridBtn = document.getElementById("viewGrid");
-        const tableEl = document.getElementById("tableContainer");
-
-        if (listBtn && gridBtn && tableEl) {
-            listBtn.addEventListener("click", () => {
-                tableEl.classList.remove("grid-mode");
-                listBtn.classList.add("active");
-                gridBtn.classList.remove("active");
-                localStorage.setItem("view_mode", "list");
-            });
-
-            gridBtn.addEventListener("click", () => {
-                tableEl.classList.add("grid-mode");
-                gridBtn.classList.add("active");
-                listBtn.classList.remove("active");
-                localStorage.setItem("view_mode", "grid");
-            });
-
-            if (localStorage.getItem("view_mode") === "grid") gridBtn.click();
-        }
-
-        const searchEl = document.getElementById("search-input");
-        if (searchEl) {
-            searchEl.addEventListener("input", filterRows);
-        }
     }
 
     return { render };
