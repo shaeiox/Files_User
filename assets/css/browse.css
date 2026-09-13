@@ -148,7 +148,7 @@ html[dir="rtl"] .crumb-sep svg {
     height: 52px;
     padding: 0 16px;
     border-bottom: 1px solid #f1f5f9;
-    transition: background 120ms ease;
+    transition: background 120ms ease, transform 150ms var(--ease), border-color 150ms ease;
 }
 
 [data-theme="dark"] .file-tbl .trow {
