@@ -342,16 +342,29 @@
 }
 
 /* Active language */
-.lang-option.active {
-    background: rgba(255, 184, 0, 0.12);
-    color: var(--a-5);
+:root .lang-option.active,
+[data-theme="light"] .lang-option.active {
+    background: #fef3c7;
+    color: #b45309;
+    font-weight: 600;
 }
 
-.lang-option.active span {
-    color: var(--a-5);
+
+[data-theme="light"] .lang-option.active span {
+    color: #d97706;
+    opacity: 1;
+}
+
+[data-theme="dark"] .lang-option.active {
+    background: rgba(255, 184, 0, 0.14);
+    color: #ffb800;
+    font-weight: 600;
+}
+
+[data-theme="dark"] .lang-option.active span {
+    color: #ffb800;
     opacity: 0.9;
 }
-
 
 /* ── Inputs ── */
 .input-wrap {
