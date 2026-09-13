@@ -38,7 +38,7 @@ const CavBanner = (function () {
                 actionUrl: "https://docs.cloudavid.com",
             },
             fa: {
-                title: "مستندات کلوداوید",
+                title: "مستندات کلود آوید",
                 message: "راهنمای نصب، آموزش و ارتقای مهارت ادمین و مستندات معماری زیرساخت.",
                 actionText: "مشاهده مستندات",
                 actionUrl: "https://docs.cloudavid.com",

@@ -101,20 +101,20 @@ const i18n = {
         lang: "fa",
 
         // Global Header / Navbar
-        brand: "کلوداوید",
+        brand: "کلود آوید",
         subtitle: "پرتال فایل",
         website: "وب‌سایت",
         docs: "مستندات",
         downloads: "دانلودها",
         home: "خانه",
         root: "خانه",
-        pageTitle: "کلوداوید • پرتال فایل",
-        browseTitle: "دانلودها • کلوداوید",
+        pageTitle: "کلود آوید • پرتال فایل",
+        browseTitle: "دانلودها • کلود آوید",
 
         // Hero Section
         portalStatus: "زیرساخت شما، با آوید",
         heroTitle: `<span class="avid">مرکز</span> <span class="accent">دانلود</span><br>آوید`,
-        desc: "دسترسی به بسته‌های نرم‌افزاری، ایمیج‌های ISO، قالب‌ها و لاگ‌های سیستمی — ارائه شده توسط تیم زیرساخت کلوداوید.",
+        desc: "دسترسی به بسته‌های نرم‌افزاری، ایمیج‌های ISO، قالب‌ها و لاگ‌های سیستمی — ارائه شده توسط تیم زیرساخت کلود آوید.",
         searchPh: "جستجو در فایل‌ها، بسته‌ها، قالب‌ها...",
         searchBtn: "جستجو",
         stopBtn: "توقف",

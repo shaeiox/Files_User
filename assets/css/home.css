@@ -1058,3 +1058,133 @@ body.rtl .hero-visual {
         animation: none;
     }
 }
+
+/* ── SKELETON LOADING STATES ── */
+.resource-card-skeleton {
+    pointer-events: none;
+    cursor: default;
+}
+
+.resource-card-skeleton .resource-arrow {
+    display: none;
+}
+
+.skeleton-box,
+.skeleton-line {
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.05) 0%,
+            rgba(255, 255, 255, 0.12) 50%,
+            rgba(255, 255, 255, 0.05) 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+    border-radius: 6px;
+}
+
+.skeleton-line-title {
+    height: 16px;
+    width: 60%;
+    margin-bottom: 8px;
+}
+
+.skeleton-line-desc {
+    height: 12px;
+    width: 90%;
+    margin-bottom: 6px;
+}
+
+.skeleton-line-desc-sm {
+    height: 12px;
+    width: 70%;
+    margin-bottom: 12px;
+}
+
+.skeleton-line-meta {
+    display: inline-block;
+    height: 10px;
+    width: 80px;
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Light theme skeleton */
+[data-theme="light"] .skeleton-box,
+[data-theme="light"] .skeleton-line {
+    background: linear-gradient(90deg,
+            rgba(0, 0, 0, 0.04) 0%,
+            rgba(0, 0, 0, 0.08) 50%,
+            rgba(0, 0, 0, 0.04) 100%);
+    background-size: 200% 100%;
+}
+
+/* ── STATUS INDICATORS ── */
+.resource-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 6px;
+}
+
+[dir="rtl"] .resource-status {
+    margin-left: 0;
+    margin-right: 6px;
+}
+
+.status-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #10b981;
+    font-weight: 500;
+}
+
+.status-error {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #ef4444;
+    font-weight: 500;
+}
+
+.dot-error {
+    background: #ef4444 !important;
+}
+
+.badge-error {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.stat-empty {
+    color: var(--text-muted, #94a3b8);
+    font-style: italic;
+    opacity: 0.7;
+}
+
+/* ── GLOBAL ERROR STATE ── */
+.resources-error {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 40px 24px;
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px dashed rgba(239, 68, 68, 0.25);
+    border-radius: 12px;
+    color: #ef4444;
+    font-size: 14px;
+}

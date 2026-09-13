@@ -3,7 +3,7 @@
 
    Renders directory listing into #app container.
    Fetches file list from /__list/ API endpoint.
-   Includes Full Multi-Language (i18n) Support.
+   Includes Full Multi-Language (i18n) & Skeleton Loading.
    ═══════════════════════════════════════════════ */
 
 const BrowsePage = (function () {
@@ -73,7 +73,8 @@ const BrowsePage = (function () {
 
         buildCrumbs();
         bindEvents();
-        fetchList();
+        renderSkeletons(); // 🚀 1. Show skeleton animations first
+        fetchList();       // 🚀 2. Then fetch data
     }
 
     /* ── Helpers ── */
@@ -83,7 +84,6 @@ const BrowsePage = (function () {
     }
 
     function humanSize(b, lang) {
-        const d = getDict();
         if (!Number.isFinite(b) || b < 0) return "—";
         if (b === 0) return lang === "fa" ? "0 بایت" : "0 B";
         const k = 1024;
@@ -105,6 +105,31 @@ const BrowsePage = (function () {
         return type === "directory"
             ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"/></svg>`
             : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>`;
+    }
+
+    /* ── Skeleton Loading ── */
+    function renderSkeletons() {
+        const rowsEl = document.getElementById("rows");
+        if (!rowsEl) return;
+
+        // Setup mock counts while loading
+        document.getElementById("folderCount").innerHTML = `<span class="skeleton-line" style="display:inline-block; width:16px; height:12px; margin:0"></span>`;
+        document.getElementById("fileCount").innerHTML = `<span class="skeleton-line" style="display:inline-block; width:16px; height:12px; margin:0"></span>`;
+
+        let html = "";
+        // Generate 6 fake skeleton rows
+        for (let i = 0; i < 6; i++) {
+            const randomWidth = Math.floor(Math.random() * 40 + 30); // 30% to 70%
+            html += `
+            <div class="trow anim-fade-up" style="animation-delay: ${i * 30}ms; pointer-events: none;">
+                <div class="f-icon skeleton-box" style="width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0; margin-right: 8px;"></div>
+                <div class="f-name"><div class="skeleton-line" style="width: ${randomWidth}%; height: 16px;"></div></div>
+                <div><div class="skeleton-line" style="width: 48px; height: 20px; border-radius: 10px;"></div></div>
+                <div class="f-sub"><div class="skeleton-line" style="width: 100px; height: 12px;"></div></div>
+                <div class="f-sub"><div class="skeleton-line" style="width: 60px; height: 12px;"></div></div>
+            </div>`;
+        }
+        rowsEl.innerHTML = html;
     }
 
     /* ── Breadcrumb ── */
@@ -153,6 +178,8 @@ const BrowsePage = (function () {
     /* ── Empty / Error states ── */
     function showEmpty(msg, isErr) {
         const el = document.getElementById("empty");
+        const rowsEl = document.getElementById("rows");
+        if (rowsEl) rowsEl.innerHTML = ""; // clear skeletons
         if (!el) return;
         el.style.display = "flex";
         el.innerHTML = `
