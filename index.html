@@ -64,7 +64,7 @@
               <line x1="16" y1="17" x2="8" y2="17" />
               <polyline points="10 9 9 9 8 9" />
             </svg>
-            <span>Docs</span>
+            <span data-i18n="docs">Docs</span>
           </a>
           <a class="nav-tab active" href="/" aria-current="page">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -73,11 +73,12 @@
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            <span>Downloads</span>
+            <span data-i18n="downloads">Downloads</span>
           </a>
         </div>
 
         <div class="nav-actions">
+          <!-- Theme Toggle Button -->
           <button class="theme-btn" id="themeBtn" type="button" title="Toggle theme" aria-label="Toggle theme">
             <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -90,18 +91,33 @@
               <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
             </svg>
           </button>
-          <button class="lang-pill" id="langBtn" type="button" title="Toggle language">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="2" y1="12" x2="22" y2="12" />
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-            </svg>
-            <span>EN</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </button>
+
+          <!-- Language Dropdown Menu -->
+          <div class="lang-dropdown-wrap">
+            <button class="lang-pill" id="langBtn" type="button" aria-haspopup="true" title="Select language">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="2" y1="12" x2="22" y2="12" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
+              <span id="currentLangLabel">EN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+
+            <div class="lang-dropdown-menu">
+              <button class="lang-option" data-lang="en" type="button">
+                <span class="lang-opt-title">English</span>
+                <span class="lang-opt-sub">EN</span>
+              </button>
+              <button class="lang-option" data-lang="fa" type="button">
+                <span class="lang-opt-title">فارسی</span>
+                <span class="lang-opt-sub">FA</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </nav>

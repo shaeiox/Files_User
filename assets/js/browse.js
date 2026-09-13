@@ -3,6 +3,7 @@
 
    Renders directory listing into #app container.
    Fetches file list from /__list/ API endpoint.
+   Includes Full Multi-Language (i18n) Support.
    ═══════════════════════════════════════════════ */
 
 const BrowsePage = (function () {
@@ -15,10 +16,12 @@ const BrowsePage = (function () {
      * Render the browse page into the given container.
      */
     function render(container, path) {
+        const d = getDict(); // 🌍 Fetch dictionary for the current language
+
         currentPath = path;
         if (!currentPath.endsWith("/")) currentPath += "/";
 
-        document.title = getDict().browseTitle || "Downloads • CloudAvid";
+        document.title = d.browseTitle || "Downloads • CloudAvid";
 
         container.innerHTML = `
       <div class="browse-layout anim-fade-up">
@@ -32,13 +35,13 @@ const BrowsePage = (function () {
                 <span class="stat-item">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"/></svg>
                   <span class="stat-val" id="folderCount">0</span>
-                  <span data-i18n="folders">folders</span>
+                  <span>${d.folders || "folders"}</span>
                 </span>
                 <span class="stat-dot">·</span>
                 <span class="stat-item">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>
                   <span class="stat-val" id="fileCount">0</span>
-                  <span data-i18n="files">files</span>
+                  <span>${d.files || "files"}</span>
                 </span>
               </div>
             </div>
@@ -56,10 +59,10 @@ const BrowsePage = (function () {
         <section class="file-tbl" id="tableContainer">
           <div class="trow thead">
             <div></div>
-            <div data-i18n="name">Name</div>
-            <div data-i18n="type">Type</div>
-            <div data-i18n="modified">Modified</div>
-            <div data-i18n="size">Size</div>
+            <div>${d.name || "Name"}</div>
+            <div>${d.type || "Type"}</div>
+            <div>${d.modified || "Modified"}</div>
+            <div>${d.size || "Size"}</div>
           </div>
           <div id="rows"></div>
           <div class="empty-box" id="empty" style="display:none"></div>
@@ -80,6 +83,7 @@ const BrowsePage = (function () {
     }
 
     function humanSize(b, lang) {
+        const d = getDict();
         if (!Number.isFinite(b) || b < 0) return "—";
         if (b === 0) return lang === "fa" ? "0 بایت" : "0 B";
         const k = 1024;
@@ -113,7 +117,7 @@ const BrowsePage = (function () {
         const home = document.createElement("a");
         home.href = "/";
         home.className = "crumb";
-        home.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>${d.root}</span>`;
+        home.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>${d.root || "Home"}</span>`;
         el.appendChild(home);
 
         const parts = currentPath.split("/").filter(Boolean);
@@ -124,7 +128,9 @@ const BrowsePage = (function () {
 
             const sep = document.createElement("span");
             sep.className = "crumb-sep";
-            sep.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+            sep.innerHTML = d.dir === "rtl"
+                ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`
+                : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
             el.appendChild(sep);
 
             if (i === parts.length - 1) {
@@ -185,7 +191,7 @@ const BrowsePage = (function () {
         if (fc) fc.textContent = dirs;
         if (flc) flc.textContent = files.length - dirs;
 
-        if (!files.length) { showEmpty(d.empty); return; }
+        if (!files.length) { showEmpty(d.empty || "This folder is empty."); return; }
         hideEmpty();
 
         const frag = document.createDocumentFragment();
@@ -197,13 +203,12 @@ const BrowsePage = (function () {
             row.dataset.name = f.name.toLowerCase();
             row.style.animationDelay = Math.min(idx * 25, 300) + "ms";
 
-            // For files: direct download link, not SPA navigation
             const linkAttr = f.type === "directory" ? `href="${href}"` : `href="${href}" data-file="true"`;
 
             row.innerHTML = `
         <div class="f-icon ${f.type === 'directory' ? 'f-icon-dir' : 'f-icon-file'}">${svgIcon(f.type)}</div>
         <div class="f-name"><a class="f-link" ${linkAttr} title="${f.name}">${f.name}</a></div>
-        <div><span class="badge ${f.type === 'directory' ? 'badge-dir' : 'badge-file'}">${f.type === 'directory' ? d.folder : d.file}</span></div>
+        <div><span class="badge ${f.type === 'directory' ? 'badge-dir' : 'badge-file'}">${f.type === 'directory' ? (d.folder || 'Folder') : (d.file || 'File')}</span></div>
         <div class="f-sub">${fmtDate(f.modified, lang)}</div>
         <div class="f-sub">${f.type === 'directory' ? '—' : humanSize(f.size, lang)}</div>`;
 
@@ -231,12 +236,13 @@ const BrowsePage = (function () {
             if (ok) shown++;
         });
 
-        if (!shown && rows.length) showEmpty(q ? d.emptySearch : d.empty);
+        if (!shown && rows.length) showEmpty(q ? (d.emptySearch || "No files matched.") : (d.empty || "This folder is empty."));
         else if (shown) hideEmpty();
     }
 
     /* ── Fetch directory listing from API ── */
     async function fetchList() {
+        const d = getDict();
         try {
             const res = await fetch("/__list" + currentPath, { cache: "no-store" });
             if (!res.ok) throw new Error("HTTP " + res.status);
@@ -256,8 +262,7 @@ const BrowsePage = (function () {
             renderFiles(items);
         } catch (e) {
             console.error(e);
-            const d = getDict();
-            showEmpty(`<strong>${d.loadErrTitle}</strong><div style="margin-top:8px">${d.loadErrHint}</div>`, true);
+            showEmpty(`<strong>${d.loadErrTitle || "Failed to load"}</strong><div style="margin-top:8px">${d.loadErrHint || "Check API endpoint."}</div>`, true);
         }
     }
 
@@ -285,7 +290,6 @@ const BrowsePage = (function () {
             if (localStorage.getItem("view_mode") === "grid") gridBtn.click();
         }
 
-        // In-page search (if there's a search input in nav)
         const searchEl = document.getElementById("search-input");
         if (searchEl) {
             searchEl.addEventListener("input", filterRows);

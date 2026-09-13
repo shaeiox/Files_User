@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════
    autocomplete.js — Smart Search Autocomplete Engine
+   (With i18n / Multi-Language Support)
    ═══════════════════════════════════════════════ */
 
 const Autocomplete = (function () {
@@ -68,6 +69,8 @@ const Autocomplete = (function () {
     }
 
     function renderDropdown(query) {
+        const d = getDict(); // 🌍 گرفتن دیکشنری برای ترجمه کلمات منو
+
         if (!dropdownEl) return;
 
         if (!matches.length) {
@@ -93,7 +96,7 @@ const Autocomplete = (function () {
             </div>
           </div>
           <span class="badge ${item.type === 'directory' ? 'badge-dir' : 'badge-file'}">
-            ${item.type === 'directory' ? 'DIR' : 'FILE'}
+            ${item.type === 'directory' ? (d.dirBadge || 'DIR') : (d.fileBadge || 'FILE')}
           </span>
         </li>
       `;
@@ -101,8 +104,8 @@ const Autocomplete = (function () {
 
         const footerHtml = `
       <div class="ac-footer">
-        <span>Navigate <kbd>↑</kbd> <kbd>↓</kbd></span>
-        <span>Select <kbd>↵</kbd></span>
+        <span>${d.navNavigate || "Navigate"} <kbd>↑</kbd> <kbd>↓</kbd></span>
+        <span>${d.navSelect || "Select"} <kbd>↵</kbd></span>
       </div>
     `;
 

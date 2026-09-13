@@ -1,23 +1,15 @@
 /* ═══════════════════════════════════════════════
-   router.js — Lightweight SPA Router
-
-   Intercepts internal link clicks and replaces
-   only the #app container content instead of
-   doing a full page reload.
-
-   ✓ Keeps nav, footer, and banner alive
-   ✓ Updates browser URL and history
-   ✓ Supports back/forward buttons
-   ✓ Falls through to normal navigation for external links
-   ═══════════════════════════════════════════════ */
-/* ═══════════════════════════════════════════════
    router.js — Smart SPA Router (File Aware)
+   Skill: Enterprise Architecture — Decoupled & State-managed
    ═══════════════════════════════════════════════ */
 const Router = (function () {
     'use strict';
 
     const app = document.getElementById("app");
     const fileExtensions = /\.(html|backhtml|zip|tar|gz|iso|qcow2|vmdk|pdf|txt|log|sql|docx|xlsx|pptx|png|jpg|exec|sh)$/i;
+
+    // Internal State
+    let currentPath = window.location.pathname;
 
     function resolveRoute(path) {
         if (path === "/" || path === "/index.html") return "home";
@@ -28,27 +20,36 @@ const Router = (function () {
     function navigate(path, pushState = true) {
         const route = resolveRoute(path);
 
+        // Fallback for external or unknown routes
         if (!route) {
             window.location.href = path;
             return;
         }
 
+        // Update State & Browser History
+        currentPath = path;
         if (pushState) {
             history.pushState({ path }, "", path);
         }
 
+        // 1. Transition Out
         app.style.opacity = "0";
         app.style.transform = "translateY(8px)";
 
         setTimeout(() => {
+            // 2. Render Component
             if (route === "home") {
                 HomePage.render(app);
             } else if (route === "browse") {
                 BrowsePage.render(app, path);
             }
 
-            applyLang(getLang());
+            // 3. Apply Language to newly rendered DOM safely
+            if (typeof applyLang === 'function') {
+                applyLang(getLang());
+            }
 
+            // 4. Transition In
             requestAnimationFrame(() => {
                 app.style.transition = "opacity 250ms ease, transform 250ms ease";
                 app.style.opacity = "1";
@@ -59,6 +60,12 @@ const Router = (function () {
         }, 150);
     }
 
+    // A clean method for other modules to request a page re-render (e.g. after language change)
+    function refresh() {
+        navigate(currentPath, false);
+    }
+
+    // Global Link Interceptor
     document.addEventListener("click", (e) => {
         const link = e.target.closest("a[href]");
         if (!link) return;
@@ -77,29 +84,16 @@ const Router = (function () {
         navigate(href);
     });
 
+    // Handle Browser Back/Forward Buttons
     window.addEventListener("popstate", (e) => {
         const path = e.state?.path || window.location.pathname;
         navigate(path, false);
     });
 
-    document.getElementById("langBtn").addEventListener("click", () => {
-        const next = getLang() === "en" ? "fa" : "en";
-        applyLang(next);
-
-        const route = resolveRoute(window.location.pathname);
-        if (route === "home") {
-            HomePage.render(app);
-            applyLang(next);
-        } else if (route === "browse") {
-            BrowsePage.render(app, window.location.pathname);
-            applyLang(next);
-        }
-    });
-
+    // Boot
     function init() {
-        const path = window.location.pathname;
-        history.replaceState({ path }, "", path);
-        navigate(path, false);
+        history.replaceState({ path: currentPath }, "", currentPath);
+        navigate(currentPath, false);
     }
 
     if (document.readyState === "loading") {
@@ -108,5 +102,10 @@ const Router = (function () {
         init();
     }
 
-    return { navigate };
+    // Public API
+    return {
+        navigate,
+        refresh,
+        get currentPath() { return currentPath; }
+    };
 })();
