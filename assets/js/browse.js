@@ -85,10 +85,11 @@ const BrowsePage = (function () {
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
                 <div class="filter-dropdown-menu">
-                  <button class="filter-option active" data-val="name-asc" type="button">${d.sortName || "Name (A-Z)"}</button>
-                  <button class="filter-option" data-val="name-desc" type="button">${d.sortNameDesc || "Name (Z-A)"}</button>
-                  <button class="filter-option" data-val="date-desc" type="button">${d.sortLatest || "Newest First"}</button>
-                  <button class="filter-option" data-val="size-desc" type="button">${d.sortSize || "Largest First"}</button>
+                <button class="filter-option active" data-val="name-asc" type="button">${d.sortName || "Name (A-Z)"}</button>
+                <button class="filter-option" data-val="name-desc" type="button">${d.sortNameDesc || "Name (Z-A)"}</button>
+                <button class="filter-option" data-val="date-desc" type="button">${d.sortLatest || "Newest First"}</button>
+                <button class="filter-option" data-val="date-asc" type="button">${d.sortOldest || "Oldest First"}</button>
+                <button class="filter-option" data-val="size-desc" type="button">${d.sortSize || "Largest First"}</button>
                 </div>
               </div>
 
@@ -199,6 +200,11 @@ const BrowsePage = (function () {
                 const tA = new Date(a.modified).getTime();
                 const tB = new Date(b.modified).getTime();
                 return tB - tA;
+            } else if (activeSort === "date-asc") {
+                // Oldest First
+                const tA = new Date(a.modified).getTime() || 0;
+                const tB = new Date(b.modified).getTime() || 0;
+                return tA - tB;
             }
             return 0;
         });

@@ -102,6 +102,13 @@ const i18n = {
         perfLow: "Power Saver",
         perfPotato: "Potato Mode",
 
+        // Browse Page Filters & Sorting
+        searchFolderPh: "Search in folder...",
+        allTypes: "All Types",
+        sortName: "Name (A-Z)",
+        sortNameDesc: "Name (Z-A)",
+        sortOldest: "Oldest First",
+        sortSize: "Largest First",
     },
 
     fa: {
@@ -201,6 +208,14 @@ const i18n = {
         perfMed: "عملکرد متعادل",
         perfLow: "کاهش مصرف باتری",
         perfPotato: "بسیار سبک (سیب‌زمینی)",
+
+        // Browse Page Filters & Sorting
+        searchFolderPh: "جستجو در این پوشه...",
+        allTypes: "همه موارد",
+        sortName: "نام (الف - ی)",
+        sortNameDesc: "نام (ی - الف)",
+        sortOldest: "قدیمی‌ترین",
+        sortSize: "بیشترین حجم",
     }
 };
 
