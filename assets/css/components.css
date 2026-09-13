@@ -18,7 +18,7 @@
     gap: 16px;
     height: 56px;
     padding: 0 16px 0 14px;
-    border-radius: 12px;
+    border-radius: 9px;
     background: var(--bg-card);
     border: 1px solid var(--border);
     box-shadow: var(--shadow-sm);
@@ -36,7 +36,7 @@
 .nav-logo img {
     width: 36px;
     height: 36px;
-    border-radius: 8px;
+    border-radius: 6px;
     object-fit: contain;
 }
 
@@ -78,7 +78,7 @@
     gap: 6px;
     height: 36px;
     padding: 0 14px;
-    border-radius: 8px;
+    border-radius: 6px;
     font-size: 13px;
     font-weight: 600;
     color: var(--text-3);
@@ -127,7 +127,7 @@
     gap: 6px;
     height: 36px;
     padding: 0 16px;
-    border-radius: 8px;
+    border-radius: 6px;
     font-size: 13px;
     font-weight: 600;
     border: 1px solid var(--border);
@@ -177,13 +177,13 @@
     height: 32px;
     padding: 0 12px;
     font-size: 12.5px;
-    border-radius: 8px;
+    border-radius: 6px;
 }
 
 .btn-icon {
     width: 36px;
     padding: 0;
-    border-radius: 8px;
+    border-radius: 6px;
 }
 
 .btn-icon.btn-sm {
@@ -194,11 +194,12 @@
 /* — Theme btn— */
 .theme-btn {
     width: 36px;
+    min-width: 36px;
     height: 36px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: 6px;
     border: 1px solid var(--border);
     background: var(--bg-card);
     color: var(--text-3);
@@ -240,27 +241,42 @@
 
 /* — Language pill — */
 .lang-pill {
+    height: 36px;
+    min-height: 36px;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    height: 32px;
-    padding: 0 10px 0 8px;
-    border-radius: 8px;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 11px;
+    border-radius: 6px;
     border: 1px solid var(--border);
     background: var(--bg-card);
-    font-size: 12.5px;
-    font-weight: 600;
     color: var(--text-3);
+    font: inherit;
+    line-height: 1;
+    cursor: default;
+    /* Trigger is hover-only, not a language toggle */
+    white-space: nowrap;
+    transition: border-color var(--dur-1) ease, background var(--dur-1) ease;
 }
 
 .lang-pill svg {
-    opacity: 0.7;
+    display: block;
+    flex-shrink: 0;
+}
+
+/* ── Optional visual feedback on hover ── */
+.lang-dropdown-wrap:hover .lang-pill {
+    border-color: var(--border-hover);
+    background: var(--bg-hover);
 }
 
 /* ── Language Dropdown ── */
 .lang-dropdown-wrap {
     position: relative;
     display: inline-flex;
+    align-items: stretch;
+    height: 36px;
 }
 
 /* Menu */
@@ -272,7 +288,7 @@
     padding: 4px;
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 8px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     opacity: 0;
     visibility: hidden;
@@ -304,7 +320,7 @@
     width: 100%;
     padding: 7px 10px;
     border: none;
-    border-radius: 7px;
+    border-radius: 6px;
     background: transparent;
     color: var(--text-main);
     font-size: 13px;
@@ -345,7 +361,7 @@
     gap: 8px;
     height: 42px;
     padding: 0 8px 0 12px;
-    border-radius: 10px;
+    border-radius: 8px;
     background: var(--input-bg);
     border: 1px solid var(--border);
     transition: border-color var(--dur-1) ease, box-shadow var(--dur-1) ease;
@@ -390,7 +406,7 @@ kbd {
     min-width: 20px;
     height: 20px;
     padding: 0 5px;
-    border-radius: 6px;
+    border-radius: 5px;
     font-family: var(--mono);
     font-size: 10px;
     font-weight: 600;
@@ -406,7 +422,7 @@ kbd {
     justify-content: center;
     height: 20px;
     padding: 0 7px;
-    border-radius: 6px;
+    border-radius: 5px;
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.06em;
@@ -447,7 +463,7 @@ kbd {
 .card {
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 9px;
     box-shadow: var(--shadow-card);
 }
 
@@ -460,7 +476,7 @@ kbd {
     padding: 12px 16px;
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 8px;
     font-size: 11px;
     color: var(--text-4);
     gap: 12px;
@@ -481,7 +497,7 @@ kbd {
     grid-template-columns: repeat(4, 1fr);
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 8px;
     overflow: hidden;
     box-shadow: var(--shadow-card);
 }
@@ -504,7 +520,7 @@ kbd {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: 6px;
     background: var(--n-4);
     color: var(--text-3);
     flex-shrink: 0;
@@ -582,7 +598,7 @@ kbd {
     right: 0;
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: 10px;
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
     z-index: 100;
     /* High z-index to stay above everything */
@@ -615,7 +631,7 @@ kbd {
 
 .ac-list::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.15);
-    border-radius: 4px;
+    border-radius: 3px;
 }
 
 /* ── AUTOCOMPLETE ITEM ── */
@@ -625,7 +641,7 @@ kbd {
     justify-content: space-between;
     gap: 12px;
     padding: 10px 14px;
-    border-radius: 10px;
+    border-radius: 8px;
     cursor: pointer;
     border-left: 2.5px solid transparent;
     transition: all 140ms ease;
@@ -652,7 +668,7 @@ kbd {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: 6px;
     flex-shrink: 0;
     border: 1px solid var(--border);
     transition: all 0.2s ease;
