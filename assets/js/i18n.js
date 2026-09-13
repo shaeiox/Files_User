@@ -93,7 +93,15 @@ const i18n = {
         modified: "Modified",
         size: "Size",
         loadErrTitle: "Failed to load",
-        loadErrHint: "Check /__list/ endpoint."
+        loadErrHint: "Check /__list/ endpoint.",
+
+        perfLabel: "Performance",
+        perfAuto: "Auto Detect",
+        perfHigh: "High Power",
+        perfMed: "Balanced",
+        perfLow: "Power Saver",
+        perfPotato: "Potato Mode",
+
     },
 
     fa: {
@@ -185,7 +193,14 @@ const i18n = {
         modified: "آخرین تغییر",
         size: "حجم",
         loadErrTitle: "بارگذاری ناموفق",
-        loadErrHint: "مسیر /__list/ را بررسی کنید."
+        loadErrHint: "مسیر /__list/ را بررسی کنید.",
+
+        perfLabel: "عملکرد سیستم",
+        perfAuto: "تشخیص خودکار",
+        perfHigh: "حداکثر گرافیک",
+        perfMed: "عملکرد متعادل",
+        perfLow: "کاهش مصرف باتری",
+        perfPotato: "بسیار سبک (سیب‌زمینی)",
     }
 };
 

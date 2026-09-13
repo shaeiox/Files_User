@@ -1,0 +1,585 @@
+/* ═══════════════════════════════════════════════════════════════
+   performance-modes.css — Adaptive Performance Tiers & UI
+   Architecture: Progressive Visual Degradation (Enterprise Standard)
+   
+   Table of Contents:
+   1. Tier: HIGH (Default)
+   2. Tier: MEDIUM (Balanced)
+   3. Tier: LOW (Power Saver)
+   4. Tier: POTATO (Maximum Performance)
+   5. User Interface (Performance Dropdown)
+   6. System UI (Toast Notifications)
+   7. Developer Tools (Debug Panel)
+   8. Accessibility (Reduced Motion)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ───────────────────────────────────────────────────────────────
+   1. TIER: HIGH (Default — Everything Enabled)
+   ───────────────────────────────────────────────────────────────
+   No CSS overrides are required. The system runs at maximum 
+   visual fidelity with full blurs, shadows, and animations.
+   ─────────────────────────────────────────────────────────────── */
+
+/* ───────────────────────────────────────────────────────────────
+   2. TIER: MEDIUM (Balanced)
+   ───────────────────────────────────────────────────────────────
+   Strategy: Reduce heavy compositing tasks (blur intensity) and
+   slow down infinite background animations to save GPU cycles.
+   ─────────────────────────────────────────────────────────────── */
+[data-perf="medium"] .aura-glow-1,
+[data-perf="medium"] .aura-glow-2 {
+    filter: blur(20px);
+    /* Reduced from 40-50px */
+}
+
+[data-perf="medium"] .nav-bar,
+[data-perf="medium"] .ac-dropdown {
+    backdrop-filter: blur(6px);
+    /* Reduced from 12px */
+    -webkit-backdrop-filter: blur(6px);
+}
+
+[data-perf="medium"] .logo-shader {
+    filter: blur(20px);
+    /* Reduced from 36px */
+}
+
+[data-perf="medium"] .hero-cloud-wrap {
+    animation-duration: 10s;
+    /* Slower animation = less GPU repaint */
+}
+
+/* ───────────────────────────────────────────────────────────────
+   3. TIER: LOW (Power Saver)
+   ───────────────────────────────────────────────────────────────
+   Strategy: Completely disable expensive filters (backdrop-filter),
+   remove ambient glows, simplify box-shadows, and convert complex
+   bezier animations to rapid linear transitions.
+   ─────────────────────────────────────────────────────────────── */
+
+/* Disable all backdrop filters (heaviest CSS property) */
+[data-perf="low"] .nav-bar,
+[data-perf="low"] .ac-dropdown {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Remove ambient background glows entirely */
+[data-perf="low"] .aura-glow-1,
+[data-perf="low"] .aura-glow-2,
+[data-perf="low"] .logo-shader {
+    display: none;
+}
+
+/* Simplify logo transition, remove blur filter */
+[data-perf="low"] .logo-layer {
+    filter: none !important;
+    transition: opacity 100ms linear !important;
+}
+
+/* Flatten multi-layered shadows to a single, cheap drop-shadow */
+[data-perf="low"] .resource-card,
+[data-perf="low"] .panel,
+[data-perf="low"] .file-tbl,
+[data-perf="low"] .browse-head,
+[data-perf="low"] .status-bar,
+[data-perf="low"] .results-panel {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Dark mode specific simplified shadows */
+[data-theme="dark"][data-perf="low"] .resource-card,
+[data-theme="dark"][data-perf="low"] .panel,
+[data-theme="dark"][data-perf="low"] .file-tbl,
+[data-theme="dark"][data-perf="low"] .browse-head,
+[data-theme="dark"][data-perf="low"] .status-bar,
+[data-theme="dark"][data-perf="low"] .results-panel {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Halt infinite decorative animations */
+[data-perf="low"] .hero-cloud-wrap {
+    animation: none;
+}
+
+/* Simplify skeleton shimmer to a static, low-opacity pulse */
+[data-perf="low"] .skeleton-box,
+[data-perf="low"] .skeleton-line {
+    animation: none;
+    opacity: 0.5;
+}
+
+/* Disable staggered entry animations (avoids layout recalculations) */
+[data-perf="low"] .stagger>* {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/* Force UI elements to use cheap, linear transitions */
+[data-perf="low"] .resource-card,
+[data-perf="low"] .btn,
+[data-perf="low"] .nav-tab,
+[data-perf="low"] .crumb {
+    transition-duration: 80ms !important;
+    transition-timing-function: linear !important;
+}
+
+/* Disable structural hover transforms to prevent composite layer creation */
+[data-perf="low"] .resource-card:hover,
+[data-perf="low"] .file-tbl.grid-mode .trow:hover {
+    transform: none !important;
+}
+
+/* Remove decorative layout elements */
+[data-perf="low"] .hero-max::before {
+    display: none;
+}
+
+[data-perf="low"] .cav-banner-timer-bar {
+    animation: none !important;
+    transform: scaleX(1) !important;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   4. TIER: POTATO (Maximum Performance / Zero Eye Candy)
+   ───────────────────────────────────────────────────────────────
+   Strategy: Absolute zero visual overhead. Inherits all LOW 
+   overrides, then forcefully kills ALL animations, transitions, 
+   shadows, and decorative backdrops globally.
+   ─────────────────────────────────────────────────────────────── */
+
+/* Inherit LOW tier overrides */
+[data-perf="potato"] .nav-bar,
+[data-perf="potato"] .ac-dropdown {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Nuke all background aesthetics */
+[data-perf="potato"] .aura-glow-1,
+[data-perf="potato"] .aura-glow-2,
+[data-perf="potato"] .logo-shader,
+[data-perf="potato"] .hero-max::before,
+[data-perf="potato"] .aura-backdrop {
+    display: none !important;
+}
+
+/* ☢️ Force kill ALL animations and transitions globally */
+[data-perf="potato"] *,
+[data-perf="potato"] *::before,
+[data-perf="potato"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+}
+
+/* Eradicate all box-shadows to bypass drawing entirely */
+[data-perf="potato"] .resource-card,
+[data-perf="potato"] .panel,
+[data-perf="potato"] .file-tbl,
+[data-perf="potato"] .browse-head,
+[data-perf="potato"] .status-bar,
+[data-perf="potato"] .results-panel,
+[data-perf="potato"] .nav-bar,
+[data-perf="potato"] .ac-dropdown,
+[data-perf="potato"] .card,
+[data-perf="potato"] .btn {
+    box-shadow: none !important;
+}
+
+/* Suppress all remaining hover transforms */
+[data-perf="potato"] .resource-card:hover,
+[data-perf="potato"] .file-tbl.grid-mode .trow:hover,
+[data-perf="potato"] .resource-arrow,
+[data-perf="potato"] .btn:active {
+    transform: none !important;
+}
+
+/* Pure static skeletons */
+[data-perf="potato"] .skeleton-box,
+[data-perf="potato"] .skeleton-line {
+    animation: none !important;
+    background: var(--n-4) !important;
+    opacity: 0.6;
+}
+
+/* Remove functional toggle animations (Theme, Wipe, etc.) */
+[data-perf="potato"] .theme-btn svg {
+    transition: none !important;
+}
+
+[data-perf="potato"] .logo-layer {
+    filter: none !important;
+    transition: none !important;
+}
+
+[data-perf="potato"] .logo-swap.wiping {
+    clip-path: none !important;
+}
+
+/* Highly simplified scrollbar */
+[data-perf="potato"] ::-webkit-scrollbar {
+    width: 4px;
+}
+
+[data-perf="potato"] ::-webkit-scrollbar-thumb {
+    border-radius: 0;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   5. USER INTERFACE (Performance Setting Dropdown)
+   shadcn-inspired minimal architecture
+   ─────────────────────────────────────────────────────────────── */
+
+/* Dropdown Container */
+.perf-dropdown-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: stretch;
+    height: 36px;
+}
+
+/* Trigger Button (Pill) */
+.perf-pill {
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 11px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-3);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--dur-1) ease;
+}
+
+/* SVG Icon in Pill */
+.perf-pill svg {
+    color: var(--text-4);
+    transition: color var(--dur-1) ease;
+}
+
+/* Pill Hover & Active State */
+.perf-dropdown-wrap:hover .perf-pill,
+.perf-dropdown-wrap.show .perf-pill {
+    border-color: var(--border-hover);
+    background: var(--bg-hover);
+    color: var(--text);
+}
+
+/* Highlight icon with brand color when active/hovered */
+.perf-dropdown-wrap:hover .perf-pill svg,
+.perf-dropdown-wrap.show .perf-pill svg {
+    color: var(--a-5);
+}
+
+/* Dropdown Menu Panel */
+.perf-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 170px;
+    padding: 4px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px) scale(0.98);
+    transition: all 0.15s ease;
+    z-index: 200;
+    /* Stays above general content */
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    pointer-events: none;
+}
+
+/* RTL Layout Flip */
+[dir="rtl"] .perf-dropdown-menu {
+    right: auto;
+    left: 0;
+}
+
+/* Menu Visible State */
+.perf-dropdown-wrap.show .perf-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+/* Menu Item (Option) */
+.perf-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-2);
+    font-size: 12.5px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: start;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.perf-option:hover {
+    background: var(--bg-hover);
+    color: var(--text);
+}
+
+/* Selected Indicator Dot */
+.perf-indicator-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: transparent;
+    transition: background-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+/* Selected Item - Base Active State */
+.perf-option.active {
+    font-weight: 700;
+}
+
+/* Selected Item - Light Theme */
+:root .perf-option.active,
+[data-theme="light"] .perf-option.active {
+    background: #fffbeb;
+    color: #b45309;
+}
+
+:root .perf-option.active .perf-indicator-dot,
+[data-theme="light"] .perf-option.active .perf-indicator-dot {
+    background: #d97706;
+    box-shadow: 0 0 6px rgba(217, 119, 6, 0.4);
+}
+
+/* Selected Item - Dark Theme */
+[data-theme="dark"] .perf-option.active {
+    background: rgba(255, 184, 0, 0.12);
+    color: #ffb800;
+}
+
+[data-theme="dark"] .perf-option.active .perf-indicator-dot {
+    background: #ffb800;
+    box-shadow: 0 0 6px rgba(255, 184, 0, 0.6);
+}
+
+/* Mobile Responsiveness for Dropdown Trigger */
+@media (max-width: 480px) {
+    .perf-pill span {
+        display: none;
+        /* Hide text, keep only icon */
+    }
+
+    .perf-pill {
+        padding: 0 10px;
+    }
+}
+
+/* ───────────────────────────────────────────────────────────────
+   6. SYSTEM UI (Toast Notifications for Auto-Downgrades)
+   ─────────────────────────────────────────────────────────────── */
+.perf-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: var(--bg-card, #1e293b);
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    color: var(--text, #fff);
+    font-family: var(--font, system-ui);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.perf-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+
+.perf-toast svg {
+    color: #f59e0b;
+    flex-shrink: 0;
+}
+
+/* Toast RTL Alignment */
+[dir="rtl"] .perf-toast {
+    left: auto;
+    right: 50%;
+    transform: translateX(50%) translateY(20px);
+}
+
+[dir="rtl"] .perf-toast.show {
+    transform: translateX(50%) translateY(0);
+}
+
+/* ───────────────────────────────────────────────────────────────
+   7. DEVELOPER TOOLS (Debug Panel via Ctrl+Shift+P)
+   ─────────────────────────────────────────────────────────────── */
+.perf-debug-panel {
+    position: fixed;
+    top: 70px;
+    right: 16px;
+    z-index: 99998;
+    width: 260px;
+    border-radius: 10px;
+    background: var(--bg-card, #161922);
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    font-family: var(--mono, monospace);
+    font-size: 11px;
+    color: var(--text, #e2e8f0);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.96);
+    transition: all 150ms ease;
+    overflow: hidden;
+}
+
+/* Debug Panel RTL Alignment */
+[dir="rtl"] .perf-debug-panel {
+    right: auto;
+    left: 16px;
+}
+
+.perf-debug-panel.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.perf-debug-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.perf-debug-close {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--text-4, #64748b);
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.perf-debug-close:hover {
+    background: var(--bg-hover, rgba(255, 255, 255, 0.06));
+    color: var(--text, #fff);
+}
+
+.perf-debug-body {
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.perf-debug-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+}
+
+.perf-debug-label {
+    color: var(--text-4, #64748b);
+    font-weight: 500;
+}
+
+.perf-debug-value {
+    font-weight: 700;
+    color: var(--text, #e2e8f0);
+}
+
+.perf-debug-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 8px 12px 10px;
+    border-top: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+}
+
+.perf-debug-btn {
+    flex: 1;
+    min-width: 48px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+    border-radius: 5px;
+    background: var(--bg-hover, rgba(255, 255, 255, 0.04));
+    color: var(--text-3, #94a3b8);
+    font-family: var(--mono, monospace);
+    font-size: 9px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 100ms ease;
+}
+
+.perf-debug-btn:hover {
+    background: var(--a-5, #ffb800);
+    color: #111;
+    border-color: var(--a-5, #ffb800);
+}
+
+.perf-debug-btn-auto {
+    flex-basis: 100%;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   8. ACCESSIBILITY (Reduced Motion)
+   ───────────────────────────────────────────────────────────────
+   Respect OS-level user preferences unconditionally.
+   Disables layout shifts and animated state changes globally.
+   ─────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+
+    [data-perf] *,
+    [data-perf] *::before,
+    [data-perf] *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

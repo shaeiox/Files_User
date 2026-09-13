@@ -8,13 +8,79 @@
   <title>AVID Download • File Portal</title>
   <script>
     (function () {
+      'use strict';
+
+      var root = document.documentElement;
+
+      /* ── Apply theme before first paint ── */
+      var theme = 'light';
+
       try {
-        var s = localStorage.getItem('cav_theme');
-        var t = (s === 'light' || s === 'dark') ? s
-          : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        document.documentElement.setAttribute('data-theme', t);
-      } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); }
+        if (
+          window.matchMedia &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches
+        ) {
+          theme = 'dark';
+        }
+      } catch (_) { }
+
+      try {
+        var savedTheme = localStorage.getItem('cav_theme');
+
+        if (savedTheme === 'light' || savedTheme === 'dark') {
+          theme = savedTheme;
+        }
+      } catch (_) { }
+
+      root.setAttribute('data-theme', theme);
+
+      /* ── Apply cached performance tier before first paint ── */
+      var perfTier = 'medium';
+      var reducedMotion = false;
+
+      try {
+        reducedMotion = window.matchMedia &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      } catch (_) { }
+
+      if (reducedMotion) {
+        perfTier = 'low';
+      } else {
+        try {
+          var rawPerf = localStorage.getItem('cav_perf_tier');
+
+          if (rawPerf) {
+            var cachedPerf = JSON.parse(rawPerf);
+            var cachedTier = String(cachedPerf.tier || '').toUpperCase();
+            var timestamp = Number(cachedPerf.timestamp);
+            var cacheTTL = 7 * 24 * 60 * 60 * 1000;
+            var cacheAge = Date.now() - timestamp;
+            var validTiers = ['HIGH', 'MEDIUM', 'LOW', 'POTATO'];
+
+            if (
+              validTiers.indexOf(cachedTier) !== -1 &&
+              Number.isFinite(timestamp) &&
+              cacheAge >= 0 &&
+              cacheAge < cacheTTL
+            ) {
+              perfTier = cachedTier.toLowerCase();
+            } else {
+              localStorage.removeItem('cav_perf_tier');
+            }
+          }
+        } catch (_) {
+        }
+      }
+
+      root.setAttribute('data-perf', perfTier);
     })();
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof PerformanceMonitor !== 'undefined') {
+        PerformanceMonitor.init({
+          debug: false
+        });
+      }
+    }, { once: true });
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,27 +90,42 @@
   <link rel="stylesheet" href="/assets/css/components.css">
   <link rel="stylesheet" href="/assets/css/home.css">
   <link rel="stylesheet" href="/assets/css/browse.css">
+  <link rel="stylesheet" href="/assets/css/performance-modes.css">
   <link rel="icon" href="/assets/icon/files-logo.webp">
 </head>
 
 <body>
+  <!-- ═══════════════════════════════════════════════════════════════
+       BACKGROUND AURA BACKDROP (Glow Effects)
+       ═══════════════════════════════════════════════════════════════ -->
   <div class="aura-backdrop" aria-hidden="true">
     <div class="aura-base"></div>
     <div class="aura-glow-1"></div>
     <div class="aura-glow-2"></div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════════
+       PAGE CONTAINER
+       ═══════════════════════════════════════════════════════════════ -->
   <div class="page">
-    <nav class="nav">
+
+    <!-- MAIN NAVIGATION HEADER -->
+    <header class="nav">
       <div class="nav-bar">
+
+        <!-- BRAND LOGO -->
         <a class="nav-logo" href="/" data-link>
-          <img src="/assets/icon/logo.webp" alt="CloudAvid" onerror="this.style.display='none'">
+          <img src="/assets/icon/avid-logo-dark.webp" alt="CloudAvid Logo" class="logo-dark"
+            onerror="this.style.display='none'">
+          <img src="/assets/icon/avid-logo-light.webp" alt="CloudAvid Logo" class="logo-light"
+            onerror="this.style.display='none'">
           <div class="nav-logo-text">
             <strong data-i18n="brand">CloudAvid</strong>
             <span data-i18n="subtitle">FILE PORTAL</span>
           </div>
         </a>
 
+        <!-- CENTER NAVIGATION TABS -->
         <div class="nav-tabs" role="tablist" aria-label="Primary">
           <a class="nav-tab" href="https://cloudavid.com" target="_blank" rel="noopener">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -77,8 +158,76 @@
           </a>
         </div>
 
+        <!-- RIGHT ACTIONS TOOLBAR -->
         <div class="nav-actions">
-          <!-- Theme Toggle Button -->
+
+          <!-- 1. Performance Selector Dropdown -->
+          <div class="perf-dropdown-wrap">
+            <button class="perf-pill" type="button" aria-haspopup="true" aria-expanded="false"
+              title="Performance Settings" aria-label="Performance Settings">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12 14 4-4" />
+                <path d="M3.34 19a10 10 0 1 1 17.32 0" />
+              </svg>
+              <span id="currentPerfLabel" data-i18n="perfLabel">Performance</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            <div class="perf-dropdown-menu" role="menu">
+              <button class="perf-option" data-perf-val="AUTO" type="button" role="menuitem">
+                <span data-i18n="perfAuto">Auto Detect</span>
+                <span class="perf-indicator-dot"></span>
+              </button>
+              <button class="perf-option" data-perf-val="HIGH" type="button" role="menuitem">
+                <span data-i18n="perfHigh">High Power</span>
+                <span class="perf-indicator-dot"></span>
+              </button>
+              <button class="perf-option" data-perf-val="MEDIUM" type="button" role="menuitem">
+                <span data-i18n="perfMed">Balanced</span>
+                <span class="perf-indicator-dot"></span>
+              </button>
+              <button class="perf-option" data-perf-val="LOW" type="button" role="menuitem">
+                <span data-i18n="perfLow">Power Saver</span>
+                <span class="perf-indicator-dot"></span>
+              </button>
+              <button class="perf-option" data-perf-val="POTATO" type="button" role="menuitem">
+                <span data-i18n="perfPotato">Potato Mode</span>
+                <span class="perf-indicator-dot"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Language Selector Dropdown -->
+          <div class="lang-dropdown-wrap">
+            <button class="lang-pill" id="langBtn" type="button" aria-haspopup="true" aria-expanded="false"
+              title="Select language" aria-label="Select language">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="2" y1="12" x2="22" y2="12" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
+              <span id="currentLangLabel">EN</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+
+            <div class="lang-dropdown-menu" role="menu">
+              <button class="lang-option" data-lang="en" type="button" role="menuitem">
+                <span class="lang-opt-title">English</span>
+                <span class="lang-opt-sub">EN</span>
+              </button>
+              <button class="lang-option" data-lang="fa" type="button" role="menuitem">
+                <span class="lang-opt-title">فارسی</span>
+                <span class="lang-opt-sub">FA</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. Theme Toggle Button -->
           <button class="theme-btn" id="themeBtn" type="button" title="Toggle theme" aria-label="Toggle theme">
             <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -92,51 +241,28 @@
             </svg>
           </button>
 
-          <!-- Language Dropdown Menu -->
-          <div class="lang-dropdown-wrap">
-            <button class="lang-pill" id="langBtn" type="button" aria-haspopup="true" title="Select language">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="2" y1="12" x2="22" y2="12" />
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-              </svg>
-              <span id="currentLangLabel">EN</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-            </button>
-
-            <div class="lang-dropdown-menu">
-              <button class="lang-option" data-lang="en" type="button">
-                <span class="lang-opt-title">English</span>
-                <span class="lang-opt-sub">EN</span>
-              </button>
-              <button class="lang-option" data-lang="fa" type="button">
-                <span class="lang-opt-title">فارسی</span>
-                <span class="lang-opt-sub">FA</span>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
-    </nav>
+    </header>
 
+    <!-- SPA DYNAMIC CONTENT MOUNT POINT -->
     <main id="app"></main>
 
+    <!-- FOOTER -->
     <footer class="footer" style="display:none">
       <span>© 2025 CloudAvid Co</span>
-      <a href="https://cloudavid.com">cloudavid.com</a>
+      <a href="https://cloudavid.com" target="_blank" rel="noopener">cloudavid.com</a>
     </footer>
   </div>
-  <script src="/assets/js/services/resource-service.js"></script>
-  <script src="/assets/js/theme.js"></script>
-  <script src="/assets/js/i18n.js"></script>
-  <script src="/assets/js/autocomplete.js"></script>
-  <script src="/assets/js/banner.js"></script>
-  <script src="/assets/js/home.js"></script>
-  <script src="/assets/js/browse.js"></script>
-  <script src="/assets/js/router.js"></script>
+  <script src="/assets/js/services/resource-service.js" defer></script>
+  <script src="/assets/js/services/performance-monitor.js" defer></script>
+  <script src="/assets/js/theme.js" defer></script>
+  <script src="/assets/js/i18n.js" defer></script>
+  <script src="/assets/js/autocomplete.js" defer></script>
+  <script src="/assets/js/banner.js" ></script>
+  <script src="/assets/js/home.js" defer></script>
+  <script src="/assets/js/browse.js" defer></script>
+  <script src="/assets/js/router.js" defer></script>
 </body>
 
 </html>
