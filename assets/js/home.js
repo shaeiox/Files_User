@@ -2,9 +2,9 @@
    home.js — AVID Download Infrastructure
    Skill: UI UX Pro Max — Flat Design + Enterprise Gateway + i18n
    Architecture: Component-based + Service Layer + Progressive Loading
-   
+
    Dependencies:
-   - i18n.js         (getDict, getLang)
+   - i18n.js         (window.getDict, window.getLang)
    - resource-service.js (ResourceService)
    - autocomplete.js (Autocomplete) [optional]
    ═══════════════════════════════════════════════════════════════ */
@@ -22,12 +22,15 @@ const HomePage = (function () {
 
   /* ── Internal State ── */
   let stopFlag = false;
+  let rawResources = [];      // Cached raw data from API
+  let activeCategory = "all"; // Current active category filter
+  let activeSort = "latest";  // Current active sort filter
 
   /* ═══════════════════════════════════════════════
      MAIN RENDER
      ═══════════════════════════════════════════════ */
   function render(container) {
-    const d = getDict();
+    const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
     document.title = d.pageTitle || "AVID Download • File Portal";
 
     container.innerHTML = `
@@ -41,7 +44,7 @@ const HomePage = (function () {
     `;
 
     bindEvents();
-    loadResources(); // 🚀 Fetch real infrastructure data
+    loadResources(); // Async fetch infrastructure resources
   }
 
   /* ═══════════════════════════════════════════════
@@ -85,8 +88,6 @@ const HomePage = (function () {
 
   /* ═══════════════════════════════════════════════
      SECTION: INFRASTRUCTURE RESOURCES
-     Initial render shows Skeleton placeholders
-     Real data is loaded asynchronously via loadResources()
      ═══════════════════════════════════════════════ */
   function renderResourcesSection(d) {
     return `
@@ -101,23 +102,50 @@ const HomePage = (function () {
               <div class="section-sub">${d.infraSub || "Browse and download all available infrastructure resources and packages."}</div>
             </div>
           </div>
+          
           <div class="section-controls">
-            <label class="select-pill">
-              <span>${d.allCategories || "All categories"}</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </label>
-            <label class="select-pill">
-              <span>${d.sortLatest || "Sort by: Latest"}</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </label>
-            <button class="icon-btn" id="refreshResourcesBtn" title="${d.refresh || 'Refresh'}" aria-label="Refresh resources">
+            
+            <!-- 1. Custom Category Filter -->
+            <div class="filter-dropdown-wrap" id="catFilterWrap">
+              <button class="filter-pill" type="button" aria-haspopup="true">
+                <span class="filter-value" data-val="all">${d.allCategories || "All categories"}</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="filter-dropdown-menu">
+                <button class="filter-option active" data-val="all" type="button">${d.allCategories || "All categories"}</button>
+                <button class="filter-option" data-val="system-files" type="button">${d.sysFiles || "System Files"}</button>
+                <button class="filter-option" data-val="templates" type="button">${d.template || "Templates"}</button>
+                <button class="filter-option" data-val="sandbox" type="button">${d.sandbox || "Sandbox"}</button>
+                <button class="filter-option" data-val="log-server" type="button">${d.logServer || "Log Server"}</button>
+                <button class="filter-option" data-val="iso-images" type="button">${d.iso || "ISO Images"}</button>
+                <button class="filter-option" data-val="documentation" type="button">${d.docsTitle || "Documentation"}</button>
+              </div>
+            </div>
+
+            <!-- 2. Custom Sort Filter -->
+            <div class="filter-dropdown-wrap" id="sortFilterWrap">
+              <button class="filter-pill" type="button" aria-haspopup="true">
+                <span class="filter-value" data-val="latest">${d.sortLatest || "Sort by: Latest"}</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="filter-dropdown-menu">
+                <button class="filter-option active" data-val="latest" type="button">${d.sortLatest || "Sort by: Latest"}</button>
+                <button class="filter-option" data-val="name-asc" type="button">Sort by: Name (A-Z)</button>
+                <button class="filter-option" data-val="count-desc" type="button">Sort by: File Count</button>
+              </div>
+            </div>
+
+            <!-- Refresh Button -->
+            <button class="icon-btn" id="refreshResourcesBtn" title="${d.refresh || 'Refresh'}" aria-label="Refresh resources" type="button">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
             </button>
+
+            <!-- Grid/List View Toggle -->
             <div class="view-toggle" role="tablist" aria-label="View mode">
-              <button class="vt-btn active" id="viewGridBtn" aria-label="Grid view">
+              <button class="vt-btn active" id="viewGridBtn" aria-label="Grid view" type="button">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
               </button>
-              <button class="vt-btn" id="viewListBtn" aria-label="List view">
+              <button class="vt-btn" id="viewListBtn" aria-label="List view" type="button">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
               </button>
             </div>
@@ -132,8 +160,7 @@ const HomePage = (function () {
   }
 
   /* ═══════════════════════════════════════════════
-     SECTION: BOTTOM (Latest Releases + Quick Access)
-     Note: Still uses mock data. Can be wired to a service later.
+     SECTION: BOTTOM PANELS (Latest Releases + Quick Access)
      ═══════════════════════════════════════════════ */
   function renderBottomSection(d) {
     return `
@@ -261,10 +288,8 @@ const HomePage = (function () {
   }
 
   /* ═══════════════════════════════════════════════
-     RESOURCE CARDS — Skeleton & Real Rendering
+     RESOURCE CARDS RENDERING & FILTERING
      ═══════════════════════════════════════════════ */
-
-  // Render skeleton placeholders while data is being fetched
   function renderSkeletonCards() {
     if (typeof ResourceService === 'undefined') {
       return '<div class="resources-error">ResourceService not loaded</div>';
@@ -284,19 +309,52 @@ const HomePage = (function () {
     `).join('');
   }
 
-  // Render real resource cards after data arrives from the service
+  // Triggered on Dropdown selections
+  function applyFiltersAndRender() {
+    let filtered = [...rawResources];
+
+    // 1. Apply Category Filter
+    if (activeCategory !== "all") {
+      filtered = filtered.filter(item => item.id === activeCategory);
+    }
+
+    // 2. Apply Sorting Filter
+    filtered.sort((a, b) => {
+      if (activeSort === "name-asc") {
+        const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
+        const titleA = d[a.titleKey] || a.defaultTitle;
+        const titleB = d[b.titleKey] || b.defaultTitle;
+        return titleA.localeCompare(titleB);
+      } else if (activeSort === "count-desc") {
+        const countA = a.stats?.total || 0;
+        const countB = b.stats?.total || 0;
+        return countB - countA;
+      } else { // "latest"
+        const timeA = a.stats?.latestModified || 0;
+        const timeB = b.stats?.latestModified || 0;
+        return timeB - timeA;
+      }
+    });
+
+    renderResourceCards(filtered);
+  }
+
   function renderResourceCards(resources) {
-    const d = getDict();
+    const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
     const grid = document.getElementById("resourcesGrid");
     if (!grid) return;
+
+    if (resources.length === 0) {
+      grid.innerHTML = `<div class="ac-empty" style="grid-column:1/-1; padding:32px; text-align:center;">${d.empty || "No resources found."}</div>`;
+      return;
+    }
 
     grid.innerHTML = resources.map(resource => {
       const title = d[resource.titleKey] || resource.defaultTitle;
       const desc = d[resource.descKey] || resource.defaultDesc;
 
-      // Build stats badge based on availability
       let statsBadge;
-      if (!resource.stats.available) {
+      if (!resource.stats || !resource.stats.available) {
         statsBadge = `<span class="badge badge-error">${d.unavailable || "Unavailable"}</span>`;
       } else if (resource.stats.total === 0) {
         statsBadge = `<span class="stat-empty">${d.emptyFolder || "Empty"}</span>`;
@@ -306,19 +364,16 @@ const HomePage = (function () {
         statsBadge = `${count} ${label}`;
       }
 
-      // Build status indicator
-      const statusHtml = resource.stats.available
+      const statusHtml = (resource.stats && resource.stats.available)
         ? `<span class="status-live"><span class="dot"></span> ${d.updated || "Updated"}</span>`
         : `<span class="status-error"><span class="dot dot-error"></span> ${d.offline || "Offline"}</span>`;
 
       return resourceCard(resource.path, title, desc, statsBadge, resource.iconType, statusHtml);
     }).join('');
 
-    // Update last sync time in status bar
     updateLastSyncTime();
   }
 
-  // Card component template
   function resourceCard(href, title, desc, meta, iconType, statusHtml) {
     const iconSvg = getResourceIcon(iconType);
     return `
@@ -340,21 +395,21 @@ const HomePage = (function () {
     `;
   }
 
-  // Icon library for resource cards
   function getResourceIcon(iconType) {
     const icons = {
-      folder: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"/><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z" fill="#FFB800" opacity="0.18" stroke="none"/><rect x="6" y="10" width="10" height="1.6" rx="0.8" fill="currentColor" opacity="0.15"/></svg>`,
-      doc: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>`,
+      folder: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"/></svg>`,
+      doc: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
       box: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
       server: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>`,
       disc: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`,
-      book: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="12" y2="15"/></svg>`
+      book: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="12" y2="15"/></svg>`,
+      shield: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>`
     };
     return icons[iconType] || icons.folder;
   }
 
   /* ═══════════════════════════════════════════════
-     DATA LOADING — Async fetch via ResourceService
+     DATA FETCHING & SYNC
      ═══════════════════════════════════════════════ */
   async function loadResources(options = {}) {
     if (typeof ResourceService === 'undefined') {
@@ -363,13 +418,13 @@ const HomePage = (function () {
     }
 
     try {
-      const resources = await ResourceService.getResources(options);
-      renderResourceCards(resources);
+      rawResources = await ResourceService.getResources(options);
+      applyFiltersAndRender();
     } catch (err) {
       console.error("[Home] Failed to load resources:", err);
       const grid = document.getElementById("resourcesGrid");
       if (grid) {
-        const d = getDict();
+        const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
         grid.innerHTML = `
           <div class="resources-error">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -380,22 +435,23 @@ const HomePage = (function () {
     }
   }
 
-  // Update the "Last Sync" timestamp in the status bar
   function updateLastSyncTime() {
     const el = document.getElementById("lastSyncTime");
     if (!el) return;
     const now = new Date();
-    const lang = getLang();
+    const lang = typeof window.getLang === 'function' ? window.getLang() : getLang();
     const locale = lang === "fa" ? "fa-IR" : "en-US";
     el.textContent = now.toLocaleDateString(locale) + " " +
       now.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
   }
 
   /* ═══════════════════════════════════════════════
-     RELEASE ROW COMPONENT
+     UI COMPONENTS HELPERS
      ═══════════════════════════════════════════════ */
   function releaseRow(ver, isNew, type, date, size, checksum) {
-    const d = getDict();
+    const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
+
+    // Icon mapping for Release Table
     const typeIcons = {
       "System Package": `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`,
       "Template": `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
@@ -421,18 +477,8 @@ const HomePage = (function () {
     `;
   }
 
-  /* ═══════════════════════════════════════════════
-     QUICK ACCESS ITEM COMPONENT
-     ═══════════════════════════════════════════════ */
   function quickItem(title, sub, iconType) {
-    const icons = {
-      cube: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`,
-      disc: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>`,
-      shield: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>`,
-      doc: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`
-    };
-    const icon = icons[iconType] || icons.doc;
-
+    const icon = getResourceIcon(iconType);
     return `
       <div class="quick-item">
         <div class="quick-icon">${icon}</div>
@@ -446,12 +492,59 @@ const HomePage = (function () {
   }
 
   /* ═══════════════════════════════════════════════
-     EVENT BINDING
+     DOM BINDINGS
      ═══════════════════════════════════════════════ */
   function bindEvents() {
     bindSearchEvents();
     bindViewToggleEvents();
     bindRefreshEvent();
+    bindFilterEvents();
+  }
+
+  function bindFilterEvents() {
+    const filterWraps = document.querySelectorAll(".filter-dropdown-wrap");
+
+    filterWraps.forEach(wrap => {
+      const pill = wrap.querySelector(".filter-pill");
+      const valueSpan = pill.querySelector(".filter-value");
+      const options = wrap.querySelectorAll(".filter-option");
+
+      // 1. Open/Close custom dropdown
+      pill.addEventListener("click", (e) => {
+        e.stopPropagation();
+        // Close other open menus
+        filterWraps.forEach(w => { if (w !== wrap) w.classList.remove("show"); });
+        wrap.classList.toggle("show");
+      });
+
+      // 2. Handle option click
+      options.forEach(opt => {
+        opt.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const val = opt.getAttribute("data-val");
+          const text = opt.textContent;
+
+          // Update trigger button text
+          valueSpan.textContent = text;
+
+          // Update active styling
+          options.forEach(o => o.classList.remove("active"));
+          opt.classList.add("active");
+
+          // Save state & Apply
+          if (wrap.id === "catFilterWrap") activeCategory = val;
+          if (wrap.id === "sortFilterWrap") activeSort = val;
+
+          wrap.classList.remove("show");
+          applyFiltersAndRender();
+        });
+      });
+    });
+
+    // 3. Close on outside click
+    document.addEventListener("click", () => {
+      filterWraps.forEach(w => w.classList.remove("show"));
+    });
   }
 
   function bindSearchEvents() {
@@ -472,6 +565,7 @@ const HomePage = (function () {
 
     searchBtn.addEventListener("click", doSearch);
     stopBtn.addEventListener("click", () => { stopFlag = true; });
+
     qInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") { e.preventDefault(); doSearch(); }
       if (e.key === "Escape") clearResults();
@@ -484,6 +578,9 @@ const HomePage = (function () {
         qInput.focus();
       }
     };
+
+    // Remove previous listener to avoid duplicates if re-rendered
+    window.removeEventListener("keydown", window._homeKeyHandler);
     window.addEventListener("keydown", window._homeKeyHandler);
   }
 
@@ -503,8 +600,6 @@ const HomePage = (function () {
       grid.style.gridTemplateColumns = "";
       gridBtn.classList.add("active");
       listBtn.classList.remove("active");
-      if (window.innerWidth <= 1024) grid.style.gridTemplateColumns = "repeat(2, 1fr)";
-      if (window.innerWidth <= 640) grid.style.gridTemplateColumns = "1fr";
     });
   }
 
@@ -526,12 +621,8 @@ const HomePage = (function () {
   }
 
   /* ═══════════════════════════════════════════════
-     SEARCH ENGINE — Deep scan across all roots
+     SEARCH ENGINE
      ═══════════════════════════════════════════════ */
-  function isHidden(n) {
-    return (n || "").toLowerCase() === "index.html" || (n || "").startsWith(".");
-  }
-
   function clearResults() {
     const box = document.getElementById("resultsList");
     const panel = document.getElementById("resultsBox");
@@ -540,7 +631,7 @@ const HomePage = (function () {
   }
 
   function addResult(item) {
-    const d = getDict();
+    const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
     const list = document.getElementById("resultsList");
     if (!list) return;
 
@@ -560,7 +651,7 @@ const HomePage = (function () {
   }
 
   async function scanAll(query) {
-    const d = getDict();
+    const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
     stopFlag = false;
 
     const resultsBox = document.getElementById("resultsBox");
@@ -572,7 +663,6 @@ const HomePage = (function () {
 
     if (!resultsBox) return;
 
-    // Prepare UI state
     resultsList.innerHTML = "";
     resultsBox.style.display = "block";
     resultsBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -598,8 +688,9 @@ const HomePage = (function () {
         const entries = await res.json();
         for (const e of entries) {
           if (stopFlag) break;
+          // Ignore hidden or standard . / .. 
           if (!e || !e.name || e.name === "." || e.name === "..") continue;
-          if (isHidden(e.name)) continue;
+          if ((e.name || "").toLowerCase() === "index.html" || (e.name || "").startsWith(".")) continue;
 
           const type = e.type === "directory" ? "directory" : "file";
           const href = dir + e.name + (type === "directory" ? "/" : "");
@@ -617,7 +708,6 @@ const HomePage = (function () {
       progressEl.textContent = `${d.scannedDirs || 'Scanned'} ${scanned} · ${found} ${d.foundText || 'found'}`;
     }
 
-    // Finalize UI state
     progressEl.textContent = `${d.done || 'Done'} · ${found} ${d.foundText || 'found'}`;
     stopBtn.style.display = "none";
     searchBtn.disabled = false;

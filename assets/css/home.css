@@ -472,12 +472,18 @@ body.rtl .hero-visual {
     flex-wrap: wrap;
 }
 
-.select-pill {
+/* ── CUSTOM FILTER DROPDOWNS (Category & Sorting) ── */
+.filter-dropdown-wrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.filter-pill {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     height: 32px;
-    padding: 0 10px 0 12px;
+    padding: 0 12px;
     border-radius: 6px;
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -485,16 +491,92 @@ body.rtl .hero-visual {
     font-weight: 500;
     color: var(--text-3);
     box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: all var(--dur-1) ease;
 }
 
-.select-pill select {
+.filter-pill:hover,
+.filter-dropdown-wrap.show .filter-pill {
+    border-color: var(--border-hover);
+    background: var(--bg-hover);
+    color: var(--text);
+}
+
+.filter-pill svg {
+    color: var(--text-4);
+    transition: transform var(--dur-1) ease;
+}
+
+.filter-dropdown-wrap.show .filter-pill svg {
+    transform: rotate(180deg);
+}
+
+/* Dropdown Menu */
+.filter-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 100%;
+    padding: 4px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px) scale(0.98);
+    transition: all 0.15s ease;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    white-space: nowrap;
+}
+
+/* RTL Support */
+[dir="rtl"] .filter-dropdown-menu {
+    left: auto;
+    right: 0;
+}
+
+.filter-dropdown-wrap.show .filter-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+/* Dropdown Options */
+.filter-option {
+    padding: 8px 12px;
     border: none;
-    background: none;
-    font: inherit;
-    color: inherit;
-    outline: none;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--text-2);
+    font-size: 12px;
+    font-weight: 500;
+    text-align: left;
     cursor: pointer;
-    padding-right: 4px;
+    transition: background 0.12s ease;
+}
+
+[dir="rtl"] .filter-option {
+    text-align: right;
+}
+
+.filter-option:hover {
+    background: var(--bg-hover);
+    color: var(--text);
+}
+
+.filter-option.active {
+    font-weight: 700;
+    color: var(--text);
+    background: var(--bg-hover);
+}
+
+[data-theme="dark"] .filter-option.active {
+    background: rgba(255, 184, 0, 0.12);
+    color: #ffb800;
 }
 
 .view-toggle {

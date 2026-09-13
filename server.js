@@ -20,7 +20,7 @@ const { URL } = require("url");
 /* ── Config ── */
 const PORT = process.env.PORT || 3000;
 const ROOT = __dirname;
-const ARTIFICIAL_LATENCY_MS = 5600; // set to 400–800 to test skeleton loading
+const ARTIFICIAL_LATENCY_MS = 600; // set to 400–800 to test skeleton loading
 
 /* ── Colors for console ── */
 const c = {
@@ -74,7 +74,7 @@ const MIMES = {
 const MOCK_FS = {
     /* ── Root used by ResourceService: System Files ── */
     "/files/": [
-        { name: "kernel-modules", type: "directory", mtime: "2025-06-12T08:00:00Z" },
+        { name: "kernel-modules", type: "directory", mtime: "2027-06-12T08:00:00Z" },
         { name: "ca-certificates", type: "directory", mtime: "2025-06-10T09:30:00Z" },
         { name: "sysctl.conf", type: "file", size: 4200, mtime: "2025-05-01T12:00:00Z" },
         { name: "hosts.allow", type: "file", size: 890, mtime: "2025-04-20T10:00:00Z" },
