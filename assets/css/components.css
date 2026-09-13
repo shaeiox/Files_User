@@ -502,14 +502,16 @@ kbd {
     right: 0;
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    box-shadow: var(--shadow-md);
-    z-index: 60;
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+    z-index: 100;
+    /* High z-index to stay above everything */
     overflow: hidden;
     opacity: 0;
-    transform: translateY(-4px) scale(0.99);
+    transform: translateY(-6px) scale(0.98);
     pointer-events: none;
-    transition: all 160ms var(--ease);
+    transition: opacity 180ms ease, transform 180ms ease;
+    backdrop-filter: blur(12px);
 }
 
 .ac-dropdown.show {
@@ -522,20 +524,31 @@ kbd {
     list-style: none;
     margin: 0;
     padding: 6px;
-    max-height: 260px;
+    max-height: 280px;
     overflow-y: auto;
 }
 
+/* Custom Scrollbar for list */
+.ac-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+.ac-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+}
+
+/* ── AUTOCOMPLETE ITEM ── */
 .ac-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 10px 12px;
-    border-radius: 8px;
+    padding: 10px 14px;
+    border-radius: 10px;
     cursor: pointer;
-    border-left: 2px solid transparent;
-    transition: all 120ms ease;
+    border-left: 2.5px solid transparent;
+    transition: all 140ms ease;
 }
 
 .ac-item:hover,
@@ -547,40 +560,47 @@ kbd {
 .ac-item-left {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     min-width: 0;
     flex: 1;
 }
 
+/* ── ICONS (Light Theme Defaults) ── */
 .ac-icon {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
+    border-radius: 8px;
     flex-shrink: 0;
     border: 1px solid var(--border);
+    transition: all 0.2s ease;
 }
 
 .ac-icon-dir {
     background: #fef3c7;
     color: #d97706;
+    border-color: #fde68a;
 }
 
 .ac-icon-file {
     background: #f1f5f9;
     color: #64748b;
+    border-color: #e2e8f0;
 }
 
+/* ── ICONS (Dark Theme Overrides) ── */
 [data-theme="dark"] .ac-icon-dir {
-    background: rgba(255, 184, 0, 0.15);
-    color: #fbbf24;
+    background: rgba(255, 184, 0, 0.12);
+    color: #fcd34d;
+    border-color: rgba(255, 184, 0, 0.25);
 }
 
 [data-theme="dark"] .ac-icon-file {
-    background: rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.05);
     color: #94a3b8;
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .ac-info {
