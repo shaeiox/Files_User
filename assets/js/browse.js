@@ -62,7 +62,7 @@ const BrowsePage = (function () {
               <!-- Local Search -->
               <div class="input-wrap browse-search">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                <input id="localSearchInput" type="text" autocomplete="off" placeholder="${d.searchPh || 'Search folder...'}" aria-label="Search in folder" />
+                <input id="localSearchInput" type="text" autocomplete="off" placeholder="${d.searchFolderPh || 'Search folder...'}" aria-label="Search in folder" />
               </div>
 
               <!-- Type Filter Dropdown -->
