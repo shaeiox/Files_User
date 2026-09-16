@@ -1,96 +1,52 @@
 /* ═══════════════════════════════════════════════════════════════
-   resource-service.js — Enterprise Resource Data Layer
-   Skill: Clean Architecture — Caching, Parallel Fetching, Fallback
-   
-   Responsibilities:
-   - Fetch directory metadata from /__list/ API
-   - Cache results (in-memory + sessionStorage)
-   - Provide unified resource metadata (icons, keys, paths)
-   - Graceful degradation on API failure
+   resource-service.js — Resource data layer
+   Fetches categories, listings, search, and releases from the API.
    ═══════════════════════════════════════════════════════════════ */
 
 const ResourceService = (function () {
     'use strict';
 
-    /* ── Cache Configuration ── */
     const CACHE_KEY = "cav_resources_cache";
-    const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache lifetime
+    const CACHE_TTL = 5 * 60 * 1000;
     let memoryCache = null;
 
-    /* ── Resource Registry (Metadata Definition) ── */
-    // Central config for all infrastructure resources
-    // Each entry defines: path, icon type, i18n keys for title/description
-    const RESOURCE_REGISTRY = [
-        {
-            id: "system-files",
-            path: "/files/",
-            iconType: "folder",
-            titleKey: "sysFiles",
-            descKey: "sysFilesDesc",
-            defaultTitle: "System Files",
-            defaultDesc: "Public system files and essential packages for infrastructure."
-        },
-        {
-            id: "templates",
-            path: "/download/download-User/Template/",
-            iconType: "doc",
-            titleKey: "template",
-            descKey: "templateDesc",
-            defaultTitle: "Templates",
-            defaultDesc: "Common templates and configuration files for deployment."
-        },
-        {
-            id: "sandbox",
-            path: "/download/download-User/Sandbox/",
-            iconType: "box",
-            titleKey: "sandbox",
-            descKey: "sandboxDesc",
-            defaultTitle: "Sandbox",
-            defaultDesc: "Isolated environment packages and test files."
-        },
-        {
-            id: "log-server",
-            path: "/download/download-User/LogDB/",
-            iconType: "server",
-            titleKey: "logServer",
-            descKey: "logServerDesc",
-            defaultTitle: "Log Server",
-            defaultDesc: "Database exports and system logs for troubleshooting."
-        },
-        {
-            id: "iso-images",
-            path: "/download/download-User/ISO/",
-            iconType: "disc",
-            titleKey: "iso",
-            descKey: "isoDesc",
-            defaultTitle: "ISO Images",
-            defaultDesc: "Operating systems and installation images."
-        },
-        {
-            id: "documentation",
-            path: "/download/download-Avid/",
-            iconType: "book",
-            titleKey: "docsTitle",
-            descKey: "docsDesc",
-            defaultTitle: "Documentation",
-            defaultDesc: "Guides, manuals and technical documentation."
-        }
-    ];
+    function encodeRelPath(relPath) {
+        return String(relPath || "")
+            .replace(/\\/g, "/")
+            .split("/")
+            .filter(Boolean)
+            .map(encodeURIComponent)
+            .join("/");
+    }
 
-    /* ── Utility: Check hidden files ── */
+    function browseHref(relPath) {
+        const encoded = encodeRelPath(relPath);
+        return encoded ? "/browse/" + encoded + "/" : "/browse/";
+    }
+
+    function downloadHref(relPath) {
+        return "/api/download/" + encodeRelPath(relPath);
+    }
+
+    function inferIcon(name) {
+        const n = String(name || "").toLowerCase();
+        if (/(iso|image|disc|dvd|cd)/.test(n)) return "disc";
+        if (/(log|db|server)/.test(n)) return "server";
+        if (/(doc|guide|manual|template|readme)/.test(n)) return "doc";
+        if (/(sandbox|test|lab)/.test(n)) return "box";
+        if (/(system|sys|kernel|package)/.test(n)) return "folder";
+        return "folder";
+    }
+
     function isHidden(name) {
         const l = (name || "").toLowerCase();
         return l === "index.html" || l === "index.php" || l.startsWith(".");
     }
 
-    /* ── Cache Layer ── */
     function getCachedData() {
-        // Try memory first (fastest)
         if (memoryCache && (Date.now() - memoryCache.timestamp) < CACHE_TTL) {
             return memoryCache.data;
         }
-
-        // Try sessionStorage (survives page navigation)
         try {
             const raw = sessionStorage.getItem(CACHE_KEY);
             if (raw) {
@@ -101,7 +57,6 @@ const ResourceService = (function () {
                 }
             }
         } catch { }
-
         return null;
     }
 
@@ -120,83 +75,109 @@ const ResourceService = (function () {
         } catch { }
     }
 
-    /* ── Fetch a single directory & compute stats ── */
-    async function fetchDirectoryStats(path) {
-        try {
-            const res = await fetch("/__list" + path, { cache: "no-store" });
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-            const entries = await res.json();
-            if (!Array.isArray(entries)) throw new Error("Invalid JSON");
-
-            const visible = entries.filter(e =>
-                e && e.name && e.name !== "." && e.name !== ".." && !isHidden(e.name)
-            );
-
-            const files = visible.filter(e => e.type !== "directory").length;
-            const folders = visible.filter(e => e.type === "directory").length;
-            const total = visible.length;
-
-            // Find latest modified item
-            let latestModified = null;
-            visible.forEach(e => {
-                const mtime = e.mtime || e.modified || e.time;
-                if (mtime) {
-                    const t = new Date(mtime).getTime();
-                    if (!latestModified || t > latestModified) latestModified = t;
-                }
-            });
-
-            return {
+    function mapCategory(cat) {
+        const name = cat.name || cat.path;
+        const latest = cat.latestModified || cat.mtime || null;
+        const latestMs = latest ? new Date(latest).getTime() : null;
+        const files = Number(cat.fileCount || 0);
+        const folders = Number(cat.folderCount || 0);
+        return {
+            id: cat.path || name,
+            name,
+            path: browseHref(cat.path || name),
+            relPath: cat.path || name,
+            iconType: inferIcon(name),
+            stats: {
                 available: true,
-                total,
+                total: files + folders,
                 files,
                 folders,
-                latestModified,
+                latestModified: Number.isFinite(latestMs) ? latestMs : null,
                 error: null
-            };
-        } catch (err) {
-            return {
-                available: false,
-                total: 0,
-                files: 0,
-                folders: 0,
-                latestModified: null,
-                error: err.message
-            };
-        }
+            }
+        };
     }
 
-    /* ── Main API: fetch all resources in parallel ── */
+    async function parseError(res) {
+        try {
+            const body = await res.json();
+            if (body && body.error) return body.error;
+        } catch { }
+        return "HTTP " + res.status;
+    }
+
     async function getResources(options = {}) {
         const { forceRefresh = false } = options;
-
-        // Return cached data if available
         if (!forceRefresh) {
             const cached = getCachedData();
             if (cached) return cached;
         }
 
-        // Fetch all resources in parallel
-        const promises = RESOURCE_REGISTRY.map(async (resource) => {
-            const stats = await fetchDirectoryStats(resource.path);
-            return { ...resource, stats };
-        });
+        const res = await fetch("/api/categories", { cache: "no-store" });
+        if (!res.ok) {
+            throw new Error(await parseError(res));
+        }
+        const payload = await res.json();
+        if (!Array.isArray(payload)) {
+            throw new Error(payload && payload.error ? payload.error : "Invalid categories response");
+        }
 
-        const resources = await Promise.all(promises);
+        const resources = payload
+            .filter((c) => c && c.name && c.type !== "file")
+            .map(mapCategory);
+
         setCachedData(resources);
         return resources;
     }
 
-    /* ── Get raw registry (for skeleton rendering) ── */
     function getRegistry() {
-        return RESOURCE_REGISTRY.map(r => ({ ...r, stats: null }));
+        const cached = getCachedData();
+        if (cached && cached.length) {
+            return cached.map((r) => ({ ...r, stats: null }));
+        }
+        return Array.from({ length: 6 }, (_, i) => ({
+            id: "placeholder-" + i,
+            name: "",
+            path: "/",
+            iconType: "folder",
+            stats: null
+        }));
     }
 
-    /* ── Public API ── */
+    async function listFiles(relPath) {
+        const res = await fetch("/api/files/" + encodeRelPath(relPath), { cache: "no-store" });
+        if (!res.ok) throw new Error(await parseError(res));
+        const data = await res.json();
+        if (!Array.isArray(data)) throw new Error("Invalid file list");
+        return data.filter((e) => e && e.name && !isHidden(e.name));
+    }
+
+    async function search(query, options = {}) {
+        const params = new URLSearchParams();
+        params.set("q", query || "");
+        if (options.limit) params.set("limit", String(options.limit));
+        const res = await fetch("/api/search?" + params.toString(), { cache: "no-store" });
+        if (!res.ok) throw new Error(await parseError(res));
+        return res.json();
+    }
+
+    async function getReleases(limit = 8) {
+        const res = await fetch("/api/releases?limit=" + encodeURIComponent(limit), { cache: "no-store" });
+        if (!res.ok) throw new Error(await parseError(res));
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
+    }
+
     return {
         getResources,
         getRegistry,
-        clearCache
+        clearCache,
+        listFiles,
+        search,
+        getReleases,
+        browseHref,
+        downloadHref,
+        encodeRelPath,
+        inferIcon
     };
 })();

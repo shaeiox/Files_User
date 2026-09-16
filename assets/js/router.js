@@ -6,14 +6,14 @@ const Router = (function () {
     'use strict';
 
     const app = document.getElementById("app");
-    const fileExtensions = /\.(html|backhtml|zip|tar|gz|iso|qcow2|vmdk|pdf|txt|log|sql|docx|xlsx|pptx|png|jpg|exec|sh)$/i;
+    const fileExtensions = /\.(html|backhtml|zip|tar|gz|iso|qcow2|vmdk|pdf|txt|log|sql|docx|xlsx|pptx|png|jpg|exec|sh|yml|yaml|md|json|csv)$/i;
 
     // Internal State
     let currentPath = window.location.pathname;
 
     function resolveRoute(path) {
         if (path === "/" || path === "/index.html") return "home";
-        if (path.startsWith("/download/") || path.startsWith("/files/")) return "browse";
+        if (path === "/browse" || path.startsWith("/browse/")) return "browse";
         return null;
     }
 

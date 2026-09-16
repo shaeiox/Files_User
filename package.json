@@ -1,0 +1,12 @@
+{
+  "name": "cloudavid-file-portal",
+  "private": true,
+  "description": "CloudAvid File Portal — filesystem-driven download portal",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  }
+}

@@ -1193,6 +1193,7 @@ body.rtl .hero-visual {
     transition: all 120ms ease;
     white-space: nowrap;
     cursor: pointer;
+    text-decoration: none;
 }
 
 .download-btn:hover {
@@ -1264,6 +1265,8 @@ body.rtl .hero-visual {
     border-bottom: 1px solid var(--border);
     transition: background 120ms ease;
     cursor: pointer;
+    text-decoration: none;
+    color: inherit;
 }
 
 .quick-item:last-child {

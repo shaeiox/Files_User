@@ -1,61 +1,24 @@
 /* ═══════════════════════════════════════════════
-   autocomplete.js — Smart Search Autocomplete Engine
-   (With i18n / Multi-Language Support)
+   autocomplete.js — Search suggestions from /api/search
    ═══════════════════════════════════════════════ */
 
 const Autocomplete = (function () {
     'use strict';
 
-    const rootsToPreCache = [
-        "/download/download-User/",
-        "/download/download-Avid/",
-        "/files/",
-        "/download/download-User/Template/",
-        "/download/download-User/ISO/",
-        "/download/download-User/Sandbox/",
-        "/download/download-User/LogDB/",
-        "/download/download-User/imageClone/",
-        "/download/download-User/Documents/",
-        "/download/download-User/files/"
-    ];
-
-    let cache = []; // Cached file/folder index
     let activeIndex = -1;
     let matches = [];
     let dropdownEl = null;
     let inputEl = null;
     let debounceTimer = null;
+    let requestSeq = 0;
 
-    // Fetch directory list silently
-    async function fetchDir(path) {
-        try {
-            const res = await fetch("/__list" + path, { cache: "force-cache" });
-            if (!res.ok) return [];
-            const data = await res.json();
-            if (!Array.isArray(data)) return [];
-
-            return data
-                .filter(x => x && x.name && x.name !== "." && x.name !== "..")
-                .map(x => ({
-                    name: String(x.name),
-                    type: x.type === "directory" ? "directory" : "file",
-                    href: path + x.name + (x.type === "directory" ? "/" : "")
-                }));
-        } catch {
-            return [];
+    function itemHref(item) {
+        if (typeof ResourceService !== "undefined") {
+            return item.type === "directory"
+                ? ResourceService.browseHref(item.path)
+                : ResourceService.downloadHref(item.path);
         }
-    }
-
-    // Pre-load top-level directories into cache on boot
-    async function initCache() {
-        for (const root of rootsToPreCache) {
-            const items = await fetchDir(root);
-            items.forEach(item => {
-                if (!cache.some(c => c.href === item.href)) {
-                    cache.push(item);
-                }
-            });
-        }
+        return item.path || "#";
     }
 
     function escapeRegExp(str) {
@@ -65,12 +28,11 @@ const Autocomplete = (function () {
     function highlightMatch(text, query) {
         if (!query) return text;
         const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
-        return text.replace(regex, '<span class="ac-highlight">$1</span>');
+        return String(text).replace(regex, '<span class="ac-highlight">$1</span>');
     }
 
     function renderDropdown(query) {
-        const d = getDict(); // 🌍 گرفتن دیکشنری برای ترجمه کلمات منو
-
+        const d = typeof getDict === "function" ? getDict() : {};
         if (!dropdownEl) return;
 
         if (!matches.length) {
@@ -80,19 +42,20 @@ const Autocomplete = (function () {
 
         const listHtml = matches.map((item, index) => {
             const isActive = index === activeIndex ? 'active' : '';
+            const href = itemHref(item);
             const iconSvg = item.type === 'directory'
                 ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"/></svg>`
                 : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>`;
 
             return `
-        <li class="ac-item ${isActive}" data-index="${index}" data-href="${item.href}">
+        <li class="ac-item ${isActive}" data-index="${index}" data-href="${href}" data-type="${item.type}">
           <div class="ac-item-left">
             <div class="ac-icon ${item.type === 'directory' ? 'ac-icon-dir' : 'ac-icon-file'}">
               ${iconSvg}
             </div>
             <div class="ac-info">
               <span class="ac-name">${highlightMatch(item.name, query)}</span>
-              <span class="ac-path">${item.href}</span>
+              <span class="ac-path">${item.path || ""}</span>
             </div>
           </div>
           <span class="badge ${item.type === 'directory' ? 'badge-dir' : 'badge-file'}">
@@ -112,12 +75,10 @@ const Autocomplete = (function () {
         dropdownEl.innerHTML = `<ul class="ac-list">${listHtml}</ul>${footerHtml}`;
         dropdownEl.classList.add('show');
 
-        // Attach click events to items
         dropdownEl.querySelectorAll('.ac-item').forEach(el => {
             el.addEventListener('click', (e) => {
                 e.preventDefault();
-                const href = el.getAttribute('data-href');
-                selectItem(href);
+                selectItem(el.getAttribute('data-href'), el.getAttribute('data-type'));
             });
             el.addEventListener('mouseenter', () => {
                 activeIndex = parseInt(el.getAttribute('data-index'), 10);
@@ -139,9 +100,13 @@ const Autocomplete = (function () {
         });
     }
 
-    function selectItem(href) {
+    function selectItem(href, type) {
         hide();
         if (inputEl) inputEl.value = '';
+        if (type === "file") {
+            window.location.href = href;
+            return;
+        }
         if (typeof Router !== 'undefined') {
             Router.navigate(href);
         } else {
@@ -149,21 +114,27 @@ const Autocomplete = (function () {
         }
     }
 
-    function search(query) {
-        const q = query.trim().toLowerCase();
-        if (!q || q.length < 1) {
+    async function search(query) {
+        const q = query.trim();
+        if (!q) {
             matches = [];
             hide();
             return;
         }
+        if (typeof ResourceService === "undefined") return;
 
-        // Filter cache for top 6 matching items
-        matches = cache
-            .filter(item => item.name.toLowerCase().includes(q))
-            .slice(0, 3);
-
-        activeIndex = -1;
-        renderDropdown(q);
+        const seq = ++requestSeq;
+        try {
+            const data = await ResourceService.search(q, { limit: 6 });
+            if (seq !== requestSeq) return;
+            matches = (data.results || []).slice(0, 6);
+            activeIndex = -1;
+            renderDropdown(q);
+        } catch {
+            if (seq !== requestSeq) return;
+            matches = [];
+            hide();
+        }
     }
 
     function hide() {
@@ -176,7 +147,6 @@ const Autocomplete = (function () {
         const wrap = input.closest('.input-wrap');
         if (!wrap) return;
 
-        // Create dropdown container if not exists
         dropdownEl = wrap.querySelector('.ac-dropdown');
         if (!dropdownEl) {
             dropdownEl = document.createElement('div');
@@ -184,7 +154,6 @@ const Autocomplete = (function () {
             wrap.appendChild(dropdownEl);
         }
 
-        // Typing listener with 150ms debounce
         input.addEventListener('input', (e) => {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
@@ -192,7 +161,6 @@ const Autocomplete = (function () {
             }, 150);
         });
 
-        // Keyboard navigation (ArrowUp, ArrowDown, Enter, Escape)
         input.addEventListener('keydown', (e) => {
             if (!dropdownEl.classList.contains('show')) return;
 
@@ -208,33 +176,25 @@ const Autocomplete = (function () {
                 if (activeIndex >= 0 && matches[activeIndex]) {
                     e.preventDefault();
                     e.stopPropagation();
-                    selectItem(matches[activeIndex].href);
+                    const item = matches[activeIndex];
+                    selectItem(itemHref(item), item.type);
                 }
             } else if (e.key === 'Escape') {
                 hide();
             }
         });
 
-        // Close on click outside
         document.addEventListener('click', (e) => {
             if (!wrap.contains(e.target)) {
                 hide();
             }
         });
 
-        // Re-open on focus if query exists
         input.addEventListener('focus', () => {
             if (input.value.trim()) {
                 search(input.value);
             }
         });
-    }
-
-    // Pre-fetch cache on page load
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initCache);
-    } else {
-        initCache();
     }
 
     return {

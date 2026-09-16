@@ -93,7 +93,10 @@ const i18n = {
         modified: "Modified",
         size: "Size",
         loadErrTitle: "Failed to load",
-        loadErrHint: "Check /__list/ endpoint.",
+        loadErrHint: "Check the file API and FILES_ROOT configuration.",
+        resourcesLoadError: "Unable to load resources. Check FILES_ROOT and try again.",
+        noReleases: "No files found yet.",
+        categoryDesc: "Browse and download files in this category.",
 
         perfLabel: "Performance",
         perfAuto: "Auto Detect",
@@ -200,7 +203,10 @@ const i18n = {
         modified: "آخرین تغییر",
         size: "حجم",
         loadErrTitle: "بارگذاری ناموفق",
-        loadErrHint: "مسیر /__list/ را بررسی کنید.",
+        loadErrHint: "رابط فایل و مقدار FILES_ROOT را بررسی کنید.",
+        resourcesLoadError: "بارگذاری منابع ممکن نشد. FILES_ROOT را بررسی کنید.",
+        noReleases: "هنوز فایلی پیدا نشد.",
+        categoryDesc: "مرور و دانلود فایل‌های این دسته.",
 
         perfLabel: "عملکرد سیستم",
         perfAuto: "تشخیص خودکار",

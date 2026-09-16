@@ -28,6 +28,9 @@ const BrowsePage = (function () {
 
         // Reset state for new path
         currentPath = path.endsWith("/") ? path : path + "/";
+        if (!currentPath.startsWith("/browse")) {
+            currentPath = "/browse/";
+        }
         activeType = "all";
         activeSort = "name-asc";
         searchQuery = "";
@@ -133,9 +136,8 @@ const BrowsePage = (function () {
     async function fetchList() {
         const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
         try {
-            const res = await fetch("/__list" + currentPath, { cache: "no-store" });
-            if (!res.ok) throw new Error("HTTP " + res.status);
-            const data = await res.json();
+            const relPath = currentPath.replace(/^\/browse\/?/, "");
+            const data = await ResourceService.listFiles(relPath);
             if (!Array.isArray(data)) throw new Error("Bad JSON");
 
             allFiles = data
@@ -143,6 +145,7 @@ const BrowsePage = (function () {
                 .filter(x => !isHidden(x.name))
                 .map(x => ({
                     name: String(x.name),
+                    relPath: x.path || (relPath ? relPath.replace(/\/+$/, "") + "/" + x.name : x.name),
                     type: x.type === "directory" ? "directory" : "file",
                     size: Number(x.size || 0),
                     modified: x.mtime || x.modified || x.time || 0
@@ -227,7 +230,9 @@ const BrowsePage = (function () {
         const frag = document.createDocumentFragment();
 
         files.forEach((f, idx) => {
-            const href = currentPath + f.name + (f.type === "directory" ? "/" : "");
+            const href = f.type === "directory"
+                ? ResourceService.browseHref(f.relPath)
+                : ResourceService.downloadHref(f.relPath);
             const row = document.createElement("div");
             row.className = "trow anim-fade-up";
             row.style.animationDelay = Math.min(idx * 15, 300) + "ms";
@@ -344,11 +349,11 @@ const BrowsePage = (function () {
         home.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>${d.root || "Home"}</span>`;
         el.appendChild(home);
 
-        const parts = currentPath.split("/").filter(Boolean);
+        const parts = currentPath.replace(/^\/browse\/?/, "").split("/").filter(Boolean);
         let acc = "";
 
         parts.forEach((part, i) => {
-            acc += "/" + part;
+            acc = acc ? acc + "/" + part : part;
             const sep = document.createElement("span");
             sep.className = "crumb-sep";
             sep.innerHTML = d.dir === "rtl"
@@ -361,16 +366,16 @@ const BrowsePage = (function () {
                 cur.className = "crumb crumb-active";
                 cur.textContent = decodeURIComponent(part);
                 el.appendChild(cur);
-                const fn = document.getElementById("folderName");
-                if (fn) fn.textContent = decodeURIComponent(part);
             } else {
                 const link = document.createElement("a");
-                link.href = acc + "/";
+                link.href = ResourceService.browseHref(acc);
                 link.className = "crumb";
                 link.textContent = decodeURIComponent(part);
                 el.appendChild(link);
             }
         });
+        const fn = document.getElementById("folderName");
+        if (fn) fn.textContent = parts.length ? decodeURIComponent(parts[parts.length - 1]) : (d.root || "Home");
     }
 
     function isHidden(n) {
