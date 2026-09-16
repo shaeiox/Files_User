@@ -11,7 +11,7 @@
    ✓ Optional artificial latency (for skeleton testing)
    ✓ Colored structured logging
    ═══════════════════════════════════════════════════════════════ */
-
+const HOST = "0.0.0.0";
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
@@ -386,7 +386,7 @@ const server = http.createServer(async (req, res) => {
 /* ═══════════════════════════════════════════════
    BOOT
    ═══════════════════════════════════════════════ */
-server.listen(PORT, () => {
+server.listen(PORT, HOST, () => {
     console.log(`
 ${c.cyan}${c.bold}
   ╔══════════════════════════════════════════════════╗
