@@ -1,9 +1,11 @@
 /* ═══════════════════════════════════════════════════════════════
-   components.css — shadcn-style primitives
-   Nav, Button, Input, Badge, Select, Card, Table
+   components.css — Huly primitives
+   Pill nav, pill buttons, pill inputs, chips, dropdowns, status bar
    ═══════════════════════════════════════════════════════════════ */
 
-/* ── Top Navigation — white pill, tabs centered ── */
+/* ─────────────────────────────────────────────
+   TOP NAVIGATION — floating pill bar
+   ───────────────────────────────────────────── */
 .nav {
     position: sticky;
     top: 12px;
@@ -17,13 +19,13 @@
     justify-content: space-between;
     gap: 16px;
     height: 56px;
-    padding: 0 16px 0 14px;
-    border-radius: 9px;
-    background: var(--bg-card);
+    padding: 0 10px 0 16px;
+    border-radius: var(--radius-buttons);
+    background: var(--nav-bg);
     border: 1px solid var(--border);
-    box-shadow: var(--shadow-sm);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
 }
 
 .nav-logo {
@@ -34,9 +36,9 @@
 }
 
 .nav-logo img {
-    width: 36px;
-    height: 36px;
-    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
     object-fit: contain;
 }
 
@@ -44,25 +46,25 @@
     display: flex;
     flex-direction: column;
     line-height: 1;
-    gap: 2px;
+    gap: 3px;
 }
 
 .nav-logo-text strong {
     font-size: 14px;
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: -0.02em;
     color: var(--text);
 }
 
 .nav-logo-text span {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--text-4);
 }
 
-/* — Center tabs (Website / Docs / Downloads) — */
+/* — Center tabs — */
 .nav-tabs {
     display: flex;
     align-items: center;
@@ -76,19 +78,19 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    height: 36px;
+    height: 34px;
     padding: 0 14px;
-    border-radius: 6px;
+    border-radius: var(--radius-buttons);
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--text-3);
-    border: 1px solid transparent;
+    border: none;
     transition: all var(--dur-1) ease;
     position: relative;
 }
 
 .nav-tab svg {
-    opacity: 0.7;
+    opacity: 0.75;
 }
 
 .nav-tab:hover {
@@ -97,41 +99,35 @@
 }
 
 .nav-tab.active {
-    color: var(--text);
-    font-weight: 700;
+    color: var(--text-accent);
+    font-weight: 600;
+    background: var(--glow-strong);
 }
 
-.nav-tab.active::after {
-    content: "";
-    position: absolute;
-    left: 12px;
-    right: 12px;
-    bottom: -9px;
-    height: 2.5px;
-    background: var(--a-5);
-    border-radius: 999px;
-}
-
+/* — Right actions — */
 .nav-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-shrink: 0;
 }
 
-/* ── Buttons (shadcn) ── */
+/* ─────────────────────────────────────────────
+   BUTTONS — pill-first
+   ───────────────────────────────────────────── */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
     height: 36px;
-    padding: 0 16px;
-    border-radius: 6px;
+    padding: 0 18px;
+    border-radius: var(--radius-buttons);
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
+    letter-spacing: -0.01em;
     border: 1px solid var(--border);
-    background: var(--bg-card);
+    background: transparent;
     color: var(--text-2);
     white-space: nowrap;
     transition: all var(--dur-1) ease;
@@ -139,7 +135,7 @@
 }
 
 .btn:hover {
-    background: var(--bg-hover);
+    background: var(--bg-card);
     border-color: var(--border-hover);
     color: var(--text);
 }
@@ -159,31 +155,31 @@
     outline-offset: 2px;
 }
 
+/* Primary Pill — the single iris action per screen */
 .btn-primary {
-    background: var(--a-5);
-    border-color: #e6a600;
-    color: #111;
-    font-weight: 700;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    background: var(--color-electric-iris);
+    border-color: transparent;
+    color: #ffffff;
+    font-weight: 500;
+    box-shadow: 0 1px 2px rgba(9, 10, 12, 0.2);
 }
 
 .btn-primary:hover {
-    background: #ffb31a;
-    border-color: #d99000;
-    color: #000;
+    background: #4a78cf;
+    border-color: transparent;
+    color: #ffffff;
+    box-shadow: 0 0 0 4px var(--glow), 0 2px 12px rgba(86, 131, 218, 0.35);
 }
 
 .btn-sm {
     height: 32px;
-    padding: 0 12px;
-    font-size: 12.5px;
-    border-radius: 6px;
+    padding: 0 14px;
+    font-size: 12px;
 }
 
 .btn-icon {
     width: 36px;
     padding: 0;
-    border-radius: 6px;
 }
 
 .btn-icon.btn-sm {
@@ -191,7 +187,9 @@
     height: 32px;
 }
 
-/* — Theme btn— */
+/* ─────────────────────────────────────────────
+   THEME TOGGLE — circular ghost
+   ───────────────────────────────────────────── */
 .theme-btn {
     width: 36px;
     min-width: 36px;
@@ -199,9 +197,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
+    border-radius: var(--radius-buttons);
     border: 1px solid var(--border);
-    background: var(--bg-card);
+    background: transparent;
     color: var(--text-3);
     position: relative;
     overflow: hidden;
@@ -209,7 +207,7 @@
 }
 
 .theme-btn:hover {
-    background: var(--bg-hover);
+    background: var(--bg-card);
     color: var(--text);
     border-color: var(--border-hover);
 }
@@ -239,7 +237,9 @@
     transform: rotate(90deg) scale(0.6);
 }
 
-/* — Language pill — */
+/* ─────────────────────────────────────────────
+   LANGUAGE PILL + DROPDOWN
+   ───────────────────────────────────────────── */
 .lang-pill {
     height: 36px;
     min-height: 36px;
@@ -247,15 +247,16 @@
     align-items: center;
     justify-content: center;
     gap: 7px;
-    padding: 0 11px;
-    border-radius: 6px;
+    padding: 0 12px;
+    border-radius: var(--radius-buttons);
     border: 1px solid var(--border);
-    background: var(--bg-card);
+    background: transparent;
     color: var(--text-3);
     font: inherit;
+    font-size: 13px;
+    font-weight: 500;
     line-height: 1;
     cursor: default;
-    /* Trigger is hover-only, not a language toggle */
     white-space: nowrap;
     transition: border-color var(--dur-1) ease, background var(--dur-1) ease;
 }
@@ -265,13 +266,11 @@
     flex-shrink: 0;
 }
 
-/* ── Optional visual feedback on hover ── */
 .lang-dropdown-wrap:hover .lang-pill {
     border-color: var(--border-hover);
-    background: var(--bg-hover);
+    background: var(--bg-card);
 }
 
-/* ── Language Dropdown ── */
 .lang-dropdown-wrap {
     position: relative;
     display: inline-flex;
@@ -279,17 +278,16 @@
     height: 36px;
 }
 
-/* Menu */
 .lang-dropdown-menu {
     position: absolute;
-    top: calc(100% + 6px);
+    top: calc(100% + 8px);
     right: 0;
-    min-width: 132px;
+    min-width: 148px;
     padding: 4px;
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    border-radius: 12px;
+    box-shadow: var(--shadow-xl);
     opacity: 0;
     visibility: hidden;
     transform: translateY(-4px) scale(0.98);
@@ -297,7 +295,7 @@
     z-index: 200;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 2px;
 }
 
 .lang-dropdown-wrap:hover .lang-dropdown-menu {
@@ -306,23 +304,21 @@
     transform: translateY(0) scale(1);
 }
 
-/* RTL */
 [dir="rtl"] .lang-dropdown-menu {
     right: auto;
     left: 0;
 }
 
-/* Options */
 .lang-option {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 7px 10px;
+    padding: 8px 12px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     background: transparent;
-    color: var(--text-main);
+    color: var(--text-2);
     font-size: 13px;
     font-weight: 500;
     font-family: inherit;
@@ -331,50 +327,48 @@
 }
 
 .lang-option span {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
-    color: var(--text-muted);
-    opacity: 0.7;
+    color: var(--text-4);
 }
 
 .lang-option:hover {
     background: var(--bg-hover);
+    color: var(--text);
 }
 
-/* Active language */
+.lang-option.active,
 :root .lang-option.active,
 [data-theme="light"] .lang-option.active {
-    background: #fef3c7;
-    color: #b45309;
+    background: var(--glow);
+    color: var(--text-accent);
     font-weight: 600;
-}
-
-
-[data-theme="light"] .lang-option.active span {
-    color: #d97706;
-    opacity: 1;
 }
 
 [data-theme="dark"] .lang-option.active {
-    background: rgba(255, 184, 0, 0.14);
-    color: #ffb800;
-    font-weight: 600;
+    background: rgba(86, 131, 218, 0.16);
+    color: #a9c3ee;
+}
+
+[data-theme="light"] .lang-option.active span {
+    color: #3d6bc7;
 }
 
 [data-theme="dark"] .lang-option.active span {
-    color: #ffb800;
-    opacity: 0.9;
+    color: #a9c3ee;
 }
 
-/* ── Inputs ── */
+/* ─────────────────────────────────────────────
+   INPUTS — pill search field
+   ───────────────────────────────────────────── */
 .input-wrap {
     position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
-    height: 42px;
-    padding: 0 8px 0 12px;
-    border-radius: 8px;
+    height: 40px;
+    padding: 0 12px 0 16px;
+    border-radius: var(--radius-inputs);
     background: var(--input-bg);
     border: 1px solid var(--border);
     transition: border-color var(--dur-1) ease, box-shadow var(--dur-1) ease;
@@ -382,7 +376,7 @@
 
 .input-wrap:focus-within {
     border-color: var(--border-focus);
-    box-shadow: 0 0 0 3px rgba(255, 184, 0, 0.18);
+    box-shadow: 0 0 0 4px var(--glow);
 }
 
 .input-wrap svg {
@@ -398,8 +392,15 @@
     outline: none;
     background: none;
     color: var(--text);
-    font-family: var(--font);
+    font-family: inherit;
     font-size: 13.5px;
+    letter-spacing: -0.01em;
+}
+
+[dir="rtl"] .input-wrap input,
+html[lang="fa"] .input-wrap input,
+body.rtl .input-wrap input {
+    letter-spacing: 0;
 }
 
 .input-wrap input::placeholder {
@@ -419,7 +420,7 @@ kbd {
     min-width: 20px;
     height: 20px;
     padding: 0 5px;
-    border-radius: 5px;
+    border-radius: 6px;
     font-family: var(--mono);
     font-size: 10px;
     font-weight: 600;
@@ -428,68 +429,77 @@ kbd {
     border: 1px solid var(--border);
 }
 
-/* ── Badges ── */
+/* ─────────────────────────────────────────────
+   CHIPS / BADGES — category pills
+   ───────────────────────────────────────────── */
 .badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     height: 20px;
-    padding: 0 7px;
-    border-radius: 5px;
+    padding: 0 9px;
+    border-radius: var(--radius-tags);
     font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
+    font-weight: 600;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
 }
 
+/* Iris chip — folders / new releases / primary category */
 .badge-new {
-    background: #fef3c7;
-    color: #92400e;
-    border: 1px solid #fde68a;
+    background: rgba(86, 131, 218, 0.14);
+    color: #3d6bc7;
+    border: 1px solid rgba(86, 131, 218, 0.35);
 }
 
 .badge-dir {
-    background: #fef3c7;
-    color: #92400e;
-    border: 1px solid #fde68a;
+    background: rgba(86, 131, 218, 0.14);
+    color: #3d6bc7;
+    border: 1px solid rgba(86, 131, 218, 0.35);
 }
 
+/* Neutral chip — files */
 .badge-file {
-    background: #f1f5f9;
-    color: #475569;
-    border: 1px solid #e2e8f0;
+    background: var(--n-4);
+    color: var(--text-3);
+    border: 1px solid var(--border);
 }
 
-[data-theme="dark"] .badge-new {
-    background: rgba(255, 184, 0, 0.18);
-    color: #fcd34d;
-    border-color: rgba(255, 184, 0, 0.3);
+[data-theme="dark"] .badge-new,
+[data-theme="dark"] .badge-dir {
+    background: rgba(86, 131, 218, 0.16);
+    color: #a9c3ee;
+    border-color: rgba(86, 131, 218, 0.35);
 }
 
 [data-theme="dark"] .badge-file {
-    background: rgba(255, 255, 255, 0.08);
-    color: #94a3b8;
-    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+    color: #95979e;
+    border-color: #4a4b50;
 }
 
-/* ── Card primitive ── */
+/* ─────────────────────────────────────────────
+   CARD PRIMITIVE
+   ───────────────────────────────────────────── */
 .card {
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 9px;
+    border-radius: var(--radius-cards);
     box-shadow: var(--shadow-card);
 }
 
-/* ── Footer — status bar style ── */
+/* ─────────────────────────────────────────────
+   FOOTER
+   ───────────────────────────────────────────── */
 .footer {
     margin-top: 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 16px;
-    background: var(--bg-card);
+    padding: 14px 20px;
+    background: transparent;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-cards);
     font-size: 11px;
     color: var(--text-4);
     gap: 12px;
@@ -498,19 +508,22 @@ kbd {
 
 .footer a {
     color: var(--text-3);
+    transition: color var(--dur-1) ease;
 }
 
 .footer a:hover {
-    color: var(--text);
+    color: var(--text-accent);
 }
 
-/* — Status bar (bottom 4-col) — */
+/* ─────────────────────────────────────────────
+   STATUS BAR — 4-up trust strip
+   ───────────────────────────────────────────── */
 .status-bar {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-cards);
     overflow: hidden;
     box-shadow: var(--shadow-card);
 }
@@ -519,7 +532,7 @@ kbd {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 16px;
+    padding: 14px 18px;
     position: relative;
 }
 
@@ -528,12 +541,12 @@ kbd {
 }
 
 .status-item-icon {
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
+    border-radius: 8px;
     background: var(--n-4);
     color: var(--text-3);
     flex-shrink: 0;
@@ -542,15 +555,16 @@ kbd {
 .status-item-text {
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: 2px;
     min-width: 0;
 }
 
 .status-item-label {
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-2);
     line-height: 1;
+    letter-spacing: -0.01em;
 }
 
 .status-item-sub {
@@ -566,8 +580,8 @@ kbd {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #10b981;
-    box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+    background: var(--success);
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.45);
 }
 
 @media (max-width: 900px) {
@@ -603,7 +617,9 @@ kbd {
     }
 }
 
-/* ── Autocomplete dropdown — light card ── */
+/* ─────────────────────────────────────────────
+   AUTOCOMPLETE DROPDOWN
+   ───────────────────────────────────────────── */
 .ac-dropdown {
     position: absolute;
     top: calc(100% + 8px);
@@ -611,16 +627,16 @@ kbd {
     right: 0;
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+    border-radius: 12px;
+    box-shadow: var(--shadow-xl);
     z-index: 100;
-    /* High z-index to stay above everything */
     overflow: hidden;
     opacity: 0;
     transform: translateY(-6px) scale(0.98);
     pointer-events: none;
     transition: opacity 180ms ease, transform 180ms ease;
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
 }
 
 .ac-dropdown.show {
@@ -637,17 +653,15 @@ kbd {
     overflow-y: auto;
 }
 
-/* Custom Scrollbar for list */
 .ac-list::-webkit-scrollbar {
     width: 5px;
 }
 
 .ac-list::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--n-5);
     border-radius: 3px;
 }
 
-/* ── AUTOCOMPLETE ITEM ── */
 .ac-item {
     display: flex;
     align-items: center;
@@ -656,14 +670,14 @@ kbd {
     padding: 10px 14px;
     border-radius: 8px;
     cursor: pointer;
-    border-left: 2.5px solid transparent;
+    border-left: 2px solid transparent;
     transition: all 140ms ease;
 }
 
 .ac-item:hover,
 .ac-item.active {
     background: var(--bg-hover);
-    border-left-color: var(--a-5);
+    border-left-color: var(--color-electric-iris);
 }
 
 .ac-item-left {
@@ -674,42 +688,40 @@ kbd {
     flex: 1;
 }
 
-/* ── ICONS (Light Theme Defaults) ── */
 .ac-icon {
     width: 32px;
     height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
+    border-radius: 8px;
     flex-shrink: 0;
     border: 1px solid var(--border);
     transition: all 0.2s ease;
 }
 
 .ac-icon-dir {
-    background: #fef3c7;
-    color: #d97706;
-    border-color: #fde68a;
+    background: rgba(86, 131, 218, 0.12);
+    color: #3d6bc7;
+    border-color: rgba(86, 131, 218, 0.3);
 }
 
 .ac-icon-file {
-    background: #f1f5f9;
-    color: #64748b;
-    border-color: #e2e8f0;
+    background: var(--n-4);
+    color: var(--text-3);
+    border-color: var(--border);
 }
 
-/* ── ICONS (Dark Theme Overrides) ── */
 [data-theme="dark"] .ac-icon-dir {
-    background: rgba(255, 184, 0, 0.12);
-    color: #fcd34d;
-    border-color: rgba(255, 184, 0, 0.25);
+    background: rgba(86, 131, 218, 0.14);
+    color: #a9c3ee;
+    border-color: rgba(86, 131, 218, 0.3);
 }
 
 [data-theme="dark"] .ac-icon-file {
     background: rgba(255, 255, 255, 0.05);
-    color: #94a3b8;
-    border-color: rgba(255, 255, 255, 0.1);
+    color: #95979e;
+    border-color: #4a4b50;
 }
 
 .ac-info {
@@ -735,15 +747,11 @@ kbd {
 }
 
 .ac-highlight {
-    background: rgba(255, 184, 0, 0.18);
-    color: #92400e;
+    background: rgba(86, 131, 218, 0.18);
+    color: var(--text-accent);
     padding: 0 2px;
     border-radius: 3px;
     font-weight: 700;
-}
-
-[data-theme="dark"] .ac-highlight {
-    color: #fcd34d;
 }
 
 .ac-footer {
@@ -763,7 +771,9 @@ kbd {
     font-size: 13px;
 }
 
-/* ── Responsive nav ── */
+/* ─────────────────────────────────────────────
+   RESPONSIVE NAV
+   ───────────────────────────────────────────── */
 @media (max-width: 900px) {
     .nav-tabs {
         display: none;

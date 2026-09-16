@@ -78,8 +78,8 @@ const HomePage = (function () {
         <div class="hero-visual">
           <div class="logo-shader" aria-hidden="true"></div>
           <div class="logo-swap" id="logoSwap">
-            <img class="logo-layer logo-dark" src="/assets/icon/avid-logo-dark.webp" alt="AVID Download" draggable="false">
-            <img class="logo-layer logo-light" src="/assets/icon/avid-logo-light.webp" alt="AVID Download" draggable="false">
+            <img class="logo-layer logo-dark" src="/assets/icon/logo-2-dark.webp" alt="AVID Download" draggable="false">
+            <img class="logo-layer logo-light" src="/assets/icon/logo-2-light.webp" alt="AVID Download" draggable="false">
           </div>
         </div>
       </section>
@@ -169,7 +169,7 @@ const HomePage = (function () {
           <div class="panel-head">
             <div class="panel-head-left">
               <div class="panel-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff8964" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               </div>
               <div>
                 <div class="panel-title">${d.latestReleases || "Latest Releases"}</div>
@@ -204,7 +204,7 @@ const HomePage = (function () {
           <div class="panel-head">
             <div class="panel-head-left">
               <div class="panel-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff8964" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               </div>
               <div>
                 <div class="panel-title">${d.quickAccess || "Quick Access"}</div>
@@ -271,7 +271,7 @@ const HomePage = (function () {
           </div>
           <div class="status-item-text">
             <span class="status-item-label">${d.statusStorage || "Storage"}</span>
-            <span class="status-item-sub"><span class="status-dot" style="background:#f59e0b"></span> 72% ${d.statusUsed || "used"} (1.4 TB / 2 TB)</span>
+            <span class="status-item-sub"><span class="status-dot" style="background:#ff8964"></span> 72% ${d.statusUsed || "used"} (1.4 TB / 2 TB)</span>
           </div>
         </div>
         <div class="status-item">
@@ -280,7 +280,7 @@ const HomePage = (function () {
           </div>
           <div class="status-item-text">
             <span class="status-item-label">${d.statusSync || "Last Sync"}</span>
-            <span class="status-item-sub"><span class="status-dot" style="background:#0ea5e9"></span> <span id="lastSyncTime">—</span></span>
+            <span class="status-item-sub"><span class="status-dot" style="background:#5683da"></span> <span id="lastSyncTime">—</span></span>
           </div>
         </div>
       </div>

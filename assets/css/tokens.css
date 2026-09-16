@@ -1,12 +1,28 @@
 /* ═══════════════════════════════════════════════════════════════
    tokens.css — CloudAvid / AVID Download — Design System
-   Architecture: shadcn/ui-inspired + UI-UX Pro Max Skill
-   Pattern: Product Demo + Features | Style: Flat Design + Minimal Swiss
-   Colors: Enterprise gold + neutral infrastructure (light-first)
-   Generated via UI UX Pro Max Skill — design-system + color + typography
+   Style: Huly — "Aurora through a midnight observatory"
+   Canvas: obsidian #303236 (dark) / linen-white (light)
+   Accents: Electric Iris #5683da + Ember Pulse #ff8964 — nothing else
+   Type: Inter (functional) + Sora (display, hero only)
+   Geometry: pill-first (9999px controls), 12px cards, 30px panels
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
+    /* ── Huly core palette ── */
+    --color-obsidian-canvas: #303236;
+    --color-void: #090a0c;
+    --color-charcoal-card: #111111;
+    --color-slate-edge: #4a4b50;
+    --color-iron-veil: #6b6c6d;
+    --color-smoke: #95979e;
+    --color-ash: #a9a9aa;
+    --color-frost: #d1d1d1;
+    --color-linen: #e5e5e7;
+    --color-snow: #ffffff;
+    --color-electric-iris: #5683da;
+    --color-ember-pulse: #ff8964;
+    --color-molasses: #5a250a;
+
     /* ── Spacing scale (4px base) ── */
     --s1: 4px;
     --s2: 8px;
@@ -23,29 +39,36 @@
     --s20: 80px;
     --s24: 96px;
 
-    /* ── Radius (shadcn) ── */
-    --r1: 6px;
-    --r2: 8px;
-    --r3: 10px;
+    /* ── Radius (pill-first system) ── */
+    --r1: 4px;
+    --r2: 6px;
+    --r3: 8px;
     --r4: 12px;
-    --r5: 14px;
-    --r6: 16px;
+    --r5: 16px;
+    --r6: 30px;
     --r-full: 9999px;
     --radius: 12px;
 
-    /* ── Gold enterprise palette ── */
-    --a-1: #332200;
-    --a-2: #664400;
-    --a-3: #b37700;
-    --a-4: #e69900;
-    --a-5: #ffb800;
-    --a-6: #ffc733;
-    --a-7: #ffd666;
-    --a-8: #ffefb3;
+    --radius-tags: 9999px;
+    --radius-cards: 12px;
+    --radius-inputs: 9999px;
+    --radius-panels: 30px;
+    --radius-buttons: 9999px;
 
+    /* ── Iris ramp (legacy --a-* aliases, now Electric Iris) ── */
+    --a-1: #12213c;
+    --a-2: #1d3a6b;
+    --a-3: #2f5cb2;
+    --a-4: #4a78cf;
+    --a-5: #5683da;
+    --a-6: #7ea4e5;
+    --a-7: #a9c3ee;
+    --a-8: #dce7fa;
+
+    /* ── Semantic (status only — never brand accents) ── */
     --danger: #ef4444;
     --success: #10b981;
-    --warning: #f59e0b;
+    --warning: #ff8964;
 
     /* ── Motion ── */
     --ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -53,169 +76,189 @@
     --dur-1: 150ms;
     --dur-2: 200ms;
     --dur-3: 350ms;
-    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+    --font: 'Manrope', 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-display: 'Sora', 'Manrope', 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-hero: 'Cinzel', 'Sora', ui-sans-serif, system-ui, sans-serif;
+    --font-fa: 'Vazirmatn', 'Tahoma', ui-sans-serif, system-ui, sans-serif;
     --mono: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+
+    /* ── Type scale (Huly) ── */
+    --text-caption: 11px;
+    --text-body: 14px;
+    --text-body-lg: 16px;
+    --text-subheading: 18px;
+    --text-heading-sm: 22px;
+    --text-heading: 24px;
+    --text-display-sm: 32px;
+    --text-display: clamp(42px, 6.4vw, 80px);
 }
 
 /* ───────────────────────────────────────────────────────────────
-   LIGHT THEME — Default (matches mock: new-ui.png)
-   Background: #f1f3f6 page, Card #ffffff, Border #e2e8f0
-   Primary gold #FFB800 used for CTA, accent, pills
+   LIGHT THEME — calm editorial band: snow cards on linen canvas
    ─────────────────────────────────────────────────────────────── */
 :root,
 [data-theme="light"] {
     color-scheme: light;
 
-    /* — shadcn semantic tokens (HSL for Tailwind compat, plus hex fallbacks) — */
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    /* — shadcn semantic tokens — */
+    --background: 240 4% 96%;
+    --foreground: 240 9% 3%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 240 9% 3%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 240 9% 3%;
 
-    --primary: 42 100% 50%;
-    /* #ffb800 */
-    --primary-foreground: 0 0% 7%;
-    /* #111 */
+    --primary: 220 64% 60%;
+    /* Electric Iris #5683da */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96%;
-    /* #f1f5f9 */
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 240 5% 94%;
+    --secondary-foreground: 240 9% 3%;
 
-    --muted: 210 40% 98%;
-    /* #f8fafc */
-    --muted-foreground: 215 16% 47%;
-    /* #64748b */
+    --muted: 240 5% 95%;
+    --muted-foreground: 225 1% 42%;
 
-    --accent: 42 100% 50%;
-    --accent-foreground: 0 0% 7%;
+    --accent: 220 64% 60%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 214 25% 82%;
-    /* #e2e8f0 */
-    --input: 214 32% 91%;
-    --ring: 42 100% 50%;
+    --border: 240 5% 65%;
+    /* linen #e5e5e7 */
+    --input: 240 5% 90%;
+    --ring: 220 64% 60%;
 
-    /* — legacy aliases for existing CSS — */
+    /* — legacy neutral aliases — */
     --n-0: #ffffff;
-    --n-1: #f1f3f6;
-    --n-2: #f8fafc;
+    --n-1: #f6f6f6;
+    --n-2: #efeff1;
     --n-3: #ffffff;
-    --n-4: #f1f5f9;
-    --n-5: #e2e8f0;
-    --n-6: #cbd5e1;
-    --n-7: #94a3b8;
-    --n-8: #64748b;
-    --n-9: #475569;
-    --n-10: #334155;
-    --n-11: #1e293b;
-    --n-12: #0f172a;
+    --n-4: #efeff1;
+    --n-5: #d1d1d1;
+    --n-6: #b9babc;
+    --n-7: #95979e;
+    --n-8: #6b6c6d;
+    --n-9: #4a4b50;
+    --n-10: #303236;
+    --n-11: #1a1b1c;
+    --n-12: #050506;
 
-    --bg: #f1f3f6;
+    --bg: #e3e2e2;
     --bg-card: #ffffff;
-    --bg-hover: #f8fafc;
+    --bg-hover: #f1f1f3;
     --bg-input: #ffffff;
     --bg-elevated: #ffffff;
 
-    --border: #e2e8f0;
-    --border-hover: #cbd5e1;
-    --border-focus: #ffb800;
+    --border: #e5e5e7;
+    --border-hover: #d1d1d1;
+    --border-focus: #5683da;
 
-    --text: #0f172a;
-    --text-2: #334155;
-    --text-3: #64748b;
-    --text-4: #94a3b8;
-    --text-accent: #b45309;
+    --text: #050506;
+    --text-2: #303236;
+    --text-3: #6b6c6d;
+    --text-4: #95979e;
+    --text-accent: #3d6bc7;
 
-    --surface-glass: #ffffff;
-    --nav-bg: #ffffff;
-    --hero-grad: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    --surface-glass: rgba(255, 255, 255, 0.78);
+    --nav-bg: rgba(255, 255, 255, 0.72);
+    --hero-grad: linear-gradient(180deg, #090a0c 0%, #0d0e12 100%);
     --input-bg: #ffffff;
-    --glow: rgba(255, 184, 0, 0.06);
-    --glow-strong: rgba(255, 184, 0, 0.12);
+    --glow: rgba(86, 131, 218, 0.08);
+    --glow-strong: rgba(86, 131, 218, 0.14);
+    --ember-glow: rgba(255, 137, 100, 0.12);
 
-    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.06);
-    --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 6px rgba(15, 23, 42, 0.04);
-    --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.05);
-    --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-sm: 0 1px 2px rgba(9, 10, 12, 0.06), 0 1px 3px rgba(9, 10, 12, 0.05);
+    --shadow-md: rgba(9, 10, 12, 0.18) 0px 4px 16px 0px;
+    --shadow-lg: 0 10px 30px rgba(9, 10, 12, 0.08), 0 4px 12px rgba(9, 10, 12, 0.05);
+    --shadow-xl: rgba(9, 10, 12, 0.5) 0px 6px 25px 0px;
+    --shadow-card: 0 1px 3px rgba(9, 10, 12, 0.05), 0 1px 2px rgba(9, 10, 12, 0.04);
+    --shadow-subtle: rgba(86, 131, 218, 0.35) 0px 0px 0px 6px;
 }
 
-/* ── DARK THEME — OLED-inspired, enterprise gold retained ── */
+/* ───────────────────────────────────────────────────────────────
+   DARK THEME — the Huly product surface: obsidian + charcoal
+   ─────────────────────────────────────────────────────────────── */
 [data-theme="dark"] {
     color-scheme: dark;
 
-    --background: 232 18% 6%;
+    --background: 220 3% 20%;
+    /* obsidian #303236 */
     --foreground: 0 0% 100%;
 
-    --card: 232 14% 10%;
+    --card: 0 0% 7%;
+    /* charcoal #111111 */
     --card-foreground: 0 0% 100%;
 
-    --popover: 232 14% 10%;
+    --popover: 0 0% 7%;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 42 100% 50%;
-    --primary-foreground: 0 0% 7%;
+    --primary: 220 64% 60%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 232 14% 16%;
+    --secondary: 220 3% 26%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 232 12% 14%;
-    --muted-foreground: 215 16% 60%;
+    --muted: 220 3% 24%;
+    --muted-foreground: 225 1% 61%;
 
-    --accent: 42 100% 50%;
-    --accent-foreground: 0 0% 7%;
+    --accent: 220 64% 60%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 232 12% 18%;
-    --input: 232 12% 18%;
-    --ring: 42 100% 50%;
+    --border: 225 4% 30%;
+    /* slate edge #4a4b50 */
+    --input: 225 4% 30%;
+    --ring: 220 64% 60%;
 
-    --n-0: #000000;
-    --n-1: #08090e;
-    --n-2: #0f1118;
-    --n-3: #161922;
-    --n-4: #1e2530;
-    --n-5: #2d3545;
-    --n-6: #3d465e;
-    --n-7: #5c647e;
-    --n-8: #7f88a3;
-    --n-9: #a4adc7;
-    --n-10: #c9d1e5;
-    --n-11: #eef1f8;
+    --n-0: #090a0c;
+    --n-1: #111112;
+    --n-2: #1a1b1e;
+    --n-3: #232428;
+    --n-4: #2b2d31;
+    --n-5: #4a4b50;
+    --n-6: #6b6c6d;
+    --n-7: #95979e;
+    --n-8: #a9a9aa;
+    --n-9: #c7c8cb;
+    --n-10: #d1d1d1;
+    --n-11: #e9e9ea;
     --n-12: #ffffff;
 
-    --bg: #08090e;
-    --bg-card: rgba(22, 25, 34, 0.9);
-    --bg-hover: rgba(30, 37, 52, 0.95);
-    --bg-input: rgba(15, 18, 28, 0.9);
-    --bg-elevated: rgba(22, 25, 34, 0.95);
+    --bg: #1c1d1f;
+    --bg-card: #111111;
+    --bg-hover: rgba(255, 255, 255, 0.05);
+    --bg-input: rgba(9, 10, 12, 0.55);
+    --bg-elevated: #1a1b1e;
 
-    --border: rgba(255, 255, 255, 0.08);
-    --border-hover: rgba(255, 255, 255, 0.14);
-    --border-focus: #ffb800;
+    --border: #4a4b50;
+    --border-hover: #6b6c6d;
+    --border-focus: #5683da;
 
     --text: #ffffff;
-    --text-2: #e2e8f0;
-    --text-3: #94a3b8;
-    --text-4: #64748b;
-    --text-accent: #ffb800;
+    --text-2: #d1d1d1;
+    --text-3: #a9a9aa;
+    --text-4: #95979e;
+    --text-accent: #7ea4e5;
 
-    --surface-glass: rgba(22, 25, 34, 0.6);
-    --nav-bg: rgba(12, 14, 22, 0.85);
-    --hero-grad: linear-gradient(180deg, rgba(22, 25, 34, 0.9) 0%, rgba(12, 13, 19, 0.9) 100%);
-    --input-bg: rgba(0, 0, 0, 0.35);
-    --glow: rgba(255, 184, 0, 0.06);
-    --glow-strong: rgba(255, 184, 0, 0.14);
+    --surface-glass: rgba(17, 17, 17, 0.6);
+    --nav-bg: rgba(17, 17, 17, 0.62);
+    --hero-grad: linear-gradient(180deg, #090a0c 0%, #0d0e12 100%);
+    --input-bg: rgba(9, 10, 12, 0.55);
+    --glow: rgba(86, 131, 218, 0.10);
+    --glow-strong: rgba(86, 131, 218, 0.18);
+    --ember-glow: rgba(255, 137, 100, 0.14);
 
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
-    --shadow-lg: 0 24px 48px rgba(0, 0, 0, 0.6);
-    --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.35);
+    /* Huly rule: dark cards prefer borders over drop shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+    --shadow-md: rgba(0, 0, 0, 0.35) 0px 4px 16px 0px;
+    --shadow-lg: rgba(0, 0, 0, 0.35) 0px 4px 16px 0px;
+    --shadow-xl: rgba(0, 0, 0, 0.5) 0px 6px 25px 0px;
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-subtle: rgba(255, 255, 255, 0.4) 0px 0px 0px 6px;
 }

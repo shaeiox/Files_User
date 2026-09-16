@@ -360,25 +360,25 @@
 /* Selected Item - Light Theme */
 :root .perf-option.active,
 [data-theme="light"] .perf-option.active {
-    background: #fffbeb;
-    color: #b45309;
+    background: rgba(86, 131, 218, 0.12);
+    color: #3d6bc7;
 }
 
 :root .perf-option.active .perf-indicator-dot,
 [data-theme="light"] .perf-option.active .perf-indicator-dot {
-    background: #d97706;
-    box-shadow: 0 0 6px rgba(217, 119, 6, 0.4);
+    background: #5683da;
+    box-shadow: 0 0 6px rgba(86, 131, 218, 0.5);
 }
 
 /* Selected Item - Dark Theme */
 [data-theme="dark"] .perf-option.active {
-    background: rgba(255, 184, 0, 0.12);
-    color: #ffb800;
+    background: rgba(86, 131, 218, 0.16);
+    color: #a9c3ee;
 }
 
 [data-theme="dark"] .perf-option.active .perf-indicator-dot {
-    background: #ffb800;
-    box-shadow: 0 0 6px rgba(255, 184, 0, 0.6);
+    background: #5683da;
+    box-shadow: 0 0 6px rgba(86, 131, 218, 0.6);
 }
 
 /* Mobile Responsiveness for Dropdown Trigger */
@@ -427,7 +427,7 @@
 }
 
 .perf-toast svg {
-    color: #f59e0b;
+    color: var(--color-ember-pulse, #ff8964);
     flex-shrink: 0;
 }
 
@@ -558,9 +558,9 @@
 }
 
 .perf-debug-btn:hover {
-    background: var(--a-5, #ffb800);
-    color: #111;
-    border-color: var(--a-5, #ffb800);
+    background: var(--a-5, #5683da);
+    color: #ffffff;
+    border-color: var(--a-5, #5683da);
 }
 
 .perf-debug-btn-auto {

@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
-   base.css — Foundation & Layout (shadcn structure)
-   Reset, typography, page container, backdrop
+   base.css — Foundation & Layout (Huly aurora system)
+   Reset, typography, page container, ambient backdrop
    ═══════════════════════════════════════════════════════════════ */
 
 *,
@@ -20,8 +20,9 @@ html {
 body {
     background: var(--bg);
     font-family: var(--font);
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: var(--text-body, 14px);
+    line-height: 1.5;
+    letter-spacing: -0.14px;
     color: var(--text);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -30,8 +31,29 @@ body {
     transition: background-color var(--dur-2) ease, color var(--dur-2) ease;
 }
 
+/* Persian: Vazirmatn everywhere — generous line-height for joined scripts,
+   no negative tracking (it distorts Arabic-script letterforms) */
+[lang="fa"],
+[dir="rtl"] body,
+body.rtl {
+    font-family: var(--font-fa);
+    line-height: 1.75;
+    letter-spacing: 0;
+}
+
+[lang="fa"] ::selection,
+[dir="rtl"] ::selection {
+    background: rgba(86, 131, 218, 0.32);
+}
+
 ::selection {
-    background: rgba(255, 184, 0, 0.22);
+    background: rgba(86, 131, 218, 0.28);
+    color: #ffffff;
+}
+
+[data-theme="light"] ::selection {
+    background: rgba(86, 131, 218, 0.2);
+    color: inherit;
 }
 
 a {
@@ -42,6 +64,7 @@ a {
 button {
     font-family: inherit;
     cursor: pointer;
+    letter-spacing: inherit;
 }
 
 img {
@@ -49,23 +72,26 @@ img {
     max-width: 100%;
 }
 
-/* ── Page container — wider to match mock (1240px) ── */
+/* ── Page container — wide fluid enterprise layout ──
+   One shared container: navbar, hero, and every section align to it. */
 .page {
     position: relative;
     z-index: 1;
-    width: min(1240px, calc(100% - 32px));
+    width: calc(100% - 48px);
+    max-width: 1720px;
     margin: 0 auto;
     padding: 16px 0 32px;
 }
 
 @media (max-width: 768px) {
     .page {
-        width: min(100% - 20px, 100%);
+        width: calc(100% - 24px);
         padding: 12px 0 24px;
     }
 }
 
-/* ── AVID Signature Backdrop — subtle, light-first ── */
+/* ── Ambient backdrop — the aurora's quiet echo ──
+   Dark: iris wash top, ember wash bottom. Light: barely-there cool tint. */
 .aura-backdrop {
     position: fixed;
     inset: 0;
@@ -82,27 +108,28 @@ img {
 
 .aura-glow-1 {
     position: absolute;
-    top: -15%;
-    right: -8%;
-    width: 60%;
-    height: 55%;
+    top: -14%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 46%;
+    height: 42%;
     background: radial-gradient(ellipse at center,
-            rgba(255, 184, 0, 0.07) 0%,
-            rgba(255, 184, 0, 0.03) 35%,
+            rgba(86, 131, 218, 0.06) 0%,
+            rgba(86, 131, 218, 0.025) 38%,
             transparent 70%);
-    filter: blur(40px);
+    filter: blur(48px);
 }
 
 .aura-glow-2 {
     position: absolute;
-    bottom: -20%;
-    left: -10%;
-    width: 65%;
-    height: 60%;
+    bottom: -18%;
+    left: -8%;
+    width: 44%;
+    height: 42%;
     background: radial-gradient(ellipse at center,
-            rgba(148, 163, 184, 0.08) 0%,
+            rgba(255, 137, 100, 0.03) 0%,
             transparent 65%);
-    filter: blur(50px);
+    filter: blur(56px);
 }
 
 .aura-vignette {
@@ -111,15 +138,15 @@ img {
 
 [data-theme="dark"] .aura-glow-1 {
     background: radial-gradient(ellipse at center,
-            rgba(255, 184, 0, 0.10) 0%,
-            rgba(255, 184, 0, 0.04) 35%,
+            rgba(86, 131, 218, 0.08) 0%,
+            rgba(86, 131, 218, 0.03) 38%,
             transparent 70%);
 }
 
 [data-theme="dark"] .aura-glow-2 {
     background: radial-gradient(ellipse at center,
-            rgba(30, 41, 59, 0.5) 0%,
-            transparent 70%);
+            rgba(255, 137, 100, 0.045) 0%,
+            transparent 65%);
 }
 
 /* ── Animations (reduced-motion aware) ── */
@@ -216,6 +243,14 @@ img {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--n-6);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: #4a4b50;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: #6b6c6d;
 }
 
 :focus-visible {

@@ -128,7 +128,7 @@ const i18n = {
 
         // Hero Section
         portalStatus: "زیرساخت شما، با آوید",
-        heroTitle: `<span class="avid">مرکز</span> <span class="accent">دانلود</span><br>آوید`,
+        heroTitle: `<span class="avid">مرکز</span> <span class="accent">دانلود</span>&nbsp;<br>آوید`,
         desc: "دسترسی به بسته‌های نرم‌افزاری، ایمیج‌های ISO، قالب‌ها و لاگ‌های سیستمی — ارائه شده توسط تیم زیرساخت کلود آوید.",
         searchPh: "جستجو در فایل‌ها، بسته‌ها، قالب‌ها...",
         searchBtn: "جستجو",
