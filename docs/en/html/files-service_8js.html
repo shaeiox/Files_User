@@ -132,7 +132,7 @@ back"), and nobody may leave the storage room. If anything is wrong — the base
 <h2 class="doxsection"><a class="anchor" id="fs_responsibilities"></a>
 Core Responsibilities</h2>
 <ul>
-<li><b>Sole Owner of FILES_ROOT:</b> Reads <span class="tt">process.env.FILES_ROOT</span> (populated from <span class="tt">.env</span> by <span class="tt"><a class="el" href="load-env_8js_source.html">lib/load-env.js</a></span>), resolves it against the project root, and validates that it exists, is a directory, and is non-empty with at least one visible category folder. No other file in the repository resolves or stats <span class="tt">FILES_ROOT</span> except via this module.</li>
+<li><b>Sole Owner of FILES_ROOT:</b> Reads <span class="tt">process.env.FILES_ROOT</span> (populated from <span class="tt">.env</span> by <span class="tt"><a class="el" href="load-env_8js.html" title="The environment bootstrap of the CloudAvid File Portal: reads the project-root .env file into process...">lib/load-env.js</a></span>), resolves it against the project root, and validates that it exists, is a directory, and is non-empty with at least one visible category folder. No other file in the repository resolves or stats <span class="tt">FILES_ROOT</span> except via this module.</li>
 <li><b>Path Safety Wall:</b> Converts any client-supplied relative path into a validated absolute path that is provably inside <span class="tt">FILES_ROOT</span>, rejecting <span class="tt">.</span> / <span class="tt">..</span> segments and NUL bytes, and re-checking with <span class="tt">path.relative()</span> after resolution (defence in depth).</li>
 <li><b>Directory Listing Engine:</b> <span class="tt">listCategories()</span> (with per-category recursive summaries) and <span class="tt">listPath()</span> (flat listings at any depth) — the data behind <span class="tt">/api/categories</span> and <span class="tt">/api/files</span>.</li>
 <li><b>Download Resolver:</b> <span class="tt">getDownloadTarget()</span> stats a file and returns the <span class="tt">{ absPath, fileName, size, mtime }</span> bundle that <span class="tt"><a class="el" href="server_8js.html" title="The Node.js back-end of the CloudAvid File Portal: a zero-framework HTTP server that serves the SPA s...">server.js</a></span> streams with <span class="tt">fs.createReadStream</span>. This module never streams; it only decides <em>what</em> may be streamed.</li>
@@ -149,7 +149,7 @@ Core Responsibilities</h2>
 <li><span class="tt"><a class="el" href="server_8js.html" title="The Node.js back-end of the CloudAvid File Portal: a zero-framework HTTP server that serves the SPA s...">server.js</a></span> = transport layer (HTTP parsing, headers, CORS, streaming, routing, logging). Knows nothing about how paths are validated.</li>
 <li><span class="tt"><a class="el" href="files-service_8js.html" title="The filesystem domain layer of the CloudAvid File Portal: resolves FILES_ROOT, sanitises every client...">lib/files-service.js</a></span> = domain layer (this file). Knows nothing about HTTP; it never writes headers and never sees a request object. Its only HTTP awareness is the <span class="tt">httpStatus</span> numbers it stamps onto errors, a pragmatic exception that lets <span class="tt"><a class="el" href="server_8js.html" title="The Node.js back-end of the CloudAvid File Portal: a zero-framework HTTP server that serves the SPA s...">server.js</a></span>'s generic <span class="tt">catch</span> render the right status without a mapping table.</li>
 </ul>
-<p>Upward, it is consumed exclusively by <span class="tt"><a class="el" href="server_8js.html" title="The Node.js back-end of the CloudAvid File Portal: a zero-framework HTTP server that serves the SPA s...">server.js</a></span>, which wires each exported function to exactly one API route. Downward, it depends only on Node built-ins (<span class="tt">fs/promises</span>, <span class="tt">fs</span>, <span class="tt">path</span>) and on the environment contract established by <span class="tt"><a class="el" href="load-env_8js_source.html">lib/load-env.js</a></span>. The frontend never calls this module; it consumes its output indirectly through <span class="tt"><a class="el" href="resource-service_8js_source.html">assets/js/services/resource-service.js</a></span>.</p>
+<p>Upward, it is consumed exclusively by <span class="tt"><a class="el" href="server_8js.html" title="The Node.js back-end of the CloudAvid File Portal: a zero-framework HTTP server that serves the SPA s...">server.js</a></span>, which wires each exported function to exactly one API route. Downward, it depends only on Node built-ins (<span class="tt">fs/promises</span>, <span class="tt">fs</span>, <span class="tt">path</span>) and on the environment contract established by <span class="tt"><a class="el" href="load-env_8js.html" title="The environment bootstrap of the CloudAvid File Portal: reads the project-root .env file into process...">lib/load-env.js</a></span>. The frontend never calls this module; it consumes its output indirectly through <span class="tt"><a class="el" href="resource-service_8js_source.html">assets/js/services/resource-service.js</a></span>.</p>
 <dl class="section note"><dt>Note</dt><dd>What This File Does NOT Do:<ul>
 <li>It does <b>not</b> serve HTTP. No routing, no headers, no streaming — all of that is <span class="tt"><a class="el" href="server_8js.html" title="The Node.js back-end of the CloudAvid File Portal: a zero-framework HTTP server that serves the SPA s...">server.js</a></span> (<span class="tt">streamDownload</span>, <span class="tt">sendJSON</span>).</li>
 <li>It does <b>not</b> cache. Every call re-reads the disk; all caching in this product lives in the browser (<span class="tt"><a class="el" href="resource-service_8js_source.html">resource-service.js</a></span>'s sessionStorage).</li>
@@ -193,7 +193,7 @@ yes or no"), and a <b>map of the building</b> (<span class="tt">path</span>) so 
 <dl class="section user"><dt>🔗 Project Dependencies</dt><dd><ul>
 <li>Depends on: Node.js runtime only — no npm dependency, which is why the domain layer keeps working even if <span class="tt">node_modules</span> is wiped.</li>
 <li>Consumed by: nothing at require time; the bindings are used by all functions documented below.</li>
-<li>Sideways: mirrors <span class="tt"><a class="el" href="server_8js.html" title="The Node.js back-end of the CloudAvid File Portal: a zero-framework HTTP server that serves the SPA s...">server.js</a></span>'s "built-ins first" require style and <span class="tt"><a class="el" href="load-env_8js_source.html">lib/load-env.js</a></span>'s identical approach.</li>
+<li>Sideways: mirrors <span class="tt"><a class="el" href="server_8js.html" title="The Node.js back-end of the CloudAvid File Portal: a zero-framework HTTP server that serves the SPA s...">server.js</a></span>'s "built-ins first" require style and <span class="tt"><a class="el" href="load-env_8js.html" title="The environment bootstrap of the CloudAvid File Portal: reads the project-root .env file into process...">lib/load-env.js</a></span>'s identical approach.</li>
 <li></li>
 </ul>
 </dd></dl>
@@ -202,7 +202,7 @@ yes or no"), and a <b>map of the building</b> (<span class="tt">path</span>) so 
 </ul>
 </dd>
 <dd>
-<a class="el" href="load-env_8js_source.html">lib/load-env.js</a></dd></dl>
+<a class="el" href="load-env_8js.html" title="The environment bootstrap of the CloudAvid File Portal: reads the project-root .env file into process...">lib/load-env.js</a></dd></dl>
 <dl class="section user"><dt>⚠️ Breaking Change Warning</dt><dd>If <span class="tt">fsSync</span> is removed (e.g. during an async-only refactor), <span class="tt">peekRootSync()</span> throws a <span class="tt">ReferenceError</span> the first time <span class="tt">/api/health</span> is hit or the startup banner renders — health checks start reporting <span class="tt">degraded</span> and monitoring silently flips. Conversely, replacing <span class="tt">require("fs/promises")</span> with <span class="tt">require("fs")</span> breaks every <span class="tt">await</span> in this file at runtime: the calls return callbacks-style behaviour and all six API routes start 500-ing.</dd></dl>
 <dl class="section user"><dt>💻 Live Source Code:</dt><dd><div class="fragment"><div class="line"><span class="keyword">const</span> fs = require(<span class="stringliteral">&quot;fs/promises&quot;</span>);</div>
 <div class="line"><span class="keyword">const</span> fsSync = require(<span class="stringliteral">&quot;fs&quot;</span>);</div>
@@ -328,7 +328,7 @@ went wrong!", every refusal gets a stamp: the desk knows how serious it is (the 
 <dl class="section user"><dt>🧒 ELI5</dt><dd>Reading the label on the basement door. No label? Refuse to guess — go back and tell the manager "the door has no name on it" (<span class="tt">503
 FILES_ROOT_MISSING</span>). Label can be a full address or directions from the lobby; the keeper knows both dialects.</dd></dl>
 <dl class="section user"><dt>⚙️ How It Works (Step-by-Step)</dt><dd><ol type="1">
-<li>Read <span class="tt">process.env.FILES_ROOT</span> — populated at boot by <span class="tt"><a class="el" href="load-env_8js_source.html">lib/load-env.js</a></span> before <span class="tt"><a class="el" href="server_8js.html" title="The Node.js back-end of the CloudAvid File Portal: a zero-framework HTTP server that serves the SPA s...">server.js</a></span> requires this module (both are required after <span class="tt">loadEnv()</span> runs, so ordering is safe).</li>
+<li>Read <span class="tt">process.env.FILES_ROOT</span> — populated at boot by <span class="tt"><a class="el" href="load-env_8js.html" title="The environment bootstrap of the CloudAvid File Portal: reads the project-root .env file into process...">lib/load-env.js</a></span> before <span class="tt"><a class="el" href="server_8js.html" title="The Node.js back-end of the CloudAvid File Portal: a zero-framework HTTP server that serves the SPA s...">server.js</a></span> requires this module (both are required after <span class="tt">loadEnv()</span> runs, so ordering is safe).</li>
 <li>Treat <span class="tt">undefined</span>, <span class="tt">null</span> and whitespace-only values (<span class="tt">""</span> after <span class="tt">String(raw).trim()</span>) as "not configured" → throw <span class="tt">503 FILES_ROOT_MISSING</span>. 503 (not 500) is deliberate: it tells the operator this is a <em>configuration</em> problem, and it reads correctly on <span class="tt">/api/health</span>-style probes.</li>
 <li>Trim once into <span class="tt">configured</span>; whitespace around the value in <span class="tt">.env</span> is therefore harmless.</li>
 <li>If the string is already absolute (<span class="tt">path.isAbsolute</span> — true for <span class="tt">/srv/cloudavid/downloads</span> on Linux and <span class="tt">D:\CloudAvid\Downloads</span> on Windows), resolve it with <span class="tt">path.resolve(configured)</span> to normalise separators and collapses.</li>
@@ -346,12 +346,12 @@ FILES_ROOT_MISSING</span>). Label can be a full address or directions from the l
 </ul>
 </dd></dl>
 <dl class="section user"><dt>🔗 Project Dependencies</dt><dd><ul>
-<li>Depends on: <span class="tt">process.env.FILES_ROOT</span> (written by <span class="tt"><a class="el" href="load-env_8js_source.html">lib/load-env.js</a></span>), Node <span class="tt">path</span>, <span class="tt">serviceError</span>.</li>
+<li>Depends on: <span class="tt">process.env.FILES_ROOT</span> (written by <span class="tt"><a class="el" href="load-env_8js.html" title="The environment bootstrap of the CloudAvid File Portal: reads the project-root .env file into process...">lib/load-env.js</a></span>), Node <span class="tt">path</span>, <span class="tt">serviceError</span>.</li>
 <li>Consumed by: <span class="tt">getRoot</span> (async path) and <span class="tt">peekRootSync</span> (sync path) — the only two call sites.</li>
 <li></li>
 </ul>
 </dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="load-env_8js_source.html">lib/load-env.js</a><ul>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="load-env_8js.html" title="The environment bootstrap of the CloudAvid File Portal: reads the project-root .env file into process...">lib/load-env.js</a><ul>
 <li></li>
 </ul>
 </dd>
@@ -1322,7 +1322,7 @@ answer, even if the answer is 'I couldn't even check'." It never shouts, never r
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><span class="tt">peekRootSync(projectRoot)</span>  </td><td class="markdownTableBodyNone"><span class="tt">(s) =&gt; {configured, exists, isDirectory, error?}</span>  </td><td class="markdownTableBodyNone">Yes, exported  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="server_8js.html" title="The Node.js back-end of the CloudAvid File Portal: a zero-framework HTTP server that serves the SPA s...">server.js</a></span> <span class="tt">/api/health</span> + banner  </td><td class="markdownTableBodyNone">Never-throw sync root probe  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">FILES_ROOT</span> (env)  </td><td class="markdownTableBodyNone"><span class="tt">string</span>  </td><td class="markdownTableBodyNone">No (<span class="tt"><a class="el" href="load-env_8js_source.html">lib/load-env.js</a></span> reads <span class="tt">.env</span>)  </td><td class="markdownTableBodyNone"><span class="tt">resolveConfiguredRoot</span>  </td><td class="markdownTableBodyNone">Deployment-defined downloads root  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">FILES_ROOT</span> (env)  </td><td class="markdownTableBodyNone"><span class="tt">string</span>  </td><td class="markdownTableBodyNone">No (<span class="tt"><a class="el" href="load-env_8js.html" title="The environment bootstrap of the CloudAvid File Portal: reads the project-root .env file into process...">lib/load-env.js</a></span> reads <span class="tt">.env</span>)  </td><td class="markdownTableBodyNone"><span class="tt">resolveConfiguredRoot</span>  </td><td class="markdownTableBodyNone">Deployment-defined downloads root  </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Error codes <span class="tt">FILES_ROOT_MISSING</span> / <span class="tt">_NOT_FOUND</span> / <span class="tt">_NOT_DIRECTORY</span> / <span class="tt">_EMPTY</span> / <span class="tt">_NO_CATEGORIES</span> / <span class="tt">INVALID_PATH</span> / <span class="tt">PATH_TRAVERSAL</span> / <span class="tt">NOT_FOUND</span> / <span class="tt">NOT_A_DIRECTORY</span> / <span class="tt">NOT_A_FILE</span>  </td><td class="markdownTableBodyNone"><span class="tt">string</span>  </td><td class="markdownTableBodyNone">Yes  </td><td class="markdownTableBodyNone"><span class="tt"><a class="el" href="server_8js.html" title="The Node.js back-end of the CloudAvid File Portal: a zero-framework HTTP server that serves the SPA s...">server.js</a></span> JSON <span class="tt">code</span> field  </td><td class="markdownTableBodyNone">Stable machine-readable failure kinds  </td></tr>
 </table>
@@ -1336,7 +1336,7 @@ answer, even if the answer is 'I couldn't even check'." It never shouts, never r
 🔍 See Also</h1>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="server_8js.html" title="The Node.js back-end of the CloudAvid File Portal: a zero-framework HTTP server that serves the SPA s...">server.js</a> — the only direct consumer; transport, streaming and error rendering. </dd>
 <dd>
-<a class="el" href="load-env_8js_source.html">lib/load-env.js</a> — populates <span class="tt">process.env.FILES_ROOT</span> before this module is required. </dd>
+<a class="el" href="load-env_8js.html" title="The environment bootstrap of the CloudAvid File Portal: reads the project-root .env file into process...">lib/load-env.js</a> — populates <span class="tt">process.env.FILES_ROOT</span> before this module is required. </dd>
 <dd>
 .env.example — the documented contract for <span class="tt">FILES_ROOT</span> and <span class="tt">PORT</span>. </dd>
 <dd>
@@ -1351,7 +1351,7 @@ answer, even if the answer is 'I couldn't even check'." It never shouts, never r
 nginx.conf — proxies <span class="tt">/api/</span> to the server that fronts this module. </dd>
 <dd>
 <a class="el" href="package_8json_source.html">package.json</a> — npm start entry point and the single (optional) dependency.</dd></dl>
-<dl class="section author"><dt>Author</dt><dd>CloudAvid Team </dd></dl>
+<dl class="section author"><dt>Author</dt><dd>ShaiyaAzizi </dd></dl>
 <dl class="section version"><dt>Version</dt><dd>1.0 </dd></dl>
 
 <p class="definition">Definition in file <a class="el" href="files-service_8js_source.html">files-service.js</a>.</p>

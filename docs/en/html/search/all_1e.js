@@ -29,5 +29,8 @@ var searchData=
   ['—_20script_3a_20client_20side_20router_26',['Block 27 — Script: Client-Side Router',['../browse_8html.html#block_script_router',1,'']]],
   ['—_20script_3a_20home_20page_20module_27',['Block 25 — Script: Home Page Module',['../browse_8html.html#block_script_home',1,'']]],
   ['—_20script_3a_20internationalization_20engine_28',['Block 23 — Script: Internationalization Engine',['../browse_8html.html#block_script_i18n',1,'']]],
-  ['—_20startup_20banner_29',['🧩 Block: &lt;span class=&quot;tt&quot;&gt;server.listen(PORT, HOST, …)&lt;/span&gt; — Startup Banner',['../server_8js.html#server_listen',1,'']]]
+  ['—_20startup_20banner_29',['🧩 Block: &lt;span class=&quot;tt&quot;&gt;server.listen(PORT, HOST, …)&lt;/span&gt; — Startup Banner',['../server_8js.html#server_listen',1,'']]],
+  ['—_20the_20fallback_20parser_30',['Block: parseEnvText(text) — The Fallback Parser',['../load-env_8js.html#sub_le_parseenvtext',1,'']]],
+  ['—_20the_20orchestrator_31',['Block: loadEnv(projectRoot) — The Orchestrator',['../load-env_8js.html#sub_le_loadenv',1,'']]],
+  ['—_20the_20public_20surface_32',['Block: module.exports — The Public Surface',['../load-env_8js.html#sub_le_exports',1,'']]]
 ];

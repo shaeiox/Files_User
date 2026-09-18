@@ -8,7 +8,7 @@ var searchData=
   ['🧩_20block_206_3a_20navigation_20bar_20header_5',['🧩 Block 6: Navigation Bar (Header)',['../index_8html.html#sec_block6',1,'']]],
   ['🧩_20block_207_3a_20spa_20mount_20point_6',['🧩 Block 7: SPA Mount Point',['../index_8html.html#sec_block7',1,'']]],
   ['🧩_20block_208_3a_20deferred_20script_20pipeline_7',['🧩 Block 8: Deferred Script Pipeline',['../index_8html.html#sec_block8',1,'']]],
-  ['🧩_20block_20by_20block_20deep_20dive_8',['🧩 Block by Block Deep Dive',['../browse_8html.html#deepdive',1,'🧩 Block-by-Block Deep Dive'],['../files-service_8js.html#fs_blocks',1,'🧩 Block-by-Block Deep Dive']]],
+  ['🧩_20block_20by_20block_20deep_20dive_8',['🧩 Block by Block Deep Dive',['../browse_8html.html#deepdive',1,'🧩 Block-by-Block Deep Dive'],['../files-service_8js.html#fs_blocks',1,'🧩 Block-by-Block Deep Dive'],['../load-env_8js.html#le_blocks',1,'🧩 Block-by-Block Deep Dive']]],
   ['🧩_20block_3a_20core_20module_20requires_20fs_20promises_20fs_20path_9',['🧩 Block: Core Module Requires (fs/promises, fs, path)',['../files-service_8js.html#fs_sub_requires',1,'']]],
   ['🧩_20block_3a_20core_20module_20requires_20http_20fs_20path_20url_10',['🧩 Block: Core Module Requires (http, fs, path, URL)',['../server_8js.html#server_requires',1,'']]],
   ['🧩_20block_3a_20host_20port_20and_20root_20constants_11',['🧩 Block: HOST, PORT and ROOT Constants',['../server_8js.html#server_hostport',1,'']]],

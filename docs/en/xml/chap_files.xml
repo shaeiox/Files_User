@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="chap_files" kind="page">
+    <compoundname>chap_files</compoundname>
+    <title>Chapter 4 — lib/files-service.js: The Filesystem Domain Layer</title>
+    <briefdescription>
+<para>Landing chapter for the <ref refid="files-service_8js" kindref="compound">files-service.js</ref> documentation: FILES_ROOT ownership, the path-safety wall, and everything that reads the download tree. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>The bottom of the back-end and the only file that touches the downloads tree. It resolves and validates <computeroutput>FILES_ROOT</computeroutput>, converts every client-supplied path into a provably-inside-root absolute path, walks the tree for categories, listings, search and releases, and returns the metadata bundle that <computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput> streams. It never sees HTTP objects.</para>
+<para><simplesect kind="par"><title>🎯 Why read this chapter</title><para>This is where the portal&apos;s security and its data contracts live: the <computeroutput>403 PATH_TRAVERSAL</computeroutput> wall protects every byte the server ships, and the shapes returned by <computeroutput>listCategories</computeroutput>/<computeroutput>listPath</computeroutput>/<computeroutput>searchEntries</computeroutput>/ <computeroutput>listLatestReleases</computeroutput> are consumed field-by-field by the frontend service layer. The chapter also documents the full error-code table the other chapters rely on.</para>
+</simplesect>
+<simplesect kind="par"><title>🗺️ What the full documentation covers</title><para><itemizedlist>
+<listitem><para>Architecture flow of the shared validation gates: <ref refid="files-service_8js_1fs_arch" kindref="member">🏗️ Architectural Flow</ref></para>
+</listitem><listitem><para>Runtime sequence with <computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput> and the frontend: <ref refid="files-service_8js_1fs_sequence" kindref="member">🔄 Execution Sequence</ref></para>
+</listitem><listitem><para>Block-by-block deep dive — including the path-safety wall: <ref refid="files-service_8js_1fs_sub_resolveinside" kindref="member">🧩 Function: <computeroutput>resolveInsideRoot(root, relPath)</computeroutput></ref>, the search walker: <ref refid="files-service_8js_1fs_sub_search" kindref="member">🧩 Function: <computeroutput>searchEntries(projectRoot, query, options)</computeroutput></ref>, and the sync health probe: <ref refid="files-service_8js_1fs_sub_peek" kindref="member">🧩 Function: <computeroutput>peekRootSync(projectRoot)</computeroutput></ref></para>
+</listitem><listitem><para>One click&apos;s journey from browser to disk: <ref refid="files-service_8js_1fs_lifecycle" kindref="member">🔄 End-to-End Lifecycle: One Click, Three Files</ref></para>
+</listitem><listitem><para>Conventions and contracts table: <ref refid="files-service_8js_1fs_contracts" kindref="member">📐 Conventions &amp; Contracts</ref></para>
+</listitem><listitem><para>Cross-file reference map: <ref refid="files-service_8js_1fs_crossref" kindref="member">🔗 Cross-File Reference Map</ref></para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+<simplesect kind="par"><title>🔗 Directly connected chapters</title><para><table rows="2" cols="3"><row>
+<entry thead="yes"><para>Previous  </para>
+</entry><entry thead="yes"><para>Home  </para>
+</entry><entry thead="yes"><para>Related  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><ref refid="chap_server" kindref="compound">Chapter 3 — server.js</ref>  </para>
+</entry><entry thead="no"><para><ref refid="index" kindref="compound">Manual home</ref>  </para>
+</entry><entry thead="no"><para>Route table: <ref refid="index_1manual_api" kindref="member">📡 The JSON API Surface (one table)</ref> · error contract: <ref refid="index_1manual_errors" kindref="member">🚨 The Shared Error Contract</ref>  </para>
+</entry></row>
+</table>
+</para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="files-service_8js" kindref="compound">files-service.js</ref> </para>
+</simplesect>
+</para>
+    </detaileddescription>
+    <location file="dox/main/manual.dox"/>
+  </compounddef>
+</doxygen>

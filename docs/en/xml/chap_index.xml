@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="chap_index" kind="page">
+    <compoundname>chap_index</compoundname>
+    <title>Chapter 1 — index.html: The SPA Shell</title>
+    <briefdescription>
+<para>Landing chapter for the <ref refid="index_8html" kindref="compound">index.html</ref> documentation: what the shell does, what its deep dive covers, and where to go next. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Every visit to the portal starts here. <computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput> answers <computeroutput>/</computeroutput>, <computeroutput>/index.html</computeroutput> and any unknown HTML-ish route with this one file (<computeroutput>serveSPA()</computeroutput>), and the browser never performs a full navigation away from it again — all &quot;pages&quot; are views mounted into its <computeroutput>&lt;main id="app"&gt;</computeroutput> container.</para>
+<para><simplesect kind="par"><title>🎯 Why read this chapter</title><para>The shell owns the two decisions that happen <emphasis>before first paint</emphasis>: which theme and which performance tier apply (preventing flash-of-unstyled content), and in which order fonts, CSS and the deferred scripts load. Everything else in the frontend depends on those choices.</para>
+</simplesect>
+<simplesect kind="par"><title>🗺️ What the full documentation covers</title><para><itemizedlist>
+<listitem><para>The overview and architecture: <ref refid="index_8html_1sec_overview" kindref="member">📖 Overview: What Does This File Do?</ref> and <ref refid="index_8html_1sec_arch" kindref="member">🏗️ Architectural Flow</ref></para>
+</listitem><listitem><para>Block 1–2: the theme detection and performance-tier pre-paint engines: <ref refid="index_8html_1sec_block1" kindref="member">🧩 Block 1: Theme Detection Engine (Pre-Paint)</ref>, <ref refid="index_8html_1sec_block2" kindref="member">🧩 Block 2: Performance Tier Engine (Pre-Paint)</ref></para>
+</listitem><listitem><para>Block 3: the performance monitor bootstrap: <ref refid="index_8html_1sec_block3" kindref="member">🧩 Block 3: Performance Monitor Bootstrap</ref></para>
+</listitem><listitem><para>Blocks 4–8: head assets, aura backdrop, navbar, the <computeroutput>#app</computeroutput> mount point, and the deferred script pipeline: <ref refid="index_8html_1sec_block4" kindref="member">🧩 Block 4: Head Assets (Fonts + CSS)</ref>, <ref refid="index_8html_1sec_block5" kindref="member">🧩 Block 5: Aura Backdrop (Background Glow)</ref>, <ref refid="index_8html_1sec_block6" kindref="member">🧩 Block 6: Navigation Bar (Header)</ref>, <ref refid="index_8html_1sec_block7" kindref="member">🧩 Block 7: SPA Mount Point</ref>, <ref refid="index_8html_1sec_block8" kindref="member">🧩 Block 8: Deferred Script Pipeline</ref></para>
+</listitem><listitem><para>HTML conventions used throughout: <ref refid="index_8html_1sec_conventions" kindref="member">📐 HTML Conventions Used In This File</ref></para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+<simplesect kind="par"><title>🔗 Directly connected chapters</title><para><table rows="2" cols="2"><row>
+<entry thead="yes"><para>Next  </para>
+</entry><entry thead="yes"><para>Related  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><ref refid="chap_browse" kindref="compound">Chapter 2 — browse.html</ref>  </para>
+</entry><entry thead="no"><para><ref refid="chap_server" kindref="compound">Chapter 3 — server.js (serves this file via serveSPA)</ref>  </para>
+</entry></row>
+</table>
+</para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="index_8html" kindref="compound">index.html</ref> </para>
+</simplesect>
+</para>
+    </detaileddescription>
+    <location file="dox/main/manual.dox"/>
+  </compounddef>
+</doxygen>

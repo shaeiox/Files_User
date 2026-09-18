@@ -16,3 +16,4 @@ C:/PRO/files-server-web/assets/css/performance-modes.css:170: warning: documente
 C:/PRO/files-server-web/assets/css/performance-modes.css:171: warning: documented symbol '* after' was not declared or defined.
 C:/PRO/files-server-web/dox/main/browse.dox:187: warning: ignoring \startuml command because PLANTUML_JAR_PATH is not set
 C:/PRO/files-server-web/dox/main/files-service.dox:240: warning: ignoring \startuml command because PLANTUML_JAR_PATH is not set
+C:/PRO/files-server-web/dox/main/load-env.dox:196: warning: ignoring \startuml command because PLANTUML_JAR_PATH is not set

@@ -9,12 +9,12 @@ var searchData=
   ['script_3a_20internationalization_20engine_6',['Block 23 — Script: Internationalization Engine',['../browse_8html.html#block_script_i18n',1,'']]],
   ['searchentries_20projectroot_20query_20options_7',['🧩 Function: &lt;span class=&quot;tt&quot;&gt;searchEntries(projectRoot, query, options)&lt;/span&gt;',['../files-service_8js.html#fs_sub_search',1,'']]],
   ['securityheaders_20res_8',['🧩 Function: &lt;span class=&quot;tt&quot;&gt;securityHeaders(res)&lt;/span&gt;',['../server_8js.html#server_sechdrs',1,'']]],
-  ['see_20also_9',['See Also',['../files-service_8js.html#fs_seealso',1,'🔍 See Also'],['../index_8html.html#sec_seealso',1,'🔍 See Also']]],
+  ['see_20also_9',['See Also',['../files-service_8js.html#fs_seealso',1,'🔍 See Also'],['../index_8html.html#sec_seealso',1,'🔍 See Also'],['../load-env_8js.html#le_seealso',1,'🔍 See Also']]],
   ['see_20also_20metadata_10',['🔍 See Also &amp;amp; Metadata',['../browse_8html.html#seealso',1,'']]],
   ['sendjson_20res_20status_20data_20headers_11',['🧩 Function: &lt;span class=&quot;tt&quot;&gt;sendJSON(res, status, data, headers)&lt;/span&gt;',['../server_8js.html#server_sendjson',1,'']]],
   ['sendserviceerror_20res_20err_12',['🧩 Function: &lt;span class=&quot;tt&quot;&gt;sendServiceError(res, err)&lt;/span&gt;',['../server_8js.html#server_senderror',1,'']]],
   ['sendtext_20res_20status_20text_20contenttype_13',['🧩 Function: &lt;span class=&quot;tt&quot;&gt;sendText(res, status, text, contentType)&lt;/span&gt;',['../server_8js.html#server_sendtext',1,'']]],
-  ['sequence_14',['🔄 Execution Sequence',['../files-service_8js.html#fs_sequence',1,'']]],
+  ['sequence_14',['Sequence',['../files-service_8js.html#fs_sequence',1,'🔄 Execution Sequence'],['../load-env_8js.html#le_sequence',1,'🔄 Execution Sequence']]],
   ['sequence_20plantuml_20diagram_15',['🔄 Execution Sequence (PlantUML Diagram)',['../browse_8html.html#sequence',1,'']]],
   ['server_20listen_20port_20host_20…_20—_20startup_20banner_16',['🧩 Block: &lt;span class=&quot;tt&quot;&gt;server.listen(PORT, HOST, …)&lt;/span&gt; — Startup Banner',['../server_8js.html#server_listen',1,'']]],
   ['servespa_20res_17',['🧩 Function: &lt;span class=&quot;tt&quot;&gt;serveSPA(res)&lt;/span&gt;',['../server_8js.html#server_servespa',1,'']]],
@@ -35,5 +35,6 @@ var searchData=
   ['streamdownload_20req_20res_20fileinfo_32',['🧩 Function: &lt;span class=&quot;tt&quot;&gt;streamDownload(req, res, fileInfo)&lt;/span&gt;',['../server_8js.html#server_streamdownload',1,'']]],
   ['stylesheet_33',['Stylesheet',['../browse_8html.html#block_tokens_css',1,'Block 10 — Design Tokens Stylesheet'],['../browse_8html.html#block_base_css',1,'Block 11 — Base Stylesheet'],['../browse_8html.html#block_components_css',1,'Block 12 — Components Stylesheet'],['../browse_8html.html#block_home_css',1,'Block 13 — Home Page Stylesheet'],['../browse_8html.html#block_browse_css',1,'Block 14 — Browse Page Stylesheet'],['../browse_8html.html#block_google_fonts',1,'Block 9 — Google Fonts Stylesheet']]],
   ['summarizetree_20dir_34',['🧩 Function: &lt;span class=&quot;tt&quot;&gt;summarizeTree(dir)&lt;/span&gt;',['../files-service_8js.html#fs_sub_summarizetree',1,'']]],
-  ['summary_35',['Summary',['../browse_8html.html#eli5_overview',1,'🧒 ELI5 Summary'],['../files-service_8js.html#fs_eli5',1,'🧒 ELI5 Summary'],['../server_8js.html#server_eli5',1,'🧒 ELI5 Summary']]]
+  ['summary_35',['Summary',['../browse_8html.html#eli5_overview',1,'🧒 ELI5 Summary'],['../files-service_8js.html#fs_eli5',1,'🧒 ELI5 Summary'],['../load-env_8js.html#le_eli5',1,'🧒 ELI5 Summary'],['../server_8js.html#server_eli5',1,'🧒 ELI5 Summary']]],
+  ['surface_36',['Block: module.exports — The Public Surface',['../load-env_8js.html#sub_le_exports',1,'']]]
 ];

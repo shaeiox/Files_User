@@ -472,7 +472,7 @@ back&quot;), and nobody may leave the storage room. If anything is wrong — the
 </sect2>
 <sect2 id="files-service_8js_1fs_responsibilities">
 <title>Core Responsibilities</title><para><itemizedlist>
-<listitem><para><bold>Sole Owner of FILES_ROOT:</bold> Reads <computeroutput>process.env.FILES_ROOT</computeroutput> (populated from <computeroutput>.env</computeroutput> by <computeroutput><ref refid="load-env_8js_source" kindref="compound">lib/load-env.js</ref></computeroutput>), resolves it against the project root, and validates that it exists, is a directory, and is non-empty with at least one visible category folder. No other file in the repository resolves or stats <computeroutput>FILES_ROOT</computeroutput> except via this module.</para>
+<listitem><para><bold>Sole Owner of FILES_ROOT:</bold> Reads <computeroutput>process.env.FILES_ROOT</computeroutput> (populated from <computeroutput>.env</computeroutput> by <computeroutput><ref refid="load-env_8js" kindref="compound">lib/load-env.js</ref></computeroutput>), resolves it against the project root, and validates that it exists, is a directory, and is non-empty with at least one visible category folder. No other file in the repository resolves or stats <computeroutput>FILES_ROOT</computeroutput> except via this module.</para>
 </listitem><listitem><para><bold>Path Safety Wall:</bold> Converts any client-supplied relative path into a validated absolute path that is provably inside <computeroutput>FILES_ROOT</computeroutput>, rejecting <computeroutput>.</computeroutput> / <computeroutput>..</computeroutput> segments and NUL bytes, and re-checking with <computeroutput>path.relative()</computeroutput> after resolution (defence in depth).</para>
 </listitem><listitem><para><bold>Directory Listing Engine:</bold> <computeroutput>listCategories()</computeroutput> (with per-category recursive summaries) and <computeroutput>listPath()</computeroutput> (flat listings at any depth) — the data behind <computeroutput>/api/categories</computeroutput> and <computeroutput>/api/files</computeroutput>.</para>
 </listitem><listitem><para><bold>Download Resolver:</bold> <computeroutput>getDownloadTarget()</computeroutput> stats a file and returns the <computeroutput>{ absPath, fileName, size, mtime }</computeroutput> bundle that <computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput> streams with <computeroutput>fs.createReadStream</computeroutput>. This module never streams; it only decides <emphasis>what</emphasis> may be streamed.</para>
@@ -491,7 +491,7 @@ back&quot;), and nobody may leave the storage room. If anything is wrong — the
 </listitem><listitem><para><computeroutput><ref refid="files-service_8js" kindref="compound">lib/files-service.js</ref></computeroutput> = domain layer (this file). Knows nothing about HTTP; it never writes headers and never sees a request object. Its only HTTP awareness is the <computeroutput>httpStatus</computeroutput> numbers it stamps onto errors, a pragmatic exception that lets <computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput>&apos;s generic <computeroutput>catch</computeroutput> render the right status without a mapping table.</para>
 </listitem></itemizedlist>
 </para>
-<para>Upward, it is consumed exclusively by <computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput>, which wires each exported function to exactly one API route. Downward, it depends only on Node built-ins (<computeroutput>fs/promises</computeroutput>, <computeroutput>fs</computeroutput>, <computeroutput>path</computeroutput>) and on the environment contract established by <computeroutput><ref refid="load-env_8js_source" kindref="compound">lib/load-env.js</ref></computeroutput>. The frontend never calls this module; it consumes its output indirectly through <computeroutput><ref refid="resource-service_8js_source" kindref="compound">assets/js/services/resource-service.js</ref></computeroutput>.</para>
+<para>Upward, it is consumed exclusively by <computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput>, which wires each exported function to exactly one API route. Downward, it depends only on Node built-ins (<computeroutput>fs/promises</computeroutput>, <computeroutput>fs</computeroutput>, <computeroutput>path</computeroutput>) and on the environment contract established by <computeroutput><ref refid="load-env_8js" kindref="compound">lib/load-env.js</ref></computeroutput>. The frontend never calls this module; it consumes its output indirectly through <computeroutput><ref refid="resource-service_8js_source" kindref="compound">assets/js/services/resource-service.js</ref></computeroutput>.</para>
 <para><simplesect kind="note"><para>What This File Does NOT Do:<itemizedlist>
 <listitem><para>It does <bold>not</bold> serve HTTP. No routing, no headers, no streaming — all of that is <computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput> (<computeroutput>streamDownload</computeroutput>, <computeroutput>sendJSON</computeroutput>).</para>
 </listitem><listitem><para>It does <bold>not</bold> cache. Every call re-reads the disk; all caching in this product lives in the browser (<computeroutput><ref refid="resource-service_8js_source" kindref="compound">resource-service.js</ref></computeroutput>&apos;s sessionStorage).</para>
@@ -606,7 +606,7 @@ yes or no&quot;), and a <bold>map of the building</bold> (<computeroutput>path</
 <simplesect kind="par"><title>🔗 Project Dependencies</title><para><itemizedlist>
 <listitem><para>Depends on: Node.js runtime only — no npm dependency, which is why the domain layer keeps working even if <computeroutput>node_modules</computeroutput> is wiped.</para>
 </listitem><listitem><para>Consumed by: nothing at require time; the bindings are used by all functions documented below.</para>
-</listitem><listitem><para>Sideways: mirrors <computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput>&apos;s &quot;built-ins first&quot; require style and <computeroutput><ref refid="load-env_8js_source" kindref="compound">lib/load-env.js</ref></computeroutput>&apos;s identical approach.</para>
+</listitem><listitem><para>Sideways: mirrors <computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput>&apos;s &quot;built-ins first&quot; require style and <computeroutput><ref refid="load-env_8js" kindref="compound">lib/load-env.js</ref></computeroutput>&apos;s identical approach.</para>
 </listitem><listitem></listitem></itemizedlist>
 </para>
 </simplesect>
@@ -614,7 +614,7 @@ yes or no&quot;), and a <bold>map of the building</bold> (<computeroutput>path</
 <listitem></listitem></itemizedlist>
 </para>
 </simplesect>
-<simplesect kind="see"><para><ref refid="load-env_8js_source" kindref="compound">lib/load-env.js</ref></para>
+<simplesect kind="see"><para><ref refid="load-env_8js" kindref="compound">lib/load-env.js</ref></para>
 </simplesect>
 <simplesect kind="par"><title>⚠️ Breaking Change Warning</title><para>If <computeroutput>fsSync</computeroutput> is removed (e.g. during an async-only refactor), <computeroutput>peekRootSync()</computeroutput> throws a <computeroutput>ReferenceError</computeroutput> the first time <computeroutput>/api/health</computeroutput> is hit or the startup banner renders — health checks start reporting <computeroutput>degraded</computeroutput> and monitoring silently flips. Conversely, replacing <computeroutput>require("fs/promises")</computeroutput> with <computeroutput>require("fs")</computeroutput> breaks every <computeroutput>await</computeroutput> in this file at runtime: the calls return callbacks-style behaviour and all six API routes start 500-ing.</para>
 </simplesect>
@@ -767,7 +767,7 @@ went wrong!&quot;, every refusal gets a stamp: the desk knows how serious it is 
 <simplesect kind="par"><title>🧒 ELI5</title><para>Reading the label on the basement door. No label? Refuse to guess — go back and tell the manager &quot;the door has no name on it&quot; (<computeroutput>503 FILES_ROOT_MISSING</computeroutput>). Label can be a full address or directions from the lobby; the keeper knows both dialects.</para>
 </simplesect>
 <simplesect kind="par"><title>⚙️ How It Works (Step-by-Step)</title><para><orderedlist>
-<listitem><para>Read <computeroutput>process.env.FILES_ROOT</computeroutput> — populated at boot by <computeroutput><ref refid="load-env_8js_source" kindref="compound">lib/load-env.js</ref></computeroutput> before <computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput> requires this module (both are required after <computeroutput>loadEnv()</computeroutput> runs, so ordering is safe).</para>
+<listitem><para>Read <computeroutput>process.env.FILES_ROOT</computeroutput> — populated at boot by <computeroutput><ref refid="load-env_8js" kindref="compound">lib/load-env.js</ref></computeroutput> before <computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput> requires this module (both are required after <computeroutput>loadEnv()</computeroutput> runs, so ordering is safe).</para>
 </listitem><listitem><para>Treat <computeroutput>undefined</computeroutput>, <computeroutput>null</computeroutput> and whitespace-only values (<computeroutput>""</computeroutput> after <computeroutput>String(raw).trim()</computeroutput>) as &quot;not configured&quot; → throw <computeroutput>503 FILES_ROOT_MISSING</computeroutput>. 503 (not 500) is deliberate: it tells the operator this is a <emphasis>configuration</emphasis> problem, and it reads correctly on <computeroutput>/api/health</computeroutput>-style probes.</para>
 </listitem><listitem><para>Trim once into <computeroutput>configured</computeroutput>; whitespace around the value in <computeroutput>.env</computeroutput> is therefore harmless.</para>
 </listitem><listitem><para>If the string is already absolute (<computeroutput>path.isAbsolute</computeroutput> — true for <computeroutput>/srv/cloudavid/downloads</computeroutput> on Linux and <computeroutput>D:\CloudAvid\Downloads</computeroutput> on Windows), resolve it with <computeroutput>path.resolve(configured)</computeroutput> to normalise separators and collapses.</para>
@@ -788,12 +788,12 @@ went wrong!&quot;, every refusal gets a stamp: the desk knows how serious it is 
 </para>
 </simplesect>
 <simplesect kind="par"><title>🔗 Project Dependencies</title><para><itemizedlist>
-<listitem><para>Depends on: <computeroutput>process.env.FILES_ROOT</computeroutput> (written by <computeroutput><ref refid="load-env_8js_source" kindref="compound">lib/load-env.js</ref></computeroutput>), Node <computeroutput>path</computeroutput>, <computeroutput>serviceError</computeroutput>.</para>
+<listitem><para>Depends on: <computeroutput>process.env.FILES_ROOT</computeroutput> (written by <computeroutput><ref refid="load-env_8js" kindref="compound">lib/load-env.js</ref></computeroutput>), Node <computeroutput>path</computeroutput>, <computeroutput>serviceError</computeroutput>.</para>
 </listitem><listitem><para>Consumed by: <computeroutput>getRoot</computeroutput> (async path) and <computeroutput>peekRootSync</computeroutput> (sync path) — the only two call sites.</para>
 </listitem><listitem></listitem></itemizedlist>
 </para>
 </simplesect>
-<simplesect kind="see"><para><ref refid="load-env_8js_source" kindref="compound">lib/load-env.js</ref><itemizedlist>
+<simplesect kind="see"><para><ref refid="load-env_8js" kindref="compound">lib/load-env.js</ref><itemizedlist>
 <listitem></listitem></itemizedlist>
 </para>
 </simplesect>
@@ -1994,7 +1994,7 @@ digraph download_lifecycle {
 <row>
 <entry thead="no"><para><computeroutput>FILES_ROOT</computeroutput> (env)  </para>
 </entry><entry thead="no"><para><computeroutput>string</computeroutput>  </para>
-</entry><entry thead="no"><para>No (<computeroutput><ref refid="load-env_8js_source" kindref="compound">lib/load-env.js</ref></computeroutput> reads <computeroutput>.env</computeroutput>)  </para>
+</entry><entry thead="no"><para>No (<computeroutput><ref refid="load-env_8js" kindref="compound">lib/load-env.js</ref></computeroutput> reads <computeroutput>.env</computeroutput>)  </para>
 </entry><entry thead="no"><para><computeroutput>resolveConfiguredRoot</computeroutput>  </para>
 </entry><entry thead="no"><para>Deployment-defined downloads root  </para>
 </entry></row>
@@ -2067,7 +2067,7 @@ digraph crossref {
 <sect1 id="files-service_8js_1fs_seealso">
 <title>🔍 See Also</title><para><simplesect kind="see"><para><ref refid="server_8js" kindref="compound">server.js</ref> — the only direct consumer; transport, streaming and error rendering. </para>
 </simplesect>
-<simplesect kind="see"><para><ref refid="load-env_8js_source" kindref="compound">lib/load-env.js</ref> — populates <computeroutput>process.env.FILES_ROOT</computeroutput> before this module is required. </para>
+<simplesect kind="see"><para><ref refid="load-env_8js" kindref="compound">lib/load-env.js</ref> — populates <computeroutput>process.env.FILES_ROOT</computeroutput> before this module is required. </para>
 </simplesect>
 <simplesect kind="see"><para>.env.example — the documented contract for <computeroutput>FILES_ROOT</computeroutput> and <computeroutput>PORT</computeroutput>. </para>
 </simplesect>
@@ -2083,7 +2083,7 @@ digraph crossref {
 </simplesect>
 <simplesect kind="see"><para><ref refid="package_8json_source" kindref="compound">package.json</ref> — npm start entry point and the single (optional) dependency.</para>
 </simplesect>
-<simplesect kind="author"><para>CloudAvid Team </para>
+<simplesect kind="author"><para>ShaiyaAzizi </para>
 </simplesect>
 <simplesect kind="version"><para>1.0 </para>
 </simplesect>

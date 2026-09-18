@@ -1196,6 +1196,8 @@
   </compound>
   <compound refid="index_8dox" kind="file"><name>index.dox</name>
   </compound>
+  <compound refid="load-env_8dox" kind="file"><name>load-env.dox</name>
+  </compound>
   <compound refid="server_8dox" kind="file"><name>server.dox</name>
   </compound>
   <compound refid="index_8html" kind="file"><name>index.html</name>

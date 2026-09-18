@@ -1,0 +1,373 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="indexpage" kind="page">
+    <compoundname>index</compoundname>
+    <title>CloudAvid File Portal — Documentation Manual</title>
+    <innerpage refid="chap_index">Chapter 1 — index.html: The SPA Shell</innerpage>
+    <innerpage refid="chap_browse">Chapter 2 — browse.html: The Deep-Link Shell</innerpage>
+    <innerpage refid="chap_server">Chapter 3 — server.js: The HTTP Transport Layer</innerpage>
+    <innerpage refid="chap_files">Chapter 4 — lib/files-service.js: The Filesystem Domain Layer</innerpage>
+    <tableofcontents>
+      <tocsect>
+        <name>📖 Overview: The Portal in One Paragraph</name>
+        <docs><para>📖 Overview: The Portal in One Paragraph </para>
+</docs>
+        <reference>indexpage_1manual_overview</reference>
+      </tocsect>
+      <tocsect>
+        <name>🗺️ System Map</name>
+        <docs><para>🗺️ System Map </para>
+</docs>
+        <reference>indexpage_1manual_map</reference>
+      </tocsect>
+      <tocsect>
+        <name>🧭 Reading Order</name>
+        <docs><para>🧭 Reading Order </para>
+</docs>
+        <reference>indexpage_1manual_toc</reference>
+      </tocsect>
+      <tocsect>
+        <name>📡 The JSON API Surface (one table)</name>
+        <docs><para>📡 The JSON API Surface (one table) </para>
+</docs>
+        <reference>indexpage_1manual_api</reference>
+      </tocsect>
+      <tocsect>
+        <name>🚨 The Shared Error Contract</name>
+        <docs><para>🚨 The Shared Error Contract </para>
+</docs>
+        <reference>indexpage_1manual_errors</reference>
+      </tocsect>
+      <tocsect>
+        <name>📐 House Conventions (applies to all chapters)</name>
+        <docs><para>📐 House Conventions (applies to all chapters) </para>
+</docs>
+        <reference>indexpage_1manual_conventions</reference>
+      </tocsect>
+      <tocsect>
+        <name>🔍 See Also</name>
+        <docs><para>🔍 See Also </para>
+</docs>
+        <reference>indexpage_1manual_seealso</reference>
+      </tocsect>
+    </tableofcontents>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para>Welcome to the engineering manual for the <bold>CloudAvid File Portal</bold>: a zero-framework, filesystem-driven download portal with a Single Page Application (SPA) frontend and a two-layer Node.js back-end.</para>
+<para>─────────────────────────────────────────────────────────────────────────────</para>
+<sect1 id="index_1manual_overview">
+<title>📖 Overview: The Portal in One Paragraph</title><para><simplesect kind="par"><title>🧒 ELI5</title><para>The portal is a <bold>library</bold>. Two pretty rooms — <computeroutput><ref refid="index_8html" kindref="compound">index.html</ref></computeroutput> and <computeroutput><ref refid="browse_8html" kindref="compound">browse.html</ref></computeroutput> — are where visitors stand. A helpful clerk (<computeroutput><ref refid="resource-service_8js_source" kindref="compound">assets/js/services/resource-service.js</ref></computeroutput>) takes the visitor&apos;s requests to the front desk (<computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput>), and the front desk calls the basement keeper (<computeroutput><ref refid="files-service_8js" kindref="compound">lib/files-service.js</ref></computeroutput>), the only person with the key to the storage room (<computeroutput>FILES_ROOT</computeroutput>). Nobody skips a layer: visitors never walk into the basement, and the basement keeper never talks to visitors directly.</para>
+</simplesect>
+<simplesect kind="par"><title>🧭 The Two-Layer Rule (the project&apos;s most important convention)</title><para>All communication flows through exactly one HTTP seam (<computeroutput><ref refid="resource-service_8js_source" kindref="compound">assets/js/services/resource-service.js</ref></computeroutput> → <computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput> → <computeroutput><ref refid="files-service_8js" kindref="compound">lib/files-service.js</ref></computeroutput>). Each layer is deliberately blind to the others&apos; internals:</para>
+</simplesect>
+<table rows="6" cols="4"><row>
+<entry thead="yes"><para>Layer  </para>
+</entry><entry thead="yes"><para>Files  </para>
+</entry><entry thead="yes"><para>Allowed to do  </para>
+</entry><entry thead="yes"><para>Forbidden to do  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><bold>Shell</bold>  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="index_8html" kindref="compound">index.html</ref></computeroutput>, <computeroutput><ref refid="browse_8html" kindref="compound">browse.html</ref></computeroutput>  </para>
+</entry><entry thead="no"><para>Persistent chrome (navbar/footer), asset pipeline, <computeroutput>&lt;main id="app"&gt;</computeroutput> mount point  </para>
+</entry><entry thead="no"><para>Contain business logic  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><bold>View / Router</bold>  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="router_8js_source" kindref="compound">assets/js/router.js</ref></computeroutput>, <computeroutput><ref refid="home_8js_source" kindref="compound">home.js</ref></computeroutput>, <computeroutput><ref refid="browse_8js_source" kindref="compound">browse.js</ref></computeroutput>, <computeroutput><ref refid="autocomplete_8js_source" kindref="compound">autocomplete.js</ref></computeroutput>  </para>
+</entry><entry thead="no"><para>Render views, react to input  </para>
+</entry><entry thead="no"><para>Fetch the API directly (must go through the service layer)  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><bold>Data service</bold>  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="resource-service_8js_source" kindref="compound">assets/js/services/resource-service.js</ref></computeroutput>  </para>
+</entry><entry thead="no"><para>All <computeroutput>fetch("/api/…")</computeroutput> calls, sessionStorage cache (5 min TTL), URL building (<computeroutput>browseHref</computeroutput>/<computeroutput>downloadHref</computeroutput>)  </para>
+</entry><entry thead="no"><para>Touch the DOM  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><bold>HTTP transport</bold>  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput>  </para>
+</entry><entry thead="no"><para>Routing, headers, CORS, MIME, streaming, security blocklist (<computeroutput>/.env</computeroutput>, <computeroutput>/lib/</computeroutput>, <computeroutput>/node_modules/</computeroutput>)  </para>
+</entry><entry thead="no"><para>Any filesystem decision-making  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><bold>Filesystem domain</bold>  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="files-service_8js" kindref="compound">lib/files-service.js</ref></computeroutput>  </para>
+</entry><entry thead="no"><para>FILES_ROOT resolution, path-safety wall, directory walks, search, release ranking  </para>
+</entry><entry thead="no"><para>Write headers, see request objects, stream bytes  </para>
+</entry></row>
+</table>
+</para>
+<para>─────────────────────────────────────────────────────────────────────────────</para>
+</sect1>
+<sect1 id="index_1manual_map">
+<title>🗺️ System Map</title><para>Every arrow below is a real dependency verified in source. Blue = entry points, yellow = processing, green = rendered output, pink/orange = side-effects and storage, indigo = external systems.</para>
+<para><dot>
+digraph system_map {
+  rankdir=TB;
+  node [shape=box, style=&quot;rounded,filled&quot;, fontname=&quot;Helvetica&quot;, fontsize=10, color=&quot;#9CA3AF&quot;];
+  edge [fontname=&quot;Helvetica&quot;, fontsize=9, color=&quot;#6B7280&quot;];
+
+  subgraph cluster_ops {
+    label=&quot;Operations&quot;;
+    style=&quot;dashed&quot;; color=&quot;#9CA3AF&quot;;
+    nginx [label=&quot;nginx.conf\\nproxies /api/ → 127.0.0.1:3000&quot;, fillcolor=&quot;#E0E7FF&quot;];
+    npm   [label=&quot;package.json\\n\\\&quot;start\\\&quot;: \\\&quot;node server.js\\\&quot;&quot;, fillcolor=&quot;#E0E7FF&quot;];
+  }
+
+  subgraph cluster_browser {
+    label=&quot;Browser&quot;;
+    style=&quot;dashed&quot;; color=&quot;#9CA3AF&quot;;
+
+    subgraph cluster_shells {
+      label=&quot;Shells (Chapter 1–2)&quot;;
+      style=&quot;dashed&quot;; color=&quot;#9CA3AF&quot;;
+      index_html  [label=&quot;index.html\\nSPA shell · pre-paint boot&quot;, fillcolor=&quot;#DBEAFE&quot;];
+      browse_html [label=&quot;browse.html\\ndeep-link shell (/browse/…)&quot;, fillcolor=&quot;#DBEAFE&quot;];
+    }
+
+    subgraph cluster_front {
+      label=&quot;Views + data service&quot;;
+      style=&quot;dashed&quot;; color=&quot;#9CA3AF&quot;;
+      router  [label=&quot;router.js\\nmounts views into #app&quot;, fillcolor=&quot;#FEF3C7&quot;];
+      views   [label=&quot;home.js · browse.js\\nautocomplete.js&quot;, fillcolor=&quot;#D1FAE5&quot;];
+      ressvc  [label=&quot;resource-service.js\\nfetch /api/* · sessionStorage cache&quot;, fillcolor=&quot;#FEF3C7&quot;];
+    }
+  }
+
+  subgraph cluster_node {
+    label=&quot;Node.js process&quot;;
+    style=&quot;dashed&quot;; color=&quot;#9CA3AF&quot;;
+    server [label=&quot;server.js\\nHTTP transport (Chapter 3)&quot;, fillcolor=&quot;#DBEAFE&quot;];
+  }
+
+  subgraph cluster_domain {
+    label=&quot;Domain (Chapter 4)&quot;;
+    style=&quot;dashed&quot;; color=&quot;#9CA3AF&quot;;
+    fsvc [label=&quot;lib/files-service.js\\npath safety · walks · search&quot;, fillcolor=&quot;#CFFAFE&quot;];
+  }
+
+  disk [label=&quot;FILES_ROOT\\n(.env configured tree)&quot;, shape=cylinder, fillcolor=&quot;#FFEDD5&quot;];
+  env  [label=&quot;.env · lib/load-env.js\\nPORT · FILES_ROOT&quot;, fillcolor=&quot;#FFEDD5&quot;];
+
+  views -&gt; index_html  [label=&quot;mounted into #app&quot;, dir=back];
+  views -&gt; browse_html [label=&quot;mounted into #app&quot;, dir=back];
+  router -&gt; views [dir=back];
+  views -&gt; ressvc;
+  ressvc -&gt; server [label=&quot;GET /api/categories · files\\nsearch · releases · download&quot;];
+  npm -&gt; server;
+  nginx -&gt; server [style=dashed];
+  server -&gt; fsvc [label=&quot;6 handlers delegate&quot;];
+  fsvc -&gt; disk [label=&quot;readdir · stat&quot;];
+  env -&gt; server [style=dashed];
+  server -&gt; index_html [label=&quot;serveSPA()&quot;, dir=back];
+  server -&gt; browse_html [label=&quot;serveStatic()&quot;, dir=back];
+}
+</dot>
+</para>
+<para>─────────────────────────────────────────────────────────────────────────────</para>
+</sect1>
+<sect1 id="index_1manual_toc">
+<title>🧭 Reading Order</title><para>The manual has four chapters. Each chapter page summarises one documented file and links into its full documentation. Read top to bottom for the intended learning path — shell first, then the wire, then the disk:</para>
+<para><orderedlist>
+<listitem><para><bold><ref refid="chap_index" kindref="compound">Chapter 1 — index.html: The SPA Shell</ref></bold> — the SPA shell: pre-paint boot, theme and performance tiers, the <computeroutput>#app</computeroutput> mount point, and the ordered script pipeline. <emphasis>Start here: everything the user sees loads through it.</emphasis></para>
+</listitem><listitem><para><bold><ref refid="chap_browse" kindref="compound">Chapter 2 — browse.html: The Deep-Link Shell</ref></bold> — the deep-link shell for <computeroutput>/browse/…</computeroutput> routes, so a refresh or shared link inside the catalogue still boots the same SPA.</para>
+</listitem><listitem><para><bold><ref refid="chap_server" kindref="compound">Chapter 3 — server.js: The HTTP Transport Layer</ref></bold> — the HTTP transport: every route, the security blocklist, streaming downloads, and the error funnel.</para>
+</listitem><listitem><para><bold><ref refid="chap_files" kindref="compound">Chapter 4 — lib/files-service.js: The Filesystem Domain Layer</ref></bold> — the filesystem domain layer: FILES_ROOT validation, the path-safety wall, and the three tree walkers.</para>
+</listitem></orderedlist>
+</para>
+<para><table rows="5" cols="4"><row>
+<entry thead="yes"><para>Chapter  </para>
+</entry><entry thead="yes"><para>Documented file  </para>
+</entry><entry thead="yes"><para>Full documentation  </para>
+</entry><entry thead="yes"><para>Best for  </para>
+</entry></row>
+<row>
+<entry thead="no"><para>1  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="index_8html" kindref="compound">index.html</ref></computeroutput>  </para>
+</entry><entry thead="no"><para><ref refid="index_8html_1sec_overview" kindref="member">index.html deep dive</ref>  </para>
+</entry><entry thead="no"><para>Understanding boot order and the SPA skeleton  </para>
+</entry></row>
+<row>
+<entry thead="no"><para>2  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="browse_8html" kindref="compound">browse.html</ref></computeroutput>  </para>
+</entry><entry thead="no"><para><ref refid="browse_8html_1overview" kindref="member">browse.html deep dive</ref>  </para>
+</entry><entry thead="no"><para>Deep links, asset pipeline, shell duplication  </para>
+</entry></row>
+<row>
+<entry thead="no"><para>3  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput>  </para>
+</entry><entry thead="no"><para><ref refid="server_8js_1server_architecture" kindref="member">server.js deep dive</ref>  </para>
+</entry><entry thead="no"><para>Routing, headers, streaming, security gates  </para>
+</entry></row>
+<row>
+<entry thead="no"><para>4  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="files-service_8js" kindref="compound">lib/files-service.js</ref></computeroutput>  </para>
+</entry><entry thead="no"><para><ref refid="files-service_8js_1fs_overview" kindref="member">files-service.js deep dive</ref>  </para>
+</entry><entry thead="no"><para>Path safety, listings, search, releases, health  </para>
+</entry></row>
+</table>
+</para>
+<para>─────────────────────────────────────────────────────────────────────────────</para>
+</sect1>
+<sect1 id="index_1manual_api">
+<title>📡 The JSON API Surface (one table)</title><para>All six routes live in <computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput> and delegate every filesystem decision to <computeroutput><ref refid="files-service_8js" kindref="compound">lib/files-service.js</ref></computeroutput>. The browser reaches them only through <computeroutput><ref refid="resource-service_8js_source" kindref="compound">resource-service.js</ref></computeroutput> (directly, or via <computeroutput>nginx.conf</computeroutput> in production).</para>
+<para><table rows="7" cols="4"><row>
+<entry thead="yes"><para>Route  </para>
+</entry><entry thead="yes"><para><ref refid="server_8js" kindref="compound">server.js</ref> handler  </para>
+</entry><entry thead="yes"><para><ref refid="files-service_8js" kindref="compound">files-service.js</ref> call  </para>
+</entry><entry thead="yes"><para>Frontend caller  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>GET /__health</computeroutput>, <computeroutput>GET /api/health</computeroutput>  </para>
+</entry><entry thead="no"><para>inline  </para>
+</entry><entry thead="no"><para><computeroutput>peekRootSync()</computeroutput>  </para>
+</entry><entry thead="no"><para>uptime monitors  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>GET /api/categories</computeroutput>  </para>
+</entry><entry thead="no"><para>inline  </para>
+</entry><entry thead="no"><para><computeroutput>listCategories()</computeroutput>  </para>
+</entry><entry thead="no"><para><computeroutput>getResources()</computeroutput> → <computeroutput><ref refid="home_8js_source" kindref="compound">home.js</ref></computeroutput> cards  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>GET /api/releases?limit=</computeroutput>  </para>
+</entry><entry thead="no"><para>inline  </para>
+</entry><entry thead="no"><para><computeroutput>listLatestReleases()</computeroutput>  </para>
+</entry><entry thead="no"><para><computeroutput>getReleases()</computeroutput> → <computeroutput><ref refid="home_8js_source" kindref="compound">home.js</ref></computeroutput>  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>GET /api/search?q=&amp;limit=</computeroutput>  </para>
+</entry><entry thead="no"><para>inline  </para>
+</entry><entry thead="no"><para><computeroutput>searchEntries()</computeroutput>  </para>
+</entry><entry thead="no"><para><computeroutput>search()</computeroutput> → <computeroutput><ref refid="autocomplete_8js_source" kindref="compound">autocomplete.js</ref></computeroutput>, <computeroutput><ref refid="home_8js_source" kindref="compound">home.js</ref></computeroutput>  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>GET /api/files[/&lt;rel&gt;]</computeroutput>, <computeroutput>?path=</computeroutput>  </para>
+</entry><entry thead="no"><para>inline  </para>
+</entry><entry thead="no"><para><computeroutput>listPath()</computeroutput>  </para>
+</entry><entry thead="no"><para><computeroutput>listFiles()</computeroutput> → <computeroutput><ref refid="browse_8js_source" kindref="compound">browse.js</ref></computeroutput>  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>GET/HEAD /api/download[/&lt;rel&gt;]</computeroutput>, <computeroutput>?path=</computeroutput>  </para>
+</entry><entry thead="no"><para><computeroutput>streamDownload()</computeroutput>  </para>
+</entry><entry thead="no"><para><computeroutput>getDownloadTarget()</computeroutput>  </para>
+</entry><entry thead="no"><para><computeroutput>downloadHref()</computeroutput> → <computeroutput><ref refid="browse_8js_source" kindref="compound">browse.js</ref></computeroutput>, <computeroutput><ref refid="home_8js_source" kindref="compound">home.js</ref></computeroutput>, <computeroutput><ref refid="autocomplete_8js_source" kindref="compound">autocomplete.js</ref></computeroutput>  </para>
+</entry></row>
+</table>
+</para>
+<para>Non-API routes: <computeroutput>/</computeroutput>, <computeroutput>/index.html</computeroutput>, <computeroutput>/browse</computeroutput> and <computeroutput>/browse/…</computeroutput> serve the SPA shell (<computeroutput>serveSPA</computeroutput>); everything else is static assets via <computeroutput>serveStatic</computeroutput>, with a hard 403 on <computeroutput>/.env</computeroutput>, <computeroutput>/lib/</computeroutput>, <computeroutput>/node_modules/</computeroutput>.</para>
+<para>─────────────────────────────────────────────────────────────────────────────</para>
+</sect1>
+<sect1 id="index_1manual_errors">
+<title>🚨 The Shared Error Contract</title><para>Every back-end failure is created by <computeroutput>serviceError()</computeroutput> in <computeroutput><ref refid="files-service_8js" kindref="compound">lib/files-service.js</ref></computeroutput> and rendered verbatim by <computeroutput>sendServiceError()</computeroutput> in <computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput> as <computeroutput>{ "error": &lt;message&gt;, "code": &lt;code&gt; }</computeroutput>. These codes are a public contract — the frontend surfaces them and operators match on them:</para>
+<para><table rows="11" cols="4"><row>
+<entry thead="yes"><para>Code  </para>
+</entry><entry thead="yes"><para>HTTP  </para>
+</entry><entry thead="yes"><para>Thrown by  </para>
+</entry><entry thead="yes"><para>Meaning  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>FILES_ROOT_MISSING</computeroutput>  </para>
+</entry><entry thead="no"><para>503  </para>
+</entry><entry thead="no"><para><computeroutput>resolveConfiguredRoot()</computeroutput>  </para>
+</entry><entry thead="no"><para><computeroutput>FILES_ROOT</computeroutput> unset or blank in <computeroutput>.env</computeroutput>  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>FILES_ROOT_NOT_FOUND</computeroutput>  </para>
+</entry><entry thead="no"><para>503  </para>
+</entry><entry thead="no"><para><computeroutput>getRoot()</computeroutput>  </para>
+</entry><entry thead="no"><para>Configured path does not exist  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>FILES_ROOT_NOT_DIRECTORY</computeroutput>  </para>
+</entry><entry thead="no"><para>503  </para>
+</entry><entry thead="no"><para><computeroutput>getRoot()</computeroutput>  </para>
+</entry><entry thead="no"><para>Configured path is not a directory  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>FILES_ROOT_EMPTY</computeroutput>  </para>
+</entry><entry thead="no"><para>503  </para>
+</entry><entry thead="no"><para><computeroutput>assertCategoryStructure()</computeroutput>  </para>
+</entry><entry thead="no"><para>No visible entries at all  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>FILES_ROOT_NO_CATEGORIES</computeroutput>  </para>
+</entry><entry thead="no"><para>503  </para>
+</entry><entry thead="no"><para><computeroutput>assertCategoryStructure()</computeroutput>  </para>
+</entry><entry thead="no"><para>Only files at root; directories are categories  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>INVALID_PATH</computeroutput>  </para>
+</entry><entry thead="no"><para>400  </para>
+</entry><entry thead="no"><para><computeroutput>resolveInsideRoot()</computeroutput>, <computeroutput>getDownloadTarget()</computeroutput>  </para>
+</entry><entry thead="no"><para><computeroutput>.</computeroutput> / <computeroutput>..</computeroutput> / NUL segment, or blank download path  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>PATH_TRAVERSAL</computeroutput>  </para>
+</entry><entry thead="no"><para>403  </para>
+</entry><entry thead="no"><para><computeroutput>resolveInsideRoot()</computeroutput>  </para>
+</entry><entry thead="no"><para>Resolved target escapes <computeroutput>FILES_ROOT</computeroutput>  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>NOT_FOUND</computeroutput>  </para>
+</entry><entry thead="no"><para>404  </para>
+</entry><entry thead="no"><para><computeroutput>listPath()</computeroutput>, <computeroutput>getDownloadTarget()</computeroutput>  </para>
+</entry><entry thead="no"><para>Target does not exist  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>NOT_A_DIRECTORY</computeroutput>  </para>
+</entry><entry thead="no"><para>400  </para>
+</entry><entry thead="no"><para><computeroutput>listPath()</computeroutput>  </para>
+</entry><entry thead="no"><para>Asked to list a file  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>NOT_A_FILE</computeroutput>  </para>
+</entry><entry thead="no"><para>400  </para>
+</entry><entry thead="no"><para><computeroutput>getDownloadTarget()</computeroutput>  </para>
+</entry><entry thead="no"><para>Asked to download a directory  </para>
+</entry></row>
+</table>
+</para>
+<para>─────────────────────────────────────────────────────────────────────────────</para>
+</sect1>
+<sect1 id="index_1manual_conventions">
+<title>📐 House Conventions (applies to all chapters)</title><para><itemizedlist>
+<listitem><para><bold>Module banners:</bold> every source file opens with the <computeroutput>═══</computeroutput> banner comment naming the file and its role.</para>
+</listitem><listitem><para><bold>Live documentation:</bold> the <computeroutput>.dox</computeroutput> pages never hardcode source; they inject it with <computeroutput>@snippet &lt;file&gt; &lt;snippet_id&gt;</computeroutput> against <computeroutput>[snippet_id]</computeroutput> marker comments in the sources (see <computeroutput>dox/main/files-service.dox</computeroutput> and the <computeroutput>fs_snip_*</computeroutput> markers in <computeroutput><ref refid="files-service_8js" kindref="compound">lib/files-service.js</ref></computeroutput>).</para>
+</listitem><listitem><para><bold>Hybrid tone:</bold> ELI5 analogies for <emphasis>what/why</emphasis>, senior depth for <emphasis>how</emphasis>, plus a ⚠️ breaking-change warning per logical block.</para>
+</listitem><listitem><para><bold>Diagrams:</bold> Graphviz <computeroutput>@dot</computeroutput> with the pastel palette (<computeroutput>#DBEAFE</computeroutput> entry · <computeroutput>#FEF3C7</computeroutput> processing · <computeroutput>#D1FAE5</computeroutput> output · <computeroutput>#FCE7F3</computeroutput> side-effects · <computeroutput>#E0E7FF</computeroutput> external · <computeroutput>#FFEDD5</computeroutput> storage); PlantUML <computeroutput>@startuml</computeroutput> for interaction timelines.</para>
+</listitem><listitem><para><bold>Hidden-entry rule:</bold> <computeroutput><ref refid="index_8html" kindref="compound">index.html</ref></computeroutput>, <computeroutput>index.php</computeroutput> and dotfiles never appear in listings. The authoritative filter is <computeroutput>isHidden()</computeroutput> in <computeroutput><ref refid="files-service_8js" kindref="compound">lib/files-service.js</ref></computeroutput>; <computeroutput><ref refid="browse_8js_source" kindref="compound">browse.js</ref></computeroutput> and <computeroutput><ref refid="resource-service_8js_source" kindref="compound">resource-service.js</ref></computeroutput> keep defensive display-level copies.</para>
+</listitem><listitem><para><bold>Caching:</bold> the API never caches (<computeroutput>Cache-Control: no-store</computeroutput>); the only cache is the browser&apos;s sessionStorage TTL in <computeroutput><ref refid="resource-service_8js_source" kindref="compound">resource-service.js</ref></computeroutput>.</para>
+</listitem><listitem><para><bold>Config:</bold> no hardcoded paths — <computeroutput>PORT</computeroutput> and <computeroutput>FILES_ROOT</computeroutput> come from <computeroutput>.env</computeroutput> via <computeroutput><ref refid="load-env_8js_source" kindref="compound">lib/load-env.js</ref></computeroutput> (template: <computeroutput>.env.example</computeroutput>).</para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+<sect1 id="index_1manual_seealso">
+<title>🔍 See Also</title><para><simplesect kind="see"><para><ref refid="index_8html" kindref="compound">index.html</ref> </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="browse_8html" kindref="compound">browse.html</ref> </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="server_8js" kindref="compound">server.js</ref> </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="files-service_8js" kindref="compound">files-service.js</ref> </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="load-env_8js_source" kindref="compound">lib/load-env.js</ref> </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="resource-service_8js_source" kindref="compound">assets/js/services/resource-service.js</ref> </para>
+</simplesect>
+<simplesect kind="see"><para>.env.example </para>
+</simplesect>
+<simplesect kind="see"><para>nginx.conf</para>
+</simplesect>
+<simplesect kind="author"><para>CloudAvid Team </para>
+</simplesect>
+<simplesect kind="version"><para>1.0 </para>
+</simplesect>
+</para>
+</sect1>
+    </detaileddescription>
+    <location file="dox/main/manual.dox"/>
+  </compounddef>
+</doxygen>
