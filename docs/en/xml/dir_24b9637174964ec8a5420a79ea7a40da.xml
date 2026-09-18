@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="dir_24b9637174964ec8a5420a79ea7a40da" kind="dir">
+    <compoundname>assets/js/services</compoundname>
+    <innerfile refid="performance-monitor_8js">performance-monitor.js</innerfile>
+    <innerfile refid="resource-service_8js">resource-service.js</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="assets/js/services/"/>
+  </compounddef>
+</doxygen>

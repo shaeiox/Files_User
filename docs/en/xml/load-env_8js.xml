@@ -1,0 +1,135 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="load-env_8js" kind="file" language="Javascript">
+    <compoundname>load-env.js</compoundname>
+    <sectiondef kind="var">
+      <memberdef kind="variable" id="load-env_8js_1a2e47e1f004220675d0fa39b8255bd78f" prot="public" static="no" mutable="no">
+        <type>const</type>
+        <definition>const fs</definition>
+        <argsstring></argsstring>
+        <name>fs</name>
+        <initializer>= require(&quot;fs&quot;)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="lib/load-env.js" line="2" column="7" bodyfile="lib/load-env.js" bodystart="2" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="load-env_8js_1a1fdc7709faf62dce60620fb3f9d3453c" prot="public" static="no" mutable="no">
+        <type>const</type>
+        <definition>const path</definition>
+        <argsstring></argsstring>
+        <name>path</name>
+        <initializer>= require(&quot;path&quot;)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="lib/load-env.js" line="3" column="7" bodyfile="lib/load-env.js" bodystart="3" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="load-env_8js_1aa4072ba4b6b56b0fb6f4801f17ab2b34" prot="public" static="no" mutable="no">
+        <type>module</type>
+        <definition>module exports</definition>
+        <argsstring></argsstring>
+        <name>exports</name>
+        <initializer>= { loadEnv }</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="lib/load-env.js" line="42" column="7" bodyfile="lib/load-env.js" bodystart="42" bodyend="42"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="load-env_8js_1afbe3e43d4b7b028495ec58fb2f2e7c71" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>function</type>
+        <definition>function parseEnvText</definition>
+        <argsstring>(text)</argsstring>
+        <name>parseEnvText</name>
+        <param>
+          <type>text</type>
+          <defname>text</defname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="lib/load-env.js" line="5" column="10" bodyfile="lib/load-env.js" bodystart="5" bodyend="23"/>
+      </memberdef>
+      <memberdef kind="function" id="load-env_8js_1adf7b5fa45f0ea74971a5d0483e708ec3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>function</type>
+        <definition>function loadEnv</definition>
+        <argsstring>(projectRoot)</argsstring>
+        <name>loadEnv</name>
+        <param>
+          <type>projectRoot</type>
+          <defname>projectRoot</defname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="lib/load-env.js" line="25" column="10" bodyfile="lib/load-env.js" bodystart="25" bodyend="40"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">/*<sp/>Load<sp/>.env<sp/>from<sp/>the<sp/>project<sp/>root.<sp/>Prefers<sp/>dotenv;<sp/>falls<sp/>back<sp/>to<sp/>a<sp/>small<sp/>parser.<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>fs<sp/>=<sp/>require(</highlight><highlight class="stringliteral">&quot;fs&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>path<sp/>=<sp/>require(</highlight><highlight class="stringliteral">&quot;path&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="keyword">function</highlight><highlight class="normal"><sp/>parseEnvText(text)<sp/>{</highlight></codeline>
+<codeline lineno="6"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>rawLine<sp/>of<sp/>text.split(/\r?\n/))<sp/>{</highlight></codeline>
+<codeline lineno="7"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>line<sp/>=<sp/>rawLine.trim();</highlight></codeline>
+<codeline lineno="8"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(!line<sp/>||<sp/>line.startsWith(</highlight><highlight class="stringliteral">&quot;#&quot;</highlight><highlight class="normal">))<sp/></highlight><highlight class="keywordflow">continue</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>eq<sp/>=<sp/>line.indexOf(</highlight><highlight class="stringliteral">&quot;=&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="10"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(eq<sp/>&lt;=<sp/>0)<sp/></highlight><highlight class="keywordflow">continue</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>key<sp/>=<sp/>line.slice(0,<sp/>eq).trim();</highlight></codeline>
+<codeline lineno="12"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>let<sp/>value<sp/>=<sp/>line.slice(eq<sp/>+<sp/>1).trim();</highlight></codeline>
+<codeline lineno="13"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>(value.startsWith(</highlight><highlight class="charliteral">&apos;&quot;&apos;</highlight><highlight class="normal">)<sp/>&amp;&amp;<sp/>value.endsWith(</highlight><highlight class="charliteral">&apos;&quot;&apos;</highlight><highlight class="normal">))<sp/>||</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>(value.startsWith(</highlight><highlight class="stringliteral">&quot;&apos;&quot;</highlight><highlight class="normal">)<sp/>&amp;&amp;<sp/>value.endsWith(</highlight><highlight class="stringliteral">&quot;&apos;&quot;</highlight><highlight class="normal">))</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)<sp/>{</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>value<sp/>=<sp/>value.slice(1,<sp/>-1);</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="19"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(process.env[key]<sp/>==<sp/></highlight><highlight class="keyword">null</highlight><highlight class="normal"><sp/>||<sp/>process.env[key]<sp/>===<sp/></highlight><highlight class="stringliteral">&quot;&quot;</highlight><highlight class="normal">)<sp/>{</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>process.env[key]<sp/>=<sp/>value;</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="23"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight><highlight class="keyword">function</highlight><highlight class="normal"><sp/>loadEnv(projectRoot)<sp/>{</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>envPath<sp/>=<sp/>path.join(projectRoot,<sp/></highlight><highlight class="stringliteral">&quot;.env&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">try</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>require(</highlight><highlight class="stringliteral">&quot;dotenv&quot;</highlight><highlight class="normal">).config({<sp/>path:<sp/>envPath<sp/>});</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">catch</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>dotenv<sp/>not<sp/>installed<sp/>—<sp/>parse<sp/>.env<sp/>manually<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">try</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(fs.existsSync(envPath))<sp/>{</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>parseEnvText(fs.readFileSync(envPath,<sp/></highlight><highlight class="stringliteral">&quot;utf8&quot;</highlight><highlight class="normal">));</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">catch</highlight><highlight class="normal"><sp/>(err)<sp/>{</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>console.warn(</highlight><highlight class="stringliteral">&quot;Could<sp/>not<sp/>read<sp/>.env:&quot;</highlight><highlight class="normal">,<sp/>err.message);</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="40"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal">module.exports<sp/>=<sp/>{<sp/>loadEnv<sp/>};</highlight></codeline>
+    </programlisting>
+    <location file="lib/load-env.js"/>
+  </compounddef>
+</doxygen>

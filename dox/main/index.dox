@@ -1,0 +1,435 @@
+/**
+ * @file index.html
+ * @brief The main SPA shell, boot-loader, and UI skeleton for the CloudAvid File Portal.
+ * 
+ * @tableofcontents
+ * 
+ * @section sec_overview 📖 Overview: What Does This File Do?
+ * 
+ * The `index.html` is the **single entry point** for the entire CloudAvid File Portal application.
+ * It is not a traditional multi-page website; it is a **Single Page Application (SPA)** where
+ * this HTML file acts as an empty "shell" that hosts dynamic content injected by JavaScript.
+ * 
+ * **Primary Responsibilities of this file:**
+ * 
+ * 1. **UI Skeleton:** Renders the persistent chrome (Navbar, Background Aura, Footer) that stays 
+ *    visible across all views.
+ * 2. **Pre-Paint Boot Logic:** Executes a critical synchronous script *before* the browser paints 
+ *    the screen. This prevents "Flash of Unstyled Content" (FOUC) by applying user's saved theme 
+ *    and performance tier immediately.
+ * 3. **Mount Point:** Provides the `<main id="app">` container where the SPA Router (`router.js`) 
+ *    injects the current view (Home, Browse, etc.).
+ * 4. **Asset Orchestration:** Loads CSS, Fonts, and JavaScript files in a strictly ordered manner.
+ * 
+ * @note This file itself contains **minimal logic**. All heavy business logic lives inside the 
+ * deferred JavaScript files loaded at the bottom of `<body>`.
+ * 
+ * ---
+ * 
+ * @section sec_arch 🏗️ Architectural Flow
+ * 
+ * The lifecycle of a page load happens in this exact order:
+ * 
+ * ```
+ * 1. Browser downloads index.html
+ *          │
+ *          ▼
+ * 2. <head> Inline Script runs SYNCHRONOUSLY
+ *    ├─ Reads localStorage (theme + perf tier)
+ *    └─ Sets data-theme + data-perf on <html>
+ *          │
+ *          ▼
+ * 3. CSS files download (styles apply instantly with correct theme)
+ *          │
+ *          ▼
+ * 4. HTML body renders (Navbar, empty <main>, Footer)
+ *          │
+ *          ▼
+ * 5. Deferred JS files execute (services → UI → router)
+ *          │
+ *          ▼
+ * 6. router.js reads URL → injects the correct view into <main id="app">
+ * ```
+ * 
+ * ---
+ * 
+ * @section sec_block1 🧩 Block 1: Theme Detection Engine (Pre-Paint)
+ * 
+ * @par 📍 Location
+ * Inside `<head>`, in the first inline `<script>` tag (IIFE - Immediately Invoked Function Expression).
+ * 
+ * @par 🎯 Purpose
+ * To decide whether the user wants **Light Mode** or **Dark Mode**, and apply it to the root HTML 
+ * element **before** the browser starts painting. This prevents the annoying "white flash" that 
+ * occurs when a dark-mode user loads a page that starts as light.
+ * 
+ * @par ⚙️ How It Works (Step by Step)
+ * 1. Grabs the `<html>` element reference (`document.documentElement`).
+ * 2. Sets default theme to `'light'`.
+ * 3. **Priority #1 — OS Preference:** Uses `window.matchMedia('(prefers-color-scheme: dark)')` 
+ *    to check if the user's operating system is set to dark mode.
+ * 4. **Priority #2 — User Choice:** Reads `localStorage` key `cav_theme`. If the user has manually 
+ *    selected a theme before, this overrides the OS preference.
+ * 5. **Apply:** Writes the final decision to `<html data-theme="dark|light">`. CSS variables in 
+ *    `tokens.css` react to this attribute to color the entire UI.
+ * 
+ * @par 📥 Inputs
+ * - OS setting: `prefers-color-scheme`
+ * - Browser storage: `localStorage.getItem('cav_theme')` (values: `'light'` or `'dark'`)
+ * 
+ * @par 📤 Outputs
+ * - DOM attribute: `<html data-theme="...">`
+ * 
+ * @par 🔗 Dependencies
+ * - `window.matchMedia` (Browser API)
+ * - `localStorage` (Browser API)
+ * - **Consumed by:** `tokens.css`, `theme.js`
+ * 
+ * @par 💻 Actual Code
+ * ```javascript
+ * var root = document.documentElement;
+ * var theme = 'light';
+ * 
+ * try {
+ *   if (window.matchMedia &&
+ *       window.matchMedia('(prefers-color-scheme: dark)').matches) {
+ *     theme = 'dark';
+ *   }
+ * } catch (_) { }
+ * 
+ * try {
+ *   var savedTheme = localStorage.getItem('cav_theme');
+ *   if (savedTheme === 'light' || savedTheme === 'dark') {
+ *     theme = savedTheme;
+ *   }
+ * } catch (_) { }
+ * 
+ * root.setAttribute('data-theme', theme);
+ * ```
+ * 
+ * @warning The `try/catch` wrapper is crucial. `localStorage` throws exceptions in Private Browsing 
+ * mode on some browsers (e.g., Safari), which would crash the entire page without this safety net.
+ * 
+ * ---
+ * 
+ * @section sec_block2 🧩 Block 2: Performance Tier Engine (Pre-Paint)
+ * 
+ * @par 📍 Location
+ * Same IIFE inside `<head>`, right after the theme block.
+ * 
+ * @par 🎯 Purpose
+ * To classify the user's device power (High / Medium / Low / Potato) and apply the corresponding 
+ * performance mode **before rendering**. This ensures a slow device does not attempt to render 
+ * expensive CSS animations and blur effects.
+ * 
+ * @par ⚙️ How It Works (Step by Step)
+ * 1. Sets default tier to `'medium'`.
+ * 2. **Accessibility Priority:** Checks `prefers-reduced-motion`. If the user disabled motion at 
+ *    the OS level, we force `low` tier (no animations).
+ * 3. **Read Cache:** Reads the `cav_perf_tier` key from `localStorage`. This cache was previously 
+ *    written by `performance-monitor.js` after running device benchmarks.
+ * 4. **Parse Cache:** Expects a JSON object `{ tier: 'HIGH', timestamp: 1234567890 }`.
+ * 5. **Validation:** Ensures 4 conditions are met:
+ *    - The tier value is in the whitelist: `['HIGH', 'MEDIUM', 'LOW', 'POTATO']`
+ *    - Timestamp is a valid number
+ *    - Cache age is non-negative
+ *    - Cache is less than **7 days old** (TTL = `7 * 24 * 60 * 60 * 1000` ms)
+ * 6. **Purge:** If cache is invalid or expired, delete it (a fresh benchmark will run later).
+ * 7. **Apply:** Writes to `<html data-perf="low|medium|high|potato">`.
+ * 
+ * @par 📥 Inputs
+ * - OS setting: `prefers-reduced-motion`
+ * - Browser storage: `localStorage.getItem('cav_perf_tier')` (JSON string)
+ * 
+ * @par 📤 Outputs
+ * - DOM attribute: `<html data-perf="...">`
+ * - Side effect: May purge invalid cache from `localStorage`
+ * 
+ * @par 🔗 Dependencies
+ * - `window.matchMedia`, `localStorage`, `JSON.parse`, `Date.now`
+ * - **Consumed by:** `performance-modes.css`, `performance-monitor.js`
+ * 
+ * @par 💻 Actual Code
+ * ```javascript
+ * var perfTier = 'medium';
+ * var reducedMotion = false;
+ * 
+ * try {
+ *   reducedMotion = window.matchMedia &&
+ *     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ * } catch (_) { }
+ * 
+ * if (reducedMotion) {
+ *   perfTier = 'low';
+ * } else {
+ *   try {
+ *     var rawPerf = localStorage.getItem('cav_perf_tier');
+ *     if (rawPerf) {
+ *       var cachedPerf = JSON.parse(rawPerf);
+ *       var cachedTier = String(cachedPerf.tier || '').toUpperCase();
+ *       var timestamp = Number(cachedPerf.timestamp);
+ *       var cacheTTL = 7 * 24 * 60 * 60 * 1000;  // 7 days
+ *       var cacheAge = Date.now() - timestamp;
+ *       var validTiers = ['HIGH', 'MEDIUM', 'LOW', 'POTATO'];
+ * 
+ *       if (
+ *         validTiers.indexOf(cachedTier) !== -1 &&
+ *         Number.isFinite(timestamp) &&
+ *         cacheAge >= 0 &&
+ *         cacheAge < cacheTTL
+ *       ) {
+ *         perfTier = cachedTier.toLowerCase();
+ *       } else {
+ *         localStorage.removeItem('cav_perf_tier');
+ *       }
+ *     }
+ *   } catch (_) { }
+ * }
+ * 
+ * root.setAttribute('data-perf', perfTier);
+ * ```
+ * 
+ * @note **Why cache for 7 days?** Running a benchmark on every page load is wasteful. Device 
+ * performance rarely changes over a week, so we trust the cached value for that period.
+ * 
+ * ---
+ * 
+ * @section sec_block3 🧩 Block 3: Performance Monitor Bootstrap
+ * 
+ * @par 📍 Location
+ * Standalone `<script>` tag after the boot IIFE in `<head>`.
+ * 
+ * @par 🎯 Purpose
+ * To initialize the `PerformanceMonitor` module *after* the DOM is ready.
+ * 
+ * @par ⚙️ How It Works
+ * 1. Attaches a **one-time** listener (`{ once: true }`) to the `DOMContentLoaded` event.
+ * 2. When DOM parsing finishes, checks if the `PerformanceMonitor` global exists (it will be 
+ *    loaded by the deferred script `performance-monitor.js`).
+ * 3. Calls `PerformanceMonitor.init({ debug: false })` to start monitoring FPS and device metrics.
+ * 
+ * @par 📥 Inputs
+ * - Event: `DOMContentLoaded`
+ * - Global: `PerformanceMonitor` (may or may not exist)
+ * 
+ * @par 📤 Outputs
+ * - Side effect: Starts the FPS/performance monitoring loop
+ * 
+ * @par 💻 Actual Code
+ * ```javascript
+ * document.addEventListener('DOMContentLoaded', function () {
+ *   if (typeof PerformanceMonitor !== 'undefined') {
+ *     PerformanceMonitor.init({ debug: false });
+ *   }
+ * }, { once: true });
+ * ```
+ * 
+ * @see performance-monitor.js
+ * 
+ * ---
+ * 
+ * @section sec_block4 🧩 Block 4: Head Assets (Fonts + CSS)
+ * 
+ * @par 🎯 Purpose
+ * Load external fonts and stylesheets required by the UI.
+ * 
+ * @par ⚙️ Load Strategy
+ * - **Preconnect:** Establishes early connection to Google Fonts CDN to reduce latency.
+ * - **Fonts:** Loads 4 font families — *Manrope* (default UI), *Cinzel* (headings), 
+ *   *Vazirmatn* (Persian/Farsi UI), *Sora* (accent text).
+ * - **CSS Cascade Order (Critical):**
+ *   1. `tokens.css` → Design system variables (colors, spacing)
+ *   2. `base.css` → Global resets and typography
+ *   3. `components.css` → Reusable UI parts (buttons, pills, dropdowns)
+ *   4. `home.css` → Home view specific styles
+ *   5. `browse.css` → File browser view specific styles
+ *   6. `performance-modes.css` → Rules driven by `[data-perf]` attribute
+ * 
+ * @par 💻 Actual Code
+ * ```html
+ * <link rel="preconnect" href="https://fonts.googleapis.com">
+ * <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ * <link href="https://fonts.googleapis.com/css2?family=Manrope..." rel="stylesheet">
+ * 
+ * <link rel="stylesheet" href="/assets/css/tokens.css">
+ * <link rel="stylesheet" href="/assets/css/base.css">
+ * <link rel="stylesheet" href="/assets/css/components.css">
+ * <link rel="stylesheet" href="/assets/css/home.css">
+ * <link rel="stylesheet" href="/assets/css/browse.css">
+ * <link rel="stylesheet" href="/assets/css/performance-modes.css">
+ * ```
+ * 
+ * @note `banner.js` is intentionally loaded here (without `defer`) so promotional banners 
+ * appear as early as possible during page load.
+ * 
+ * ---
+ * 
+ * @section sec_block5 🧩 Block 5: Aura Backdrop (Background Glow)
+ * 
+ * @par 🎯 Purpose
+ * Creates the ambient glowing background effect visible across the entire application.
+ * 
+ * @par ⚙️ How It Works
+ * - Uses 3 stacked absolutely-positioned `<div>` layers.
+ * - Each layer has its own CSS `radial-gradient` and animation.
+ * - Marked with `aria-hidden="true"` because it is purely decorative (screen readers skip it).
+ * - When `data-perf="low"` or `data-perf="potato"`, animations are disabled by `performance-modes.css`.
+ * 
+ * @par 📤 Outputs
+ * - Visual glow effect on the page background
+ * 
+ * @par 💻 Actual Code
+ * ```html
+ * <div class="aura-backdrop" aria-hidden="true">
+ *   <div class="aura-base"></div>
+ *   <div class="aura-glow-1"></div>
+ *   <div class="aura-glow-2"></div>
+ * </div>
+ * ```
+ * 
+ * ---
+ * 
+ * @section sec_block6 🧩 Block 6: Navigation Bar (Header)
+ * 
+ * @par 🎯 Purpose
+ * Provides the persistent top navigation with branding, tabs, and toolbar actions.
+ * 
+ * @par 🧱 Structural Breakdown
+ * 
+ * ### A) Brand Logo (`.nav-logo`)
+ * - Wrapped in an anchor with `data-link` so `router.js` handles the click as SPA navigation 
+ *   (no full page reload).
+ * - Image has `onerror` fallback to hide broken image.
+ * - Text uses `data-i18n` for translation.
+ * 
+ * ### B) Center Tabs (`.nav-tabs`)
+ * - Three external/internal links: **Website**, **Docs**, **Downloads (current)**.
+ * - The active tab uses `class="active"` and `aria-current="page"` for accessibility.
+ * 
+ * ### C) Right Toolbar (`.nav-actions`)
+ * Contains three interactive components:
+ * 
+ * | Component | Element | Purpose |
+ * |-----------|---------|---------|
+ * | Performance Dropdown | `.perf-dropdown-wrap` | Switches performance tier: AUTO / HIGH / MEDIUM / LOW / POTATO |
+ * | Language Dropdown | `.lang-dropdown-wrap` | Switches locale: English (`en`) / Persian (`fa`) |
+ * | Theme Toggle | `#themeBtn` | Toggles light ↔ dark mode |
+ * 
+ * @par 🔗 Dependencies
+ * - `theme.js` → binds `#themeBtn` click
+ * - `i18n.js` → binds language dropdown and translates `data-i18n` elements
+ * - `performance-monitor.js` → binds performance dropdown
+ * - `router.js` → intercepts `data-link` clicks
+ * 
+ * @par 💻 Structural Skeleton
+ * ```html
+ * <header class="nav">
+ *   <div class="nav-bar">
+ *     <a class="nav-logo" href="/" data-link>...</a>
+ *     
+ *     <div class="nav-tabs" role="tablist">
+ *       <a class="nav-tab" href="https://cloudavid.com">...</a>
+ *       <a class="nav-tab" href="https://docs.cloudavid.com">...</a>
+ *       <a class="nav-tab active" href="/" aria-current="page">...</a>
+ *     </div>
+ *     
+ *     <div class="nav-actions">
+ *       <div class="perf-dropdown-wrap">...</div>
+ *       <div class="lang-dropdown-wrap">...</div>
+ *       <button class="theme-btn" id="themeBtn">...</button>
+ *     </div>
+ *   </div>
+ * </header>
+ * ```
+ * 
+ * ---
+ * 
+ * @section sec_block7 🧩 Block 7: SPA Mount Point
+ * 
+ * @par 🎯 Purpose
+ * The **most important tag** in this entire HTML file. It is the empty container where every SPA 
+ * view (Home, Browse, etc.) gets rendered by `router.js`.
+ * 
+ * @par ⚙️ How It Works
+ * - Starts completely empty when the page loads.
+ * - `router.js` reads `window.location.pathname` and calls the appropriate view renderer 
+ *   (e.g., `renderHome()` or `renderBrowse()`).
+ * - The renderer generates HTML strings and injects them via `document.getElementById('app').innerHTML = ...`.
+ * - On subsequent navigation, the router clears `#app` and mounts the next view.
+ * 
+ * @par 💻 Actual Code
+ * ```html
+ * <main id="app"></main>
+ * ```
+ * 
+ * @warning Never modify `id="app"` — it is hardcoded in `router.js`, `home.js`, and `browse.js`.
+ * 
+ * @see router.js
+ * @see home.js
+ * @see browse.js
+ * 
+ * ---
+ * 
+ * @section sec_block8 🧩 Block 8: Deferred Script Pipeline
+ * 
+ * @par 🎯 Purpose
+ * Loads all business logic modules **after** HTML parsing finishes (thanks to `defer`), so page 
+ * rendering is never blocked.
+ * 
+ * @par ⚙️ Execution Order (STRICT)
+ * The order matters because later files depend on earlier ones:
+ * 
+ * | # | File | Role | Depends On |
+ * |---|------|------|------------|
+ * | 1 | `resource-service.js` | API layer for backend files/folders | — |
+ * | 2 | `performance-monitor.js` | Device benchmark + FPS monitor | — |
+ * | 3 | `theme.js` | Theme toggle logic | — |
+ * | 4 | `i18n.js` | Translation engine | — |
+ * | 5 | `autocomplete.js` | Search suggestion widget | resource-service |
+ * | 6 | `home.js` | Home view renderer | resource-service, i18n |
+ * | 7 | `browse.js` | Browse view renderer | resource-service, i18n |
+ * | 8 | `router.js` | SPA router (last!) | ALL of the above |
+ * 
+ * @warning `router.js` **must** be last because it immediately triggers the initial route on load, 
+ * which requires all view renderers and services to already be ready.
+ * 
+ * @par 💻 Actual Code
+ * ```html
+ * <script src="/assets/js/services/resource-service.js" defer></script>
+ * <script src="/assets/js/services/performance-monitor.js" defer></script>
+ * <script src="/assets/js/theme.js" defer></script>
+ * <script src="/assets/js/i18n.js" defer></script>
+ * <script src="/assets/js/autocomplete.js" defer></script>
+ * <script src="/assets/js/home.js" defer></script>
+ * <script src="/assets/js/browse.js" defer></script>
+ * <script src="/assets/js/router.js" defer></script>
+ * ```
+ * 
+ * ---
+ * 
+ * @section sec_conventions 📐 HTML Conventions Used In This File
+ * 
+ * | Attribute | Meaning | Consumed By |
+ * |-----------|---------|-------------|
+ * | `data-link` | Mark link as SPA navigation (no reload) | `router.js` |
+ * | `data-i18n="key"` | Translate this element's text | `i18n.js` |
+ * | `data-theme="light\|dark"` | Active color theme | `tokens.css`, `theme.js` |
+ * | `data-perf="high\|medium\|low\|potato"` | Active performance tier | `performance-modes.css` |
+ * | `aria-hidden="true"` | Hide from screen readers | Assistive tech |
+ * | `aria-current="page"` | Mark current page/tab | Assistive tech |
+ * 
+ * ---
+ * 
+ * @section sec_seealso 🔍 See Also
+ * 
+ * @see router.js — SPA routing engine
+ * @see home.js — Home view renderer
+ * @see browse.js — File browser renderer
+ * @see theme.js — Theme toggle logic
+ * @see i18n.js — Translation engine
+ * @see performance-monitor.js — Device benchmarking
+ * @see resource-service.js — Backend API layer
+ * 
+ * @author ShaiyaAzizi
+ * @version 1.0
+ */

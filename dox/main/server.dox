@@ -1,0 +1,2032 @@
+/**
+ * @file server.js
+ * @brief The Node.js back-end of the CloudAvid File Portal: a zero-framework HTTP server that serves the SPA shell, static assets, a filesystem-driven JSON API, and streamed downloads.
+ *
+ * @tableofcontents
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_overview 📖 Overview
+ *
+ * @subsection server_eli5 🧒 ELI5 Summary
+ *
+ * Think of this file as the **reception desk** of a building.
+ *
+ * You (the browser) walk in the front door and say things like:
+ * "I want the welcome brochure" (the `index.html` page), or "Can I see the
+ * list of rooms?" (`/api/categories`), or "Please hand me the big box in room
+ * 3, shelf 2" (`/api/download/...`). The receptionist — this file — never
+ * builds the rooms itself and never touches the boxes directly. It just
+ * listens to what you ask for, checks that you are allowed to have it, and
+ * then calls the right **specialist** (the modules in `lib/`) who does the
+ * actual walking-and-fetching. If you ask for something dangerous — like
+ * "give me the staff-only key cabinet" (`/lib/`, `/.env`) — the receptionist
+ * politely but firmly says "403 Forbidden" and does not even look inside.
+ *
+ * @subsection server_responsibilities Core Responsibilities
+ *
+ * - **HTTP Endpoint:** Creates the single Node.js `http.Server` for the whole
+ *   project and binds it to `0.0.0.0` on the configured port. It is the only
+ *   network listener in the repository.
+ * - **Environment Bootstrap:** Loads `process.env` from the project-root
+ *   `.env` file (via `lib/load-env.js`) *before* anything else reads it.
+ * - **JSON API Router:** Implements six API endpoints (`/api/health`,
+ *   `/api/categories`, `/api/releases`, `/api/search`, `/api/files`,
+ *   `/api/download`) by delegating all filesystem work to `lib/files-service.js`.
+ * - **SPA Fallback Server:** Returns `index.html` for `/`, `/browse`, and any
+ *   unknown HTML-ish route, so client-side routing (`assets/js/router.js`)
+ *   works on refresh and deep links.
+ * - **Static Asset Server:** Serves `assets/`, fonts, icons and other files
+ *   from the project root with a curated MIME table, a one-hour cache policy,
+ *   and an inline SVG placeholder for missing images.
+ * - **Security Gatekeeper:** Blocks path traversal, blocks access to
+ *   `/.env`, `/lib/`, `/node_modules/`, sets `nosniff` / `SAMEORIGIN` /
+ *   `strict-origin-when-cross-origin` headers on every served response, and
+ *   sanitises the `Content-Disposition` filename of downloads.
+ * - **Cross-Origin Enabler:** Answers CORS preflights (`OPTIONS`) and stamps
+ *   `Access-Control-Allow-Origin: *` on every JSON and download response,
+ *   because `nginx.conf` proxies only the `/api/` prefix and other origins
+ *   may call the API directly.
+ * - **Ops Surface:** Colour-coded request logging, a startup banner that
+ *   reports the health of `FILES_ROOT`, a health endpoint for uptime
+ *   monitors, and a graceful `SIGINT` shutdown handler.
+ *
+ * @subsection server_arch_role 🧭 Role in the Overall Architecture
+ *
+ * `server.js` is the **front door of the back-end**. It contains *zero*
+ * filesystem logic of its own; every read, stat, walk and safety check on
+ * the downloads tree is delegated to `lib/files-service.js`. This is a
+ * deliberate two-layer split:
+ *
+ * - **server.js** = transport layer (HTTP, headers, streaming, CORS, routing).
+ * - **lib/files-service.js** = domain layer (FILES_ROOT resolution, path
+ *   sanitisation, directory walking, search, release ranking).
+ *
+ * The frontend mirror of this split is `assets/js/services/resource-service.js`,
+ * which is the *only* frontend file allowed to call this server's API.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_architecture 🏗️ Architecture: How A Request Flows Through This File
+ *
+ * The diagram below shows every decision point of the main request handler.
+ * Note the deliberate ordering: URL parse → CORS preflight → method filter →
+ * security blocklist → API routes → SPA routes → static fallback → error net.
+ *
+ * @dot
+ * digraph request_flow {
+ *   rankdir=TB;
+ *   node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=10, color="#9CA3AF"];
+ *   edge [fontname="Helvetica", fontsize=9, color="#6B7280"];
+ *
+ *   request  [label="http.createServer\\nasync (req, res)", fillcolor="#DBEAFE"];
+ *   parse    [label="new URL(req.url) +\\ndecodeURIComponent(pathname)\\n400 on failure", fillcolor="#DBEAFE"];
+ *   options  [label="OPTIONS?\\n→ 204 + CORS preflight headers", fillcolor="#FEF3C7"];
+ *   method   [label="Method not GET/HEAD?\\n→ 405 Method Not Allowed", fillcolor="#FEF3C7"];
+ *   blocked  [label="/.env · /lib/ · /node_modules/?\\n→ 403 Forbidden", fillcolor="#FEE2E2"];
+ *
+ *   subgraph cluster_api {
+ *     label="JSON API (delegates to lib/files-service.js)";
+ *     style="dashed"; color="#9CA3AF"; fontname="Helvetica"; fontsize=11;
+ *
+ *     health     [label="/api/health · /__health\\npeekRootSync + JSON status", fillcolor="#CFFAFE"];
+ *     categories [label="/api/categories\\nlistCategories()", fillcolor="#CFFAFE"];
+ *     releases   [label="/api/releases?limit=\\nlistLatestReleases()", fillcolor="#CFFAFE"];
+ *     search     [label="/api/search?q=&limit=\\nsearchEntries()", fillcolor="#CFFAFE"];
+ *     files      [label="/api/files[/rel] ?path=\\nlistPath()", fillcolor="#CFFAFE"];
+ *     download   [label="/api/download[/rel] ?path=\\ngetDownloadTarget() → streamDownload()", fillcolor="#FCE7F3"];
+ *   }
+ *
+ *   subgraph cluster_pages {
+ *     label="Pages & Static Assets";
+ *     style="dashed"; color="#9CA3AF"; fontname="Helvetica"; fontsize=11;
+ *
+ *     spa_route  [label="/ · /index.html ·\\n/browse · /browse/*\\n(assettish ext → static, else SPA)", fillcolor="#D1FAE5"];
+ *     serveSPA   [label="serveSPA()\\nreads index.html\\n+ security headers", fillcolor="#D1FAE5"];
+ *     serveStatic[label="serveStatic(pathname)\\nMIME + cache + traversal guard\\nmissing image → SVG placeholder\\nmissing html → SPA fallback", fillcolor="#D1FAE5"];
+ *   }
+ *
+ *   error  [label="catch (err)\\nsendServiceError()\\nerr.httpStatus or 500", fillcolor="#FEE2E2"];
+ *   client [label="Browser / curl / uptime monitor", fillcolor="#E0E7FF"];
+ *
+ *   request -> parse;
+ *   parse -> options;
+ *   options -> method;
+ *   method -> blocked;
+ *   blocked -> health;
+ *   blocked -> categories;
+ *   blocked -> releases;
+ *   blocked -> search;
+ *   blocked -> files;
+ *   blocked -> download;
+ *   blocked -> spa_route;
+ *
+ *   health -> client [label="JSON"];
+ *   categories -> client [label="JSON"];
+ *   releases -> client [label="JSON"];
+ *   search -> client [label="JSON"];
+ *   files -> client [label="JSON"];
+ *   download -> client [label="binary stream"];
+ *   spa_route -> serveSPA [label="no file extension"];
+ *   spa_route -> serveStatic [label="has MIMES extension"];
+ *   serveSPA -> client [label="HTML"];
+ *   serveStatic -> client [label="asset / 404 / SVG / SPA"];
+ *   serveStatic -> serveSPA [label=".html or extensionless\\nfile missing", style=dashed];
+ *   spa_route -> error [label="service error", style=dashed];
+ *   download -> error [label="e.g. PATH_TRAVERSAL", style=dashed];
+ *   parse -> error [style=dashed];
+ * }
+ * @enddot
+ *
+ * The dependency graph below shows how `server.js` connects the whole project:
+ * it consumes the environment layer, delegates the domain work, and is
+ * consumed by nginx (in production), npm start (in development), and the
+ * frontend's single API client.
+ *
+ * @dot
+ * digraph dependencies {
+ *   rankdir=LR;
+ *   node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=10, color="#9CA3AF"];
+ *   edge [fontname="Helvetica", fontsize=9, color="#6B7280"];
+ *
+ *   subgraph cluster_env {
+ *     label="Environment";
+ *     style="dashed"; color="#9CA3AF";
+ *     dotenv_dep [label="dotenv npm package\\n(preferred .env loader)", fillcolor="#FEF3C7"];
+ *     load_env   [label="lib/load-env.js\\nloadEnv() + fallback parser", fillcolor="#FEF3C7"];
+ *     env_file   [label=".env · .env.example\\nPORT, FILES_ROOT", fillcolor="#FEF3C7"];
+ *   }
+ *
+ *   subgraph cluster_server {
+ *     label="This file";
+ *     style="dashed"; color="#9CA3AF";
+ *     server [label="server.js\\nHTTP transport + routing", fillcolor="#DBEAFE"];
+ *   }
+ *
+ *   subgraph cluster_domain {
+ *     label="Domain layer";
+ *     style="dashed"; color="#9CA3AF";
+ *     files_service [label="lib/files-service.js\\nlistCategories · listPath\\ngetDownloadTarget · searchEntries\\nlistLatestReleases · peekRootSync", fillcolor="#CFFAFE"];
+ *   }
+ *
+ *   subgraph cluster_consumers {
+ *     label="Consumers";
+ *     style="dashed"; color="#9CA3AF";
+ *     nginx  [label="nginx.conf\\nlocation /api/ → 127.0.0.1:3000", fillcolor="#D1FAE5"];
+ *     npm    [label="package.json\\n\"start\": \"node server.js\"", fillcolor="#D1FAE5"];
+ *     ressvc [label="assets/js/services/resource-service.js\\nfetch() /api/*", fillcolor="#D1FAE5"];
+ *     auto   [label="assets/js/autocomplete.js\\nsuggestions via ResourceService.search", fillcolor="#E0E7FF"];
+ *     pages  [label="assets/js/home.js · browse.js\\nlists + download links", fillcolor="#E0E7FF"];
+ *   }
+ *
+ *   env_file -> load_env;
+ *   dotenv_dep -> load_env [label="preferred, optional"];
+ *   load_env -> server [label="loadEnv(PROJECT_ROOT)"];
+ *   server -> files_service [label="6 API handlers delegate"];
+ *   nginx -> server [label="reverse proxy"];
+ *   npm -> server [label="npm start"];
+ *   ressvc -> server [label="GET /api/categories · files · search · releases · download"];
+ *   ressvc -> auto;
+ *   ressvc -> pages;
+ * }
+ * @enddot
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_header 🧩 File Header Comment
+ *
+ * @par 📍 Location
+ * The very first lines of `server.js`.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * This is the name-tag on the reception desk. It tells a human skimming the
+ * repository what this file is and on which operating systems it runs. It
+ * carries no executable meaning — it is purely documentation inside code.
+ *
+ * @par 🔗 Trace Downward
+ * Pure comment; no runtime effect. The claims it makes ("filesystem-driven",
+ * "Windows + Linux") are backed by `lib/files-service.js` (which normalises
+ * separators with `path.*` calls) and by this file's `path.join` /
+ * `path.normalize` usage throughout.
+ *
+ * @par 🤝 Trace Sideways
+ * The `═══` banner style is the project's house convention for module
+ * headers; the same style opens `lib/files-service.js`... and, on the
+ * frontend, `assets/js/resource-service.js`, `assets/js/router.js` and
+ * `assets/js/autocomplete.js`.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * /* ═══════════════════════════════════════════════════════════════
+ *    server.js — CloudAvid File Portal
+ *    Filesystem-driven HTTP server (Windows + Linux)
+ *    ═══════════════════════════════════════════════════════════════ */
+ * ```
+ *
+ * @warning When editing, keep this banner comment syntactically closed. If
+ * the closing delimiter (`*` immediately followed by `/`) is lost, the
+ * `require("http")` below it becomes part of
+ * the comment and the server crashes on startup with `http is not defined`.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_requires 🧩 Block: Core Module Requires (http, fs, path, URL)
+ *
+ * @par 📍 Location
+ * Immediately after the header banner.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * Before the receptionist can work, they need their tools: a telephone
+ * (`http`) to talk to visitors, a ladder into the file archive (`fs`), a map
+ * of the building (`path`), and a magnifying glass to read the name tag on
+ * every request (`URL`).
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * All four are **Node.js built-ins** — this is the reason the project's only
+ * runtime dependency (`dotenv`, see `package.json`) can be treated as
+ * optional: even if `node_modules` were wiped, the server would still start,
+ * merely losing the polished `.env` parsing. `URL` is destructured from
+ * `require("url")` instead of using the global `URL`, which keeps the file
+ * explicit and works identically on old Node versions where the global was
+ * not yet exposed.
+ *
+ * @par 🔗 Trace Downward
+ * - `http` powers `http.createServer` and `server.listen` at the bottom.
+ * - `fs` powers `fs.readFile` in `serveSPA`/`serveStatic` and
+ *   `fs.createReadStream` in `streamDownload`.
+ * - `path` powers every safe-path helper (`isInsideRoot`, `serveStatic`,
+ *   `serveSPA`, `streamDownload`'s extension lookup).
+ * - `URL` powers the request parsing inside the main handler.
+ *
+ * @par 🤝 Trace Sideways
+ * The frontend equivalent of "requires" are the ordered `<script defer>`
+ * tags in `index.html`; the same "standard library first" spirit appears in
+ * `lib/load-env.js` and `lib/files-service.js`, which also open with plain
+ * built-in requires and no third-party imports.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * const http = require("http");
+ * const fs = require("fs");
+ * const path = require("path");
+ * const { URL } = require("url");
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * If you swap `require("fs")` for `fs/promises` here, the four callback-style
+ * `fs.readFile(..., (err, data) => ...)` call sites stop working silently at
+ * runtime (they would receive a Promise, never the buffer). Both `lib/`
+ * modules already use promises, but this file intentionally does not.
+ *
+ * @see lib/load-env.js
+ * @see lib/files-service.js
+ * @see package.json
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_paths 🧩 Block: PROJECT_ROOT and Environment Bootstrap
+ *
+ * @par 📍 Location
+ * Right after the requires.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * This is the receptionist pinning the building map on the wall. `PROJECT_ROOT`
+ * says "everything I serve lives here", and `loadEnv` pastes the office
+ * rulebook (`.env`) onto the wall so every later decision — which port, where
+ * the downloads live — can read it.
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * `__dirname` is the directory containing `server.js`, i.e. the repository
+ * root in this project's layout. `loadEnv(PROJECT_ROOT)` therefore resolves
+ * `<project root>/.env`. The call happens **synchronously at module top
+ * level, before `files-service` is required** — this ordering is load-bearing:
+ * `PORT` below and `FILES_ROOT` (read lazily by `lib/files-service.js`) both
+ * assume `process.env` is already populated. `loadEnv` prefers the `dotenv`
+ * package and silently falls back to a hand-rolled parser if it is not
+ * installed, and it never overwrites an existing environment variable.
+ *
+ * @par 📥 Inputs
+ * - File on disk: `.env` (template: `.env.example` — keys `PORT`, `FILES_ROOT`).
+ *
+ * @par 📤 Outputs
+ * - Populated `process.env.PORT` and `process.env.FILES_ROOT` for the whole
+ *   Node process.
+ * - `PROJECT_ROOT` constant used by every API handler and passed as the first
+ *   argument to every `lib/files-service.js` call.
+ *
+ * @par 🔗 Trace Downward
+ * - Depends on `lib/load-env.js` → `loadEnv()`, which depends on the `dotenv`
+ *   package (optional) and `fs`/`path`.
+ * - Depends on `node_modules/dotenv` being *installed* (it is declared in
+ *   `package.json`).
+ *
+ * @par 🔗 Trace Upward
+ * - `.env.example` documents the two keys this bootstrap makes real; DevOps
+ *   copy it to `.env` on deploy.
+ * - `nginx.conf` deliberately does **not** configure `FILES_ROOT` — its
+ *   comment says "FILES_ROOT is configured in the Node process .env — not in
+ *   this file", i.e. this bootstrap is the single source of truth.
+ * - `package.json`'s `"start": "node server.js"` is the command that triggers
+ *   this whole sequence.
+ *
+ * @par 🤝 Trace Sideways
+ * The "pass `PROJECT_ROOT` into the service" convention is the reason
+ * `lib/files-service.js` can stay testable and location-agnostic: every
+ * exported function there (`listCategories`, `listPath`, `getDownloadTarget`,
+ * `searchEntries`, `listLatestReleases`, `peekRootSync`) takes
+ * `projectRoot` as its first parameter instead of importing a global.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * const PROJECT_ROOT = __dirname;
+ * const { loadEnv } = require("./lib/load-env");
+ * loadEnv(PROJECT_ROOT);
+ *
+ * const filesService = require("./lib/files-service");
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * Reordering these lines — e.g. requiring `lib/files-service.js` before
+ * calling `loadEnv` — still works today only because `files-service` reads
+ * `FILES_ROOT` lazily inside each request. But if `files-service` ever gains
+ * top-level `process.env.FILES_ROOT` capture (a natural "optimisation"),
+ * that reordering would make every request 503 with `FILES_ROOT_MISSING`.
+ * Treat the call order here as a contract, not a style choice. Renaming
+ * `PROJECT_ROOT` also breaks nothing internally, but any new file that
+ * mirrors this pattern should keep the same name for greppability.
+ *
+ * @see lib/load-env.js
+ * @see lib/files-service.js
+ * @see .env.example
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_hostport 🧩 Block: HOST, PORT and ROOT Constants
+ *
+ * @par 📍 Location
+ * Directly after the files-service require.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * The desk's address: which door to open (`HOST`), which number plate to hang
+ * on it (`PORT`), and a nickname for the building (`ROOT`).
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * - `HOST = "0.0.0.0"` binds to **all** interfaces. That is what allows
+ *   `nginx.conf` to reach this process over the loopback interface
+ *   (`proxy_pass http://127.0.0.1:3000;`) without any socket tricks. It also
+ *   means the port is reachable from the network, so the security blocklist
+ *   later in the request handler is not merely theoretical.
+ * - `PORT` reads `process.env.PORT` with a `3000` fallback. Note the truthiness
+ *   form: `PORT=0` in `.env` would fall through to 3000 rather than picking a
+ *   random OS port — an edge case worth knowing before "fixing" it.
+ * - `ROOT = PROJECT_ROOT` is an alias kept purely for readability at the call
+ *   sites (`isInsideRoot(ROOT, fp)`, `path.join(ROOT, ...)`, `path.join(ROOT,
+ *   "index.html")`).
+ *
+ * @par 📥 Inputs
+ * - `process.env.PORT` (set by the `.env` bootstrap above; documented in
+ *   `.env.example` as "HTTP port for the Node.js server").
+ *
+ * @par 📤 Outputs
+ * - The listen target used by `server.listen(PORT, HOST, ...)`.
+ * - The `http://localhost:${PORT}` base used by `decodePathname` and by the
+ *   `new URL(req.url, ...)` parsing in the main handler.
+ *
+ * @par 🔗 Trace Upward
+ * `nginx.conf` hardcodes the expectation of this port in `proxy_pass
+ * http://127.0.0.1:3000`. Changing the default `3000` here without editing
+ * `nginx.conf` (or setting `PORT` in `.env` to match) silently 502s the whole
+ * production site.
+ *
+ * @par 🤝 Trace Sideways
+ * `PORT` also appears in `lib/load-env.js`'s domain (via `.env`) and in the
+ * printed URLs of the startup banner. The frontend never needs to know it:
+ * every fetch in `assets/js/services/resource-service.js` uses *relative*
+ * URLs (`"/api/categories"`), which is exactly what makes the nginx proxy
+ * transparent.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * const HOST = "0.0.0.0";
+ * const PORT = process.env.PORT || 3000;
+ * const ROOT = PROJECT_ROOT;
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * Changing `HOST` to `"127.0.0.1"` for "safety" is a behaviour change: in
+ * container deployments that port-map the service, health checks and the
+ * nginx upstream must both agree with the new bind address. Changing the
+ * default port breaks `nginx.conf` (see above) and the instructions printed
+ * in the startup banner.
+ *
+ * @see nginx.conf
+ * @see .env.example
+ * @see index.html
+ * @see assets/js/services/resource-service.js
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_colors 🧩 Block: The ANSI Colour Palette `c`
+ *
+ * @par 📍 Location
+ * After the host/port constants.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * A box of highlighter pens for the terminal. Each pen is a tiny invisible
+ * code that makes the next text a colour, and `reset` is the cap that stops
+ * the colour bleeding onto everything after it.
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * Plain string map of ANSI escape sequences — no `chalk`, no dependency. The
+ * keys are used in exactly three places: `log()` (status colouring), and the
+ * startup banner + `SIGINT` handler (cyan/yellow/green emphasis). Because
+ * these are raw escapes, they are emitted even when stdout is a redirected
+ * file or pipe; ANSI-aware log shippers ignore them, and non-ANSI consumers
+ * see a few harmless control characters.
+ *
+ * @par 📥 Inputs
+ * None — a constant.
+ *
+ * @par 📤 Outputs
+ * Colour-wrapped fragments interpolated into template literals in
+ * `log()`, `server.listen`'s banner, and the shutdown message.
+ *
+ * @par 🤝 Trace Sideways
+ * Dependency-free "small utility" is a house pattern: `lib/load-env.js`
+ * hand-rolls `.env` parsing for the same reason. The palette has no
+ * counterpart on the frontend — browser logs there are uncoloured.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * const c = {
+ *     reset: "\x1b[0m",
+ *     dim: "\x1b[2m",
+ *     green: "\x1b[32m",
+ *     yellow: "\x1b[33m",
+ *     cyan: "\x1b[36m",
+ *     red: "\x1b[31m",
+ *     magenta: "\x1b[35m",
+ *     bold: "\x1b[1m",
+ * };
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * Deleting an unused-looking key (`magenta` is currently referenced by no
+ * call site, but `dim`, `bold`, `green`, `yellow`, `cyan` and `red` all are)
+ * is safe *today* only if you re-check `log()` and the banner after any
+ * refactor. If `c` itself is removed, `log()` and `server.listen` throw
+ * `ReferenceError: c is not defined` on the first request — taking down the
+ * server exactly when it starts receiving traffic.
+ *
+ * @see lib/load-env.js
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_mimes 🧩 Block: The MIME Table `MIMES`
+ *
+ * @par 📍 Location
+ * After the colour palette.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * This is the sticker machine at the shipping counter. Every file that leaves
+ * the building gets a sticker saying what it *is* — a picture, a web page, a
+ * zip — so the receiver's browser knows whether to display it, play it, or
+ * offer a download.
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * An extension → `Content-Type` map consulted in three places:
+ * 1. `serveStatic` — picks the header for static assets (`MIMES[ext] ||
+ *    "application/octet-stream"`).
+ * 2. `streamDownload` — same fallback for downloads, so a `.iso` arrives as
+ *    `application/octet-stream` and a `.pdf` as `application/pdf` even though
+ *    `Content-Disposition: attachment` forces the save dialog anyway.
+ * 3. The SPA route — the odd one out: `if (ext && MIMES[ext] && ext !==
+ *    ".html")` uses the table as an *extension whitelist* to decide whether a
+ *    `/browse/...`-style path is a real asset (serve statically) or a client
+ *    route (serve the SPA shell).
+ * Text entries carry `charset=utf-8`; binary entries deliberately do not.
+ * Note the table doubles as the project's "supported download catalogue":
+ * `.iso`, `.qcow2`, `.vmdk`, `.docx`, `.vsdx` are here because this portal
+ * distributes VM images and Office/Visio documents.
+ *
+ * @par 📥 Inputs
+ * None — a constant.
+ *
+ * @par 📤 Outputs
+ * `Content-Type` header values for every static and download response; an
+ * extension-membership test for the SPA-vs-static routing decision.
+ *
+ * @par 🔗 Trace Upward
+ * The extensions listed here are the ones the frontend will happily link to:
+ * `assets/js/router.js` keeps its own `fileExtensions` regex (html, zip, tar,
+ * gz, iso, qcow2, vmdk, pdf, txt, log, sql, docx, xlsx, pptx, png, jpg, exec,
+ * sh, yml, yaml, md, json, csv) to decide which links must *not* be
+ * SPA-navigated but downloaded/navigated natively. The two lists overlap on
+ * purpose but are not identical — adding a new extension here (e.g. `.deb`)
+ * makes the server serve it correctly, while adding it to `router.js`'s regex
+ * is what stops the SPA from hijacking clicks on such links.
+ *
+ * @par 🔗 Trace Downward
+ * `serveStatic` also uses `ext` to pick the cache policy
+ * (`no-cache` for `.html`, `public, max-age=3600` for everything else) and to
+ * decide whether a missing file should become the inline SVG placeholder
+ * (images list) or the SPA fallback (`.html` / extensionless).
+ *
+ * @par 🤝 Trace Sideways
+ * The same "map instead of library" minimalism as the `c` palette. The
+ * frontend mirrors the pattern conceptually with `inferIcon()` in
+ * `assets/js/services/resource-service.js`, which maps *filename patterns* to
+ * icon categories.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * const MIMES = {
+ *     ".html": "text/html; charset=utf-8",
+ *     ".css": "text/css; charset=utf-8",
+ *     ".js": "text/javascript; charset=utf-8",
+ *     ".mjs": "text/javascript; charset=utf-8",
+ *     ".json": "application/json; charset=utf-8",
+ *     ".png": "image/png",
+ *     ".jpg": "image/jpeg",
+ *     ".jpeg": "image/jpeg",
+ *     ".webp": "image/webp",
+ *     ".svg": "image/svg+xml",
+ *     ".ico": "image/x-icon",
+ *     ".woff": "font/woff",
+ *     ".woff2": "font/woff2",
+ *     ".ttf": "font/ttf",
+ *     ".map": "application/json",
+ *     ".txt": "text/plain; charset=utf-8",
+ *     ".pdf": "application/pdf",
+ *     ".iso": "application/octet-stream",
+ *     ".zip": "application/zip",
+ *     ".gz": "application/gzip",
+ *     ".qcow2": "application/octet-stream",
+ *     ".vmdk": "application/octet-stream",
+ *     ".sql": "application/sql",
+ *     ".log": "text/plain; charset=utf-8",
+ *     ".yml": "text/yaml; charset=utf-8",
+ *     ".yaml": "text/yaml; charset=utf-8",
+ *     ".sh": "text/x-shellscript",
+ *     ".md": "text/markdown; charset=utf-8",
+ *     ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+ *     ".vsdx": "application/vnd.ms-visio.drawing",
+ * };
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * This table is consumed by `serveStatic`, `streamDownload` **and** the SPA
+ * route guard. Adding an entry is additive and safe. Removing or renaming an
+ * entry silently changes behaviour in three places at once: e.g. deleting
+ * `".svg"` makes SVG assets download as octet-streams *and* makes
+ * `/browse/logo.svg` fall through to the SPA shell instead of the static
+ * handler. Keep it in sync with the `fileExtensions` regex in
+ * `assets/js/router.js` and the image-extension list inside `serveStatic`.
+ *
+ * @see assets/js/router.js
+ * @see assets/js/services/resource-service.js
+ * @see nginx.conf
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_log 🧩 Function: `log(method, status, url, extra)`
+ *
+ * @par 📍 Location
+ * Between the MIME table and `sendJSON`.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * After every visitor interaction, the receptionist writes one line in the
+ * day-book: *time, what they asked, and how it went* — written in green when
+ * everything went fine, yellow when something was their mistake, red when
+ * the building itself is on fire.
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * Picks a colour from the `c` palette by status band (`≥500` red, `≥400`
+ * yellow, `≥300` cyan, else green), timestamps with a `HH:MM:SS` slice of the
+ * ISO date, and pads the method to 6 characters with `padEnd(6)` so columns
+ * line up. Called from every terminal branch of the request handler and from
+ * the blocklist guard, always *after* the response has been produced, so a
+ * logging bug can never corrupt a response.
+ *
+ * @par 📥 Inputs
+ * - `method` — e.g. `"GET"`, `"HEAD"`.
+ * - `status` — numeric HTTP status.
+ * - `url` — the decoded pathname.
+ * - `extra` — optional suffix: latency (`${Date.now() - start}ms`), item
+ *   counts (`${categories.length} categories · …`), service error codes.
+ *
+ * @par 📤 Outputs
+ * One `console.log` line per handled request. No file logging — `nginx.conf`
+ * disables `access_log` for static assets and expects the Node process's
+ * stdout to be captured by the platform service manager.
+ *
+ * @par 🔗 Trace Upward
+ * Consumed exclusively inside this file by the main request handler, the
+ * blocklist branch, and every API/SPA/static branch (always with the
+ * `Date.now() - start` latency suffix).
+ *
+ * @par 🤝 Trace Sideways
+ * The frontend has a different observability culture: `assets/js/services/
+ * performance-monitor.js` measures client-side performance instead. Server
+ * latency strings here ("… · 3ms") are the human-readable counterpart of the
+ * `Cache-Control: no-store` headers the API sends — together they say "the
+ * data is fresh and fast".
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * function log(method, status, url, extra = "") {
+ *     const color =
+ *         status >= 500 ? c.red :
+ *             status >= 400 ? c.yellow :
+ *                 status >= 300 ? c.cyan :
+ *                     c.green;
+ *     const time = new Date().toISOString().slice(11, 19);
+ *     console.log(
+ *         `${c.dim}${time}${c.reset} ${c.bold}${method.padEnd(6)}${c.reset} ${color}${status}${c.reset} ${url} ${c.dim}${extra}${c.reset}`
+ *     );
+ * }
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * Change the *signature* and every call site in this file must change too.
+ * Change the *format* and anything tailing stdout (log shippers, `journalctl`
+ * filters, alerting regexes on status codes) loses its anchors. Do not route
+ * `log()` through anything that can throw synchronously — it runs inside the
+ * request handler's `try`, so a throwing logger would convert successful
+ * responses into the 500 path of `sendServiceError`.
+ *
+ * @see lib/files-service.js
+ * @see assets/js/services/performance-monitor.js
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_sendjson 🧩 Function: `sendJSON(res, status, data, headers)`
+ *
+ * @par 📍 Location
+ * After `log`.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * The standard envelope the receptionist puts answers in: a clean white
+ * envelope (JSON), the right stamp (`Content-Type`), the exact weight
+ * (`Content-Length`), and a sticker saying "anyone may open this"
+ * (`Access-Control-Allow-Origin: *`).
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * Serialises with `JSON.stringify(data, null, 0)` (compact), writes a header
+ * set with sensible API defaults, then spreads the caller's `headers` last so
+ * a call site can override any default. Every API handler in the main router
+ * funnels through this function; `sendServiceError` uses it too, which is how
+ * error payloads inherit the same CORS/caching policy as successes.
+ * `Content-Length` is computed with `Buffer.byteLength(body)` — correct for
+ * multi-byte UTF-8 payloads (e.g. non-ASCII filenames in search results),
+ * which `body.length` would get wrong.
+ *
+ * @par 📥 Inputs
+ * - `res` — the ServerResponse.
+ * - `status` — HTTP status code.
+ * - `data` — any JSON-serialisable value (arrays for listings, objects for
+ *   health/errors).
+ * - `headers` — optional per-call overrides (currently unused by call sites,
+ *   kept for future needs).
+ *
+ * @par 📤 Outputs
+ * Default headers written:
+ * `"Content-Type": "application/json; charset=utf-8"`, `"Content-Length"`,
+ * `"Access-Control-Allow-Origin": "*"`,
+ * `"Access-Control-Allow-Methods": "GET, HEAD, OPTIONS"`,
+ * `"Access-Control-Allow-Headers": "Content-Type"`,
+ * `"Cache-Control": "no-store"` — then the body.
+ *
+ * @par 🔗 Trace Upward
+ * The most important consumer is `assets/js/services/resource-service.js`:
+ * its `getCachedData`/`setCachedData` implement their *own* 5-minute
+ * `sessionStorage` cache precisely because this endpoint sends
+ * `Cache-Control: no-store` (the HTTP cache is told never to help). Its
+ * `parseError()` also depends on this function's shape: `res.json()` is
+ * expected to yield `{ error: "..." }` for non-OK statuses.
+ *
+ * @par 🔗 Trace Downward
+ * Depends on nothing outside Node core; it *is* a dependency of every API
+ * branch below and of `sendServiceError`.
+ *
+ * @par 🤝 Trace Sideways
+ * `sendText` is its text-bodied sibling with a reduced header set; both
+ * exist so `HEAD`/static/error paths never accidentally inherit the JSON
+ * content type.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * function sendJSON(res, status, data, headers = {}) {
+ *     const body = JSON.stringify(data, null, 0);
+ *     res.writeHead(status, {
+ *         "Content-Type": "application/json; charset=utf-8",
+ *         "Content-Length": Buffer.byteLength(body),
+ *         "Access-Control-Allow-Origin": "*",
+ *         "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+ *         "Access-Control-Allow-Headers": "Content-Type",
+ *         "Cache-Control": "no-store",
+ *         ...headers,
+ *     });
+ *     res.end(body);
+ * }
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * This is the **API contract writer**. Narrowing `Access-Control-Allow-Origin`
+ * from `*` to a specific origin breaks any direct (non-nginx-proxied) API
+ * consumer. Removing `Cache-Control: no-store` turns the frontend's
+ * `sessionStorage` + browser-cache combination into a double cache whose
+ * invalidation you do not control. Changing the error payload shape
+ * (`{ error, code }`, see `sendServiceError`) breaks `parseError()` in
+ * `resource-service.js` and the user-visible error messages of the entire
+ * portal.
+ *
+ * @see assets/js/services/resource-service.js
+ * @see assets/js/home.js
+ * @see assets/js/browse.js
+ * @see assets/js/autocomplete.js
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_sendtext 🧩 Function: `sendText(res, status, text, contentType)`
+ *
+ * @par 📍 Location
+ * After `sendJSON`.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * The sticky-note version of an answer: short, plain text, no envelope. Used
+ * when there is nothing structured to say — "Forbidden", "404 — whatever you
+ * typed", "Bad Request".
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * Writes only `Content-Type` (defaulting to `text/plain; charset=utf-8`,
+ * overridable) and `Access-Control-Allow-Origin: *`, then the body. Note the
+ * deliberate differences from `sendJSON`: **no `Content-Length`** (Node uses
+ * chunked encoding), and **no `Cache-Control`** (errors are cacheable per
+ * HTTP defaults, which is acceptable for these never-changing messages).
+ *
+ * @par 📥 Inputs
+ * - `res`, `status`, `text`, optional `contentType`.
+ *
+ * @par 📤 Outputs
+ * A plain-text response body with CORS enabled.
+ *
+ * @par 🔗 Trace Upward
+ * Called from: URL-parse failure (400), method guard (405), the security
+ * blocklist (403), `serveStatic` (403 traversal, 404 missing asset),
+ * `serveSPA` (500 when `index.html` is missing), `streamDownload` (500 when
+ * the read stream errors before headers are sent). It is this file's
+ * universal "say something honest, quickly" path.
+ *
+ * @par 🤝 Trace Sideways
+ * Frontend error handling rarely surfaces these raw strings: for API calls,
+ * `resource-service.js`'s `parseError()` prefers the JSON `{error}` body from
+ * `sendServiceError`; for page navigation, `router.js` simply lets the
+ * browser display the text.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * function sendText(res, status, text, contentType = "text/plain; charset=utf-8") {
+ *     res.writeHead(status, {
+ *         "Content-Type": contentType,
+ *         "Access-Control-Allow-Origin": "*",
+ *     });
+ *     res.end(text);
+ * }
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * Adding `Cache-Control` headers here would change how browsers and upstream
+ * proxies (nginx in production) cache *error* responses — with a long
+ * max-age, a single transient 500 for `index.html` could stick at the proxy.
+ * Removing the CORS header breaks browser-visible error text for cross-origin
+ * API consumers. Keep this function boring; it is the last line of defence
+ * when everything else has already gone wrong.
+ *
+ * @see nginx.conf
+ * @see assets/js/services/resource-service.js
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_senderror 🧩 Function: `sendServiceError(res, err)`
+ *
+ * @par 📍 Location
+ * After `sendText`.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * The translator between the specialists in the back office and the visitor.
+ * When a specialist hands the receptionist a slip saying "this shelf does not
+ * exist" or "you may not go in there", this turns the slip into a proper,
+ * polite JSON answer with the right number on it.
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * Reads two *duck-typed* properties that `lib/files-service.js`'s
+ * `serviceError()` attaches to plain `Error` objects: `err.httpStatus`
+ * (default 500) and `err.code` (default `"INTERNAL"`). Responds with
+ * `{ error: err.message || "Unexpected error", code: err.code || "INTERNAL" }`.
+ * The `||` defaults make the function safe for *unexpected* errors (a real
+ * `TypeError`, an fs error without annotations) as well as expected service
+ * errors — this is the single convergence point of the main handler's
+ * `catch (err)`.
+ *
+ * @par 📥 Inputs
+ * - `err` — any thrown value; service errors from `lib/files-service.js`
+ *   carry `{ httpStatus, code, message }`.
+ *
+ * @par 📤 Outputs
+ * Via `sendJSON`: e.g. `503 { "error": "FILES_ROOT does not exist…",
+ * "code": "FILES_ROOT_NOT_FOUND" }` or `403 { "error": "Requested path is
+ * outside FILES_ROOT.", "code": "PATH_TRAVERSAL" }`.
+ *
+ * @par 🔗 Trace Upward
+ * - `assets/js/services/resource-service.js` → `parseError(res)` reads
+ *   `body.error` and throws it as a JS `Error` message; that message is
+ *   ultimately displayed to users by `home.js` and `browse.js` in their
+ *   error cards.
+ * - The `code` values (`FILES_ROOT_MISSING`, `FILES_ROOT_NOT_FOUND`,
+ *   `FILES_ROOT_NOT_DIRECTORY`, `FILES_ROOT_EMPTY`, `FILES_ROOT_NO_CATEGORIES`,
+ *   `INVALID_PATH`, `PATH_TRAVERSAL`, `NOT_FOUND`, `NOT_A_DIRECTORY`,
+ *   `NOT_A_FILE`) are defined in `lib/files-service.js` and are also echoed
+ *   into the request log line via `err.code || err.message`.
+ * - The health endpoint complements this: instead of raising these errors it
+ *   *reports* the FILES_ROOT state as `"degraded"` via `peekRootSync`, so
+ *   uptime monitors can alert before users see the errors.
+ *
+ * @par 🤝 Trace Sideways
+ * This is the same "transport maps domain errors to HTTP" pattern used by
+ * every serious Node codebase; here it is 6 lines because the domain layer
+ * already annotates its errors. Nothing in the frontend distinguishes
+ * `error` from `code` today except display — but `code` is the stable
+ * machine-readable field for future logic.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * function sendServiceError(res, err) {
+ *     const status = err.httpStatus || 500;
+ *     sendJSON(res, status, {
+ *         error: err.message || "Unexpected error",
+ *         code: err.code || "INTERNAL",
+ *     });
+ * }
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * The property names `httpStatus` and `code` are a **cross-file contract**
+ * with `lib/files-service.js`'s `serviceError()`. Renaming either side breaks
+ * error handling invisibly — every domain error would become a generic 500
+ * `INTERNAL` while tests using only success paths stay green. Changing the
+ * JSON keys (`error`, `code`) breaks `parseError()` in
+ * `resource-service.js` and therefore every error message the UI shows.
+ *
+ * @see lib/files-service.js
+ * @see assets/js/services/resource-service.js
+ * @see assets/js/home.js
+ * @see assets/js/browse.js
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_sechdrs 🧩 Function: `securityHeaders(res)`
+ *
+ * @par 📍 Location
+ * After `sendServiceError`.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * Three safety stickers glued onto every page and asset leaving the building:
+ * "don't guess what I am" (nosniff), "you may frame me only from my own
+ * house" (SAMEORIGIN), and "when people mention where they came from, be
+ * discreet" (referrer policy).
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * Uses `res.setHeader` (merge-patch semantics, applied before
+ * `res.writeHead`) rather than passing headers to `writeHead`, so it can be
+ * composed with any later `writeHead` without collision. Called by
+ * `serveSPA` (both success and via `serveStatic`'s fallback) and by the
+ * success path of `serveStatic`. It is intentionally *not* called by
+ * `streamDownload`, which sets its own strict subset (`X-Content-Type-Options`
+ * inline) — a download is never framed or navigated, only saved.
+ *
+ * @par 📥 Inputs
+ * - `res` — the ServerResponse.
+ *
+ * @par 📤 Outputs
+ * Response headers: `X-Content-Type-Options: nosniff`,
+ * `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`.
+ *
+ * @par 🔗 Trace Upward
+ * `nginx.conf` adds the *same* three headers (plus HSTS and
+ * `X-XSS-Protection`) with `add_header ... always` at the server level.
+ * Caution is warranted: nginx's `add_header` inheritance rules mean the
+ * `location /api/` and static-asset blocks (which declare their own
+ * `add_header`) do **not** inherit the server-level set — so this function is
+ * what guarantees the headers on responses served directly by Node during
+ * development, and duplicates them harmlessly for proxied API responses.
+ *
+ * @par 🤝 Trace Sideways
+ * The security posture matches the frontend's: `index.html` pins theme/perf
+ * state before paint (see `index.html`'s inline boot script) — the pair
+ * "strict server headers + strict pre-paint boot" is the project's
+ * defence-in-depth habit.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * function securityHeaders(res) {
+ *     res.setHeader("X-Content-Type-Options", "nosniff");
+ *     res.setHeader("X-Frame-Options", "SAMEORIGIN");
+ *     res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+ * }
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * Removing `nosniff` re-enables MIME-sniffing attacks on user-controlled
+ * content served from `FILES_ROOT` (the downloads tree is user-curated!).
+ * Changing `SAMEORIGIN` to `DENY` breaks any future legitimate embedding of
+ * the portal. These headers are asserted twice in the deployment (here and in
+ * `nginx.conf`); keep the two lists consistent or document the divergence.
+ *
+ * @see nginx.conf
+ * @see index.html
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_isinsideroot 🧩 Function: `isInsideRoot(rootDir, filePath)`
+ *
+ * @par 📍 Location
+ * After `securityHeaders`.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * The "are you still inside the building?" checker. A visitor may wander to
+ * room 3, shelf 2 — fine. But a request for "the basement of the building
+ * across the street" (`../../etc/passwd`-style) must be answered with a
+ * simple no.
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * The canonical path-traversal test: `path.relative(rootDir, filePath)` yields
+ * `""` when the paths are equal, a `../`-prefixed string when the target
+ * escapes, or an absolute path on a different drive (Windows). The expression
+ * `rel && !rel.startsWith("..") && !path.isAbsolute(rel)` therefore accepts
+ * strictly-*inside* targets (rejecting the root itself via `rel &&`) — and
+ * `serveStatic` re-admits the one exception (`index.html`) explicitly with
+ * `path.resolve(fp) !== path.resolve(ROOT, "index.html")`.
+ *
+ * @par 📥 Inputs
+ * - `rootDir` — always `ROOT` (the project root) in this file.
+ * - `filePath` — a joined candidate path under test.
+ *
+ * @par 📤 Outputs
+ * Boolean. Consumed once, in `serveStatic`'s guard, which answers 403
+ * `"Forbidden"` when it fails.
+ *
+ * @par 🔗 Trace Downward
+ * Depends only on Node's `path` module and its platform-correct separators.
+ *
+ * @par 🔗 Trace Upward
+ * It protects only the *static* handler. The API's downloads/listings are
+ * guarded by a **second, independent** checker: `resolveInsideRoot()` in
+ * `lib/files-service.js`, which additionally rejects `.`/`..`/NUL segments
+ * *before* resolving and throws a typed `PATH_TRAVERSAL` service error.
+ * Two checkers exist because the two layers protect different roots: this
+ * one protects the *source tree* (project root), that one protects the
+ * *content tree* (`FILES_ROOT`).
+ *
+ * @par 🤝 Trace Sideways
+ * Defense-in-depth pairs: `serveStatic` also strips leading `../` sequences
+ * with `path.normalize(...).replace(/^(\.\.[\/\\])+/, "")` before joining,
+ * and nginx adds a third layer (`location ~ /\.` deny all) in production.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * function isInsideRoot(rootDir, filePath) {
+ *     const rel = path.relative(rootDir, filePath);
+ *     return rel && !rel.startsWith("..") && !path.isAbsolute(rel);
+ * }
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * "Simplifying" this to `!rel.startsWith("..")` (dropping `rel &&`) would
+ * make the *root itself* pass the check, which combined with the
+ * `index.html` exception in `serveStatic` changes which paths are servable.
+ * Loosening it at all means any static-asset request can read `server.js`,
+ * `lib/*.js` and `.env`-adjacent files if the blocklist is ever bypassed —
+ * it is the last pure-Node barrier in front of the source tree. Keep the
+ * double-guard (`this` + `resolveInsideRoot`) intact.
+ *
+ * @see lib/files-service.js
+ * @see nginx.conf
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_decodepathname 🧩 Function: `decodePathname(rawUrl)`
+ *
+ * @par 📍 Location
+ * After `isInsideRoot`.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * The name-tag reader. When a visitor's badge says `%D9%81%D8%A7...` (weird
+ * symbols for a Persian folder name) or `my%20files`, this translates it into
+ * what the folder is *actually* called on disk.
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * Builds a `URL` against a synthetic `http://localhost:${PORT}` base (so
+ * request targets like `/api/files/x` parse even without an absolute URL),
+ * takes `.pathname` (dropping the query string), and percent-decodes it once.
+ * In the current code it is defined but the main handler performs the
+ * equivalent parse inline — the function remains as the single, documented
+ * recipe for "pathname decoding" and as a ready-made tool for refactors;
+ * note it is referenced by neither call site today (verified by search), so
+ * treat edits here as API hygiene, not hot-path changes.
+ *
+ * @par 📥 Inputs
+ * - `rawUrl` — `req.url`, e.g. `"/api/download/ISO%20Images/win11.iso"`.
+ *
+ * @par 📤 Outputs
+ * A decoded pathname string, e.g. `/api/download/ISO Images/win11.iso`.
+ *
+ * @par 🔗 Trace Upward
+ * Percent-encoded path segments come from the frontend's
+ * `encodeRelPath()` in `assets/js/services/resource-service.js`, which maps
+ * every path segment through `encodeURIComponent` — the two functions are
+ * the encode/decode pair that make non-ASCII filenames work end-to-end
+ * (including Persian category names, matching the portal's FA language
+ * support in `assets/js/i18n.js`).
+ *
+ * @par 🔗 Trace Downward
+ * Depends on the global-ish `URL` constructor destructured in the requires
+ * and on `PORT` for the base URL.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * function decodePathname(rawUrl) {
+ *     return decodeURIComponent(new URL(rawUrl, `http://localhost:${PORT}`).pathname);
+ * }
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * Decoding is the vulnerable half of the encode/decode pair: applying it
+ * twice (or using `decodeURIComponent` on the *whole* URL including the
+ * query) would let `%2e%2e%2f` smuggle traversal sequences past naive
+ * filters before the guards see them. Any caller must decode *before*
+ * security checks and only once. If you wire this into the main handler,
+ * wrap it in the existing `try` — malformed sequences throw `URIError` and
+ * must surface as 400.
+ *
+ * @see assets/js/services/resource-service.js
+ * @see assets/js/i18n.js
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_relprefix 🧩 Function: `relFromPrefix(pathname, prefix)`
+ *
+ * @par 📍 Location
+ * After `decodePathname`.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * The "cut here" scissors. The visitor says "/api/download/ISOs/win11.iso";
+ * the receptionist cuts off the "/api/download" label and hands the rest —
+ * "ISOs/win11.iso" — to the specialist.
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * `pathname.slice(prefix.length)` removes the prefix verbatim, then
+ * `replace(/^\/+/, "")` strips any leading slashes so the service receives a
+ * clean relative path. Used by exactly two branches of the router:
+ * `/api/files/...` and `/api/download/...`, in their *path-segment* form
+ * (as opposed to their `?path=` query form, which skips this helper). Note
+ * the prefix slicing relies on the decoded pathname matching the prefix
+ * byte-for-byte — spaces and Unicode are fine, but a prefix that itself
+ * contained percent-encodings would not match.
+ *
+ * @par 📥 Inputs
+ * - `pathname` — decoded pathname.
+ * - `prefix` — `"/api/files"` or `"/api/download"`.
+ *
+ * @par 📤 Outputs
+ * Relative path string (possibly `""` for `/api/files/` with no tail), which
+ * is passed as `relPath` to `filesService.listPath` / `getDownloadTarget`.
+ *
+ * @par 🔗 Trace Upward
+ * The counterpart encoder is `encodeRelPath()` in
+ * `assets/js/services/resource-service.js`; links are produced there by
+ * `browseHref()` (→ `/browse/...`, SPA routes) and `downloadHref()` (→
+ * `/api/download/...`, these endpoints) — and `autocomplete.js` builds
+ * `<li data-href>` items from the same helpers.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * function relFromPrefix(pathname, prefix) {
+ *     const rest = pathname.slice(prefix.length);
+ *     return rest.replace(/^\/+/, "");
+ * }
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * This helper is what defines the *URL grammar* of the API. If the router's
+ * `pathname.startsWith("/api/files/")` branches change (e.g. you add
+ * `/api/v2/files`), every branch and this helper must be updated together,
+ * otherwise `slice()` will cut at the wrong offset and the service will
+ * receive a corrupted `relPath` (surfacing as 404/400 from
+ * `lib/files-service.js`). Frontend producers of these URLs live in
+ * `resource-service.js` (`downloadHref`, `listFiles`) and must be updated in
+ * the same commit.
+ *
+ * @see assets/js/services/resource-service.js
+ * @see assets/js/autocomplete.js
+ * @see lib/files-service.js
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_contentdisposition 🧩 Function: `contentDisposition(fileName)`
+ *
+ * @par 📍 Location
+ * After `relFromPrefix`.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * The shipping label writer. When a big box (file download) leaves the
+ * building, this writes the recipient's name on it twice: once in simple
+ * letters everyone can read, and once in "international handwriting" so
+ * names in any language (yes, even Persian!) survive the trip.
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * Implements RFC 5987/6266 dual-encoding for `Content-Disposition`:
+ * 1. `fallback` — strips every character outside printable ASCII
+ *    (`[^\x20-\x7E]` → `_`) and removes double quotes, producing a safe
+ *    legacy `filename="..."` for ancient clients.
+ * 2. `encoded` — the full `encodeURIComponent` form for the
+ *    `filename*=UTF-8''...` variant understood by all modern browsers,
+ *    preserving Unicode (e.g. Persian) filenames exactly.
+ * Consumed only by `streamDownload`, which stamps it on every download
+ * response so the browser *saves* the file instead of trying to render it.
+ *
+ * @par 📥 Inputs
+ * - `fileName` — the basename from `filesService.getDownloadTarget` (the last
+ *   segment of the validated relative path).
+ *
+ * @par 📤 Outputs
+ * A complete header value, e.g.
+ * `attachment; filename="win11_iso"; filename*=UTF-8''win11.iso`.
+ *
+ * @par 🔗 Trace Upward
+ * Filenames arrive from `FILES_ROOT` (arbitrary, user-curated names — that is
+ * the whole point of a file portal) after validation by
+ * `lib/files-service.js`. The `attachment` disposition is the *third* layer of
+ * download safety, alongside `X-Content-Type-Options: nosniff` (same header
+ * block in `streamDownload`) and the `NOT_A_FILE` type check in the service.
+ *
+ * @par 🔗 Trace Downward
+ * Pure string manipulation — no dependencies beyond the JS standard library.
+ *
+ * @par 🤝 Trace Sideways
+ * On the client, `resource-service.js`'s `downloadHref()` builds the URL that
+ * triggers this path, and `router.js`'s `fileExtensions` regex ensures the
+ * SPA's click-interceptor stands aside for file links, letting the browser's
+ * native download (and thus this header) do its job.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * function contentDisposition(fileName) {
+ *     const fallback = String(fileName).replace(/[^\x20-\x7E]/g, "_").replace(/"/g, "");
+ *     const encoded = encodeURIComponent(fileName);
+ *     return `attachment; filename="${fallback}"; filename*=UTF-8''${encoded}`;
+ * }
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * This is a header-injection boundary. Removing the `.replace(/"/g, "")`
+ * would allow a maliciously-named file (`x".html"; filename*=...`) to inject
+ * extra header parameters. Changing `attachment` to `inline` turns the
+ * downloads tree into a drive-by content-rendering surface (combined with
+ * MIME types from `MIMES`). The regex is byte-literal — keep it exactly as
+ * is unless you have a fuzz-tested replacement.
+ *
+ * @see lib/files-service.js
+ * @see assets/js/router.js
+ * @see assets/js/services/resource-service.js
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_servespa 🧩 Function: `serveSPA(res)`
+ *
+ * @par 📍 Location
+ * After `contentDisposition`.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * Whenever someone asks for "a page of the app" — the lobby, or some deep
+ * hallway whose exact room we don't need to check — the receptionist hands
+ * them the *same* magic brochure (`index.html`). Inside the brochure, a
+ * little guide (the SPA router) looks at where they wanted to go and walks
+ * them there without ever leaving the brochure.
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * Reads `index.html` from disk on **every request** (no read-through cache:
+ * `serveStatic` gives `.html` `Cache-Control: no-cache`, and this handler
+ * sends no cache headers at all, so the browser must revalidate — an
+ * intentional trade of a little latency for instant deploy propagation).
+ * Error path answers 500 with an operator-focused message ("place it next to
+ * server.js"). Success path stamps `securityHeaders(res)` *then* writes
+ * `200` with `text/html; charset=utf-8`.
+ *
+ * @par 📥 Inputs
+ * - File: `<project root>/index.html` — the SPA shell documented in
+ *   `dox/main/index.dox`.
+ *
+ * @par 📤 Outputs
+ * The full HTML shell; the browser then loads, in order, the CSS chain
+ * (`tokens.css` → `base.css` → `components.css` → `home.css` → `browse.css`
+ * → `performance-modes.css`) and the deferred JS chain
+ * (`resource-service.js` → `performance-monitor.js` → `theme.js` →
+ * `i18n.js` → `autocomplete.js` → `home.js` → `browse.js` → `router.js`).
+ *
+ * @par 🔗 Trace Upward
+ * Invoked from two places: the explicit SPA branch (`/`, `/index.html`,
+ * `/browse`, `/browse/...` — after its extension whitelist check) and
+ * `serveStatic`'s fallback for missing `.html`/extensionless files.
+ *
+ * @par 🔗 Trace Downward
+ * Depends on `fs.readFile`, `path.join`, `securityHeaders`, `sendText`, and
+ * the presence of `index.html` on disk.
+ *
+ * @par 🤝 Trace Sideways
+ * This is the Node twin of nginx's `@spa` location in `nginx.conf`
+ * (`rewrite ^ /index.html last;`): both exist so that deep links like
+ * `/browse/ISOs/` survive refresh. In production nginx usually answers
+ * first; this handler covers `npm start` development and any Node-served
+ * deployment. The consumer of the shell is `assets/js/router.js`, whose
+ * `resolveRoute()` understands exactly the same route vocabulary
+ * (`/`, `/index.html` → home; `/browse`, `/browse/...` → browse).
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * function serveSPA(res) {
+ *     const indexPath = path.join(ROOT, "index.html");
+ *     fs.readFile(indexPath, (err, data) => {
+ *         if (err) {
+ *             sendText(res, 500, "index.html missing — place it next to server.js");
+ *             return;
+ *         }
+ *         securityHeaders(res);
+ *         res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+ *         res.end(data);
+ *     });
+ * }
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * Renaming or moving `index.html` breaks every SPA deep link *and* the
+ * error message becomes a lie. Serving a different shell (e.g. the legacy
+ * `browse.html`) would strand the deferred script chain in `index.html`
+ * (`theme.js`, `performance-monitor.js`, `autocomplete.js` are loaded only
+ * there) and silently disable theming, perf modes and search suggestions.
+ * Also note the response carries no explicit cache header here — if you add
+ * caching, coordinate with `serveStatic`'s `no-cache` policy for `.html`.
+ *
+ * @see index.html
+ * @see nginx.conf
+ * @see assets/js/router.js
+ * @see dox/main/index.dox
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_servestatic 🧩 Function: `serveStatic(reqPath, res)`
+ *
+ * @par 📍 Location
+ * After `serveSPA`.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * The supply closet attendant. Every picture, stylesheet, script and font the
+ * brochure mentions lives in this closet. You ask by name, the attendant
+ * checks you're not asking for something outside the closet (no peeking into
+ * the office!), finds the box, sticks the right label on it, and hands it
+ * over. If a picture is missing, they hand you a friendly little "picture
+ * not found" doodle instead of an error page. And if you ask for something
+ * that isn't a closet item at all — you get the magic brochure again.
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * Four phases, in order:
+ * 1. **Path sanitisation** — `path.normalize(reqPath).replace(/^(\.\.[\/\\])+/, "")`
+ *    collapses dot-segments and strips leading parent-jumps; `path.join(ROOT, …)`
+ *    maps `/` and `""` to `index.html`; the extension is lowercased once.
+ * 2. **Traversal guard** — `isInsideRoot(ROOT, fp)` plus an explicit
+ *    re-admission of `index.html`; violations get `403 Forbidden` via
+ *    `sendText`.
+ * 3. **Contentful fallbacks** (inside `fs.readFile`'s error callback):
+ *    missing *images* (png/jpg/jpeg/webp/ico/svg) get an inline 64×64 SVG
+ *    placeholder (a 200 response with `image/svg+xml`!); missing *pages*
+ *    (`.html` or no extension) get `serveSPA(res)`; anything else gets
+ *    `404 — ${reqPath}`.
+ * 4. **Success** — `securityHeaders(res)`, then `writeHead(200)` with the
+ *    MIME from `MIMES` (fallback `application/octet-stream`) and a cache
+ *    policy: `no-cache` for `.html`, `public, max-age=3600` (one hour)
+ *    otherwise.
+ *
+ * @par 📥 Inputs
+ * - `reqPath` — the decoded pathname (e.g. `/assets/css/base.css`).
+ * - Files on disk under the project root: `assets/**`, fonts, `favicon`.
+ *
+ * @par 📤 Outputs
+ * Static bytes + headers, or one of the three fallbacks above.
+ *
+ * @par 🔗 Trace Upward
+ * Called from the main router's final `serveStatic(pathname, res)` branch and
+ * from the SPA branch when the path has a known non-HTML extension. The
+ * consumers are the `<link>`/`<img>`/`<script>` tags of `index.html`
+ * (`tokens.css`, `base.css`, `components.css`, `home.css`, `browse.css`,
+ * `performance-modes.css`, `/assets/icon/logo.webp`,
+ * `/assets/icon/files-logo.webp`, all eight deferred scripts) and the
+ * runtime-injected markup of `home.js`/`browse.js`/`autocomplete.js`.
+ *
+ * @par 🔗 Trace Downward
+ * Depends on `path`, `fs`, `isInsideRoot`, `MIMES`, `securityHeaders`,
+ * `sendText`, `serveSPA`, and the inline SVG string constant embedded below.
+ *
+ * @par 🤝 Trace Sideways
+ * The inline-SVG-on-404 trick is why the navbar logo carries an inline
+ * `onerror="this.style.display='none'"` in `index.html` — the frontend has
+ * its *own* missing-image fallback, and the two coexist (server fallback for
+ * `<img>` loads that never reach JS handlers, `onerror` for robustness).
+ * nginx implements the same "serve assets with long cache" concept via its
+ * regex location (30d, `immutable`) — production caches longer than dev.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * function serveStatic(reqPath, res) {
+ *     const safe = path.normalize(reqPath).replace(/^(\.\.[\/\\])+/, "");
+ *     const fp = path.join(ROOT, safe === "/" || safe === "" ? "index.html" : safe);
+ *     const ext = path.extname(fp).toLowerCase();
+ *
+ *     if (!isInsideRoot(ROOT, fp) && path.resolve(fp) !== path.resolve(ROOT, "index.html")) {
+ *         sendText(res, 403, "Forbidden");
+ *         return;
+ *     }
+ *
+ *     fs.readFile(fp, (err, data) => {
+ *         if (err) {
+ *             if ([".png", ".jpg", ".jpeg", ".webp", ".ico", ".svg"].includes(ext)) {
+ *                 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3" opacity="0.3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`;
+ *                 res.writeHead(200, { "Content-Type": "image/svg+xml" });
+ *                 res.end(svg);
+ *                 return;
+ *             }
+ *
+ *             if (!ext || ext === ".html") {
+ *                 serveSPA(res);
+ *                 return;
+ *             }
+ *
+ *             sendText(res, 404, `404 — ${reqPath}`);
+ *             return;
+ *         }
+ *
+ *         securityHeaders(res);
+ *         res.writeHead(200, {
+ *             "Content-Type": MIMES[ext] || "application/octet-stream",
+ *             "Cache-Control": ext === ".html" ? "no-cache" : "public, max-age=3600",
+ *         });
+ *         res.end(data);
+ *     });
+ * }
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * This is the file-serving heart of the app. Softening the traversal guard
+ * exposes the *source tree* (including `lib/` and `server.js` if the router
+ * blocklist is ever bypassed). Removing the SVG placeholder changes how the
+ * UI looks under broken image URLs (home/browse cards would show browser
+ * broken-image icons). Changing the one-hour `max-age` invalidates the
+ * frontend's assumptions about asset freshness during deploys. Note the SVG
+ * fallback deliberately answers **200** — that is what keeps `<img>` elements
+ * rendering; changing it to 404 must be coordinated with the `onerror`
+ * handler on the logo in `index.html`.
+ *
+ * @see index.html
+ * @see assets/js/home.js
+ * @see assets/js/browse.js
+ * @see assets/js/autocomplete.js
+ * @see nginx.conf
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_streamdownload 🧩 Function: `streamDownload(req, res, fileInfo)`
+ *
+ * @par 📍 Location
+ * After `serveStatic`.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * The big-box counter. Small answers go in envelopes; a 5-gigabyte disk image
+ * goes into a stream — the receptionist starts rolling the box out the door
+ * *immediately*, piece by piece, instead of trying to lift the whole thing at
+ * once. And if the customer hangs up halfway, they stop rolling immediately
+ * too.
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * Builds headers from `fileInfo` (produced by `filesService.getDownloadTarget`,
+ * which has already validated existence and file-ness): MIME from `MIMES`
+ * (fallback octet-stream), exact `Content-Length` from `stat`, the RFC 5987
+ * disposition from `contentDisposition`, `Cache-Control: private, max-age=0,
+ * must-revalidate`, permissive CORS, and `X-Content-Type-Options: nosniff`.
+ * Three lifecycle details make it production-grade:
+ * 1. **HEAD support** — headers only, `res.end()` with no body.
+ * 2. **Security headers before streaming** — `securityHeaders(res)` then
+ *    `writeHead`.
+ * 3. **Backpressure & cancellation** — `fs.createReadStream(...).pipe(res)`
+ *    honours TCP backpressure; `stream.on("error")` answers 500 only if
+ *    headers have not been sent yet (`!res.headersSent`), otherwise it
+ *    `res.destroy()`s mid-flight; `req.on("close")` destroys the stream so an
+ *    aborted download stops disk reads.
+ *
+ * @par 📥 Inputs
+ * - `req` — used for method (`HEAD`) and the `close` (abort) event.
+ * - `fileInfo` — `{ absPath, fileName, size, mtime }` from
+ *   `lib/files-service.js`.
+ *
+ * @par 📤 Outputs
+ * A streamed file with `Content-Disposition: attachment; ...`, or a 500 text
+ * response on early read failure.
+ *
+ * @par 🔗 Trace Upward
+ * Triggered exclusively by the `/api/download` router branch. Frontend
+ * producers of those URLs: `ResourceService.downloadHref()` used by
+ * `home.js` (quick-links, search results, release cards), `browse.js` (file
+ * rows), and `autocomplete.js` (`itemHref` for non-directory suggestions).
+ * Because the SPA never fetches this URL with `fetch()`, the browser's
+ * native download manager is the real consumer — which is why
+ * `router.js`'s click interceptor explicitly skips file-extension links.
+ *
+ * @par 🔗 Trace Downward
+ * Depends on `fs.createReadStream`, `path.extname`, `MIMES`,
+ * `contentDisposition`, `securityHeaders`, `sendText`.
+ *
+ * @par 🤝 Trace Sideways
+ * The `no-store` on JSON endpoints vs `private, must-revalidate` on downloads
+ * mirrors the frontend cache split: `resource-service.js` caches *metadata*
+ * in `sessionStorage` for 5 minutes but never caches *bytes*. `nginx.conf`
+ * proxies this endpoint with `proxy_buffering off` and 3600s read/send
+ * timeouts — the numbers match exactly so a slow multi-GB download is never
+ * truncated by the proxy.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * function streamDownload(req, res, fileInfo) {
+ *     const ext = path.extname(fileInfo.fileName).toLowerCase();
+ *     const headers = {
+ *         "Content-Type": MIMES[ext] || "application/octet-stream",
+ *         "Content-Length": fileInfo.size,
+ *         "Content-Disposition": contentDisposition(fileInfo.fileName),
+ *         "Cache-Control": "private, max-age=0, must-revalidate",
+ *         "Access-Control-Allow-Origin": "*",
+ *         "X-Content-Type-Options": "nosniff",
+ *     };
+ *
+ *     if (req.method === "HEAD") {
+ *         res.writeHead(200, headers);
+ *         res.end();
+ *         return;
+ *     }
+ *
+ *     securityHeaders(res);
+ *     res.writeHead(200, headers);
+ *     const stream = fs.createReadStream(fileInfo.absPath);
+ *     stream.on("error", () => {
+ *         if (!res.headersSent) sendText(res, 500, "Failed to read file");
+ *         else res.destroy();
+ *     });
+ *     req.on("close", () => stream.destroy());
+ *     stream.pipe(res);
+ * }
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * The `fileInfo` shape (`absPath`, `fileName`, `size`) is a contract with
+ * `lib/files-service.js`'s `getDownloadTarget`. Switching `pipe(res)` to a
+ * manual `data`/`end` loop without backpressure can balloon memory on large
+ * `.iso`/`.qcow2`/`.vmdk` files — the exact artefacts this portal exists to
+ * serve. Removing the `req.on("close")` handler makes aborted downloads keep
+ * reading disk. Removing `res.headersSent` checking throws
+ * `ERR_HTTP_HEADERS_SENT` on mid-stream failures. And per `nginx.conf`, the
+ * 3600s proxy timeouts assume downloads can legitimately run for an hour;
+ * adding buffering (`res.end(buffer)`) or changing cache headers interacts
+ * with that configuration.
+ *
+ * @see lib/files-service.js
+ * @see nginx.conf
+ * @see assets/js/services/resource-service.js
+ * @see assets/js/router.js
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_handler 🧩 Block: The Main Request Handler — `http.createServer(async (req, res) => …)`
+ *
+ * @par 📍 Location
+ * After `streamDownload`; the largest single block in the file.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * This is the receptionist's actual brain — the big checklist they run
+ * through for *every single visitor*, in the same order every time:
+ * understand the request → handle special "may I pass?" pings → reject wrong
+ * methods → refuse dangerous doors → answer API questions → hand out pages
+ * → hand out closet items → and if anything explodes anywhere along the way,
+ * apologise politely in JSON.
+ *
+ * @par ⚙️ How It Works (Senior Depth) — Sub-blocks in exact order
+ *
+ * @par 🧩 1. Latency timer and URL parsing
+ * Records `const start = Date.now()` for every log line, then parses
+ * `req.url` into a `URL` (against the synthetic `http://localhost:${PORT}`
+ * base) and percent-decodes `url.pathname` into `pathname`. Any parse or
+ * decode failure (`URIError` from malformed `%` sequences) lands in the
+ * `catch` with `sendText(res, 400, "Bad Request")`.
+ *
+ * @par 🧩 2. CORS preflight (OPTIONS)
+ * Any `OPTIONS` request gets `204` with
+ * `Access-Control-Allow-Origin: *`, `Access-Control-Allow-Methods: GET, HEAD,
+ * OPTIONS`, `Access-Control-Allow-Headers: Content-Type`,
+ * `Access-Control-Max-Age: 86400` (browsers cache the preflight for a day).
+ * This is what lets the portal be embedded or driven from other origins even
+ * though nginx only proxies `/api/`.
+ *
+ * @par 🧩 3. Method gate
+ * Anything that is not `GET` or `HEAD` receives `405 Method Not Allowed`
+ * *before* any routing happens — a quiet rejection of POST/PUT/DELETE
+ * scanners.
+ *
+ * @par 🧩 4. Security blocklist
+ * Three prefixes are refused with `403 Forbidden` + a log line:
+ * `/.env` (secrets!), `/lib/` (server-side source: `files-service.js`,
+ * `load-env.js`), `/node_modules/` (dependency source). This is the Node-side
+ * twin of nginx's `location ~ /\.` deny rule — both layers must stay because
+ * dev traffic skips nginx and production traffic skips neither.
+ *
+ * @par 🧩 5. `/api/health` + `/__health`
+ * Calls the **synchronous** `filesService.peekRootSync(PROJECT_ROOT)` (safe
+ * in a hot path: one `existsSync`/`statSync`, no awaits) and answers with
+ * `{ status: "ok"|"degraded", service: "CloudAvid File Portal", uptime:
+ * process.uptime(), timestamp, filesRootConfigured, filesRootReady }`.
+ * `"ok"` requires configured ∧ exists ∧ isDirectory; anything else is
+ * `"degraded"` (HTTP 200 either way, so uptime monitors alert on *payload
+ * semantics*, not status codes).
+ *
+ * @par 🧩 6. `/api/categories`
+ * `await filesService.listCategories(PROJECT_ROOT)` → array of category
+ * objects (`name`, `path`, `type: "directory"`, `fileCount`, `folderCount`,
+ * `mtime`, `latestModified`), sorted by name. Logged with the category count
+ * and latency.
+ *
+ * @par 🧩 7. `/api/releases`
+ * Reads `?limit=` (string or null; the service coerces and caps it), calls
+ * `listLatestReleases(PROJECT_ROOT, limit)` → the newest files across all
+ * categories with `{ name, path, category, type, size, mtime }`.
+ *
+ * @par 🧩 8. `/api/search`
+ * Reads `?q=` (default `""`) and `?limit=`, calls
+ * `searchEntries(PROJECT_ROOT, q, { limit })` → `{ results, scanned,
+ * truncated }`. Consumers: `autocomplete.js` (limit 6, debounced) and
+ * `home.js` (full search view).
+ *
+ * @par 🧩 9. `/api/files` and `/api/files/...`
+ * Dual grammar: bare `/api/files` takes `?path=` from the query string;
+ * `/api/files/<rel>` takes the tail via `relFromPrefix`. Empty `rel` lists
+ * the category roots. Consumer: `ResourceService.listFiles()` → `browse.js`.
+ *
+ * @par 🧩 10. `/api/download` and `/api/download/...`
+ * Same dual grammar; resolves via `getDownloadTarget(PROJECT_ROOT, rel)`
+ * (which *throws* typed service errors for traversal/404/not-a-file — caught
+ * by the outer catch) and hands the descriptor to `streamDownload`. This is
+ * the only branch that streams bytes instead of JSON.
+ *
+ * @par 🧩 11. SPA routes
+ * `/`, `/index.html`, `/browse`, and anything under `/browse/` route to the
+ * app. A small wrinkle: if the path carries a *known non-HTML* extension
+ * (`ext && MIMES[ext] && ext !== ".html"`), it is served by `serveStatic`
+ * instead (logged with `static`), so `/browse/logo.svg` is an asset while
+ * `/browse/ISOs/` is a client route. Everything else becomes `serveSPA`
+ * (logged with `SPA`).
+ *
+ * @par 🧩 12. Static fallback
+ * Any other path goes to `serveStatic(pathname, res)` (logged with `asset`).
+ * Combined with the SPA branch this makes the server's page behaviour
+ * identical to nginx's `try_files $uri $uri/ @spa`.
+ *
+ * @par 🧩 13. The error net
+ * The whole routing chain sits in one `try`: any thrown service error maps
+ * through `sendServiceError` (status from `err.httpStatus`, payload
+ * `{error, code}`) and is logged with `err.code || err.message` and latency.
+ *
+ * @par 📥 Inputs
+ * - `req.url` (path + query), `req.method`.
+ * - `process.env.FILES_ROOT` (read inside the service).
+ * - The on-disk downloads tree pointed at by `FILES_ROOT`.
+ *
+ * @par 📤 Outputs
+ * JSON for the five read endpoints; streamed bytes for downloads; HTML shell
+ * for SPA routes; static bytes for assets; typed errors for everything that
+ * fails.
+ *
+ * @par 🔗 Trace Upward — who calls these endpoints, file by file
+ * - `assets/js/services/resource-service.js` — the single frontend API
+ *   client: `fetch("/api/categories")` in `getResources()`,
+ *   `fetch("/api/files/" + …)` in `listFiles()`,
+ *   `fetch("/api/search?" + params)` in `search()`,
+ *   `fetch("/api/releases?limit=" + …)` in `getReleases()`, and
+ *   `downloadHref()` building `/api/download/…` links. It adds its own
+ *   5-minute `sessionStorage` cache (`cav_resources_cache`) on top of the
+ *   `no-store` responses.
+ * - `assets/js/home.js` — `getResources` (category grid), `getReleases(8)`
+ *   (latest releases), `ResourceService.search(q, …)` (search view),
+ *   `downloadHref`/`browseHref` for links.
+ * - `assets/js/browse.js` — `listFiles(relPath)` per folder, `downloadHref`
+ *   for file rows, `browseHref` for folder navigation.
+ * - `assets/js/autocomplete.js` — debounced `ResourceService.search(q,
+ *   {limit: 6})`, `Router.navigate` for folders, `downloadHref` for files.
+ * - `nginx.conf` — proxies `location /api/` → `http://127.0.0.1:3000` with
+ *   `proxy_buffering off` and 3600s timeouts; injects
+ *   `Cache-Control: no-store... always` on API responses.
+ * - External uptime monitors — `/api/health` (or `/__health`).
+ *
+ * @par 🔗 Trace Downward — what this handler depends on
+ * - `lib/files-service.js`: `peekRootSync`, `listCategories`,
+ *   `listLatestReleases`, `searchEntries`, `listPath`, `getDownloadTarget`
+ *   — every one of the six functions of its public API.
+ * - This file's own helpers: `sendText`, `sendJSON`, `sendServiceError`,
+ *   `streamDownload`, `serveSPA`, `serveStatic`, `relFromPrefix`, `log`.
+ *
+ * @par 🤝 Trace Sideways
+ * The route vocabulary here (`/`, `/browse/...`) is mirrored by
+ * `assets/js/router.js`'s `resolveRoute()` — the two files form the
+ * server/client routing contract that `nginx.conf`'s `@spa` fallback
+ * completes. The dual grammar of `/api/files` and `/api/download` (`?path=`
+ * query *or* path segments) is a server-side affordance: today's frontend
+ * producers (verified across `assets/js/`) use only the *segment* form via
+ * `encodeRelPath()`/`downloadHref()`/`listFiles()`; the `?path=` form is
+ * reserved surface for tools, scripts and `curl` workflows.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * const server = http.createServer(async (req, res) => {
+ *     const start = Date.now();
+ *     let pathname;
+ *     let url;
+ *
+ *     try {
+ *         url = new URL(req.url, `http://localhost:${PORT}`);
+ *         pathname = decodeURIComponent(url.pathname);
+ *     } catch {
+ *         sendText(res, 400, "Bad Request");
+ *         return;
+ *     }
+ *
+ *     if (req.method === "OPTIONS") {
+ *         res.writeHead(204, {
+ *             "Access-Control-Allow-Origin": "*",
+ *             "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+ *             "Access-Control-Allow-Headers": "Content-Type",
+ *             "Access-Control-Max-Age": "86400",
+ *         });
+ *         res.end();
+ *         return;
+ *     }
+ *
+ *     if (req.method !== "GET" && req.method !== "HEAD") {
+ *         sendText(res, 405, "Method Not Allowed");
+ *         return;
+ *     }
+ *
+ *     const blocked = pathname === "/.env" || pathname.startsWith("/lib/") || pathname.startsWith("/node_modules/");
+ *     if (blocked) {
+ *         sendText(res, 403, "Forbidden");
+ *         log(req.method, 403, pathname);
+ *         return;
+ *     }
+ *
+ *     try {
+ *         if (pathname === "/__health" || pathname === "/api/health") {
+ *             const peek = filesService.peekRootSync(PROJECT_ROOT);
+ *             sendJSON(res, 200, {
+ *                 status: peek.configured && peek.exists && peek.isDirectory ? "ok" : "degraded",
+ *                 service: "CloudAvid File Portal",
+ *                 uptime: process.uptime(),
+ *                 timestamp: new Date().toISOString(),
+ *                 filesRootConfigured: peek.configured,
+ *                 filesRootReady: Boolean(peek.exists && peek.isDirectory),
+ *             });
+ *             log("GET", 200, pathname, `${Date.now() - start}ms`);
+ *             return;
+ *         }
+ *
+ *         if (pathname === "/api/categories") {
+ *             const categories = await filesService.listCategories(PROJECT_ROOT);
+ *             sendJSON(res, 200, categories);
+ *             log("GET", 200, pathname, `${categories.length} categories · ${Date.now() - start}ms`);
+ *             return;
+ *         }
+ *
+ *         if (pathname === "/api/releases") {
+ *             const limit = url.searchParams.get("limit");
+ *             const releases = await filesService.listLatestReleases(PROJECT_ROOT, limit);
+ *             sendJSON(res, 200, releases);
+ *             log("GET", 200, pathname, `${releases.length} · ${Date.now() - start}ms`);
+ *             return;
+ *         }
+ *
+ *         if (pathname === "/api/search") {
+ *             const q = url.searchParams.get("q") || "";
+ *             const limit = url.searchParams.get("limit");
+ *             const data = await filesService.searchEntries(PROJECT_ROOT, q, { limit });
+ *             sendJSON(res, 200, data);
+ *             log("GET", 200, pathname, `${data.results.length} · ${Date.now() - start}ms`);
+ *             return;
+ *         }
+ *
+ *         if (pathname === "/api/files" || pathname.startsWith("/api/files/")) {
+ *             const rel = pathname === "/api/files"
+ *                 ? (url.searchParams.get("path") || "")
+ *                 : relFromPrefix(pathname, "/api/files");
+ *             const entries = await filesService.listPath(PROJECT_ROOT, rel);
+ *             sendJSON(res, 200, entries);
+ *             log("GET", 200, pathname, `${entries.length} items · ${Date.now() - start}ms`);
+ *             return;
+ *         }
+ *
+ *         if (pathname === "/api/download" || pathname.startsWith("/api/download/")) {
+ *             const rel = pathname === "/api/download"
+ *                 ? (url.searchParams.get("path") || "")
+ *                 : relFromPrefix(pathname, "/api/download");
+ *             const fileInfo = await filesService.getDownloadTarget(PROJECT_ROOT, rel);
+ *             streamDownload(req, res, fileInfo);
+ *             log(req.method, 200, pathname, `${fileInfo.fileName} · ${Date.now() - start}ms`);
+ *             return;
+ *         }
+ *
+ *         if (
+ *             pathname === "/" ||
+ *             pathname === "/index.html" ||
+ *             pathname === "/browse" ||
+ *             pathname.startsWith("/browse/")
+ *         ) {
+ *             const ext = path.extname(pathname).toLowerCase();
+ *             if (ext && MIMES[ext] && ext !== ".html") {
+ *                 serveStatic(pathname, res);
+ *                 log("GET", 200, pathname, `static · ${Date.now() - start}ms`);
+ *                 return;
+ *             }
+ *             serveSPA(res);
+ *             log("GET", 200, pathname, `SPA · ${Date.now() - start}ms`);
+ *             return;
+ *         }
+ *
+ *         serveStatic(pathname, res);
+ *         log("GET", 200, pathname, `asset · ${Date.now() - start}ms`);
+ *     } catch (err) {
+ *         const status = err.httpStatus || 500;
+ *         sendServiceError(res, err);
+ *         log(req.method, status, pathname, `${err.code || err.message} · ${Date.now() - start}ms`);
+ *     }
+ * });
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * This handler is the **single point of coupling** for the entire stack:
+ * every `if` block's pathname is a promise made to the frontend (see the
+ * fetch URLs in `resource-service.js`), to `nginx.conf` (proxy rules), and
+ * to the health checks. Reordering the API branches is safe (they are
+ * mutually exclusive exact matches), but *reordering the method/blocklist
+ * gates below the API routing* would let POSTs and `/.env` reach the API —
+ * a genuine security regression. Deleting the `/__health` alias breaks any
+ * monitor configured against it. And note the dual grammar of
+ * `/api/files` + `/api/download`: removing the *segment* form breaks the
+ * frontend outright (every URL is built by `encodeRelPath`/`downloadHref`),
+ * while removing the `?path=` form breaks no current frontend code — but it
+ * is documented API surface (see the startup banner's
+ * `/api/files/<category>` style and any scripted/`curl` consumers), so
+ * deprecate it deliberately, never silently.
+ *
+ * @see lib/files-service.js
+ * @see lib/load-env.js
+ * @see assets/js/services/resource-service.js
+ * @see assets/js/home.js
+ * @see assets/js/browse.js
+ * @see assets/js/autocomplete.js
+ * @see assets/js/router.js
+ * @see nginx.conf
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_listen 🧩 Block: `server.listen(PORT, HOST, …)` — Startup Banner
+ *
+ * @par 📍 Location
+ * Immediately after `http.createServer`.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * The moment the reception desk opens, it pins a big friendly sign on the
+ * door: "we are open, here is where the rooms are, and here is whether the
+ * archive room actually exists today." That last bit matters — if the
+ * manager forgot to write `FILES_ROOT` on the rulebook, the sign turns
+ * yellow and tells you *exactly* what is missing instead of letting the
+ * server limp along mysteriously.
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * The callback runs once the socket is bound. It calls
+ * `filesService.peekRootSync(PROJECT_ROOT)` and converts the three failure
+ * dimensions into a colour-coded status line: not configured → yellow
+ * "FILES_ROOT is not set"; missing path → yellow "FILES_ROOT path was not
+ * found"; not a directory → yellow "FILES_ROOT is not a directory";
+ * otherwise green "FILES_ROOT is configured". It then prints the boxed
+ * banner with all six canonical endpoint URLs. Note the deliberate choice to
+ * **not** exit on a bad FILES_ROOT — the server still starts, health
+ * reports `"degraded"`, and API calls will answer typed 503s from
+ * `lib/files-service.js`; this makes misconfiguration observable rather than
+ * fatal, which is friendlier to container orchestration that restarts
+ * crash-looping processes.
+ *
+ * @par 📥 Inputs
+ * - `PORT`, `HOST` constants; `FILES_ROOT` (via `peekRootSync` reading
+ *   `process.env`).
+ *
+ * @par 📤 Outputs
+ * Stdout: the banner, the FILES_ROOT status, the hint
+ * "Set FILES_ROOT in .env — no filesystem paths are hardcoded." and
+ * "Press Ctrl+C to stop".
+ *
+ * @par 🔗 Trace Upward
+ * Triggered by `npm start` (`package.json`) in dev, or by the process
+ * manager in production behind `nginx.conf`.
+ *
+ * @par 🔗 Trace Downward
+ * Depends on `filesService.peekRootSync` — the only **synchronous** export
+ * of the service, chosen so the banner never needs async plumbing.
+ *
+ * @par 🤝 Trace Sideways
+ * The banner's endpoint list is a human-readable mirror of the router:
+ * `/api/health`, `/api/categories`, `/api/files/<category>`,
+ * `/api/download/<category>/<file>`, `/api/search?q=`, `/api/releases`.
+ * The `.env` hint mirrors `.env.example`'s comments verbatim in spirit.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * server.listen(PORT, HOST, () => {
+ *     const peek = filesService.peekRootSync(PROJECT_ROOT);
+ *     const rootState = !peek.configured
+ *         ? `${c.yellow}FILES_ROOT is not set${c.reset}`
+ *         : !peek.exists
+ *             ? `${c.yellow}FILES_ROOT path was not found${c.reset}`
+ *             : !peek.isDirectory
+ *                 ? `${c.yellow}FILES_ROOT is not a directory${c.reset}`
+ *                 : `${c.green}FILES_ROOT is configured${c.reset}`;
+ *
+ *     console.log(`
+ * ${c.cyan}${c.bold}
+ *   ╔══════════════════════════════════════════════════╗
+ *   ║     CloudAvid File Portal — File API Server      ║
+ *   ╚══════════════════════════════════════════════════╝${c.reset}
+ *
+ *   ${c.green}➜${c.reset}  Local:       ${c.bold}http://localhost:${PORT}/${c.reset}
+ *   ${c.green}➜${c.reset}  Health:      http://localhost:${PORT}/api/health
+ *   ${c.green}➜${c.reset}  Categories:  http://localhost:${PORT}/api/categories
+ *   ${c.green}➜${c.reset}  Files:       http://localhost:${PORT}/api/files/<category>
+ *   ${c.green}➜${c.reset}  Download:    http://localhost:${PORT}/api/download/<category>/<file>
+ *   ${c.green}➜${c.reset}  Search:      http://localhost:${PORT}/api/search?q=
+ *   ${c.green}➜${c.reset}  Releases:    http://localhost:${PORT}/api/releases
+ *
+ *   ${rootState}
+ *   ${c.dim}Set FILES_ROOT in .env — no filesystem paths are hardcoded.${c.reset}
+ *   ${c.dim}Press Ctrl+C to stop${c.reset}
+ * `);
+ * });
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * Anything parsing this banner (container startup probes grepping for
+ * "configured", documentation screenshots, onboarding scripts) breaks on
+ * wording changes. More subtly: `peekRootSync` runs *once*, at startup — if
+ * `FILES_ROOT` becomes valid *after* boot (a volume mount arriving late in
+ * containers), the banner stays yellow while requests succeed. Do not "fix"
+ * that by making the server exit on a bad root; the current
+ * start-anyway + degraded-health behaviour is the intended contract.
+ *
+ * @see lib/files-service.js
+ * @see package.json
+ * @see .env.example
+ * @see nginx.conf
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_sigint 🧩 Block: The SIGINT Shutdown Handler
+ *
+ * @par 📍 Location
+ * The final statement of `server.js`.
+ *
+ * @par 🎯 Purpose (ELI5)
+ * The closing-time ritual. When the operator presses Ctrl+C, the receptionist
+ * doesn't just run out the door mid-sentence — they finish the sentence,
+ * politely say "Shutting down file portal…", lock the door, and *then* turn
+ * off the lights.
+ *
+ * @par ⚙️ How It Works (Senior Depth)
+ * `process.on("SIGINT", …)` intercepts Ctrl+C (and the SIGINT signal sent by
+ * container stop sequences), prints a yellow notice, and calls
+ * `server.close(() => process.exit(0))`. `server.close` stops accepting
+ * **new** connections but lets in-flight requests (notably active
+ * `streamDownload` pipes!) finish before the callback fires and exits with
+ * code 0. Edge case worth knowing: if a download is streaming and the client
+ * never disconnects, `close`'s callback can be delayed indefinitely — that
+ * is precisely why `streamDownload` registers `req.on("close")` to destroy
+ * streams on client disconnects, and why an operator may still need a
+ * second Ctrl+C (which, with this handler installed, is captured again and
+ * merely re-runs the same path) or a SIGKILL from the orchestrator.
+ *
+ * @par 📥 Inputs
+ * - The OS signal `SIGINT`.
+ *
+ * @par 📤 Outputs
+ * Stdout notice; process exit code 0 after graceful drain.
+ *
+ * @par 🔗 Trace Upward
+ * Depended upon by deployment hygiene: `nginx.conf`'s 3600s proxy timeouts
+ * imply long-lived download connections, and graceful drain is what makes
+ * `systemctl restart`-style operations not truncate user downloads.
+ *
+ * @par 🔗 Trace Downward
+ * Depends on `server` (the `http.Server` instance) and `console`.
+ *
+ * @par 🤝 Trace Sideways
+ * The frontend has no equivalent — browsers own their lifecycle. The closest
+ * analogue is `resource-service.js`'s `clearCache()`, another explicit
+ * "clean up before leaving" utility.
+ *
+ * @par 💻 Actual Code
+ * ```javascript
+ * process.on("SIGINT", () => {
+ *     console.log(`\n${c.yellow}Shutting down file portal…${c.reset}`);
+ *     server.close(() => process.exit(0));
+ * });
+ * ```
+ *
+ * ⚠️ Breaking Change Warning
+ * Removing this handler reverts Ctrl+C to Node's default: immediate
+ * termination, truncated streams, and the `nginx.conf` upstream briefly
+ * serving connection-refused 502s during every restart. Replacing
+ * `process.exit(0)` with a nonzero code can make orchestrators treat planned
+ * restarts as crashes. If you later add `SIGTERM` support (recommended for
+ * containers), reuse this same close-and-exit body — two divergent shutdown
+ * paths is how zombie downloads happen.
+ *
+ * @see nginx.conf
+ * @see server_streamdownload
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_lifecycle 🔄 End-to-End Lifecycle: One Download, Touched by Six Files
+ *
+ * The sequence below follows a real user action — clicking a file card in
+ * the Browse view — through every layer of the project, so each `@see`
+ * target in this document appears in context.
+ *
+ * @dot
+ * digraph download_sequence {
+ *   rankdir=TB;
+ *   node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=10, color="#9CA3AF"];
+ *   edge [fontname="Helvetica", fontsize=9, color="#6B7280"];
+ *
+ *   click    [label="user clicks file card\\n(assets/js/browse.js)", fillcolor="#E0E7FF"];
+ *   href     [label="ResourceService.downloadHref(relPath)\\n→ /api/download/<encoded path>\\n(assets/js/services/resource-service.js)", fillcolor="#E0E7FF"];
+ *   skip     [label="router.js click interceptor sees file extension\\n→ stands aside (no SPA navigation)", fillcolor="#E0E7FF"];
+ *   nginx    [label="nginx.conf: location /api/\\nproxy_pass → 127.0.0.1:3000\\nbuffering off · 3600s timeouts", fillcolor="#FEF3C7"];
+ *   handler  [label="server.js main handler\\n/api/download/ branch\\nrelFromPrefix → getDownloadTarget", fillcolor="#DBEAFE"];
+ *   service  [label="lib/files-service.js\\ngetRoot → resolveInsideRoot\\n(FILES_ROOT, traversal guard)\\nstat → fileInfo", fillcolor="#CFFAFE"];
+ *   stream   [label="server.js streamDownload\\nMIMES + contentDisposition\\nfs.createReadStream → pipe(res)", fillcolor="#DBEAFE"];
+ *   browser  [label="Browser download manager saves the file\\n(Unicode name preserved via RFC 5987)", fillcolor="#D1FAE5"];
+ *   error    [label="typed service error?\\nsendServiceError → {error, code}\\nparseError in resource-service.js surfaces it in the UI", fillcolor="#FEE2E2"];
+ *
+ *   click -> href -> skip -> nginx -> handler -> service;
+ *   service -> stream [label="fileInfo ok"];
+ *   service -> error [label="403 PATH_TRAVERSAL / 404 NOT_FOUND / …", style=dashed];
+ *   stream -> browser [label="binary stream"];
+ *   handler -> error [style=dashed];
+ * }
+ * @enddot
+ *
+ * @see dox/main/index.dox
+ * @see dox/main/browse.dox
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @section server_maintainer 🛠️ Maintainer's Cheat Sheet
+ *
+ * | If you change… | …then check these, or this breaks |
+ * |---|---|
+ * | Any `/api/*` pathname | `assets/js/services/resource-service.js` (the only fetch client), `nginx.conf` proxy rules |
+ * | Response JSON shapes | `parseError()`/`mapCategory()`/`listFiles()` consumers in the frontend; error cards in `home.js`/`browse.js` |
+ * | `MIMES` table | `serveStatic` fallbacks, `streamDownload` types, SPA-route extension guard, `router.js` `fileExtensions` regex |
+ * | `error`/`code` contract | `sendServiceError` ↔ `serviceError()` in `lib/files-service.js` ↔ `parseError()` |
+ * | `PORT` default | `nginx.conf` `proxy_pass`, startup banner, deployment env |
+ * | `index.html` path/name | `serveSPA`, all SPA deep links, `nginx.conf` `@spa` |
+ * | `FILES_ROOT` handling | `.env`/`.env.example`, `peekRootSync` banner state, all 503 errors from the service |
+ * | Static cache policy | Deploy freshness of `assets/**` vs nginx's 30d `immutable` |
+ * | Shutdown behaviour | Active download streams, nginx 502 window during restarts |
+ *
+ * @note Everything above is verified against the repository as of this
+ * documentation pass: `server.js`, `lib/files-service.js`, `lib/load-env.js`,
+ * `assets/js/services/resource-service.js`, `assets/js/router.js`,
+ * `assets/js/home.js`, `assets/js/browse.js`, `assets/js/autocomplete.js`,
+ * `index.html`, `nginx.conf`, `package.json`, `.env.example`. No APIs or
+ * behaviours are documented that do not exist in those files.
+ *
+ * @author ShaiyaAzizi
+ * @version 1.0.0
+ */

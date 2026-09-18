@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="cond_test2_page" kind="page">
+    <compoundname>cond_test2_page</compoundname>
+    <title>Cond Test 2 (no blank line before endcond)</title>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<sect1 id="cond_test2_page_1sec_ct_pub_b">
+<title>Public B</title><para>Body B.</para>
+</sect1>
+<sect1 id="cond_test2_page_1sec_ct_pub_c">
+<title>Public C</title><para>Body C.</para>
+</sect1>
+<sect1 id="cond_test2_page_1sec2_pub_a">
+<title>Public A2</title><para>Body A2. </para>
+</sect1>
+    </detaileddescription>
+    <location file="dox/main/cond_test.dox"/>
+  </compounddef>
+</doxygen>

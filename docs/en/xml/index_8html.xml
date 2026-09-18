@@ -1,0 +1,828 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="index_8html" kind="file" language="C++">
+    <compoundname>index.html</compoundname>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="index_8html_1a747a468290ccc140a4435dd6a1d278e6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>&lt;!doctype html &gt;&lt; html lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;&lt; head &gt;&lt; meta charset=&quot;utf-8&quot;/&gt;&lt; meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt; meta name=&quot;theme-color&quot; content=&quot;#303236&quot;/&gt;&lt; title &gt; AVID Download • File Portal&lt;/title &gt;&lt; script &gt;</type>
+        <definition>&lt;!doctype html &gt;&lt; html lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;&lt; head &gt;&lt; meta charset=&quot;utf-8&quot;/&gt;&lt; meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;/&gt;&lt; meta name=&quot;theme-color&quot; content=&quot;#303236&quot;/&gt;&lt; title &gt; AVID Download • File Portal&lt;/title &gt;&lt; script &gt; function</definition>
+        <argsstring>()</argsstring>
+        <name>function</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="index.html" line="10" column="5" bodyfile="index.html" bodystart="10" bodyend="74"/>
+      </memberdef>
+      <memberdef kind="function" id="index_8html_1a41fe5e8f5c2877719dd3a6ca16b45751" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>document</type>
+        <definition>document addEventListener</definition>
+        <argsstring>(&apos;DOMContentLoaded&apos;, function() { if(typeof PerformanceMonitor !==&apos;undefined&apos;) { PerformanceMonitor.init({ debug:false });} }, { once:true })</argsstring>
+        <name>addEventListener</name>
+        <param>
+          <type>&apos;DOMContentLoaded&apos;</type>
+        </param>
+        <param>
+          <type>function() { if(typeof PerformanceMonitor !==&apos;undefined&apos;) { PerformanceMonitor.init({ debug:false });} }</type>
+        </param>
+        <param>
+          <type>{ once:true }</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="index.html" line="75" column="13" declfile="index.html" declline="75" declcolumn="13"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>The main SPA shell, boot-loader, and UI skeleton for the CloudAvid File Portal. </para>
+    </briefdescription>
+    <detaileddescription>
+<sect1 id="index_8html_1sec_overview">
+<title>📖 Overview: What Does This File Do?</title><para>The <computeroutput><ref refid="index_8html" kindref="compound">index.html</ref></computeroutput> is the <bold>single entry point</bold> for the entire CloudAvid File Portal application. It is not a traditional multi-page website; it is a <bold>Single Page Application (SPA)</bold> where this HTML file acts as an empty &quot;shell&quot; that hosts dynamic content injected by JavaScript.</para>
+<para><bold>Primary Responsibilities of this file:</bold></para>
+<para><orderedlist>
+<listitem><para><bold>UI Skeleton:</bold> Renders the persistent chrome (Navbar, Background Aura, Footer) that stays visible across all views.</para>
+</listitem><listitem><para><bold>Pre-Paint Boot Logic:</bold> Executes a critical synchronous script <emphasis>before</emphasis> the browser paints the screen. This prevents &quot;Flash of Unstyled Content&quot; (FOUC) by applying user&apos;s saved theme and performance tier immediately.</para>
+</listitem><listitem><para><bold>Mount Point:</bold> Provides the <computeroutput>&lt;main id="app"&gt;</computeroutput> container where the SPA Router (<computeroutput><ref refid="router_8js_source" kindref="compound">router.js</ref></computeroutput>) injects the current view (Home, Browse, etc.).</para>
+</listitem><listitem><para><bold>Asset Orchestration:</bold> Loads CSS, Fonts, and JavaScript files in a strictly ordered manner.</para>
+</listitem></orderedlist>
+</para>
+<para><simplesect kind="note"><para>This file itself contains <bold>minimal logic</bold>. All heavy business logic lives inside the deferred JavaScript files loaded at the bottom of <computeroutput>&lt;body&gt;</computeroutput>.</para>
+</simplesect>
+<hruler/>
+</para>
+</sect1>
+<sect1 id="index_8html_1sec_arch">
+<title>🏗️ Architectural Flow</title><para>The lifecycle of a page load happens in this exact order:</para>
+<para><programlisting><codeline><highlight class="normal">1.<sp/>Browser<sp/>downloads<sp/>index.html</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>│</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>▼</highlight></codeline>
+<codeline><highlight class="normal">2.<sp/>&lt;head&gt;<sp/>Inline<sp/>Script<sp/>runs<sp/>SYNCHRONOUSLY</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>├─<sp/>Reads<sp/>localStorage<sp/>(theme<sp/>+<sp/>perf<sp/>tier)</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/>└─<sp/>Sets<sp/>data-theme<sp/>+<sp/>data-perf<sp/>on<sp/>&lt;html&gt;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>│</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>▼</highlight></codeline>
+<codeline><highlight class="normal">3.<sp/>CSS<sp/>files<sp/>download<sp/>(styles<sp/>apply<sp/>instantly<sp/>with<sp/>correct<sp/>theme)</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>│</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>▼</highlight></codeline>
+<codeline><highlight class="normal">4.<sp/>HTML<sp/>body<sp/>renders<sp/>(Navbar,<sp/>empty<sp/>&lt;main&gt;,<sp/>Footer)</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>│</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>▼</highlight></codeline>
+<codeline><highlight class="normal">5.<sp/>Deferred<sp/>JS<sp/>files<sp/>execute<sp/>(services<sp/>→<sp/>UI<sp/>→<sp/>router)</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>│</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>▼</highlight></codeline>
+<codeline><highlight class="normal">6.<sp/>router.js<sp/>reads<sp/>URL<sp/>→<sp/>injects<sp/>the<sp/>correct<sp/>view<sp/>into<sp/>&lt;main<sp/></highlight><highlight class="keywordtype">id</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;app&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+</programlisting></para>
+<para><hruler/>
+</para>
+</sect1>
+<sect1 id="index_8html_1sec_block1">
+<title>🧩 Block 1: Theme Detection Engine (Pre-Paint)</title><para><simplesect kind="par"><title>📍 Location</title><para>Inside <computeroutput>&lt;head&gt;</computeroutput>, in the first inline <computeroutput>&lt;script&gt;</computeroutput> tag (IIFE - Immediately Invoked Function Expression).</para>
+</simplesect>
+<simplesect kind="par"><title>🎯 Purpose</title><para>To decide whether the user wants <bold>Light Mode</bold> or <bold>Dark Mode</bold>, and apply it to the root HTML element <bold>before</bold> the browser starts painting. This prevents the annoying &quot;white flash&quot; that occurs when a dark-mode user loads a page that starts as light.</para>
+</simplesect>
+<simplesect kind="par"><title>⚙️ How It Works (Step by Step)</title><para><orderedlist>
+<listitem><para>Grabs the <computeroutput>&lt;html&gt;</computeroutput> element reference (<computeroutput>document.documentElement</computeroutput>).</para>
+</listitem><listitem><para>Sets default theme to <computeroutput>&apos;light&apos;</computeroutput>.</para>
+</listitem><listitem><para><bold>Priority #1 — OS Preference:</bold> Uses <computeroutput>window.matchMedia(&apos;(prefers-color-scheme: dark)&apos;)</computeroutput> to check if the user&apos;s operating system is set to dark mode.</para>
+</listitem><listitem><para><bold>Priority #2 — User Choice:</bold> Reads <computeroutput>localStorage</computeroutput> key <computeroutput>cav_theme</computeroutput>. If the user has manually selected a theme before, this overrides the OS preference.</para>
+</listitem><listitem><para><bold>Apply:</bold> Writes the final decision to <computeroutput>&lt;html data-theme="dark|light"&gt;</computeroutput>. CSS variables in <computeroutput><ref refid="tokens_8css_source" kindref="compound">tokens.css</ref></computeroutput> react to this attribute to color the entire UI.</para>
+</listitem></orderedlist>
+</para>
+</simplesect>
+<simplesect kind="par"><title>📥 Inputs</title><para><itemizedlist>
+<listitem><para>OS setting: <computeroutput>prefers-color-scheme</computeroutput></para>
+</listitem><listitem><para>Browser storage: <computeroutput>localStorage.getItem(&apos;cav_theme&apos;)</computeroutput> (values: <computeroutput>&apos;light&apos;</computeroutput> or <computeroutput>&apos;dark&apos;</computeroutput>)</para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+<simplesect kind="par"><title>📤 Outputs</title><para><itemizedlist>
+<listitem><para>DOM attribute: <computeroutput>&lt;html data-theme="..."&gt;</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+<simplesect kind="par"><title>🔗 Dependencies</title><para><itemizedlist>
+<listitem><para><computeroutput>window.matchMedia</computeroutput> (Browser API)</para>
+</listitem><listitem><para><computeroutput>localStorage</computeroutput> (Browser API)</para>
+</listitem><listitem><para><bold>Consumed by:</bold> <computeroutput><ref refid="tokens_8css_source" kindref="compound">tokens.css</ref></computeroutput>, <computeroutput><ref refid="theme_8js_source" kindref="compound">theme.js</ref></computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+<simplesect kind="par"><title>💻 Actual Code</title><para><programlisting filename=".js"><codeline><highlight class="normal">var<sp/>root<sp/>=<sp/>document.documentElement;</highlight></codeline>
+<codeline><highlight class="normal">var<sp/>theme<sp/>=<sp/></highlight><highlight class="stringliteral">&apos;light&apos;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keywordflow">try</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(window.matchMedia<sp/>&amp;&amp;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>window.matchMedia(</highlight><highlight class="stringliteral">&apos;(prefers-color-scheme:<sp/>dark)&apos;</highlight><highlight class="normal">).matches)<sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>theme<sp/>=<sp/></highlight><highlight class="stringliteral">&apos;dark&apos;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline><highlight class="normal">}<sp/></highlight><highlight class="keywordflow">catch</highlight><highlight class="normal"><sp/>(_)<sp/>{<sp/>}</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keywordflow">try</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>var<sp/>savedTheme<sp/>=<sp/>localStorage.getItem(</highlight><highlight class="stringliteral">&apos;cav_theme&apos;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(savedTheme<sp/>===<sp/></highlight><highlight class="stringliteral">&apos;light&apos;</highlight><highlight class="normal"><sp/>||<sp/>savedTheme<sp/>===<sp/></highlight><highlight class="stringliteral">&apos;dark&apos;</highlight><highlight class="normal">)<sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>theme<sp/>=<sp/>savedTheme;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline><highlight class="normal">}<sp/></highlight><highlight class="keywordflow">catch</highlight><highlight class="normal"><sp/>(_)<sp/>{<sp/>}</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal">root.setAttribute(</highlight><highlight class="stringliteral">&apos;data-theme&apos;</highlight><highlight class="normal">,<sp/>theme);</highlight></codeline>
+</programlisting></para>
+</simplesect>
+<simplesect kind="warning"><para>The <computeroutput>try/catch</computeroutput> wrapper is crucial. <computeroutput>localStorage</computeroutput> throws exceptions in Private Browsing mode on some browsers (e.g., Safari), which would crash the entire page without this safety net.</para>
+</simplesect>
+<hruler/>
+</para>
+</sect1>
+<sect1 id="index_8html_1sec_block2">
+<title>🧩 Block 2: Performance Tier Engine (Pre-Paint)</title><para><simplesect kind="par"><title>📍 Location</title><para>Same IIFE inside <computeroutput>&lt;head&gt;</computeroutput>, right after the theme block.</para>
+</simplesect>
+<simplesect kind="par"><title>🎯 Purpose</title><para>To classify the user&apos;s device power (High / Medium / Low / Potato) and apply the corresponding performance mode <bold>before rendering</bold>. This ensures a slow device does not attempt to render expensive CSS animations and blur effects.</para>
+</simplesect>
+<simplesect kind="par"><title>⚙️ How It Works (Step by Step)</title><para><orderedlist>
+<listitem><para>Sets default tier to <computeroutput>&apos;medium&apos;</computeroutput>.</para>
+</listitem><listitem><para><bold>Accessibility Priority:</bold> Checks <computeroutput>prefers-reduced-motion</computeroutput>. If the user disabled motion at the OS level, we force <computeroutput>low</computeroutput> tier (no animations).</para>
+</listitem><listitem><para><bold>Read Cache:</bold> Reads the <computeroutput>cav_perf_tier</computeroutput> key from <computeroutput>localStorage</computeroutput>. This cache was previously written by <computeroutput><ref refid="performance-monitor_8js_source" kindref="compound">performance-monitor.js</ref></computeroutput> after running device benchmarks.</para>
+</listitem><listitem><para><bold>Parse Cache:</bold> Expects a JSON object <computeroutput>{ tier: &apos;HIGH&apos;, timestamp: 1234567890 }</computeroutput>.</para>
+</listitem><listitem><para><bold>Validation:</bold> Ensures 4 conditions are met:<itemizedlist>
+<listitem><para>The tier value is in the whitelist: <computeroutput>[&apos;HIGH&apos;, &apos;MEDIUM&apos;, &apos;LOW&apos;, &apos;POTATO&apos;]</computeroutput></para>
+</listitem><listitem><para>Timestamp is a valid number</para>
+</listitem><listitem><para>Cache age is non-negative</para>
+</listitem><listitem><para>Cache is less than <bold>7 days old</bold> (TTL = <computeroutput>7 * 24 * 60 * 60 * 1000</computeroutput> ms)</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para><bold>Purge:</bold> If cache is invalid or expired, delete it (a fresh benchmark will run later).</para>
+</listitem><listitem><para><bold>Apply:</bold> Writes to <computeroutput>&lt;html data-perf="low|medium|high|potato"&gt;</computeroutput>.</para>
+</listitem></orderedlist>
+</para>
+</simplesect>
+<simplesect kind="par"><title>📥 Inputs</title><para><itemizedlist>
+<listitem><para>OS setting: <computeroutput>prefers-reduced-motion</computeroutput></para>
+</listitem><listitem><para>Browser storage: <computeroutput>localStorage.getItem(&apos;cav_perf_tier&apos;)</computeroutput> (JSON string)</para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+<simplesect kind="par"><title>📤 Outputs</title><para><itemizedlist>
+<listitem><para>DOM attribute: <computeroutput>&lt;html data-perf="..."&gt;</computeroutput></para>
+</listitem><listitem><para>Side effect: May purge invalid cache from <computeroutput>localStorage</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+<simplesect kind="par"><title>🔗 Dependencies</title><para><itemizedlist>
+<listitem><para><computeroutput>window.matchMedia</computeroutput>, <computeroutput>localStorage</computeroutput>, <computeroutput>JSON.parse</computeroutput>, <computeroutput>Date.now</computeroutput></para>
+</listitem><listitem><para><bold>Consumed by:</bold> <computeroutput><ref refid="performance-modes_8css_source" kindref="compound">performance-modes.css</ref></computeroutput>, <computeroutput><ref refid="performance-monitor_8js_source" kindref="compound">performance-monitor.js</ref></computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+<simplesect kind="par"><title>💻 Actual Code</title><para><programlisting filename=".js"><codeline><highlight class="normal">var<sp/>perfTier<sp/>=<sp/></highlight><highlight class="stringliteral">&apos;medium&apos;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal">var<sp/>reducedMotion<sp/>=<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keywordflow">try</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>reducedMotion<sp/>=<sp/>window.matchMedia<sp/>&amp;&amp;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>window.matchMedia(</highlight><highlight class="stringliteral">&apos;(prefers-reduced-motion:<sp/>reduce)&apos;</highlight><highlight class="normal">).matches;</highlight></codeline>
+<codeline><highlight class="normal">}<sp/></highlight><highlight class="keywordflow">catch</highlight><highlight class="normal"><sp/>(_)<sp/>{<sp/>}</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(reducedMotion)<sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>perfTier<sp/>=<sp/></highlight><highlight class="stringliteral">&apos;low&apos;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline><highlight class="normal">}<sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">try</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>var<sp/>rawPerf<sp/>=<sp/>localStorage.getItem(</highlight><highlight class="stringliteral">&apos;cav_perf_tier&apos;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(rawPerf)<sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>cachedPerf<sp/>=<sp/>JSON.parse(rawPerf);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>cachedTier<sp/>=<sp/>String(cachedPerf.tier<sp/>||<sp/></highlight><highlight class="stringliteral">&apos;&apos;</highlight><highlight class="normal">).toUpperCase();</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>timestamp<sp/>=<sp/>Number(cachedPerf.timestamp);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>cacheTTL<sp/>=<sp/>7<sp/>*<sp/>24<sp/>*<sp/>60<sp/>*<sp/>60<sp/>*<sp/>1000;<sp/><sp/></highlight><highlight class="comment">//<sp/>7<sp/>days</highlight><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>cacheAge<sp/>=<sp/>Date.now()<sp/>-<sp/>timestamp;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>validTiers<sp/>=<sp/>[</highlight><highlight class="stringliteral">&apos;HIGH&apos;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&apos;MEDIUM&apos;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&apos;LOW&apos;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&apos;POTATO&apos;</highlight><highlight class="normal">];</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>validTiers.indexOf(cachedTier)<sp/>!==<sp/>-1<sp/>&amp;&amp;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Number.isFinite(timestamp)<sp/>&amp;&amp;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>cacheAge<sp/>&gt;=<sp/>0<sp/>&amp;&amp;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>cacheAge<sp/>&lt;<sp/>cacheTTL</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>)<sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>perfTier<sp/>=<sp/>cachedTier.toLowerCase();</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>localStorage.removeItem(</highlight><highlight class="stringliteral">&apos;cav_perf_tier&apos;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">catch</highlight><highlight class="normal"><sp/>(_)<sp/>{<sp/>}</highlight></codeline>
+<codeline><highlight class="normal">}</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal">root.setAttribute(</highlight><highlight class="stringliteral">&apos;data-perf&apos;</highlight><highlight class="normal">,<sp/>perfTier);</highlight></codeline>
+</programlisting></para>
+</simplesect>
+<simplesect kind="note"><para><bold>Why cache for 7 days?</bold> Running a benchmark on every page load is wasteful. Device performance rarely changes over a week, so we trust the cached value for that period.</para>
+</simplesect>
+<hruler/>
+</para>
+</sect1>
+<sect1 id="index_8html_1sec_block3">
+<title>🧩 Block 3: Performance Monitor Bootstrap</title><para><simplesect kind="par"><title>📍 Location</title><para>Standalone <computeroutput>&lt;script&gt;</computeroutput> tag after the boot IIFE in <computeroutput>&lt;head&gt;</computeroutput>.</para>
+</simplesect>
+<simplesect kind="par"><title>🎯 Purpose</title><para>To initialize the <computeroutput>PerformanceMonitor</computeroutput> module <emphasis>after</emphasis> the DOM is ready.</para>
+</simplesect>
+<simplesect kind="par"><title>⚙️ How It Works</title><para><orderedlist>
+<listitem><para>Attaches a <bold>one-time</bold> listener (<computeroutput>{ once: true }</computeroutput>) to the <computeroutput>DOMContentLoaded</computeroutput> event.</para>
+</listitem><listitem><para>When DOM parsing finishes, checks if the <computeroutput>PerformanceMonitor</computeroutput> global exists (it will be loaded by the deferred script <computeroutput><ref refid="performance-monitor_8js_source" kindref="compound">performance-monitor.js</ref></computeroutput>).</para>
+</listitem><listitem><para>Calls <computeroutput>PerformanceMonitor.init({ debug: false })</computeroutput> to start monitoring FPS and device metrics.</para>
+</listitem></orderedlist>
+</para>
+</simplesect>
+<simplesect kind="par"><title>📥 Inputs</title><para><itemizedlist>
+<listitem><para>Event: <computeroutput>DOMContentLoaded</computeroutput></para>
+</listitem><listitem><para>Global: <computeroutput>PerformanceMonitor</computeroutput> (may or may not exist)</para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+<simplesect kind="par"><title>📤 Outputs</title><para><itemizedlist>
+<listitem><para>Side effect: Starts the FPS/performance monitoring loop</para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+<simplesect kind="par"><title>💻 Actual Code</title><para><programlisting filename=".js"><codeline><highlight class="normal">document.addEventListener(</highlight><highlight class="stringliteral">&apos;DOMContentLoaded&apos;</highlight><highlight class="normal">,<sp/></highlight><highlight class="keyword">function</highlight><highlight class="normal"><sp/>()<sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(typeof<sp/>PerformanceMonitor<sp/>!==<sp/></highlight><highlight class="stringliteral">&apos;undefined&apos;</highlight><highlight class="normal">)<sp/>{</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>PerformanceMonitor.init({<sp/>debug:<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal"><sp/>});</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline><highlight class="normal">},<sp/>{<sp/>once:<sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal"><sp/>});</highlight></codeline>
+</programlisting></para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="performance-monitor_8js_source" kindref="compound">performance-monitor.js</ref></para>
+</simplesect>
+<hruler/>
+</para>
+</sect1>
+<sect1 id="index_8html_1sec_block4">
+<title>🧩 Block 4: Head Assets (Fonts + CSS)</title><para><simplesect kind="par"><title>🎯 Purpose</title><para>Load external fonts and stylesheets required by the UI.</para>
+</simplesect>
+<simplesect kind="par"><title>⚙️ Load Strategy</title><para><itemizedlist>
+<listitem><para><bold>Preconnect:</bold> Establishes early connection to Google Fonts CDN to reduce latency.</para>
+</listitem><listitem><para><bold>Fonts:</bold> Loads 4 font families — <emphasis>Manrope</emphasis> (default UI), <emphasis>Cinzel</emphasis> (headings), <emphasis>Vazirmatn</emphasis> (Persian/Farsi UI), <emphasis>Sora</emphasis> (accent text).</para>
+</listitem><listitem><para><bold>CSS Cascade Order (Critical):</bold><orderedlist>
+<listitem><para><computeroutput><ref refid="tokens_8css_source" kindref="compound">tokens.css</ref></computeroutput> → Design system variables (colors, spacing)</para>
+</listitem><listitem><para><computeroutput><ref refid="base_8css_source" kindref="compound">base.css</ref></computeroutput> → Global resets and typography</para>
+</listitem><listitem><para><computeroutput><ref refid="components_8css_source" kindref="compound">components.css</ref></computeroutput> → Reusable UI parts (buttons, pills, dropdowns)</para>
+</listitem><listitem><para><computeroutput><ref refid="home_8css_source" kindref="compound">home.css</ref></computeroutput> → Home view specific styles</para>
+</listitem><listitem><para><computeroutput><ref refid="browse_8css_source" kindref="compound">browse.css</ref></computeroutput> → File browser view specific styles</para>
+</listitem><listitem><para><computeroutput><ref refid="performance-modes_8css_source" kindref="compound">performance-modes.css</ref></computeroutput> → Rules driven by <computeroutput>[data-perf]</computeroutput> attribute</para>
+</listitem></orderedlist>
+</para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+<simplesect kind="par"><title>💻 Actual Code</title><para><programlisting filename=".html"><codeline><highlight class="normal">&lt;link<sp/>rel=</highlight><highlight class="stringliteral">&quot;preconnect&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;https://fonts.googleapis.com&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline><highlight class="normal">&lt;link<sp/>rel=</highlight><highlight class="stringliteral">&quot;preconnect&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;https://fonts.gstatic.com&quot;</highlight><highlight class="normal"><sp/>crossorigin&gt;</highlight></codeline>
+<codeline><highlight class="normal">&lt;link<sp/>href=</highlight><highlight class="stringliteral">&quot;https://fonts.googleapis.com/css2?family=Manrope...&quot;</highlight><highlight class="normal"><sp/>rel=</highlight><highlight class="stringliteral">&quot;stylesheet&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline><highlight class="normal"></highlight></codeline>
+<codeline><highlight class="normal">&lt;link<sp/>rel=</highlight><highlight class="stringliteral">&quot;stylesheet&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;/assets/css/tokens.css&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline><highlight class="normal">&lt;link<sp/>rel=</highlight><highlight class="stringliteral">&quot;stylesheet&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;/assets/css/base.css&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline><highlight class="normal">&lt;link<sp/>rel=</highlight><highlight class="stringliteral">&quot;stylesheet&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;/assets/css/components.css&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline><highlight class="normal">&lt;link<sp/>rel=</highlight><highlight class="stringliteral">&quot;stylesheet&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;/assets/css/home.css&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline><highlight class="normal">&lt;link<sp/>rel=</highlight><highlight class="stringliteral">&quot;stylesheet&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;/assets/css/browse.css&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline><highlight class="normal">&lt;link<sp/>rel=</highlight><highlight class="stringliteral">&quot;stylesheet&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;/assets/css/performance-modes.css&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+</programlisting></para>
+</simplesect>
+<simplesect kind="note"><para><computeroutput><ref refid="banner_8js_source" kindref="compound">banner.js</ref></computeroutput> is intentionally loaded here (without <computeroutput>defer</computeroutput>) so promotional banners appear as early as possible during page load.</para>
+</simplesect>
+<hruler/>
+</para>
+</sect1>
+<sect1 id="index_8html_1sec_block5">
+<title>🧩 Block 5: Aura Backdrop (Background Glow)</title><para><simplesect kind="par"><title>🎯 Purpose</title><para>Creates the ambient glowing background effect visible across the entire application.</para>
+</simplesect>
+<simplesect kind="par"><title>⚙️ How It Works</title><para><itemizedlist>
+<listitem><para>Uses 3 stacked absolutely-positioned <computeroutput>&lt;div&gt;</computeroutput> layers.</para>
+</listitem><listitem><para>Each layer has its own CSS <computeroutput>radial-gradient</computeroutput> and animation.</para>
+</listitem><listitem><para>Marked with <computeroutput>aria-hidden="true"</computeroutput> because it is purely decorative (screen readers skip it).</para>
+</listitem><listitem><para>When <computeroutput>data-perf="low"</computeroutput> or <computeroutput>data-perf="potato"</computeroutput>, animations are disabled by <computeroutput><ref refid="performance-modes_8css_source" kindref="compound">performance-modes.css</ref></computeroutput>.</para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+<simplesect kind="par"><title>📤 Outputs</title><para><itemizedlist>
+<listitem><para>Visual glow effect on the page background</para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+<simplesect kind="par"><title>💻 Actual Code</title><para><programlisting filename=".html"><codeline><highlight class="normal">&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;aura-backdrop&quot;</highlight><highlight class="normal"><sp/>aria-hidden=</highlight><highlight class="stringliteral">&quot;true&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;aura-base&quot;</highlight><highlight class="normal">&gt;&lt;/div&gt;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;aura-glow-1&quot;</highlight><highlight class="normal">&gt;&lt;/div&gt;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;aura-glow-2&quot;</highlight><highlight class="normal">&gt;&lt;/div&gt;</highlight></codeline>
+<codeline><highlight class="normal">&lt;/div&gt;</highlight></codeline>
+</programlisting></para>
+</simplesect>
+<hruler/>
+</para>
+</sect1>
+<sect1 id="index_8html_1sec_block6">
+<title>🧩 Block 6: Navigation Bar (Header)</title><para><simplesect kind="par"><title>🎯 Purpose</title><para>Provides the persistent top navigation with branding, tabs, and toolbar actions.</para>
+</simplesect>
+<simplesect kind="par"><title>🧱 Structural Breakdown</title><para></para>
+</simplesect>
+</para>
+<sect2 id="index_8html_1autotoc_md7_1s2"><sect3 id="index_8html_1autotoc_md7">
+<title>A) Brand Logo (<computeroutput>.nav-logo</computeroutput>)</title><para><itemizedlist>
+<listitem><para>Wrapped in an anchor with <computeroutput>data-link</computeroutput> so <computeroutput><ref refid="router_8js_source" kindref="compound">router.js</ref></computeroutput> handles the click as SPA navigation (no full page reload).</para>
+</listitem><listitem><para>Image has <computeroutput>onerror</computeroutput> fallback to hide broken image.</para>
+</listitem><listitem><para>Text uses <computeroutput>data-i18n</computeroutput> for translation.</para>
+</listitem></itemizedlist>
+</para>
+</sect3></sect2>
+<sect2 id="index_8html_1autotoc_md8_1s2"><sect3 id="index_8html_1autotoc_md8">
+<title>B) Center Tabs (<computeroutput>.nav-tabs</computeroutput>)</title><para><itemizedlist>
+<listitem><para>Three external/internal links: <bold>Website</bold>, <bold>Docs</bold>, <bold>Downloads (current)</bold>.</para>
+</listitem><listitem><para>The active tab uses <computeroutput>class="active"</computeroutput> and <computeroutput>aria-current="page"</computeroutput> for accessibility.</para>
+</listitem></itemizedlist>
+</para>
+</sect3></sect2>
+<sect2 id="index_8html_1autotoc_md9_1s2"><sect3 id="index_8html_1autotoc_md9">
+<title>C) Right Toolbar (<computeroutput>.nav-actions</computeroutput>)</title><para>Contains three interactive components:</para>
+<para><table rows="4" cols="3"><row>
+<entry thead="yes"><para>Component  </para>
+</entry><entry thead="yes"><para>Element  </para>
+</entry><entry thead="yes"><para>Purpose  </para>
+</entry></row>
+<row>
+<entry thead="no"><para>Performance Dropdown  </para>
+</entry><entry thead="no"><para><computeroutput>.perf-dropdown-wrap</computeroutput>  </para>
+</entry><entry thead="no"><para>Switches performance tier: AUTO / HIGH / MEDIUM / LOW / POTATO  </para>
+</entry></row>
+<row>
+<entry thead="no"><para>Language Dropdown  </para>
+</entry><entry thead="no"><para><computeroutput>.lang-dropdown-wrap</computeroutput>  </para>
+</entry><entry thead="no"><para>Switches locale: English (<computeroutput>en</computeroutput>) / Persian (<computeroutput>fa</computeroutput>)  </para>
+</entry></row>
+<row>
+<entry thead="no"><para>Theme Toggle  </para>
+</entry><entry thead="no"><para><computeroutput>#themeBtn</computeroutput>  </para>
+</entry><entry thead="no"><para>Toggles light ↔ dark mode  </para>
+</entry></row>
+</table>
+</para>
+<para><simplesect kind="par"><title>🔗 Dependencies</title><para><itemizedlist>
+<listitem><para><computeroutput><ref refid="theme_8js_source" kindref="compound">theme.js</ref></computeroutput> → binds <computeroutput>#themeBtn</computeroutput> click</para>
+</listitem><listitem><para><computeroutput><ref refid="i18n_8js_source" kindref="compound">i18n.js</ref></computeroutput> → binds language dropdown and translates <computeroutput>data-i18n</computeroutput> elements</para>
+</listitem><listitem><para><computeroutput><ref refid="performance-monitor_8js_source" kindref="compound">performance-monitor.js</ref></computeroutput> → binds performance dropdown</para>
+</listitem><listitem><para><computeroutput><ref refid="router_8js_source" kindref="compound">router.js</ref></computeroutput> → intercepts <computeroutput>data-link</computeroutput> clicks</para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+<simplesect kind="par"><title>💻 Structural Skeleton</title><para><programlisting filename=".html"><codeline><highlight class="normal">&lt;header<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;nav&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;nav-bar&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>&lt;a<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;nav-logo&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;/&quot;</highlight><highlight class="normal"><sp/>data-link&gt;...&lt;/a&gt;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;nav-tabs&quot;</highlight><highlight class="normal"><sp/>role=</highlight><highlight class="stringliteral">&quot;tablist&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>&lt;a<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;nav-tab&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;https://cloudavid.com&quot;</highlight><highlight class="normal">&gt;...&lt;/a&gt;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>&lt;a<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;nav-tab&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;https://docs.cloudavid.com&quot;</highlight><highlight class="normal">&gt;...&lt;/a&gt;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>&lt;a<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;nav-tab<sp/>active&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;/&quot;</highlight><highlight class="normal"><sp/>aria-current=</highlight><highlight class="stringliteral">&quot;page&quot;</highlight><highlight class="normal">&gt;...&lt;/a&gt;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>&lt;/div&gt;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;nav-actions&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;perf-dropdown-wrap&quot;</highlight><highlight class="normal">&gt;...&lt;/div&gt;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;lang-dropdown-wrap&quot;</highlight><highlight class="normal">&gt;...&lt;/div&gt;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>&lt;button<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;theme-btn&quot;</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">id</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;themeBtn&quot;</highlight><highlight class="normal">&gt;...&lt;/button&gt;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>&lt;/div&gt;</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/>&lt;/div&gt;</highlight></codeline>
+<codeline><highlight class="normal">&lt;/header&gt;</highlight></codeline>
+</programlisting></para>
+</simplesect>
+<hruler/>
+</para>
+</sect3></sect2>
+</sect1>
+<sect1 id="index_8html_1sec_block7">
+<title>🧩 Block 7: SPA Mount Point</title><para><simplesect kind="par"><title>🎯 Purpose</title><para>The <bold>most important tag</bold> in this entire HTML file. It is the empty container where every SPA view (Home, Browse, etc.) gets rendered by <computeroutput><ref refid="router_8js_source" kindref="compound">router.js</ref></computeroutput>.</para>
+</simplesect>
+<simplesect kind="par"><title>⚙️ How It Works</title><para><itemizedlist>
+<listitem><para>Starts completely empty when the page loads.</para>
+</listitem><listitem><para><computeroutput><ref refid="router_8js_source" kindref="compound">router.js</ref></computeroutput> reads <computeroutput>window.location.pathname</computeroutput> and calls the appropriate view renderer (e.g., <computeroutput>renderHome()</computeroutput> or <computeroutput>renderBrowse()</computeroutput>).</para>
+</listitem><listitem><para>The renderer generates HTML strings and injects them via <computeroutput>document.getElementById(&apos;app&apos;).innerHTML = ...</computeroutput>.</para>
+</listitem><listitem><para>On subsequent navigation, the router clears <computeroutput>#app</computeroutput> and mounts the next view.</para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+<simplesect kind="par"><title>💻 Actual Code</title><para><programlisting filename=".html"><codeline><highlight class="normal">&lt;main<sp/></highlight><highlight class="keywordtype">id</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;app&quot;</highlight><highlight class="normal">&gt;&lt;/main&gt;</highlight></codeline>
+</programlisting></para>
+</simplesect>
+<simplesect kind="warning"><para>Never modify <computeroutput>id="app"</computeroutput> — it is hardcoded in <computeroutput><ref refid="router_8js_source" kindref="compound">router.js</ref></computeroutput>, <computeroutput><ref refid="home_8js_source" kindref="compound">home.js</ref></computeroutput>, and <computeroutput><ref refid="browse_8js_source" kindref="compound">browse.js</ref></computeroutput>.</para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="router_8js_source" kindref="compound">router.js</ref> </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="home_8js_source" kindref="compound">home.js</ref> </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="browse_8js_source" kindref="compound">browse.js</ref></para>
+</simplesect>
+<hruler/>
+</para>
+</sect1>
+<sect1 id="index_8html_1sec_block8">
+<title>🧩 Block 8: Deferred Script Pipeline</title><para><simplesect kind="par"><title>🎯 Purpose</title><para>Loads all business logic modules <bold>after</bold> HTML parsing finishes (thanks to <computeroutput>defer</computeroutput>), so page rendering is never blocked.</para>
+</simplesect>
+<simplesect kind="par"><title>⚙️ Execution Order (STRICT)</title><para>The order matters because later files depend on earlier ones:</para>
+</simplesect>
+<table rows="9" cols="4"><row>
+<entry thead="yes"><para>#  </para>
+</entry><entry thead="yes"><para>File  </para>
+</entry><entry thead="yes"><para>Role  </para>
+</entry><entry thead="yes"><para>Depends On  </para>
+</entry></row>
+<row>
+<entry thead="no"><para>1  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="resource-service_8js_source" kindref="compound">resource-service.js</ref></computeroutput>  </para>
+</entry><entry thead="no"><para>API layer for backend files/folders  </para>
+</entry><entry thead="no"><para>—  </para>
+</entry></row>
+<row>
+<entry thead="no"><para>2  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="performance-monitor_8js_source" kindref="compound">performance-monitor.js</ref></computeroutput>  </para>
+</entry><entry thead="no"><para>Device benchmark + FPS monitor  </para>
+</entry><entry thead="no"><para>—  </para>
+</entry></row>
+<row>
+<entry thead="no"><para>3  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="theme_8js_source" kindref="compound">theme.js</ref></computeroutput>  </para>
+</entry><entry thead="no"><para>Theme toggle logic  </para>
+</entry><entry thead="no"><para>—  </para>
+</entry></row>
+<row>
+<entry thead="no"><para>4  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="i18n_8js_source" kindref="compound">i18n.js</ref></computeroutput>  </para>
+</entry><entry thead="no"><para>Translation engine  </para>
+</entry><entry thead="no"><para>—  </para>
+</entry></row>
+<row>
+<entry thead="no"><para>5  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="autocomplete_8js_source" kindref="compound">autocomplete.js</ref></computeroutput>  </para>
+</entry><entry thead="no"><para>Search suggestion widget  </para>
+</entry><entry thead="no"><para>resource-service  </para>
+</entry></row>
+<row>
+<entry thead="no"><para>6  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="home_8js_source" kindref="compound">home.js</ref></computeroutput>  </para>
+</entry><entry thead="no"><para>Home view renderer  </para>
+</entry><entry thead="no"><para>resource-service, i18n  </para>
+</entry></row>
+<row>
+<entry thead="no"><para>7  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="browse_8js_source" kindref="compound">browse.js</ref></computeroutput>  </para>
+</entry><entry thead="no"><para>Browse view renderer  </para>
+</entry><entry thead="no"><para>resource-service, i18n  </para>
+</entry></row>
+<row>
+<entry thead="no"><para>8  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="router_8js_source" kindref="compound">router.js</ref></computeroutput>  </para>
+</entry><entry thead="no"><para>SPA router (last!)  </para>
+</entry><entry thead="no"><para>ALL of the above  </para>
+</entry></row>
+</table>
+</para>
+<para><simplesect kind="warning"><para><computeroutput><ref refid="router_8js_source" kindref="compound">router.js</ref></computeroutput> <bold>must</bold> be last because it immediately triggers the initial route on load, which requires all view renderers and services to already be ready.</para>
+</simplesect>
+<simplesect kind="par"><title>💻 Actual Code</title><para><programlisting filename=".html"><codeline><highlight class="normal">&lt;script<sp/>src=</highlight><highlight class="stringliteral">&quot;/assets/js/services/resource-service.js&quot;</highlight><highlight class="normal"><sp/>defer&gt;&lt;/script&gt;</highlight></codeline>
+<codeline><highlight class="normal">&lt;script<sp/>src=</highlight><highlight class="stringliteral">&quot;/assets/js/services/performance-monitor.js&quot;</highlight><highlight class="normal"><sp/>defer&gt;&lt;/script&gt;</highlight></codeline>
+<codeline><highlight class="normal">&lt;script<sp/>src=</highlight><highlight class="stringliteral">&quot;/assets/js/theme.js&quot;</highlight><highlight class="normal"><sp/>defer&gt;&lt;/script&gt;</highlight></codeline>
+<codeline><highlight class="normal">&lt;script<sp/>src=</highlight><highlight class="stringliteral">&quot;/assets/js/i18n.js&quot;</highlight><highlight class="normal"><sp/>defer&gt;&lt;/script&gt;</highlight></codeline>
+<codeline><highlight class="normal">&lt;script<sp/>src=</highlight><highlight class="stringliteral">&quot;/assets/js/autocomplete.js&quot;</highlight><highlight class="normal"><sp/>defer&gt;&lt;/script&gt;</highlight></codeline>
+<codeline><highlight class="normal">&lt;script<sp/>src=</highlight><highlight class="stringliteral">&quot;/assets/js/home.js&quot;</highlight><highlight class="normal"><sp/>defer&gt;&lt;/script&gt;</highlight></codeline>
+<codeline><highlight class="normal">&lt;script<sp/>src=</highlight><highlight class="stringliteral">&quot;/assets/js/browse.js&quot;</highlight><highlight class="normal"><sp/>defer&gt;&lt;/script&gt;</highlight></codeline>
+<codeline><highlight class="normal">&lt;script<sp/>src=</highlight><highlight class="stringliteral">&quot;/assets/js/router.js&quot;</highlight><highlight class="normal"><sp/>defer&gt;&lt;/script&gt;</highlight></codeline>
+</programlisting></para>
+</simplesect>
+<hruler/>
+</para>
+</sect1>
+<sect1 id="index_8html_1sec_conventions">
+<title>📐 HTML Conventions Used In This File</title><para><table rows="7" cols="3"><row>
+<entry thead="yes"><para>Attribute  </para>
+</entry><entry thead="yes"><para>Meaning  </para>
+</entry><entry thead="yes"><para>Consumed By  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>data-link</computeroutput>  </para>
+</entry><entry thead="no"><para>Mark link as SPA navigation (no reload)  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="router_8js_source" kindref="compound">router.js</ref></computeroutput>  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>data-i18n="key"</computeroutput>  </para>
+</entry><entry thead="no"><para>Translate this element&apos;s text  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="i18n_8js_source" kindref="compound">i18n.js</ref></computeroutput>  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>data-theme="light\|dark"</computeroutput>  </para>
+</entry><entry thead="no"><para>Active color theme  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="tokens_8css_source" kindref="compound">tokens.css</ref></computeroutput>, <computeroutput><ref refid="theme_8js_source" kindref="compound">theme.js</ref></computeroutput>  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>data-perf="high\|medium\|low\|potato"</computeroutput>  </para>
+</entry><entry thead="no"><para>Active performance tier  </para>
+</entry><entry thead="no"><para><computeroutput><ref refid="performance-modes_8css_source" kindref="compound">performance-modes.css</ref></computeroutput>  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>aria-hidden="true"</computeroutput>  </para>
+</entry><entry thead="no"><para>Hide from screen readers  </para>
+</entry><entry thead="no"><para>Assistive tech  </para>
+</entry></row>
+<row>
+<entry thead="no"><para><computeroutput>aria-current="page"</computeroutput>  </para>
+</entry><entry thead="no"><para>Mark current page/tab  </para>
+</entry><entry thead="no"><para>Assistive tech  </para>
+</entry></row>
+</table>
+</para>
+<para><hruler/>
+</para>
+</sect1>
+<sect1 id="index_8html_1sec_seealso">
+<title>🔍 See Also</title><para><simplesect kind="see"><para><ref refid="router_8js_source" kindref="compound">router.js</ref> — SPA routing engine </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="home_8js_source" kindref="compound">home.js</ref> — Home view renderer </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="browse_8js_source" kindref="compound">browse.js</ref> — File browser renderer </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="theme_8js_source" kindref="compound">theme.js</ref> — Theme toggle logic </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="i18n_8js_source" kindref="compound">i18n.js</ref> — Translation engine </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="performance-monitor_8js_source" kindref="compound">performance-monitor.js</ref> — Device benchmarking </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="resource-service_8js_source" kindref="compound">resource-service.js</ref> — Backend API layer</para>
+</simplesect>
+<simplesect kind="author"><para>ShaiyaAzizi </para>
+</simplesect>
+<simplesect kind="version"><para>1.0 </para>
+</simplesect>
+</para>
+</sect1>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal">&lt;!doctype<sp/>html&gt;</highlight></codeline>
+<codeline lineno="2"><highlight class="normal">&lt;html<sp/>lang=</highlight><highlight class="stringliteral">&quot;en&quot;</highlight><highlight class="normal"><sp/>dir=</highlight><highlight class="stringliteral">&quot;ltr&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal">&lt;head&gt;</highlight></codeline>
+<codeline lineno="5"><highlight class="normal"><sp/><sp/>&lt;meta<sp/>charset=</highlight><highlight class="stringliteral">&quot;utf-8&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="6"><highlight class="normal"><sp/><sp/>&lt;meta<sp/>name=</highlight><highlight class="stringliteral">&quot;viewport&quot;</highlight><highlight class="normal"><sp/>content=</highlight><highlight class="stringliteral">&quot;width=device-width,<sp/>initial-scale=1&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="7"><highlight class="normal"><sp/><sp/>&lt;meta<sp/>name=</highlight><highlight class="stringliteral">&quot;theme-color&quot;</highlight><highlight class="normal"><sp/>content=</highlight><highlight class="stringliteral">&quot;#303236&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="8"><highlight class="normal"><sp/><sp/>&lt;title&gt;AVID<sp/>Download<sp/>•<sp/>File<sp/>Portal&lt;/title&gt;</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"><sp/><sp/>&lt;script&gt;</highlight></codeline>
+<codeline lineno="10"><highlight class="normal"><sp/><sp/><sp/><sp/>(function<sp/>()<sp/>{</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&apos;use<sp/>strict&apos;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>root<sp/>=<sp/>document.documentElement;</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>theme<sp/>=<sp/></highlight><highlight class="stringliteral">&apos;light&apos;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">try</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(</highlight></codeline>
+<codeline lineno="19"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>window.matchMedia<sp/>&amp;&amp;</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>window.matchMedia(</highlight><highlight class="stringliteral">&apos;(prefers-color-scheme:<sp/>dark)&apos;</highlight><highlight class="normal">).matches</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)<sp/>{</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>theme<sp/>=<sp/></highlight><highlight class="stringliteral">&apos;dark&apos;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">catch</highlight><highlight class="normal"><sp/>(_)<sp/>{<sp/>}</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">try</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>savedTheme<sp/>=<sp/>localStorage.getItem(</highlight><highlight class="stringliteral">&apos;cav_theme&apos;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(savedTheme<sp/>===<sp/></highlight><highlight class="stringliteral">&apos;light&apos;</highlight><highlight class="normal"><sp/>||<sp/>savedTheme<sp/>===<sp/></highlight><highlight class="stringliteral">&apos;dark&apos;</highlight><highlight class="normal">)<sp/>{</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>theme<sp/>=<sp/>savedTheme;</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">catch</highlight><highlight class="normal"><sp/>(_)<sp/>{<sp/>}</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>root.setAttribute(</highlight><highlight class="stringliteral">&apos;data-theme&apos;</highlight><highlight class="normal">,<sp/>theme);</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>perfTier<sp/>=<sp/></highlight><highlight class="stringliteral">&apos;medium&apos;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>reducedMotion<sp/>=<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">try</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>reducedMotion<sp/>=<sp/>window.matchMedia<sp/>&amp;&amp;</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>window.matchMedia(</highlight><highlight class="stringliteral">&apos;(prefers-reduced-motion:<sp/>reduce)&apos;</highlight><highlight class="normal">).matches;</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">catch</highlight><highlight class="normal"><sp/>(_)<sp/>{<sp/>}</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(reducedMotion)<sp/>{</highlight></codeline>
+<codeline lineno="45"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>perfTier<sp/>=<sp/></highlight><highlight class="stringliteral">&apos;low&apos;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">try</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>rawPerf<sp/>=<sp/>localStorage.getItem(</highlight><highlight class="stringliteral">&apos;cav_perf_tier&apos;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"></highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(rawPerf)<sp/>{</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>cachedPerf<sp/>=<sp/>JSON.parse(rawPerf);</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>cachedTier<sp/>=<sp/>String(cachedPerf.tier<sp/>||<sp/></highlight><highlight class="stringliteral">&apos;&apos;</highlight><highlight class="normal">).toUpperCase();</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>timestamp<sp/>=<sp/>Number(cachedPerf.timestamp);</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>cacheTTL<sp/>=<sp/>7<sp/>*<sp/>24<sp/>*<sp/>60<sp/>*<sp/>60<sp/>*<sp/>1000;</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>cacheAge<sp/>=<sp/>Date.now()<sp/>-<sp/>timestamp;</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>validTiers<sp/>=<sp/>[</highlight><highlight class="stringliteral">&apos;HIGH&apos;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&apos;MEDIUM&apos;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&apos;LOW&apos;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&apos;POTATO&apos;</highlight><highlight class="normal">];</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"></highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>validTiers.indexOf(cachedTier)<sp/>!==<sp/>-1<sp/>&amp;&amp;</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Number.isFinite(timestamp)<sp/>&amp;&amp;</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>cacheAge<sp/>&gt;=<sp/>0<sp/>&amp;&amp;</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>cacheAge<sp/>&lt;<sp/>cacheTTL</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)<sp/>{</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>perfTier<sp/>=<sp/>cachedTier.toLowerCase();</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>localStorage.removeItem(</highlight><highlight class="stringliteral">&apos;cav_perf_tier&apos;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">catch</highlight><highlight class="normal"><sp/>(_)<sp/>{</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"></highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>root.setAttribute(</highlight><highlight class="stringliteral">&apos;data-perf&apos;</highlight><highlight class="normal">,<sp/>perfTier);</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/>})();</highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/><sp/><sp/>document.addEventListener(</highlight><highlight class="stringliteral">&apos;DOMContentLoaded&apos;</highlight><highlight class="normal">,<sp/>function<sp/>()<sp/>{</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(typeof<sp/>PerformanceMonitor<sp/>!==<sp/></highlight><highlight class="stringliteral">&apos;undefined&apos;</highlight><highlight class="normal">)<sp/>{</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>PerformanceMonitor.init({</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>debug:<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="79"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><sp/><sp/>},<sp/>{<sp/>once:<sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal"><sp/>});</highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/>&lt;/script&gt;</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/>&lt;script<sp/>src=</highlight><highlight class="stringliteral">&quot;/assets/js/banner.js&quot;</highlight><highlight class="normal">&gt;&lt;/script&gt;</highlight></codeline>
+<codeline lineno="84"><highlight class="normal"></highlight></codeline>
+<codeline lineno="85"><highlight class="normal"></highlight></codeline>
+<codeline lineno="86"><highlight class="normal"><sp/><sp/>&lt;link<sp/>rel=</highlight><highlight class="stringliteral">&quot;preconnect&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;https://fonts.googleapis.com&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/>&lt;link<sp/>rel=</highlight><highlight class="stringliteral">&quot;preconnect&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;https://fonts.gstatic.com&quot;</highlight><highlight class="normal"><sp/>crossorigin&gt;</highlight></codeline>
+<codeline lineno="88"><highlight class="normal"><sp/><sp/>&lt;link</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/><sp/><sp/>href=</highlight><highlight class="stringliteral">&quot;https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;family=Cinzel:wght@400..700&amp;family=Vazirmatn:wght@300..700&amp;family=Sora:wght@400;500;600&amp;display=swap&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/><sp/><sp/>rel=</highlight><highlight class="stringliteral">&quot;stylesheet&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/>&lt;link<sp/>rel=</highlight><highlight class="stringliteral">&quot;stylesheet&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;/assets/css/tokens.css&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/>&lt;link<sp/>rel=</highlight><highlight class="stringliteral">&quot;stylesheet&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;/assets/css/base.css&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/>&lt;link<sp/>rel=</highlight><highlight class="stringliteral">&quot;stylesheet&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;/assets/css/components.css&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="94"><highlight class="normal"><sp/><sp/>&lt;link<sp/>rel=</highlight><highlight class="stringliteral">&quot;stylesheet&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;/assets/css/home.css&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/>&lt;link<sp/>rel=</highlight><highlight class="stringliteral">&quot;stylesheet&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;/assets/css/browse.css&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/>&lt;link<sp/>rel=</highlight><highlight class="stringliteral">&quot;stylesheet&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;/assets/css/performance-modes.css&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"></highlight></codeline>
+<codeline lineno="98"><highlight class="normal"><sp/><sp/>&lt;link<sp/>rel=</highlight><highlight class="stringliteral">&quot;icon&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;/assets/icon/files-logo.webp&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="99"><highlight class="normal">&lt;/head&gt;</highlight></codeline>
+<codeline lineno="100"><highlight class="normal"></highlight></codeline>
+<codeline lineno="101"><highlight class="normal">&lt;body&gt;</highlight></codeline>
+<codeline lineno="102"><highlight class="normal"></highlight></codeline>
+<codeline lineno="103"><highlight class="normal"><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;aura-backdrop&quot;</highlight><highlight class="normal"><sp/>aria-hidden=</highlight><highlight class="stringliteral">&quot;true&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="104"><highlight class="normal"><sp/><sp/><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;aura-base&quot;</highlight><highlight class="normal">&gt;&lt;/div&gt;</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"><sp/><sp/><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;aura-glow-1&quot;</highlight><highlight class="normal">&gt;&lt;/div&gt;</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"><sp/><sp/><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;aura-glow-2&quot;</highlight><highlight class="normal">&gt;&lt;/div&gt;</highlight></codeline>
+<codeline lineno="107"><highlight class="normal"><sp/><sp/>&lt;/div&gt;</highlight></codeline>
+<codeline lineno="108"><highlight class="normal"></highlight></codeline>
+<codeline lineno="109"><highlight class="normal"></highlight></codeline>
+<codeline lineno="110"><highlight class="normal"><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;page&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="111"><highlight class="normal"></highlight></codeline>
+<codeline lineno="112"><highlight class="normal"></highlight></codeline>
+<codeline lineno="113"><highlight class="normal"><sp/><sp/><sp/><sp/>&lt;header<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;nav&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="114"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;nav-bar&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="115"><highlight class="normal"></highlight></codeline>
+<codeline lineno="116"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;a<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;nav-logo&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;/&quot;</highlight><highlight class="normal"><sp/>data-link&gt;</highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;img<sp/>src=</highlight><highlight class="stringliteral">&quot;/assets/icon/logo.webp&quot;</highlight><highlight class="normal"><sp/>alt=</highlight><highlight class="stringliteral">&quot;CloudAvid<sp/>Logo&quot;</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;nav-logo-img&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="118"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>onerror=</highlight><highlight class="stringliteral">&quot;this.style.display=&apos;none&apos;&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="119"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;nav-logo-text&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="120"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;strong<sp/>data-i18n=</highlight><highlight class="stringliteral">&quot;brand&quot;</highlight><highlight class="normal">&gt;CloudAvid&lt;/strong&gt;</highlight></codeline>
+<codeline lineno="121"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/>data-i18n=</highlight><highlight class="stringliteral">&quot;subtitle&quot;</highlight><highlight class="normal">&gt;FILE<sp/>PORTAL&lt;/span&gt;</highlight></codeline>
+<codeline lineno="122"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/div&gt;</highlight></codeline>
+<codeline lineno="123"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/a&gt;</highlight></codeline>
+<codeline lineno="124"><highlight class="normal"></highlight></codeline>
+<codeline lineno="125"><highlight class="normal"></highlight></codeline>
+<codeline lineno="126"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;nav-tabs&quot;</highlight><highlight class="normal"><sp/>role=</highlight><highlight class="stringliteral">&quot;tablist&quot;</highlight><highlight class="normal"><sp/>aria-label=</highlight><highlight class="stringliteral">&quot;Primary&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;a<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;nav-tab&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;https://cloudavid.com&quot;</highlight><highlight class="normal"><sp/>target=</highlight><highlight class="stringliteral">&quot;_blank&quot;</highlight><highlight class="normal"><sp/>rel=</highlight><highlight class="stringliteral">&quot;noopener&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="128"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;svg<sp/>width=</highlight><highlight class="stringliteral">&quot;14&quot;</highlight><highlight class="normal"><sp/>height=</highlight><highlight class="stringliteral">&quot;14&quot;</highlight><highlight class="normal"><sp/>viewBox=</highlight><highlight class="stringliteral">&quot;0<sp/>0<sp/>24<sp/>24&quot;</highlight><highlight class="normal"><sp/>fill=</highlight><highlight class="stringliteral">&quot;none&quot;</highlight><highlight class="normal"><sp/>stroke=</highlight><highlight class="stringliteral">&quot;currentColor&quot;</highlight><highlight class="normal"><sp/>stroke-width=</highlight><highlight class="stringliteral">&quot;2&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="129"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>stroke-linecap=</highlight><highlight class="stringliteral">&quot;round&quot;</highlight><highlight class="normal"><sp/>stroke-linejoin=</highlight><highlight class="stringliteral">&quot;round&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="130"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;circle<sp/>cx=</highlight><highlight class="stringliteral">&quot;12&quot;</highlight><highlight class="normal"><sp/>cy=</highlight><highlight class="stringliteral">&quot;12&quot;</highlight><highlight class="normal"><sp/>r=</highlight><highlight class="stringliteral">&quot;10&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="131"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;line<sp/>x1=</highlight><highlight class="stringliteral">&quot;2&quot;</highlight><highlight class="normal"><sp/>y1=</highlight><highlight class="stringliteral">&quot;12&quot;</highlight><highlight class="normal"><sp/>x2=</highlight><highlight class="stringliteral">&quot;22&quot;</highlight><highlight class="normal"><sp/>y2=</highlight><highlight class="stringliteral">&quot;12&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="132"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;path<sp/>d=</highlight><highlight class="stringliteral">&quot;M12<sp/>2a15.3<sp/>15.3<sp/>0<sp/>0<sp/>1<sp/>4<sp/>10<sp/>15.3<sp/>15.3<sp/>0<sp/>0<sp/>1-4<sp/>10<sp/>15.3<sp/>15.3<sp/>0<sp/>0<sp/>1-4-10<sp/>15.3<sp/>15.3<sp/>0<sp/>0<sp/>1<sp/>4-10z&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="133"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/svg&gt;</highlight></codeline>
+<codeline lineno="134"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/>data-i18n=</highlight><highlight class="stringliteral">&quot;website&quot;</highlight><highlight class="normal">&gt;Website&lt;/span&gt;</highlight></codeline>
+<codeline lineno="135"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/a&gt;</highlight></codeline>
+<codeline lineno="136"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;a<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;nav-tab&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;https://docs.cloudavid.com&quot;</highlight><highlight class="normal"><sp/>target=</highlight><highlight class="stringliteral">&quot;_blank&quot;</highlight><highlight class="normal"><sp/>rel=</highlight><highlight class="stringliteral">&quot;noopener&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="137"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;svg<sp/>width=</highlight><highlight class="stringliteral">&quot;14&quot;</highlight><highlight class="normal"><sp/>height=</highlight><highlight class="stringliteral">&quot;14&quot;</highlight><highlight class="normal"><sp/>viewBox=</highlight><highlight class="stringliteral">&quot;0<sp/>0<sp/>24<sp/>24&quot;</highlight><highlight class="normal"><sp/>fill=</highlight><highlight class="stringliteral">&quot;none&quot;</highlight><highlight class="normal"><sp/>stroke=</highlight><highlight class="stringliteral">&quot;currentColor&quot;</highlight><highlight class="normal"><sp/>stroke-width=</highlight><highlight class="stringliteral">&quot;2&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="138"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>stroke-linecap=</highlight><highlight class="stringliteral">&quot;round&quot;</highlight><highlight class="normal"><sp/>stroke-linejoin=</highlight><highlight class="stringliteral">&quot;round&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="139"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;path<sp/>d=</highlight><highlight class="stringliteral">&quot;M14<sp/>2H6a2<sp/>2<sp/>0<sp/>0<sp/>0-2<sp/>2v16a2<sp/>2<sp/>0<sp/>0<sp/>0<sp/>2<sp/>2h12a2<sp/>2<sp/>0<sp/>0<sp/>0<sp/>2-2V8z&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="140"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;polyline<sp/>points=</highlight><highlight class="stringliteral">&quot;14<sp/>2<sp/>14<sp/>8<sp/>20<sp/>8&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="141"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;line<sp/>x1=</highlight><highlight class="stringliteral">&quot;16&quot;</highlight><highlight class="normal"><sp/>y1=</highlight><highlight class="stringliteral">&quot;13&quot;</highlight><highlight class="normal"><sp/>x2=</highlight><highlight class="stringliteral">&quot;8&quot;</highlight><highlight class="normal"><sp/>y2=</highlight><highlight class="stringliteral">&quot;13&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="142"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;line<sp/>x1=</highlight><highlight class="stringliteral">&quot;16&quot;</highlight><highlight class="normal"><sp/>y1=</highlight><highlight class="stringliteral">&quot;17&quot;</highlight><highlight class="normal"><sp/>x2=</highlight><highlight class="stringliteral">&quot;8&quot;</highlight><highlight class="normal"><sp/>y2=</highlight><highlight class="stringliteral">&quot;17&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="143"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;polyline<sp/>points=</highlight><highlight class="stringliteral">&quot;10<sp/>9<sp/>9<sp/>9<sp/>8<sp/>9&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="144"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/svg&gt;</highlight></codeline>
+<codeline lineno="145"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/>data-i18n=</highlight><highlight class="stringliteral">&quot;docs&quot;</highlight><highlight class="normal">&gt;Docs&lt;/span&gt;</highlight></codeline>
+<codeline lineno="146"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/a&gt;</highlight></codeline>
+<codeline lineno="147"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;a<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;nav-tab<sp/>active&quot;</highlight><highlight class="normal"><sp/>href=</highlight><highlight class="stringliteral">&quot;/&quot;</highlight><highlight class="normal"><sp/>aria-current=</highlight><highlight class="stringliteral">&quot;page&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="148"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;svg<sp/>width=</highlight><highlight class="stringliteral">&quot;14&quot;</highlight><highlight class="normal"><sp/>height=</highlight><highlight class="stringliteral">&quot;14&quot;</highlight><highlight class="normal"><sp/>viewBox=</highlight><highlight class="stringliteral">&quot;0<sp/>0<sp/>24<sp/>24&quot;</highlight><highlight class="normal"><sp/>fill=</highlight><highlight class="stringliteral">&quot;none&quot;</highlight><highlight class="normal"><sp/>stroke=</highlight><highlight class="stringliteral">&quot;currentColor&quot;</highlight><highlight class="normal"><sp/>stroke-width=</highlight><highlight class="stringliteral">&quot;2&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="149"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>stroke-linecap=</highlight><highlight class="stringliteral">&quot;round&quot;</highlight><highlight class="normal"><sp/>stroke-linejoin=</highlight><highlight class="stringliteral">&quot;round&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="150"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;path<sp/>d=</highlight><highlight class="stringliteral">&quot;M21<sp/>15v4a2<sp/>2<sp/>0<sp/>0<sp/>1-2<sp/>2H5a2<sp/>2<sp/>0<sp/>0<sp/>1-2-2v-4&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="151"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;polyline<sp/>points=</highlight><highlight class="stringliteral">&quot;7<sp/>10<sp/>12<sp/>15<sp/>17<sp/>10&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="152"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;line<sp/>x1=</highlight><highlight class="stringliteral">&quot;12&quot;</highlight><highlight class="normal"><sp/>y1=</highlight><highlight class="stringliteral">&quot;15&quot;</highlight><highlight class="normal"><sp/>x2=</highlight><highlight class="stringliteral">&quot;12&quot;</highlight><highlight class="normal"><sp/>y2=</highlight><highlight class="stringliteral">&quot;3&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="153"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/svg&gt;</highlight></codeline>
+<codeline lineno="154"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/>data-i18n=</highlight><highlight class="stringliteral">&quot;downloads&quot;</highlight><highlight class="normal">&gt;Downloads&lt;/span&gt;</highlight></codeline>
+<codeline lineno="155"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/a&gt;</highlight></codeline>
+<codeline lineno="156"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/div&gt;</highlight></codeline>
+<codeline lineno="157"><highlight class="normal"></highlight></codeline>
+<codeline lineno="158"><highlight class="normal"></highlight></codeline>
+<codeline lineno="159"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;nav-actions&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="160"><highlight class="normal"></highlight></codeline>
+<codeline lineno="161"><highlight class="normal"></highlight></codeline>
+<codeline lineno="162"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;perf-dropdown-wrap&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="163"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;button<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;perf-pill&quot;</highlight><highlight class="normal"><sp/>type=</highlight><highlight class="stringliteral">&quot;button&quot;</highlight><highlight class="normal"><sp/>aria-haspopup=</highlight><highlight class="stringliteral">&quot;true&quot;</highlight><highlight class="normal"><sp/>aria-expanded=</highlight><highlight class="stringliteral">&quot;false&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="164"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>title=</highlight><highlight class="stringliteral">&quot;Performance<sp/>Settings&quot;</highlight><highlight class="normal"><sp/>aria-label=</highlight><highlight class="stringliteral">&quot;Performance<sp/>Settings&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="165"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;svg<sp/>width=</highlight><highlight class="stringliteral">&quot;15&quot;</highlight><highlight class="normal"><sp/>height=</highlight><highlight class="stringliteral">&quot;15&quot;</highlight><highlight class="normal"><sp/>viewBox=</highlight><highlight class="stringliteral">&quot;0<sp/>0<sp/>24<sp/>24&quot;</highlight><highlight class="normal"><sp/>fill=</highlight><highlight class="stringliteral">&quot;none&quot;</highlight><highlight class="normal"><sp/>stroke=</highlight><highlight class="stringliteral">&quot;currentColor&quot;</highlight><highlight class="normal"><sp/>stroke-width=</highlight><highlight class="stringliteral">&quot;2&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="166"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>stroke-linecap=</highlight><highlight class="stringliteral">&quot;round&quot;</highlight><highlight class="normal"><sp/>stroke-linejoin=</highlight><highlight class="stringliteral">&quot;round&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="167"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;path<sp/>d=</highlight><highlight class="stringliteral">&quot;m12<sp/>14<sp/>4-4&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="168"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;path<sp/>d=</highlight><highlight class="stringliteral">&quot;M3.34<sp/>19a10<sp/>10<sp/>0<sp/>1<sp/>1<sp/>17.32<sp/>0&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="169"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/svg&gt;</highlight></codeline>
+<codeline lineno="170"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/></highlight><highlight class="keywordtype">id</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;currentPerfLabel&quot;</highlight><highlight class="normal"><sp/>data-i18n=</highlight><highlight class="stringliteral">&quot;perfLabel&quot;</highlight><highlight class="normal">&gt;Performance&lt;/span&gt;</highlight></codeline>
+<codeline lineno="171"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;svg<sp/>width=</highlight><highlight class="stringliteral">&quot;12&quot;</highlight><highlight class="normal"><sp/>height=</highlight><highlight class="stringliteral">&quot;12&quot;</highlight><highlight class="normal"><sp/>viewBox=</highlight><highlight class="stringliteral">&quot;0<sp/>0<sp/>24<sp/>24&quot;</highlight><highlight class="normal"><sp/>fill=</highlight><highlight class="stringliteral">&quot;none&quot;</highlight><highlight class="normal"><sp/>stroke=</highlight><highlight class="stringliteral">&quot;currentColor&quot;</highlight><highlight class="normal"><sp/>stroke-width=</highlight><highlight class="stringliteral">&quot;2&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="172"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;polyline<sp/>points=</highlight><highlight class="stringliteral">&quot;6<sp/>9<sp/>12<sp/>15<sp/>18<sp/>9&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="173"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/svg&gt;</highlight></codeline>
+<codeline lineno="174"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/button&gt;</highlight></codeline>
+<codeline lineno="175"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;perf-dropdown-menu&quot;</highlight><highlight class="normal"><sp/>role=</highlight><highlight class="stringliteral">&quot;menu&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="176"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;button<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;perf-option&quot;</highlight><highlight class="normal"><sp/>data-perf-val=</highlight><highlight class="stringliteral">&quot;AUTO&quot;</highlight><highlight class="normal"><sp/>type=</highlight><highlight class="stringliteral">&quot;button&quot;</highlight><highlight class="normal"><sp/>role=</highlight><highlight class="stringliteral">&quot;menuitem&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="177"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/>data-i18n=</highlight><highlight class="stringliteral">&quot;perfAuto&quot;</highlight><highlight class="normal">&gt;Auto<sp/>Detect&lt;/span&gt;</highlight></codeline>
+<codeline lineno="178"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;perf-indicator-dot&quot;</highlight><highlight class="normal">&gt;&lt;/span&gt;</highlight></codeline>
+<codeline lineno="179"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/button&gt;</highlight></codeline>
+<codeline lineno="180"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;button<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;perf-option&quot;</highlight><highlight class="normal"><sp/>data-perf-val=</highlight><highlight class="stringliteral">&quot;HIGH&quot;</highlight><highlight class="normal"><sp/>type=</highlight><highlight class="stringliteral">&quot;button&quot;</highlight><highlight class="normal"><sp/>role=</highlight><highlight class="stringliteral">&quot;menuitem&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="181"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/>data-i18n=</highlight><highlight class="stringliteral">&quot;perfHigh&quot;</highlight><highlight class="normal">&gt;High<sp/>Power&lt;/span&gt;</highlight></codeline>
+<codeline lineno="182"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;perf-indicator-dot&quot;</highlight><highlight class="normal">&gt;&lt;/span&gt;</highlight></codeline>
+<codeline lineno="183"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/button&gt;</highlight></codeline>
+<codeline lineno="184"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;button<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;perf-option&quot;</highlight><highlight class="normal"><sp/>data-perf-val=</highlight><highlight class="stringliteral">&quot;MEDIUM&quot;</highlight><highlight class="normal"><sp/>type=</highlight><highlight class="stringliteral">&quot;button&quot;</highlight><highlight class="normal"><sp/>role=</highlight><highlight class="stringliteral">&quot;menuitem&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="185"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/>data-i18n=</highlight><highlight class="stringliteral">&quot;perfMed&quot;</highlight><highlight class="normal">&gt;Balanced&lt;/span&gt;</highlight></codeline>
+<codeline lineno="186"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;perf-indicator-dot&quot;</highlight><highlight class="normal">&gt;&lt;/span&gt;</highlight></codeline>
+<codeline lineno="187"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/button&gt;</highlight></codeline>
+<codeline lineno="188"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;button<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;perf-option&quot;</highlight><highlight class="normal"><sp/>data-perf-val=</highlight><highlight class="stringliteral">&quot;LOW&quot;</highlight><highlight class="normal"><sp/>type=</highlight><highlight class="stringliteral">&quot;button&quot;</highlight><highlight class="normal"><sp/>role=</highlight><highlight class="stringliteral">&quot;menuitem&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="189"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/>data-i18n=</highlight><highlight class="stringliteral">&quot;perfLow&quot;</highlight><highlight class="normal">&gt;Power<sp/>Saver&lt;/span&gt;</highlight></codeline>
+<codeline lineno="190"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;perf-indicator-dot&quot;</highlight><highlight class="normal">&gt;&lt;/span&gt;</highlight></codeline>
+<codeline lineno="191"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/button&gt;</highlight></codeline>
+<codeline lineno="192"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;button<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;perf-option&quot;</highlight><highlight class="normal"><sp/>data-perf-val=</highlight><highlight class="stringliteral">&quot;POTATO&quot;</highlight><highlight class="normal"><sp/>type=</highlight><highlight class="stringliteral">&quot;button&quot;</highlight><highlight class="normal"><sp/>role=</highlight><highlight class="stringliteral">&quot;menuitem&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="193"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/>data-i18n=</highlight><highlight class="stringliteral">&quot;perfPotato&quot;</highlight><highlight class="normal">&gt;Potato<sp/>Mode&lt;/span&gt;</highlight></codeline>
+<codeline lineno="194"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;perf-indicator-dot&quot;</highlight><highlight class="normal">&gt;&lt;/span&gt;</highlight></codeline>
+<codeline lineno="195"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/button&gt;</highlight></codeline>
+<codeline lineno="196"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/div&gt;</highlight></codeline>
+<codeline lineno="197"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/div&gt;</highlight></codeline>
+<codeline lineno="198"><highlight class="normal"></highlight></codeline>
+<codeline lineno="199"><highlight class="normal"></highlight></codeline>
+<codeline lineno="200"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;lang-dropdown-wrap&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="201"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;button<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;lang-pill&quot;</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">id</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;langBtn&quot;</highlight><highlight class="normal"><sp/>type=</highlight><highlight class="stringliteral">&quot;button&quot;</highlight><highlight class="normal"><sp/>aria-haspopup=</highlight><highlight class="stringliteral">&quot;true&quot;</highlight><highlight class="normal"><sp/>aria-expanded=</highlight><highlight class="stringliteral">&quot;false&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="202"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>title=</highlight><highlight class="stringliteral">&quot;Select<sp/>language&quot;</highlight><highlight class="normal"><sp/>aria-label=</highlight><highlight class="stringliteral">&quot;Select<sp/>language&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="203"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;svg<sp/>width=</highlight><highlight class="stringliteral">&quot;14&quot;</highlight><highlight class="normal"><sp/>height=</highlight><highlight class="stringliteral">&quot;14&quot;</highlight><highlight class="normal"><sp/>viewBox=</highlight><highlight class="stringliteral">&quot;0<sp/>0<sp/>24<sp/>24&quot;</highlight><highlight class="normal"><sp/>fill=</highlight><highlight class="stringliteral">&quot;none&quot;</highlight><highlight class="normal"><sp/>stroke=</highlight><highlight class="stringliteral">&quot;currentColor&quot;</highlight><highlight class="normal"><sp/>stroke-width=</highlight><highlight class="stringliteral">&quot;2&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="204"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>stroke-linecap=</highlight><highlight class="stringliteral">&quot;round&quot;</highlight><highlight class="normal"><sp/>stroke-linejoin=</highlight><highlight class="stringliteral">&quot;round&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="205"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;circle<sp/>cx=</highlight><highlight class="stringliteral">&quot;12&quot;</highlight><highlight class="normal"><sp/>cy=</highlight><highlight class="stringliteral">&quot;12&quot;</highlight><highlight class="normal"><sp/>r=</highlight><highlight class="stringliteral">&quot;10&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="206"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;line<sp/>x1=</highlight><highlight class="stringliteral">&quot;2&quot;</highlight><highlight class="normal"><sp/>y1=</highlight><highlight class="stringliteral">&quot;12&quot;</highlight><highlight class="normal"><sp/>x2=</highlight><highlight class="stringliteral">&quot;22&quot;</highlight><highlight class="normal"><sp/>y2=</highlight><highlight class="stringliteral">&quot;12&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="207"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;path<sp/>d=</highlight><highlight class="stringliteral">&quot;M12<sp/>2a15.3<sp/>15.3<sp/>0<sp/>0<sp/>1<sp/>4<sp/>10<sp/>15.3<sp/>15.3<sp/>0<sp/>0<sp/>1-4<sp/>10<sp/>15.3<sp/>15.3<sp/>0<sp/>0<sp/>1-4-10<sp/>15.3<sp/>15.3<sp/>0<sp/>0<sp/>1<sp/>4-10z&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="208"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/svg&gt;</highlight></codeline>
+<codeline lineno="209"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/></highlight><highlight class="keywordtype">id</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;currentLangLabel&quot;</highlight><highlight class="normal">&gt;EN&lt;/span&gt;</highlight></codeline>
+<codeline lineno="210"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;svg<sp/>width=</highlight><highlight class="stringliteral">&quot;12&quot;</highlight><highlight class="normal"><sp/>height=</highlight><highlight class="stringliteral">&quot;12&quot;</highlight><highlight class="normal"><sp/>viewBox=</highlight><highlight class="stringliteral">&quot;0<sp/>0<sp/>24<sp/>24&quot;</highlight><highlight class="normal"><sp/>fill=</highlight><highlight class="stringliteral">&quot;none&quot;</highlight><highlight class="normal"><sp/>stroke=</highlight><highlight class="stringliteral">&quot;currentColor&quot;</highlight><highlight class="normal"><sp/>stroke-width=</highlight><highlight class="stringliteral">&quot;2&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="211"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;polyline<sp/>points=</highlight><highlight class="stringliteral">&quot;6<sp/>9<sp/>12<sp/>15<sp/>18<sp/>9&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="212"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/svg&gt;</highlight></codeline>
+<codeline lineno="213"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/button&gt;</highlight></codeline>
+<codeline lineno="214"><highlight class="normal"></highlight></codeline>
+<codeline lineno="215"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;div<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;lang-dropdown-menu&quot;</highlight><highlight class="normal"><sp/>role=</highlight><highlight class="stringliteral">&quot;menu&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="216"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;button<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;lang-option&quot;</highlight><highlight class="normal"><sp/>data-lang=</highlight><highlight class="stringliteral">&quot;en&quot;</highlight><highlight class="normal"><sp/>type=</highlight><highlight class="stringliteral">&quot;button&quot;</highlight><highlight class="normal"><sp/>role=</highlight><highlight class="stringliteral">&quot;menuitem&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="217"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;lang-opt-title&quot;</highlight><highlight class="normal">&gt;English&lt;/span&gt;</highlight></codeline>
+<codeline lineno="218"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;lang-opt-sub&quot;</highlight><highlight class="normal">&gt;EN&lt;/span&gt;</highlight></codeline>
+<codeline lineno="219"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/button&gt;</highlight></codeline>
+<codeline lineno="220"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;button<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;lang-option&quot;</highlight><highlight class="normal"><sp/>data-lang=</highlight><highlight class="stringliteral">&quot;fa&quot;</highlight><highlight class="normal"><sp/>type=</highlight><highlight class="stringliteral">&quot;button&quot;</highlight><highlight class="normal"><sp/>role=</highlight><highlight class="stringliteral">&quot;menuitem&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="221"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;lang-opt-title&quot;</highlight><highlight class="normal">&gt;فارسی&lt;/span&gt;</highlight></codeline>
+<codeline lineno="222"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;lang-opt-sub&quot;</highlight><highlight class="normal">&gt;FA&lt;/span&gt;</highlight></codeline>
+<codeline lineno="223"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/button&gt;</highlight></codeline>
+<codeline lineno="224"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/div&gt;</highlight></codeline>
+<codeline lineno="225"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/div&gt;</highlight></codeline>
+<codeline lineno="226"><highlight class="normal"></highlight></codeline>
+<codeline lineno="227"><highlight class="normal"></highlight></codeline>
+<codeline lineno="228"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;button<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;theme-btn&quot;</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">id</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;themeBtn&quot;</highlight><highlight class="normal"><sp/>type=</highlight><highlight class="stringliteral">&quot;button&quot;</highlight><highlight class="normal"><sp/>title=</highlight><highlight class="stringliteral">&quot;Toggle<sp/>theme&quot;</highlight><highlight class="normal"><sp/>aria-label=</highlight><highlight class="stringliteral">&quot;Toggle<sp/>theme&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="229"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;svg<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;icon-sun&quot;</highlight><highlight class="normal"><sp/>width=</highlight><highlight class="stringliteral">&quot;16&quot;</highlight><highlight class="normal"><sp/>height=</highlight><highlight class="stringliteral">&quot;16&quot;</highlight><highlight class="normal"><sp/>viewBox=</highlight><highlight class="stringliteral">&quot;0<sp/>0<sp/>24<sp/>24&quot;</highlight><highlight class="normal"><sp/>fill=</highlight><highlight class="stringliteral">&quot;none&quot;</highlight><highlight class="normal"><sp/>stroke=</highlight><highlight class="stringliteral">&quot;currentColor&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="230"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>stroke-width=</highlight><highlight class="stringliteral">&quot;2&quot;</highlight><highlight class="normal"><sp/>stroke-linecap=</highlight><highlight class="stringliteral">&quot;round&quot;</highlight><highlight class="normal"><sp/>stroke-linejoin=</highlight><highlight class="stringliteral">&quot;round&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="231"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;circle<sp/>cx=</highlight><highlight class="stringliteral">&quot;12&quot;</highlight><highlight class="normal"><sp/>cy=</highlight><highlight class="stringliteral">&quot;12&quot;</highlight><highlight class="normal"><sp/>r=</highlight><highlight class="stringliteral">&quot;4&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="232"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;path</highlight></codeline>
+<codeline lineno="233"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d=</highlight><highlight class="stringliteral">&quot;M12<sp/>2v2M12<sp/>20v2M4.93<sp/>4.93l1.41<sp/>1.41M17.66<sp/>17.66l1.41<sp/>1.41M2<sp/>12h2M20<sp/>12h2M6.34<sp/>17.66l-1.41<sp/>1.41M19.07<sp/>4.93l-1.41<sp/>1.41&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="234"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/svg&gt;</highlight></codeline>
+<codeline lineno="235"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;svg<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;icon-moon&quot;</highlight><highlight class="normal"><sp/>width=</highlight><highlight class="stringliteral">&quot;16&quot;</highlight><highlight class="normal"><sp/>height=</highlight><highlight class="stringliteral">&quot;16&quot;</highlight><highlight class="normal"><sp/>viewBox=</highlight><highlight class="stringliteral">&quot;0<sp/>0<sp/>24<sp/>24&quot;</highlight><highlight class="normal"><sp/>fill=</highlight><highlight class="stringliteral">&quot;none&quot;</highlight><highlight class="normal"><sp/>stroke=</highlight><highlight class="stringliteral">&quot;currentColor&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="236"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>stroke-width=</highlight><highlight class="stringliteral">&quot;2&quot;</highlight><highlight class="normal"><sp/>stroke-linecap=</highlight><highlight class="stringliteral">&quot;round&quot;</highlight><highlight class="normal"><sp/>stroke-linejoin=</highlight><highlight class="stringliteral">&quot;round&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="237"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;path<sp/>d=</highlight><highlight class="stringliteral">&quot;M12<sp/>3a6<sp/>6<sp/>0<sp/>0<sp/>0<sp/>9<sp/>9<sp/>9<sp/>9<sp/>0<sp/>1<sp/>1-9-9Z&quot;</highlight><highlight class="normal"><sp/>/&gt;</highlight></codeline>
+<codeline lineno="238"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/svg&gt;</highlight></codeline>
+<codeline lineno="239"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/button&gt;</highlight></codeline>
+<codeline lineno="240"><highlight class="normal"></highlight></codeline>
+<codeline lineno="241"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/div&gt;</highlight></codeline>
+<codeline lineno="242"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>&lt;/div&gt;</highlight></codeline>
+<codeline lineno="243"><highlight class="normal"><sp/><sp/><sp/><sp/>&lt;/header&gt;</highlight></codeline>
+<codeline lineno="244"><highlight class="normal"></highlight></codeline>
+<codeline lineno="245"><highlight class="normal"><sp/><sp/><sp/><sp/>&lt;main<sp/></highlight><highlight class="keywordtype">id</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;app&quot;</highlight><highlight class="normal">&gt;&lt;/main&gt;</highlight></codeline>
+<codeline lineno="246"><highlight class="normal"></highlight></codeline>
+<codeline lineno="247"><highlight class="normal"></highlight></codeline>
+<codeline lineno="248"><highlight class="normal"><sp/><sp/><sp/><sp/>&lt;footer<sp/></highlight><highlight class="keyword">class</highlight><highlight class="normal">=</highlight><highlight class="stringliteral">&quot;footer&quot;</highlight><highlight class="normal"><sp/>style=</highlight><highlight class="stringliteral">&quot;display:none&quot;</highlight><highlight class="normal">&gt;</highlight></codeline>
+<codeline lineno="249"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>&lt;span&gt;©<sp/>2025<sp/>CloudAvid<sp/>Co&lt;/span&gt;</highlight></codeline>
+<codeline lineno="250"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>&lt;a<sp/>href=</highlight><highlight class="stringliteral">&quot;https://cloudavid.com&quot;</highlight><highlight class="normal"><sp/>target=</highlight><highlight class="stringliteral">&quot;_blank&quot;</highlight><highlight class="normal"><sp/>rel=</highlight><highlight class="stringliteral">&quot;noopener&quot;</highlight><highlight class="normal">&gt;cloudavid.com&lt;/a&gt;</highlight></codeline>
+<codeline lineno="251"><highlight class="normal"><sp/><sp/><sp/><sp/>&lt;/footer&gt;</highlight></codeline>
+<codeline lineno="252"><highlight class="normal"><sp/><sp/>&lt;/div&gt;</highlight></codeline>
+<codeline lineno="253"><highlight class="normal"><sp/><sp/>&lt;script<sp/>src=</highlight><highlight class="stringliteral">&quot;/assets/js/services/resource-service.js&quot;</highlight><highlight class="normal"><sp/>defer&gt;&lt;/script&gt;</highlight></codeline>
+<codeline lineno="254"><highlight class="normal"><sp/><sp/>&lt;script<sp/>src=</highlight><highlight class="stringliteral">&quot;/assets/js/services/performance-monitor.js&quot;</highlight><highlight class="normal"><sp/>defer&gt;&lt;/script&gt;</highlight></codeline>
+<codeline lineno="255"><highlight class="normal"><sp/><sp/>&lt;script<sp/>src=</highlight><highlight class="stringliteral">&quot;/assets/js/theme.js&quot;</highlight><highlight class="normal"><sp/>defer&gt;&lt;/script&gt;</highlight></codeline>
+<codeline lineno="256"><highlight class="normal"><sp/><sp/>&lt;script<sp/>src=</highlight><highlight class="stringliteral">&quot;/assets/js/i18n.js&quot;</highlight><highlight class="normal"><sp/>defer&gt;&lt;/script&gt;</highlight></codeline>
+<codeline lineno="257"><highlight class="normal"><sp/><sp/>&lt;script<sp/>src=</highlight><highlight class="stringliteral">&quot;/assets/js/autocomplete.js&quot;</highlight><highlight class="normal"><sp/>defer&gt;&lt;/script&gt;</highlight></codeline>
+<codeline lineno="258"><highlight class="normal"><sp/><sp/>&lt;script<sp/>src=</highlight><highlight class="stringliteral">&quot;/assets/js/home.js&quot;</highlight><highlight class="normal"><sp/>defer&gt;&lt;/script&gt;</highlight></codeline>
+<codeline lineno="259"><highlight class="normal"><sp/><sp/>&lt;script<sp/>src=</highlight><highlight class="stringliteral">&quot;/assets/js/browse.js&quot;</highlight><highlight class="normal"><sp/>defer&gt;&lt;/script&gt;</highlight></codeline>
+<codeline lineno="260"><highlight class="normal"><sp/><sp/>&lt;script<sp/>src=</highlight><highlight class="stringliteral">&quot;/assets/js/router.js&quot;</highlight><highlight class="normal"><sp/>defer&gt;&lt;/script&gt;</highlight></codeline>
+<codeline lineno="261"><highlight class="normal">&lt;/body&gt;</highlight></codeline>
+<codeline lineno="262"><highlight class="normal"></highlight></codeline>
+<codeline lineno="263"><highlight class="normal">&lt;/html&gt;</highlight></codeline>
+    </programlisting>
+    <location file="index.html"/>
+  </compounddef>
+</doxygen>

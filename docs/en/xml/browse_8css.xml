@@ -1,0 +1,1978 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="browse_8css" kind="file" language="C++">
+    <compoundname>browse.css</compoundname>
+    <sectiondef kind="var">
+      <memberdef kind="variable" id="browse_8css_1aa7785ca8ab8402cb4da1d897470359d8" prot="public" static="no" mutable="no">
+        <type>browse</type>
+        <definition>browse layout</definition>
+        <argsstring></argsstring>
+        <name>layout</name>
+        <initializer>{
+    display: flex</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="6" column="7" bodyfile="assets/css/browse.css" bodystart="6" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a9535506cd21c110d81f7fa46caa7c58b" prot="public" static="no" mutable="no">
+        <type>flex</type>
+        <definition>flex direction</definition>
+        <argsstring></argsstring>
+        <name>direction</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="8" column="9" bodyfile="assets/css/browse.css" bodystart="8" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ada6cabbd78a224ea5eaf453896ef24b1" prot="public" static="no" mutable="no">
+        <type>gap</type>
+        <definition>gap __pad0__</definition>
+        <argsstring></argsstring>
+        <name>__pad0__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="9" column="5" bodyfile="assets/css/browse.css" bodystart="9" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a92a4f9c60f5fc724a2e9a4fdb35e9777" prot="public" static="no" mutable="no">
+        <type>margin</type>
+        <definition>margin top</definition>
+        <argsstring></argsstring>
+        <name>top</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="10" column="11" bodyfile="assets/css/browse.css" bodystart="10" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ad4d1caf2b0c14a28eabc3eb76b387085" prot="public" static="no" mutable="no">
+        <type>browse</type>
+        <definition>resource file browse head</definition>
+        <argsstring></argsstring>
+        <name>head</name>
+        <initializer>{
+    display: flex</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="14" column="7" bodyfile="assets/css/browse.css" bodystart="14" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ae45e1594662e5e2e7c85c16f300e7c57" prot="public" static="no" mutable="no">
+        <type>gap</type>
+        <definition>gap __pad1__</definition>
+        <argsstring></argsstring>
+        <name>__pad1__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="17" column="5" bodyfile="assets/css/browse.css" bodystart="17" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a0f9e8e71614b10009e0c99359fe08301" prot="public" static="no" mutable="no">
+        <type>padding</type>
+        <definition>padding __pad2__</definition>
+        <argsstring></argsstring>
+        <name>__pad2__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="18" column="5" bodyfile="assets/css/browse.css" bodystart="18" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a80c707b38d569e6a8eb9e56b8d29866c" prot="public" static="no" mutable="no">
+        <type>border</type>
+        <definition>border radius</definition>
+        <argsstring></argsstring>
+        <name>radius</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="19" column="11" bodyfile="assets/css/browse.css" bodystart="19" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ad689095c35fe015e26b7d484b6012e63" prot="public" static="no" mutable="no">
+        <type>background</type>
+        <definition>background __pad3__</definition>
+        <argsstring></argsstring>
+        <name>__pad3__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="20" column="5" bodyfile="assets/css/browse.css" bodystart="20" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1aab7239555af2c09c3e4fd4fc65899b9a" prot="public" static="no" mutable="no">
+        <type>border</type>
+        <definition>border __pad4__</definition>
+        <argsstring></argsstring>
+        <name>__pad4__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="21" column="5" bodyfile="assets/css/browse.css" bodystart="21" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a579f64f92421bd12ccb31e9fd945fd44" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>crumbs</definition>
+        <argsstring></argsstring>
+        <name>crumbs</name>
+        <initializer>{
+    display: flex</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="25" column="1" bodyfile="assets/css/browse.css" bodystart="25" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ad9a75ea1e4ddd55bedaed405270a215b" prot="public" static="no" mutable="no">
+        <type>align</type>
+        <definition>align items</definition>
+        <argsstring></argsstring>
+        <name>items</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="27" column="10" bodyfile="assets/css/browse.css" bodystart="27" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1aadc083fee0b0c63d8620c21d1bfc937a" prot="public" static="no" mutable="no">
+        <type>flex</type>
+        <definition>flex wrap</definition>
+        <argsstring></argsstring>
+        <name>wrap</name>
+        <initializer>{
+    position: relative</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="28" column="9" bodyfile="assets/css/browse.css" bodystart="28" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a3a253a39eb88733132ee20d63452a3ad" prot="public" static="no" mutable="no">
+        <type>gap</type>
+        <definition>gap __pad5__</definition>
+        <argsstring></argsstring>
+        <name>__pad5__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="29" column="5" bodyfile="assets/css/browse.css" bodystart="29" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ae20d3ca2acbfbfe24798ca800435f9f1" prot="public" static="no" mutable="no">
+        <type>font</type>
+        <definition>font size</definition>
+        <argsstring></argsstring>
+        <name>size</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="30" column="9" bodyfile="assets/css/browse.css" bodystart="30" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a1d0d4af061ef9a4f334401b6a7135fea" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>a crumb</definition>
+        <argsstring></argsstring>
+        <name>crumb</name>
+        <initializer>{
+    display: inline-flex</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="33" column="1" bodyfile="assets/css/browse.css" bodystart="33" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a3b2e33f126d2c682f59b75b74217976c" prot="public" static="no" mutable="no">
+        <type>gap</type>
+        <definition>gap __pad6__</definition>
+        <argsstring></argsstring>
+        <name>__pad6__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="36" column="5" bodyfile="assets/css/browse.css" bodystart="36" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a4f413711eeab12032dbd7e1f94c43f5a" prot="public" static="no" mutable="no">
+        <type>padding</type>
+        <definition>padding __pad7__</definition>
+        <argsstring></argsstring>
+        <name>__pad7__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="37" column="5" bodyfile="assets/css/browse.css" bodystart="37" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ac9adb449c24780d879ac53f14b1cc6f4" prot="public" static="no" mutable="no">
+        <type>color</type>
+        <definition>color __pad8__</definition>
+        <argsstring></argsstring>
+        <name>__pad8__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="39" column="5" bodyfile="assets/css/browse.css" bodystart="39" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a9b9780cce21a0de7f2a4efdab697bc39" prot="public" static="no" mutable="no">
+        <type>font</type>
+        <definition>font weight</definition>
+        <argsstring></argsstring>
+        <name>weight</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="40" column="9" bodyfile="assets/css/browse.css" bodystart="40" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ad696553a704d6fdc669c5d6aee5c4a8f" prot="public" static="no" mutable="no">
+        <type>transition</type>
+        <definition>transition __pad9__</definition>
+        <argsstring></argsstring>
+        <name>__pad9__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="41" column="5" bodyfile="assets/css/browse.css" bodystart="41" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a3874a778fe05ca36cd60ff2872850a7f" prot="public" static="no" mutable="no">
+        <type>color</type>
+        <definition>color __pad10__</definition>
+        <argsstring></argsstring>
+        <name>__pad10__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="46" column="5" bodyfile="assets/css/browse.css" bodystart="46" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a8a00aff9a11c11c9d3d6e81599a493ec" prot="public" static="no" mutable="no">
+        <type>crumb</type>
+        <definition>box perf option active</definition>
+        <argsstring></argsstring>
+        <name>active</name>
+        <initializer>{
+    color: var(--text-accent)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="49" column="6" bodyfile="assets/css/browse.css" bodystart="49" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a45a4017cde9680d227c5259af70c6a6a" prot="public" static="no" mutable="no">
+        <type>background</type>
+        <definition>background __pad11__</definition>
+        <argsstring></argsstring>
+        <name>__pad11__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="51" column="5" bodyfile="assets/css/browse.css" bodystart="51" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a47965d5bfb2cadc965d02412daa4d42f" prot="public" static="no" mutable="no">
+        <type>border</type>
+        <definition>border __pad12__</definition>
+        <argsstring></argsstring>
+        <name>__pad12__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="52" column="5" bodyfile="assets/css/browse.css" bodystart="52" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ad4cb8bbd256bae64919babacfd8c21dd" prot="public" static="no" mutable="no">
+        <type>background</type>
+        <definition>background __pad13__</definition>
+        <argsstring></argsstring>
+        <name>__pad13__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="58" column="5" bodyfile="assets/css/browse.css" bodystart="58" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a465f36d49b1c5db2969e7101f217b98c" prot="public" static="no" mutable="no">
+        <type>background crumb</type>
+        <definition>background crumb sep</definition>
+        <argsstring></argsstring>
+        <name>sep</name>
+        <initializer>{
+    color: var(--text-4)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="61" column="6" bodyfile="assets/css/browse.css" bodystart="61" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a3ce0bac72cd72535735937daee17dd8e" prot="public" static="no" mutable="no">
+        <type>display</type>
+        <definition>display __pad14__</definition>
+        <argsstring></argsstring>
+        <name>__pad14__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="63" column="5" bodyfile="assets/css/browse.css" bodystart="63" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ad7b217c3395bc4adc299948882617146" prot="public" static="no" mutable="no">
+        <type>html[dir=&quot;rtl&quot;] crumb sep</type>
+        <definition>perf toast svg</definition>
+        <argsstring></argsstring>
+        <name>svg</name>
+        <initializer>{
+    transform: scaleX(-1)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="67" column="15" bodyfile="assets/css/browse.css" bodystart="67" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a1ac8cb1a0984a3cbcaa53fa417756fbe" prot="public" static="no" mutable="no">
+        <type>browse title</type>
+        <definition>res row</definition>
+        <argsstring></argsstring>
+        <name>row</name>
+        <initializer>{
+    display: flex</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="72" column="12" bodyfile="assets/css/browse.css" bodystart="72" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1aa847f2bbc747f47e666a46cb74f30e00" prot="public" static="no" mutable="no">
+        <type>justify</type>
+        <definition>justify content</definition>
+        <argsstring></argsstring>
+        <name>content</name>
+        <initializer>{
+    position: relative</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="75" column="12" bodyfile="assets/css/browse.css" bodystart="75" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ab4664a83fe4c6beda0d0ef9cf1ae5414" prot="public" static="no" mutable="no">
+        <type>gap</type>
+        <definition>gap __pad15__</definition>
+        <argsstring></argsstring>
+        <name>__pad15__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="76" column="5" bodyfile="assets/css/browse.css" bodystart="76" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a7866c10b05b4c46dfcf0e550ab441b01" prot="public" static="no" mutable="no">
+        <type>browse title left</type>
+        <definition>hero content h1</definition>
+        <argsstring></argsstring>
+        <name>h1</name>
+        <initializer>{
+    font-family: var(--font-display)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="80" column="17" bodyfile="assets/css/browse.css" bodystart="80" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ae579efcc03bd327169f5bab7e8b7635d" prot="public" static="no" mutable="no">
+        <type>letter</type>
+        <definition>letter spacing</definition>
+        <argsstring></argsstring>
+        <name>spacing</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="84" column="11" bodyfile="assets/css/browse.css" bodystart="84" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ae3e4d1b9efcfafb1f7e70f9488479555" prot="public" static="no" mutable="no">
+        <type>color</type>
+        <definition>color __pad16__</definition>
+        <argsstring></argsstring>
+        <name>__pad16__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="85" column="5" bodyfile="assets/css/browse.css" bodystart="85" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1aedf59e957a3ddf8098bcf4c53e18e650" prot="public" static="no" mutable="no">
+        <type>word</type>
+        <definition>word break</definition>
+        <argsstring></argsstring>
+        <name>break</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="86" column="9" bodyfile="assets/css/browse.css" bodystart="86" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ad6d040b79093a1652d3e3a0f02172d83" prot="public" static="no" mutable="no">
+        <type>line</type>
+        <definition>line height</definition>
+        <argsstring></argsstring>
+        <name>height</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="87" column="9" bodyfile="assets/css/browse.css" bodystart="87" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a13bbcd10ef9df7e0d546fec82aef9b47" prot="public" static="no" mutable="no">
+        <type>browse</type>
+        <definition>browse stats</definition>
+        <argsstring></argsstring>
+        <name>stats</name>
+        <initializer>{
+    display: flex</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="90" column="7" bodyfile="assets/css/browse.css" bodystart="90" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a325a58a792e6f201f9de5e5ead2879c3" prot="public" static="no" mutable="no">
+        <type>gap</type>
+        <definition>gap __pad17__</definition>
+        <argsstring></argsstring>
+        <name>__pad17__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="93" column="5" bodyfile="assets/css/browse.css" bodystart="93" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a75de51ab100eb75843f5c6f44987f04c" prot="public" static="no" mutable="no">
+        <type>color</type>
+        <definition>color __pad18__</definition>
+        <argsstring></argsstring>
+        <name>__pad18__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="95" column="5" bodyfile="assets/css/browse.css" bodystart="95" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ab7b4625cd8823d2a1b2b6db9095da5fa" prot="public" static="no" mutable="no">
+        <type>stat</type>
+        <definition>quick item</definition>
+        <argsstring></argsstring>
+        <name>item</name>
+        <initializer>{
+    display: inline-flex</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="99" column="5" bodyfile="assets/css/browse.css" bodystart="99" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ad12e593a9f266da6592657a299cdb94c" prot="public" static="no" mutable="no">
+        <type>gap</type>
+        <definition>gap __pad19__</definition>
+        <argsstring></argsstring>
+        <name>__pad19__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="102" column="5" bodyfile="assets/css/browse.css" bodystart="102" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a567beab519d11fc0f3d1bcfff244a103" prot="public" static="no" mutable="no">
+        <type>stat</type>
+        <definition>stat val</definition>
+        <argsstring></argsstring>
+        <name>val</name>
+        <initializer>{
+    color: var(--text)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="105" column="5" bodyfile="assets/css/browse.css" bodystart="105" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a49ef0d3048dbda11e75fe4bb63d4f8f2" prot="public" static="no" mutable="no">
+        <type>font variant</type>
+        <definition>font variant numeric</definition>
+        <argsstring></argsstring>
+        <name>numeric</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="108" column="16" bodyfile="assets/css/browse.css" bodystart="108" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ad536b97355e2e6b5eacac3a044cf31e7" prot="public" static="no" mutable="no">
+        <type>stat</type>
+        <definition>perf option active perf indicator dot</definition>
+        <argsstring></argsstring>
+        <name>dot</name>
+        <initializer>{
+    color: var(--border-hover)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="111" column="5" bodyfile="assets/css/browse.css" bodystart="111" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1aa6abf5bb294427456c287c1c803d9c10" prot="public" static="no" mutable="no">
+        <type>browse</type>
+        <definition>browse controls</definition>
+        <argsstring></argsstring>
+        <name>controls</name>
+        <initializer>{
+    display: flex</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="116" column="7" bodyfile="assets/css/browse.css" bodystart="116" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ae4f85485406d3b6b4c7cb09c3990cdaa" prot="public" static="no" mutable="no">
+        <type>gap</type>
+        <definition>gap __pad20__</definition>
+        <argsstring></argsstring>
+        <name>__pad20__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="119" column="5" bodyfile="assets/css/browse.css" bodystart="119" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a8791db8b66f1033585eafc9883ebac7b" prot="public" static="no" mutable="no">
+        <type>browse</type>
+        <definition>browse search</definition>
+        <argsstring></argsstring>
+        <name>search</name>
+        <initializer>{
+    height: 34px</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="124" column="7" bodyfile="assets/css/browse.css" bodystart="124" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a96006d7c75ed097e50d8554a43da61f1" prot="public" static="no" mutable="no">
+        <type>padding</type>
+        <definition>padding __pad21__</definition>
+        <argsstring></argsstring>
+        <name>__pad21__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="126" column="5" bodyfile="assets/css/browse.css" bodystart="126" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1abf47d556be220f50907558d529ca4528" prot="public" static="no" mutable="no">
+        <type>width</type>
+        <definition>width __pad22__</definition>
+        <argsstring></argsstring>
+        <name>__pad22__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="128" column="5" bodyfile="assets/css/browse.css" bodystart="128" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a8faf96787ffb76e375767398790f2749" prot="public" static="no" mutable="no">
+        <type>background</type>
+        <definition>background __pad23__</definition>
+        <argsstring></argsstring>
+        <name>__pad23__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="129" column="5" bodyfile="assets/css/browse.css" bodystart="129" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ae8e58d285ae5af7c891486f923f2d197" prot="public" static="no" mutable="no">
+        <type>transition</type>
+        <definition>transition __pad24__</definition>
+        <argsstring></argsstring>
+        <name>__pad24__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="130" column="5" bodyfile="assets/css/browse.css" bodystart="130" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ae5ea7c5df72d5d3c5530deb77f6ae0a8" prot="public" static="no" mutable="no">
+        <type>browse search</type>
+        <definition>bg bg input</definition>
+        <argsstring></argsstring>
+        <name>input</name>
+        <initializer>{
+    font-size: 12px</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="137" column="14" bodyfile="assets/css/browse.css" bodystart="137" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ad6e99c6004613cd3e40061362686542f" prot="public" static="no" mutable="no">
+        <type>file</type>
+        <definition>resource file tbl</definition>
+        <argsstring></argsstring>
+        <name>tbl</name>
+        <initializer>{
+    border-radius: var(--radius-cards)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="142" column="5" bodyfile="assets/css/browse.css" bodystart="142" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a680ecdded50b97b4584a5a346d1831f5" prot="public" static="no" mutable="no">
+        <type>background</type>
+        <definition>background __pad25__</definition>
+        <argsstring></argsstring>
+        <name>__pad25__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="144" column="5" bodyfile="assets/css/browse.css" bodystart="144" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a38762f10c74d6cf6729dc5a065063e95" prot="public" static="no" mutable="no">
+        <type>border</type>
+        <definition>border __pad26__</definition>
+        <argsstring></argsstring>
+        <name>__pad26__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="145" column="5" bodyfile="assets/css/browse.css" bodystart="145" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a54649f7d2d682ecba078440969e1b7a6" prot="public" static="no" mutable="no">
+        <type>overflow</type>
+        <definition>overflow __pad27__</definition>
+        <argsstring></argsstring>
+        <name>__pad27__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="146" column="5" bodyfile="assets/css/browse.css" bodystart="146" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a5b0440dd832c0bfc33dfdba7c67f8a65" prot="public" static="no" mutable="no">
+        <type>file tbl</type>
+        <definition>resource file tbl grid mode trow</definition>
+        <argsstring></argsstring>
+        <name>trow</name>
+        <initializer>{
+    display: grid</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="149" column="9" bodyfile="assets/css/browse.css" bodystart="149" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a36e504786e592e87612acac30937525a" prot="public" static="no" mutable="no">
+        <type>grid template</type>
+        <definition>grid template columns</definition>
+        <argsstring></argsstring>
+        <name>columns</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="151" column="17" bodyfile="assets/css/browse.css" bodystart="151" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1aae08fc7303f7dc990960dea636faf736" prot="public" static="no" mutable="no">
+        <type>gap</type>
+        <definition>gap __pad28__</definition>
+        <argsstring></argsstring>
+        <name>__pad28__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="152" column="5" bodyfile="assets/css/browse.css" bodystart="152" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a57763549f1c5dc05255bf29026e46387" prot="public" static="no" mutable="no">
+        <type>height</type>
+        <definition>height __pad29__</definition>
+        <argsstring></argsstring>
+        <name>__pad29__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="154" column="5" bodyfile="assets/css/browse.css" bodystart="154" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ad2a34bd7e6f1e92344a2378a7c487429" prot="public" static="no" mutable="no">
+        <type>padding</type>
+        <definition>padding __pad30__</definition>
+        <argsstring></argsstring>
+        <name>__pad30__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="155" column="5" bodyfile="assets/css/browse.css" bodystart="155" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a9034efd9266ed643f35aa86e8ca32ac2" prot="public" static="no" mutable="no">
+        <type>border</type>
+        <definition>margin bottom</definition>
+        <argsstring></argsstring>
+        <name>bottom</name>
+        <initializer>{
+    display: flex</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="156" column="11" bodyfile="assets/css/browse.css" bodystart="156" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ac0d9da0ed5c9fa557759042a5dd25efd" prot="public" static="no" mutable="no">
+        <type>transition</type>
+        <definition>transition __pad31__</definition>
+        <argsstring></argsstring>
+        <name>__pad31__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="157" column="5" bodyfile="assets/css/browse.css" bodystart="157" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a111d7a8e72fdb67e654cdc7cffe1e9c0" prot="public" static="no" mutable="no">
+        <type>transition transform border color</type>
+        <definition>transition transform ease</definition>
+        <argsstring></argsstring>
+        <name>ease</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="157" column="44" bodyfile="assets/css/browse.css" bodystart="157" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1aa85fa1ae48d78cceb22085cdc38da769" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>file tbl grid mode thead</definition>
+        <argsstring></argsstring>
+        <name>thead</name>
+        <initializer>{
+    height: 40px</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="168" column="1" bodyfile="assets/css/browse.css" bodystart="168" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1aac09855b44363dbcc2a952fa053204fb" prot="public" static="no" mutable="no">
+        <type>background</type>
+        <definition>background __pad32__</definition>
+        <argsstring></argsstring>
+        <name>__pad32__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="170" column="5" bodyfile="assets/css/browse.css" bodystart="170" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a24e9e97283417fa76b815806f72bfa98" prot="public" static="no" mutable="no">
+        <type>text</type>
+        <definition>text transform</definition>
+        <argsstring></argsstring>
+        <name>transform</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="173" column="9" bodyfile="assets/css/browse.css" bodystart="173" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ad2786f3195fa311d842993663e7bbaf2" prot="public" static="no" mutable="no">
+        <type>color</type>
+        <definition>color __pad33__</definition>
+        <argsstring></argsstring>
+        <name>__pad33__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="175" column="5" bodyfile="assets/css/browse.css" bodystart="175" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ad0ca38bde56ccb49ae4607a75c582f77" prot="public" static="no" mutable="no">
+        <type>f</type>
+        <definition>quick icon</definition>
+        <argsstring></argsstring>
+        <name>icon</name>
+        <initializer>{
+    width: 32px</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="178" column="2" bodyfile="assets/css/browse.css" bodystart="178" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a0fb2602841b15e1d2f7267675270b7d0" prot="public" static="no" mutable="no">
+        <type>height</type>
+        <definition>height __pad34__</definition>
+        <argsstring></argsstring>
+        <name>__pad34__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="180" column="5" bodyfile="assets/css/browse.css" bodystart="180" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1adca286054f2eed5a4c17740d6ce24217" prot="public" static="no" mutable="no">
+        <type>display</type>
+        <definition>display __pad35__</definition>
+        <argsstring></argsstring>
+        <name>__pad35__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="181" column="5" bodyfile="assets/css/browse.css" bodystart="181" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a7f721df027e30636e376c670b420d27c" prot="public" static="no" mutable="no">
+        <type>border</type>
+        <definition>border __pad36__</definition>
+        <argsstring></argsstring>
+        <name>__pad36__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="185" column="5" bodyfile="assets/css/browse.css" bodystart="185" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a37b83f170b80cae8cb34897fe132ea6e" prot="public" static="no" mutable="no">
+        <type>f icon</type>
+        <definition>ac icon dir</definition>
+        <argsstring></argsstring>
+        <name>dir</name>
+        <initializer>{
+    background: rgba(86, 131, 218, 0.12)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="188" column="6" bodyfile="assets/css/browse.css" bodystart="188" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1aee0174667653000761904b9bea00878d" prot="public" static="no" mutable="no">
+        <type>border</type>
+        <definition>border color</definition>
+        <argsstring></argsstring>
+        <name>color</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="190" column="11" bodyfile="assets/css/browse.css" bodystart="190" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a6e9fbc8eb5ac1ed060623796493e0a3b" prot="public" static="no" mutable="no">
+        <type>f icon</type>
+        <definition>border ac icon file</definition>
+        <argsstring></argsstring>
+        <name>file</name>
+        <initializer>{
+    background: var(--n-4)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="194" column="6" bodyfile="assets/css/browse.css" bodystart="194" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a3bcb83008a68f06329d01741ca54fff3" prot="public" static="no" mutable="no">
+        <type>color</type>
+        <definition>color __pad37__</definition>
+        <argsstring></argsstring>
+        <name>__pad37__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="197" column="5" bodyfile="assets/css/browse.css" bodystart="197" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ac39e1813fd96d12a6506aad9727387e1" prot="public" static="no" mutable="no">
+        <type>color</type>
+        <definition>color __pad38__</definition>
+        <argsstring></argsstring>
+        <name>__pad38__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="209" column="5" bodyfile="assets/css/browse.css" bodystart="209" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a98d79a6b6702a5e4fe98fc1f04bab4fa" prot="public" static="no" mutable="no">
+        <type>f</type>
+        <definition>f name</definition>
+        <argsstring></argsstring>
+        <name>name</name>
+        <initializer>{
+    min-width: 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="212" column="2" bodyfile="assets/css/browse.css" bodystart="212" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a4b692586819047deff9bbcf8a89305e2" prot="public" static="no" mutable="no">
+        <type>f</type>
+        <definition>panel link</definition>
+        <argsstring></argsstring>
+        <name>link</name>
+        <initializer>{
+    display: block</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="216" column="2" bodyfile="assets/css/browse.css" bodystart="216" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ab428b84c6acb6010f7290e903fb0fb0b" prot="public" static="no" mutable="no">
+        <type>overflow</type>
+        <definition>overflow __pad39__</definition>
+        <argsstring></argsstring>
+        <name>__pad39__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="220" column="5" bodyfile="assets/css/browse.css" bodystart="220" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a8e751bf52edd4741a87f735b4c759c7a" prot="public" static="no" mutable="no">
+        <type>text</type>
+        <definition>text overflow</definition>
+        <argsstring></argsstring>
+        <name>overflow</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="221" column="9" bodyfile="assets/css/browse.css" bodystart="221" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a6efa209ca38838f705f3c6a21c286712" prot="public" static="no" mutable="no">
+        <type>white</type>
+        <definition>white space</definition>
+        <argsstring></argsstring>
+        <name>space</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="222" column="10" bodyfile="assets/css/browse.css" bodystart="222" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a738b48029293cd047dac0cc947086069" prot="public" static="no" mutable="no">
+        <type>color</type>
+        <definition>color __pad40__</definition>
+        <argsstring></argsstring>
+        <name>__pad40__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="223" column="5" bodyfile="assets/css/browse.css" bodystart="223" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a89f74d98f8b0600d6237d6218df64a69" prot="public" static="no" mutable="no">
+        <type>transition</type>
+        <definition>transition __pad41__</definition>
+        <argsstring></argsstring>
+        <name>__pad41__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="224" column="5" bodyfile="assets/css/browse.css" bodystart="224" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a3e6d0edd6722851cef7b5ac6be517f17" prot="public" static="no" mutable="no">
+        <type>f</type>
+        <definition>quick meta sub</definition>
+        <argsstring></argsstring>
+        <name>sub</name>
+        <initializer>{
+    font-size: 11px</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="231" column="2" bodyfile="assets/css/browse.css" bodystart="231" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ad791796dcb502dc2ee95972b82a83303" prot="public" static="no" mutable="no">
+        <type>color</type>
+        <definition>color __pad42__</definition>
+        <argsstring></argsstring>
+        <name>__pad42__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="233" column="5" bodyfile="assets/css/browse.css" bodystart="233" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a1abdab6c1da9e3cc52104798e60eb370" prot="public" static="no" mutable="no">
+        <type>empty</type>
+        <definition>skeleton box</definition>
+        <argsstring></argsstring>
+        <name>box</name>
+        <initializer>{
+    display: flex</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="238" column="6" bodyfile="assets/css/browse.css" bodystart="238" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a2760ef0632e000272eb1fea66574ae6a" prot="public" static="no" mutable="no">
+        <type>gap</type>
+        <definition>gap __pad43__</definition>
+        <argsstring></argsstring>
+        <name>__pad43__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="242" column="5" bodyfile="assets/css/browse.css" bodystart="242" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a0b622e3dbc96d1081c88867e8aa5a293" prot="public" static="no" mutable="no">
+        <type>padding</type>
+        <definition>padding __pad44__</definition>
+        <argsstring></argsstring>
+        <name>__pad44__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="243" column="5" bodyfile="assets/css/browse.css" bodystart="243" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a024818509e9cff11892e2e8927cfc5df" prot="public" static="no" mutable="no">
+        <type>text</type>
+        <definition>vertical align</definition>
+        <argsstring></argsstring>
+        <name>align</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="244" column="9" bodyfile="assets/css/browse.css" bodystart="244" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1aa085ecaa80d158df21af0ebdca83e976" prot="public" static="no" mutable="no">
+        <type>empty</type>
+        <definition>empty circle</definition>
+        <argsstring></argsstring>
+        <name>circle</name>
+        <initializer>{
+    width: 48px</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="247" column="6" bodyfile="assets/css/browse.css" bodystart="247" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a0f57713cb2b40834e85fb4746e8dbc8a" prot="public" static="no" mutable="no">
+        <type>height</type>
+        <definition>height __pad45__</definition>
+        <argsstring></argsstring>
+        <name>__pad45__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="249" column="5" bodyfile="assets/css/browse.css" bodystart="249" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a196fd9e6d589d40d652460cd73f5d63d" prot="public" static="no" mutable="no">
+        <type>display</type>
+        <definition>display __pad46__</definition>
+        <argsstring></argsstring>
+        <name>__pad46__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="250" column="5" bodyfile="assets/css/browse.css" bodystart="250" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a171098e5ea0806fb9908b8a24830bf35" prot="public" static="no" mutable="no">
+        <type>background</type>
+        <definition>background __pad47__</definition>
+        <argsstring></argsstring>
+        <name>__pad47__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="254" column="5" bodyfile="assets/css/browse.css" bodystart="254" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a068ec3a2198d8f79837e2c9bd61952c7" prot="public" static="no" mutable="no">
+        <type>border</type>
+        <definition>border __pad48__</definition>
+        <argsstring></argsstring>
+        <name>__pad48__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="255" column="5" bodyfile="assets/css/browse.css" bodystart="255" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a5745ada86c0409d4199e48d19e854bd4" prot="public" static="no" mutable="no">
+        <type>color</type>
+        <definition>color __pad49__</definition>
+        <argsstring></argsstring>
+        <name>__pad49__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="256" column="5" bodyfile="assets/css/browse.css" bodystart="256" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1aa96fc60169f256206b908545da28fb7b" prot="public" static="no" mutable="no">
+        <type>empty circle</type>
+        <definition>empty circle err</definition>
+        <argsstring></argsstring>
+        <name>err</name>
+        <initializer>{
+    background: rgba(239, 68, 68, 0.08)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="259" column="12" bodyfile="assets/css/browse.css" bodystart="259" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1afb739d7b87f72bc80cec69b27cfdeb74" prot="public" static="no" mutable="no">
+        <type>empty</type>
+        <definition>status item text</definition>
+        <argsstring></argsstring>
+        <name>text</name>
+        <initializer>{
+    font-size: 13px</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="265" column="6" bodyfile="assets/css/browse.css" bodystart="265" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ab7201e1db6a70fb618311bcaf29a5eeb" prot="public" static="no" mutable="no">
+        <type>color</type>
+        <definition>color __pad50__</definition>
+        <argsstring></argsstring>
+        <name>__pad50__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="267" column="5" bodyfile="assets/css/browse.css" bodystart="267" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a1c74471bcc3ae9575f6b087fd261fa0c" prot="public" static="no" mutable="no">
+        <type>empty text</type>
+        <definition>surface nav hero input glow strong</definition>
+        <argsstring></argsstring>
+        <name>strong</name>
+        <initializer>{
+    display: block</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="271" column="11" bodyfile="assets/css/browse.css" bodystart="271" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1aa2d6ad1f27828259a271153d8c85040b" prot="public" static="no" mutable="no">
+        <type>color</type>
+        <definition>color __pad51__</definition>
+        <argsstring></argsstring>
+        <name>__pad51__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="273" column="5" bodyfile="assets/css/browse.css" bodystart="273" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ad241414f792a4a1ac90e6729d640949b" prot="public" static="no" mutable="no">
+        <type>file tbl grid mode</type>
+        <definition>text display</definition>
+        <argsstring></argsstring>
+        <name>display</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="284" column="5" bodyfile="assets/css/browse.css" bodystart="284" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1ac1474bab7e6516659953e67406137c64" prot="public" static="no" mutable="no">
+        <type>gap</type>
+        <definition>gap __pad52__</definition>
+        <argsstring></argsstring>
+        <name>__pad52__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="286" column="5" bodyfile="assets/css/browse.css" bodystart="286" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1aea5761a84dee4d76c2430ac19ed8c2c5" prot="public" static="no" mutable="no">
+        <type>padding</type>
+        <definition>padding __pad53__</definition>
+        <argsstring></argsstring>
+        <name>__pad53__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="287" column="5" bodyfile="assets/css/browse.css" bodystart="287" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a53921e50bd2617fda0cf6abdf6d63656" prot="public" static="no" mutable="no">
+        <type>height</type>
+        <definition>height __pad54__</definition>
+        <argsstring></argsstring>
+        <name>__pad54__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="295" column="5" bodyfile="assets/css/browse.css" bodystart="295" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a4f12796b4c39338b7dc7789dcd0cfef0" prot="public" static="no" mutable="no">
+        <type>padding</type>
+        <definition>padding __pad55__</definition>
+        <argsstring></argsstring>
+        <name>__pad55__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="296" column="5" bodyfile="assets/css/browse.css" bodystart="296" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a042383ea9f239dc42ee2ac50702b8582" prot="public" static="no" mutable="no">
+        <type>border</type>
+        <definition>border __pad56__</definition>
+        <argsstring></argsstring>
+        <name>__pad56__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="297" column="5" bodyfile="assets/css/browse.css" bodystart="297" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a8514bcf283447bf602f5f0712e731bcf" prot="public" static="no" mutable="no">
+        <type>gap</type>
+        <definition>gap __pad57__</definition>
+        <argsstring></argsstring>
+        <name>__pad57__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="299" column="5" bodyfile="assets/css/browse.css" bodystart="299" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1aba6a8e4737c0a7c9ef55cc7262480fd8" prot="public" static="no" mutable="no">
+        <type>height</type>
+        <definition>height __pad58__</definition>
+        <argsstring></argsstring>
+        <name>__pad58__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="313" column="5" bodyfile="assets/css/browse.css" bodystart="313" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="browse_8css_1a9587943b60bede32a6f7643b6f787693" prot="public" static="no" mutable="no">
+        <type>file tbl grid mode trow</type>
+        <definition>file tbl grid mode trow file tbl grid mode trow file tbl grid mode trow div</definition>
+        <argsstring></argsstring>
+        <name>div</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="316" column="21" bodyfile="assets/css/browse.css" bodystart="316" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="browse_8css_1ab4df2b6a952560196fe5235825812f1e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>transition border color</type>
+        <definition>transition border color var</definition>
+        <argsstring>(--dur-1) ease</argsstring>
+        <name>var</name>
+        <param>
+          <type>--dur-</type>
+          <declname>1</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="130" column="28" declfile="assets/css/browse.css" declline="130" declcolumn="28"/>
+      </memberdef>
+      <memberdef kind="function" id="browse_8css_1af25402d524d1b8e39d3459afe4cfbeaf" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>transition transform</type>
+        <definition>transition transform var</definition>
+        <argsstring>(--ease)</argsstring>
+        <name>var</name>
+        <param>
+          <type>--</type>
+          <declname>ease</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="157" column="27"/>
+      </memberdef>
+      <memberdef kind="function" id="browse_8css_1a0e3de59934c45ff4ded4d9fad653d0ad" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>grid template</type>
+        <definition>grid template minmax</definition>
+        <argsstring>(150px, 1fr))</argsstring>
+        <name>minmax</name>
+        <param>
+          <type>150px</type>
+        </param>
+        <param>
+          <type>1fr</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="285" column="25" declfile="assets/css/browse.css" declline="285" declcolumn="25"/>
+      </memberdef>
+      <memberdef kind="function" id="browse_8css_1a58cc6b9aea08f58815b86fb52897125b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>media</definition>
+        <argsstring>(max-width:900px)</argsstring>
+        <name>media</name>
+        <param>
+          <type>max-width:900px</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="323" column="1" bodyfile="assets/css/browse.css" bodystart="323" bodyend="332"/>
+      </memberdef>
+      <memberdef kind="function" id="browse_8css_1a7be00aa1111ed1fc1a27ae252729c61c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>media</definition>
+        <argsstring>(max-width:640px)</argsstring>
+        <name>media</name>
+        <param>
+          <type>max-width:640px</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/browse.css" line="334" column="1" bodyfile="assets/css/browse.css" bodystart="334" bodyend="367"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">/*<sp/>═══════════════════════════════════════════════════════════════</highlight></codeline>
+<codeline lineno="2"><highlight class="comment"><sp/><sp/><sp/>browse.css<sp/>—<sp/>File<sp/>Browser<sp/>(Huly<sp/>aurora<sp/>system)</highlight></codeline>
+<codeline lineno="3"><highlight class="comment"><sp/><sp/><sp/>Filter<sp/>dropdowns<sp/>&amp;<sp/>view<sp/>toggle<sp/>live<sp/>in<sp/>home.css<sp/>(shared)</highlight></codeline>
+<codeline lineno="4"><highlight class="comment"><sp/><sp/><sp/>═══════════════════════════════════════════════════════════════<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal">.browse-layout<sp/>{</highlight></codeline>
+<codeline lineno="7"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>flex;</highlight></codeline>
+<codeline lineno="8"><highlight class="normal"><sp/><sp/><sp/><sp/>flex-direction:<sp/>column;</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"><sp/><sp/><sp/><sp/>gap:<sp/>16px;</highlight></codeline>
+<codeline lineno="10"><highlight class="normal"><sp/><sp/><sp/><sp/>margin-top:<sp/>16px;</highlight></codeline>
+<codeline lineno="11"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>──<sp/>BROWSE<sp/>HEADER<sp/>—<sp/>charcoal<sp/>panel<sp/>──<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal">.browse-head<sp/>{</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>flex;</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"><sp/><sp/><sp/><sp/>flex-direction:<sp/>column;</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"><sp/><sp/><sp/><sp/>gap:<sp/>14px;</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"><sp/><sp/><sp/><sp/>padding:<sp/>20px<sp/>24px;</highlight></codeline>
+<codeline lineno="19"><highlight class="normal"><sp/><sp/><sp/><sp/>border-radius:<sp/>var(--radius-cards);</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>var(--bg-card);</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/><sp/><sp/>border:<sp/>1px<sp/>solid<sp/>var(--border);</highlight></codeline>
+<codeline lineno="22"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>Breadcrumbs<sp/>—<sp/>pill<sp/>crumbs<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal">.crumbs<sp/>{</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>flex;</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/><sp/><sp/>align-items:<sp/>center;</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/>flex-wrap:<sp/>wrap;</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/>gap:<sp/>2px;</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/><sp/><sp/>font-size:<sp/>12px;</highlight></codeline>
+<codeline lineno="31"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal">.crumb<sp/>{</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal">-flex;</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/><sp/><sp/>align-items:<sp/>center;</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/><sp/><sp/>gap:<sp/>5px;</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/>padding:<sp/>5px<sp/>11px;</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/><sp/><sp/>border-radius:<sp/>var(--radius-tags);</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>var(--text-3);</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/><sp/><sp/>font-weight:<sp/>500;</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/>transition:<sp/>all<sp/>120ms<sp/>ease;</highlight></codeline>
+<codeline lineno="42"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight></codeline>
+<codeline lineno="44"><highlight class="normal">a.crumb:hover<sp/>{</highlight></codeline>
+<codeline lineno="45"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>var(--bg-hover);</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>var(--text);</highlight></codeline>
+<codeline lineno="47"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"></highlight></codeline>
+<codeline lineno="49"><highlight class="normal">.crumb-active<sp/>{</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>var(--text-accent);</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>var(--glow);</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/>border:<sp/>1px<sp/>solid<sp/>rgba(86,<sp/>131,<sp/>218,<sp/>0.28);</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/>font-weight:<sp/>600;</highlight></codeline>
+<codeline lineno="54"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"></highlight></codeline>
+<codeline lineno="56"><highlight class="normal">[data-theme=</highlight><highlight class="stringliteral">&quot;dark&quot;</highlight><highlight class="normal">]<sp/>.crumb-active<sp/>{</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>#a9c3ee;</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>rgba(86,<sp/>131,<sp/>218,<sp/>0.16);</highlight></codeline>
+<codeline lineno="59"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"></highlight></codeline>
+<codeline lineno="61"><highlight class="normal">.crumb-sep<sp/>{</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>var(--text-4);</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>flex;</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/>align-items:<sp/>center;</highlight></codeline>
+<codeline lineno="65"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"></highlight></codeline>
+<codeline lineno="67"><highlight class="normal">html[dir=</highlight><highlight class="stringliteral">&quot;rtl&quot;</highlight><highlight class="normal">]<sp/>.crumb-sep<sp/>svg<sp/>{</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/>transform:<sp/>scaleX(-1);</highlight></codeline>
+<codeline lineno="69"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"></highlight></codeline>
+<codeline lineno="71"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>Title<sp/>&amp;<sp/>Controls<sp/>Row<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="72"><highlight class="normal">.browse-title-row<sp/>{</highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>flex;</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/>align-items:<sp/>flex-end;</highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/><sp/><sp/>justify-content:<sp/>space-between;</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/><sp/><sp/>gap:<sp/>16px;</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"><sp/><sp/><sp/><sp/>flex-wrap:<sp/>wrap;</highlight></codeline>
+<codeline lineno="78"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="79"><highlight class="normal"></highlight></codeline>
+<codeline lineno="80"><highlight class="normal">.browse-title-left<sp/>h1<sp/>{</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><sp/><sp/>font-family:<sp/>var(--font-display);</highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/><sp/><sp/>font-size:<sp/>28px;</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/><sp/><sp/>font-weight:<sp/>600;</highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/><sp/><sp/>letter-spacing:<sp/>-0.03em;</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>var(--text);</highlight></codeline>
+<codeline lineno="86"><highlight class="normal"><sp/><sp/><sp/><sp/>word-</highlight><highlight class="keywordflow">break</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">break</highlight><highlight class="normal">-all;</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/><sp/><sp/>line-height:<sp/>1.1;</highlight></codeline>
+<codeline lineno="88"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"></highlight></codeline>
+<codeline lineno="90"><highlight class="normal">.browse-stats<sp/>{</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>flex;</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/><sp/><sp/>align-items:<sp/>center;</highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/><sp/><sp/>gap:<sp/>8px;</highlight></codeline>
+<codeline lineno="94"><highlight class="normal"><sp/><sp/><sp/><sp/>font-size:<sp/>12px;</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>var(--text-4);</highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/><sp/><sp/>margin-top:<sp/>6px;</highlight></codeline>
+<codeline lineno="97"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="98"><highlight class="normal"></highlight></codeline>
+<codeline lineno="99"><highlight class="normal">.stat-item<sp/>{</highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal">-flex;</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"><sp/><sp/><sp/><sp/>align-items:<sp/>center;</highlight></codeline>
+<codeline lineno="102"><highlight class="normal"><sp/><sp/><sp/><sp/>gap:<sp/>4px;</highlight></codeline>
+<codeline lineno="103"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="104"><highlight class="normal"></highlight></codeline>
+<codeline lineno="105"><highlight class="normal">.stat-val<sp/>{</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>var(--text);</highlight></codeline>
+<codeline lineno="107"><highlight class="normal"><sp/><sp/><sp/><sp/>font-weight:<sp/>600;</highlight></codeline>
+<codeline lineno="108"><highlight class="normal"><sp/><sp/><sp/><sp/>font-variant-numeric:<sp/>tabular-nums;</highlight></codeline>
+<codeline lineno="109"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="110"><highlight class="normal"></highlight></codeline>
+<codeline lineno="111"><highlight class="normal">.stat-dot<sp/>{</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>var(--border-hover);</highlight></codeline>
+<codeline lineno="113"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="114"><highlight class="normal"></highlight></codeline>
+<codeline lineno="115"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>──<sp/>CONTROLS<sp/>──<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="116"><highlight class="normal">.browse-controls<sp/>{</highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>flex;</highlight></codeline>
+<codeline lineno="118"><highlight class="normal"><sp/><sp/><sp/><sp/>align-items:<sp/>center;</highlight></codeline>
+<codeline lineno="119"><highlight class="normal"><sp/><sp/><sp/><sp/>gap:<sp/>8px;</highlight></codeline>
+<codeline lineno="120"><highlight class="normal"><sp/><sp/><sp/><sp/>flex-wrap:<sp/>wrap;</highlight></codeline>
+<codeline lineno="121"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="122"><highlight class="normal"></highlight></codeline>
+<codeline lineno="123"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>Local<sp/>Search<sp/>—<sp/>pill<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="124"><highlight class="normal">.browse-search<sp/>{</highlight></codeline>
+<codeline lineno="125"><highlight class="normal"><sp/><sp/><sp/><sp/>height:<sp/>34px;</highlight></codeline>
+<codeline lineno="126"><highlight class="normal"><sp/><sp/><sp/><sp/>padding:<sp/>0<sp/>10px<sp/>0<sp/>14px;</highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/><sp/><sp/>border-radius:<sp/>var(--radius-buttons);</highlight></codeline>
+<codeline lineno="128"><highlight class="normal"><sp/><sp/><sp/><sp/>width:<sp/>190px;</highlight></codeline>
+<codeline lineno="129"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>var(--bg-card);</highlight></codeline>
+<codeline lineno="130"><highlight class="normal"><sp/><sp/><sp/><sp/>transition:<sp/>width<sp/>var(--dur-2)<sp/>ease,<sp/>border-color<sp/>var(--dur-1)<sp/>ease;</highlight></codeline>
+<codeline lineno="131"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="132"><highlight class="normal"></highlight></codeline>
+<codeline lineno="133"><highlight class="normal">.browse-search:focus-within<sp/>{</highlight></codeline>
+<codeline lineno="134"><highlight class="normal"><sp/><sp/><sp/><sp/>width:<sp/>230px;</highlight></codeline>
+<codeline lineno="135"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="136"><highlight class="normal"></highlight></codeline>
+<codeline lineno="137"><highlight class="normal">.browse-search<sp/>input<sp/>{</highlight></codeline>
+<codeline lineno="138"><highlight class="normal"><sp/><sp/><sp/><sp/>font-size:<sp/>12px;</highlight></codeline>
+<codeline lineno="139"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="140"><highlight class="normal"></highlight></codeline>
+<codeline lineno="141"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>──<sp/>FILE<sp/>TABLE<sp/>──<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="142"><highlight class="normal">.file-tbl<sp/>{</highlight></codeline>
+<codeline lineno="143"><highlight class="normal"><sp/><sp/><sp/><sp/>border-radius:<sp/>var(--radius-cards);</highlight></codeline>
+<codeline lineno="144"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>var(--bg-card);</highlight></codeline>
+<codeline lineno="145"><highlight class="normal"><sp/><sp/><sp/><sp/>border:<sp/>1px<sp/>solid<sp/>var(--border);</highlight></codeline>
+<codeline lineno="146"><highlight class="normal"><sp/><sp/><sp/><sp/>overflow:<sp/>hidden;</highlight></codeline>
+<codeline lineno="147"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="148"><highlight class="normal"></highlight></codeline>
+<codeline lineno="149"><highlight class="normal">.file-tbl<sp/>.trow<sp/>{</highlight></codeline>
+<codeline lineno="150"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>grid;</highlight></codeline>
+<codeline lineno="151"><highlight class="normal"><sp/><sp/><sp/><sp/>grid-</highlight><highlight class="keyword">template</highlight><highlight class="normal">-columns:<sp/>40px<sp/>1fr<sp/>90px<sp/>160px<sp/>90px;</highlight></codeline>
+<codeline lineno="152"><highlight class="normal"><sp/><sp/><sp/><sp/>gap:<sp/>12px;</highlight></codeline>
+<codeline lineno="153"><highlight class="normal"><sp/><sp/><sp/><sp/>align-items:<sp/>center;</highlight></codeline>
+<codeline lineno="154"><highlight class="normal"><sp/><sp/><sp/><sp/>height:<sp/>52px;</highlight></codeline>
+<codeline lineno="155"><highlight class="normal"><sp/><sp/><sp/><sp/>padding:<sp/>0<sp/>20px;</highlight></codeline>
+<codeline lineno="156"><highlight class="normal"><sp/><sp/><sp/><sp/>border-bottom:<sp/>1px<sp/>solid<sp/>var(--border);</highlight></codeline>
+<codeline lineno="157"><highlight class="normal"><sp/><sp/><sp/><sp/>transition:<sp/>background<sp/>120ms<sp/>ease,<sp/>transform<sp/>150ms<sp/>var(--ease),<sp/>border-color<sp/>150ms<sp/>ease;</highlight></codeline>
+<codeline lineno="158"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="159"><highlight class="normal"></highlight></codeline>
+<codeline lineno="160"><highlight class="normal">.file-tbl<sp/>.trow:last-child<sp/>{</highlight></codeline>
+<codeline lineno="161"><highlight class="normal"><sp/><sp/><sp/><sp/>border-bottom:<sp/>none;</highlight></codeline>
+<codeline lineno="162"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="163"><highlight class="normal"></highlight></codeline>
+<codeline lineno="164"><highlight class="normal">.file-tbl<sp/>.trow:not(.thead):hover<sp/>{</highlight></codeline>
+<codeline lineno="165"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>var(--bg-hover);</highlight></codeline>
+<codeline lineno="166"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="167"><highlight class="normal"></highlight></codeline>
+<codeline lineno="168"><highlight class="normal">.thead<sp/>{</highlight></codeline>
+<codeline lineno="169"><highlight class="normal"><sp/><sp/><sp/><sp/>height:<sp/>40px;</highlight></codeline>
+<codeline lineno="170"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>var(--n-4);</highlight></codeline>
+<codeline lineno="171"><highlight class="normal"><sp/><sp/><sp/><sp/>font-size:<sp/>10px;</highlight></codeline>
+<codeline lineno="172"><highlight class="normal"><sp/><sp/><sp/><sp/>font-weight:<sp/>600;</highlight></codeline>
+<codeline lineno="173"><highlight class="normal"><sp/><sp/><sp/><sp/>text-transform:<sp/>uppercase;</highlight></codeline>
+<codeline lineno="174"><highlight class="normal"><sp/><sp/><sp/><sp/>letter-spacing:<sp/>0.08em;</highlight></codeline>
+<codeline lineno="175"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>var(--text-4);</highlight></codeline>
+<codeline lineno="176"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="177"><highlight class="normal"></highlight></codeline>
+<codeline lineno="178"><highlight class="normal">.f-icon<sp/>{</highlight></codeline>
+<codeline lineno="179"><highlight class="normal"><sp/><sp/><sp/><sp/>width:<sp/>32px;</highlight></codeline>
+<codeline lineno="180"><highlight class="normal"><sp/><sp/><sp/><sp/>height:<sp/>32px;</highlight></codeline>
+<codeline lineno="181"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>flex;</highlight></codeline>
+<codeline lineno="182"><highlight class="normal"><sp/><sp/><sp/><sp/>align-items:<sp/>center;</highlight></codeline>
+<codeline lineno="183"><highlight class="normal"><sp/><sp/><sp/><sp/>justify-content:<sp/>center;</highlight></codeline>
+<codeline lineno="184"><highlight class="normal"><sp/><sp/><sp/><sp/>border-radius:<sp/>10px;</highlight></codeline>
+<codeline lineno="185"><highlight class="normal"><sp/><sp/><sp/><sp/>border:<sp/>1px<sp/>solid<sp/>var(--border);</highlight></codeline>
+<codeline lineno="186"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="187"><highlight class="normal"></highlight></codeline>
+<codeline lineno="188"><highlight class="normal">.f-icon-dir<sp/>{</highlight></codeline>
+<codeline lineno="189"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>rgba(86,<sp/>131,<sp/>218,<sp/>0.12);</highlight></codeline>
+<codeline lineno="190"><highlight class="normal"><sp/><sp/><sp/><sp/>border-color:<sp/>rgba(86,<sp/>131,<sp/>218,<sp/>0.3);</highlight></codeline>
+<codeline lineno="191"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>#3d6bc7;</highlight></codeline>
+<codeline lineno="192"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="193"><highlight class="normal"></highlight></codeline>
+<codeline lineno="194"><highlight class="normal">.f-icon-file<sp/>{</highlight></codeline>
+<codeline lineno="195"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>var(--n-4);</highlight></codeline>
+<codeline lineno="196"><highlight class="normal"><sp/><sp/><sp/><sp/>border-color:<sp/>var(--border);</highlight></codeline>
+<codeline lineno="197"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>var(--text-3);</highlight></codeline>
+<codeline lineno="198"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="199"><highlight class="normal"></highlight></codeline>
+<codeline lineno="200"><highlight class="normal">[data-theme=</highlight><highlight class="stringliteral">&quot;dark&quot;</highlight><highlight class="normal">]<sp/>.f-icon-dir<sp/>{</highlight></codeline>
+<codeline lineno="201"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>rgba(86,<sp/>131,<sp/>218,<sp/>0.14);</highlight></codeline>
+<codeline lineno="202"><highlight class="normal"><sp/><sp/><sp/><sp/>border-color:<sp/>rgba(86,<sp/>131,<sp/>218,<sp/>0.3);</highlight></codeline>
+<codeline lineno="203"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>#a9c3ee;</highlight></codeline>
+<codeline lineno="204"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="205"><highlight class="normal"></highlight></codeline>
+<codeline lineno="206"><highlight class="normal">[data-theme=</highlight><highlight class="stringliteral">&quot;dark&quot;</highlight><highlight class="normal">]<sp/>.f-icon-file<sp/>{</highlight></codeline>
+<codeline lineno="207"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>rgba(255,<sp/>255,<sp/>255,<sp/>0.05);</highlight></codeline>
+<codeline lineno="208"><highlight class="normal"><sp/><sp/><sp/><sp/>border-color:<sp/>#4a4b50;</highlight></codeline>
+<codeline lineno="209"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>#95979e;</highlight></codeline>
+<codeline lineno="210"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="211"><highlight class="normal"></highlight></codeline>
+<codeline lineno="212"><highlight class="normal">.f-name<sp/>{</highlight></codeline>
+<codeline lineno="213"><highlight class="normal"><sp/><sp/><sp/><sp/>min-width:<sp/>0;</highlight></codeline>
+<codeline lineno="214"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="215"><highlight class="normal"></highlight></codeline>
+<codeline lineno="216"><highlight class="normal">.f-link<sp/>{</highlight></codeline>
+<codeline lineno="217"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>block;</highlight></codeline>
+<codeline lineno="218"><highlight class="normal"><sp/><sp/><sp/><sp/>font-weight:<sp/>500;</highlight></codeline>
+<codeline lineno="219"><highlight class="normal"><sp/><sp/><sp/><sp/>font-size:<sp/>13px;</highlight></codeline>
+<codeline lineno="220"><highlight class="normal"><sp/><sp/><sp/><sp/>overflow:<sp/>hidden;</highlight></codeline>
+<codeline lineno="221"><highlight class="normal"><sp/><sp/><sp/><sp/>text-overflow:<sp/>ellipsis;</highlight></codeline>
+<codeline lineno="222"><highlight class="normal"><sp/><sp/><sp/><sp/>white-space:<sp/>nowrap;</highlight></codeline>
+<codeline lineno="223"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>var(--text);</highlight></codeline>
+<codeline lineno="224"><highlight class="normal"><sp/><sp/><sp/><sp/>transition:<sp/>color<sp/>120ms<sp/>ease;</highlight></codeline>
+<codeline lineno="225"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="226"><highlight class="normal"></highlight></codeline>
+<codeline lineno="227"><highlight class="normal">.f-link:hover<sp/>{</highlight></codeline>
+<codeline lineno="228"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>var(--text-accent);</highlight></codeline>
+<codeline lineno="229"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="230"><highlight class="normal"></highlight></codeline>
+<codeline lineno="231"><highlight class="normal">.f-sub<sp/>{</highlight></codeline>
+<codeline lineno="232"><highlight class="normal"><sp/><sp/><sp/><sp/>font-size:<sp/>11px;</highlight></codeline>
+<codeline lineno="233"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>var(--text-4);</highlight></codeline>
+<codeline lineno="234"><highlight class="normal"><sp/><sp/><sp/><sp/>font-variant-numeric:<sp/>tabular-nums;</highlight></codeline>
+<codeline lineno="235"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="236"><highlight class="normal"></highlight></codeline>
+<codeline lineno="237"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>Empty<sp/>State<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="238"><highlight class="normal">.empty-box<sp/>{</highlight></codeline>
+<codeline lineno="239"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>flex;</highlight></codeline>
+<codeline lineno="240"><highlight class="normal"><sp/><sp/><sp/><sp/>flex-direction:<sp/>column;</highlight></codeline>
+<codeline lineno="241"><highlight class="normal"><sp/><sp/><sp/><sp/>align-items:<sp/>center;</highlight></codeline>
+<codeline lineno="242"><highlight class="normal"><sp/><sp/><sp/><sp/>gap:<sp/>12px;</highlight></codeline>
+<codeline lineno="243"><highlight class="normal"><sp/><sp/><sp/><sp/>padding:<sp/>48px<sp/>20px;</highlight></codeline>
+<codeline lineno="244"><highlight class="normal"><sp/><sp/><sp/><sp/>text-align:<sp/>center;</highlight></codeline>
+<codeline lineno="245"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="246"><highlight class="normal"></highlight></codeline>
+<codeline lineno="247"><highlight class="normal">.empty-circle<sp/>{</highlight></codeline>
+<codeline lineno="248"><highlight class="normal"><sp/><sp/><sp/><sp/>width:<sp/>48px;</highlight></codeline>
+<codeline lineno="249"><highlight class="normal"><sp/><sp/><sp/><sp/>height:<sp/>48px;</highlight></codeline>
+<codeline lineno="250"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>flex;</highlight></codeline>
+<codeline lineno="251"><highlight class="normal"><sp/><sp/><sp/><sp/>align-items:<sp/>center;</highlight></codeline>
+<codeline lineno="252"><highlight class="normal"><sp/><sp/><sp/><sp/>justify-content:<sp/>center;</highlight></codeline>
+<codeline lineno="253"><highlight class="normal"><sp/><sp/><sp/><sp/>border-radius:<sp/>50%;</highlight></codeline>
+<codeline lineno="254"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>var(--n-4);</highlight></codeline>
+<codeline lineno="255"><highlight class="normal"><sp/><sp/><sp/><sp/>border:<sp/>1px<sp/>solid<sp/>var(--border);</highlight></codeline>
+<codeline lineno="256"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>var(--text-4);</highlight></codeline>
+<codeline lineno="257"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="258"><highlight class="normal"></highlight></codeline>
+<codeline lineno="259"><highlight class="normal">.empty-circle.err<sp/>{</highlight></codeline>
+<codeline lineno="260"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>rgba(239,<sp/>68,<sp/>68,<sp/>0.08);</highlight></codeline>
+<codeline lineno="261"><highlight class="normal"><sp/><sp/><sp/><sp/>border-color:<sp/>rgba(239,<sp/>68,<sp/>68,<sp/>0.25);</highlight></codeline>
+<codeline lineno="262"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>var(--danger);</highlight></codeline>
+<codeline lineno="263"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="264"><highlight class="normal"></highlight></codeline>
+<codeline lineno="265"><highlight class="normal">.empty-text<sp/>{</highlight></codeline>
+<codeline lineno="266"><highlight class="normal"><sp/><sp/><sp/><sp/>font-size:<sp/>13px;</highlight></codeline>
+<codeline lineno="267"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>var(--text-3);</highlight></codeline>
+<codeline lineno="268"><highlight class="normal"><sp/><sp/><sp/><sp/>line-height:<sp/>1.5;</highlight></codeline>
+<codeline lineno="269"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="270"><highlight class="normal"></highlight></codeline>
+<codeline lineno="271"><highlight class="normal">.empty-text<sp/>strong<sp/>{</highlight></codeline>
+<codeline lineno="272"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>block;</highlight></codeline>
+<codeline lineno="273"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>var(--text);</highlight></codeline>
+<codeline lineno="274"><highlight class="normal"><sp/><sp/><sp/><sp/>font-size:<sp/>14px;</highlight></codeline>
+<codeline lineno="275"><highlight class="normal"><sp/><sp/><sp/><sp/>margin-bottom:<sp/>2px;</highlight></codeline>
+<codeline lineno="276"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="277"><highlight class="normal"></highlight></codeline>
+<codeline lineno="278"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>Grid<sp/>Mode<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="279"><highlight class="normal">.file-tbl.grid-mode<sp/>.thead<sp/>{</highlight></codeline>
+<codeline lineno="280"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>none;</highlight></codeline>
+<codeline lineno="281"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="282"><highlight class="normal"></highlight></codeline>
+<codeline lineno="283"><highlight class="normal">.file-tbl.grid-mode<sp/>#rows<sp/>{</highlight></codeline>
+<codeline lineno="284"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>grid;</highlight></codeline>
+<codeline lineno="285"><highlight class="normal"><sp/><sp/><sp/><sp/>grid-</highlight><highlight class="keyword">template</highlight><highlight class="normal">-columns:<sp/>repeat(</highlight><highlight class="keyword">auto</highlight><highlight class="normal">-fill,<sp/>minmax(150px,<sp/>1fr));</highlight></codeline>
+<codeline lineno="286"><highlight class="normal"><sp/><sp/><sp/><sp/>gap:<sp/>12px;</highlight></codeline>
+<codeline lineno="287"><highlight class="normal"><sp/><sp/><sp/><sp/>padding:<sp/>16px;</highlight></codeline>
+<codeline lineno="288"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="289"><highlight class="normal"></highlight></codeline>
+<codeline lineno="290"><highlight class="normal">.file-tbl.grid-mode<sp/>.trow<sp/>{</highlight></codeline>
+<codeline lineno="291"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>flex;</highlight></codeline>
+<codeline lineno="292"><highlight class="normal"><sp/><sp/><sp/><sp/>flex-direction:<sp/>column;</highlight></codeline>
+<codeline lineno="293"><highlight class="normal"><sp/><sp/><sp/><sp/>align-items:<sp/>center;</highlight></codeline>
+<codeline lineno="294"><highlight class="normal"><sp/><sp/><sp/><sp/>text-align:<sp/>center;</highlight></codeline>
+<codeline lineno="295"><highlight class="normal"><sp/><sp/><sp/><sp/>height:<sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="296"><highlight class="normal"><sp/><sp/><sp/><sp/>padding:<sp/>18px<sp/>12px;</highlight></codeline>
+<codeline lineno="297"><highlight class="normal"><sp/><sp/><sp/><sp/>border:<sp/>1px<sp/>solid<sp/>var(--border);</highlight></codeline>
+<codeline lineno="298"><highlight class="normal"><sp/><sp/><sp/><sp/>border-radius:<sp/>var(--radius-cards);</highlight></codeline>
+<codeline lineno="299"><highlight class="normal"><sp/><sp/><sp/><sp/>gap:<sp/>8px;</highlight></codeline>
+<codeline lineno="300"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="301"><highlight class="normal"></highlight></codeline>
+<codeline lineno="302"><highlight class="normal">.file-tbl.grid-mode<sp/>.trow:hover<sp/>{</highlight></codeline>
+<codeline lineno="303"><highlight class="normal"><sp/><sp/><sp/><sp/>border-color:<sp/>rgba(86,<sp/>131,<sp/>218,<sp/>0.5);</highlight></codeline>
+<codeline lineno="304"><highlight class="normal"><sp/><sp/><sp/><sp/>transform:<sp/>translateY(-2px);</highlight></codeline>
+<codeline lineno="305"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="306"><highlight class="normal"></highlight></codeline>
+<codeline lineno="307"><highlight class="normal">[data-theme=</highlight><highlight class="stringliteral">&quot;dark&quot;</highlight><highlight class="normal">]<sp/>.file-tbl.grid-mode<sp/>.trow:hover<sp/>{</highlight></codeline>
+<codeline lineno="308"><highlight class="normal"><sp/><sp/><sp/><sp/>border-color:<sp/>#5683da;</highlight></codeline>
+<codeline lineno="309"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="310"><highlight class="normal"></highlight></codeline>
+<codeline lineno="311"><highlight class="normal">.file-tbl.grid-mode<sp/>.f-icon<sp/>{</highlight></codeline>
+<codeline lineno="312"><highlight class="normal"><sp/><sp/><sp/><sp/>width:<sp/>40px;</highlight></codeline>
+<codeline lineno="313"><highlight class="normal"><sp/><sp/><sp/><sp/>height:<sp/>40px;</highlight></codeline>
+<codeline lineno="314"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="315"><highlight class="normal"></highlight></codeline>
+<codeline lineno="316"><highlight class="normal">.file-tbl.grid-mode<sp/>.trow&gt;div:nth-child(3),</highlight></codeline>
+<codeline lineno="317"><highlight class="normal">.file-tbl.grid-mode<sp/>.trow&gt;div:nth-child(4),</highlight></codeline>
+<codeline lineno="318"><highlight class="normal">.file-tbl.grid-mode<sp/>.trow&gt;div:nth-child(5)<sp/>{</highlight></codeline>
+<codeline lineno="319"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>none;</highlight></codeline>
+<codeline lineno="320"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="321"><highlight class="normal"></highlight></codeline>
+<codeline lineno="322"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>──<sp/>RESPONSIVE<sp/>──<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="323"><highlight class="normal">@media<sp/>(max-width:<sp/>900px)<sp/>{</highlight></codeline>
+<codeline lineno="324"><highlight class="normal"><sp/><sp/><sp/><sp/>.browse-search<sp/>{</highlight></codeline>
+<codeline lineno="325"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>width:<sp/>100%;</highlight></codeline>
+<codeline lineno="326"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>order:<sp/>1;</highlight></codeline>
+<codeline lineno="327"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="328"><highlight class="normal"></highlight></codeline>
+<codeline lineno="329"><highlight class="normal"><sp/><sp/><sp/><sp/>.browse-search:focus-within<sp/>{</highlight></codeline>
+<codeline lineno="330"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>width:<sp/>100%;</highlight></codeline>
+<codeline lineno="331"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="332"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="333"><highlight class="normal"></highlight></codeline>
+<codeline lineno="334"><highlight class="normal">@media<sp/>(max-width:<sp/>640px)<sp/>{</highlight></codeline>
+<codeline lineno="335"><highlight class="normal"><sp/><sp/><sp/><sp/>.browse-head<sp/>{</highlight></codeline>
+<codeline lineno="336"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>padding:<sp/>16px;</highlight></codeline>
+<codeline lineno="337"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="338"><highlight class="normal"></highlight></codeline>
+<codeline lineno="339"><highlight class="normal"><sp/><sp/><sp/><sp/>.browse-title-row<sp/>{</highlight></codeline>
+<codeline lineno="340"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>flex-direction:<sp/>column;</highlight></codeline>
+<codeline lineno="341"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>align-items:<sp/>stretch;</highlight></codeline>
+<codeline lineno="342"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="343"><highlight class="normal"></highlight></codeline>
+<codeline lineno="344"><highlight class="normal"><sp/><sp/><sp/><sp/>.browse-controls<sp/>{</highlight></codeline>
+<codeline lineno="345"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>justify-content:<sp/>space-between;</highlight></codeline>
+<codeline lineno="346"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="347"><highlight class="normal"></highlight></codeline>
+<codeline lineno="348"><highlight class="normal"><sp/><sp/><sp/><sp/>.file-tbl<sp/>.trow<sp/>{</highlight></codeline>
+<codeline lineno="349"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>grid-</highlight><highlight class="keyword">template</highlight><highlight class="normal">-columns:<sp/>36px<sp/>1fr;</highlight></codeline>
+<codeline lineno="350"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>height:<sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="351"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>padding:<sp/>10px<sp/>14px;</highlight></codeline>
+<codeline lineno="352"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="353"><highlight class="normal"></highlight></codeline>
+<codeline lineno="354"><highlight class="normal"><sp/><sp/><sp/><sp/>.file-tbl<sp/>.trow&gt;div:nth-child(3),</highlight></codeline>
+<codeline lineno="355"><highlight class="normal"><sp/><sp/><sp/><sp/>.file-tbl<sp/>.trow&gt;div:nth-child(4),</highlight></codeline>
+<codeline lineno="356"><highlight class="normal"><sp/><sp/><sp/><sp/>.file-tbl<sp/>.trow&gt;div:nth-child(5)<sp/>{</highlight></codeline>
+<codeline lineno="357"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>display:<sp/>none;</highlight></codeline>
+<codeline lineno="358"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="359"><highlight class="normal"></highlight></codeline>
+<codeline lineno="360"><highlight class="normal"><sp/><sp/><sp/><sp/>.thead<sp/>{</highlight></codeline>
+<codeline lineno="361"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>display:<sp/>none;</highlight></codeline>
+<codeline lineno="362"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="363"><highlight class="normal"></highlight></codeline>
+<codeline lineno="364"><highlight class="normal"><sp/><sp/><sp/><sp/>.browse-title-left<sp/>h1<sp/>{</highlight></codeline>
+<codeline lineno="365"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>font-size:<sp/>22px;</highlight></codeline>
+<codeline lineno="366"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="367"><highlight class="normal">}</highlight></codeline>
+    </programlisting>
+    <location file="assets/css/browse.css"/>
+  </compounddef>
+</doxygen>

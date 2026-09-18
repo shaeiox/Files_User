@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="group__core__services" kind="group">
+    <compoundname>core_services</compoundname>
+    <title>Core Services</title>
+    <innerfile refid="files-service_8js">files-service.js</innerfile>
+    <briefdescription>
+<para>Backend domain modules that hold the project&apos;s business logic, isolated from the HTTP transport layer. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>The <computeroutput>lib/</computeroutput> directory is the backend&apos;s domain layer: filesystem access, environment loading, error taxonomy. Everything here is pure Node.js with zero third-party runtime dependencies, consumed exclusively by <computeroutput><ref refid="server_8js" kindref="compound">server.js</ref></computeroutput> (the transport layer) and mirrored conceptually by the frontend&apos;s <computeroutput><ref refid="resource-service_8js_source" kindref="compound">assets/js/services/resource-service.js</ref></computeroutput> data layer.</para>
+<para>Members:<itemizedlist>
+<listitem><para><computeroutput><ref refid="files-service_8js" kindref="compound">lib/files-service.js</ref></computeroutput> — filesystem domain layer (see its file page, linked from this group&apos;s member list)</para>
+</listitem><listitem><para><computeroutput><ref refid="load-env_8js_source" kindref="compound">lib/load-env.js</ref></computeroutput> — <computeroutput>.env</computeroutput> bootstrap (planned page) </para>
+</listitem></itemizedlist>
+</para>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

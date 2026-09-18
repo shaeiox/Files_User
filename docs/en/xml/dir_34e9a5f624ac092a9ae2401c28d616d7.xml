@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="dir_34e9a5f624ac092a9ae2401c28d616d7" kind="dir">
+    <compoundname>assets</compoundname>
+    <innerdir refid="dir_45719ce4813446001deb773d097fe0a2">assets/css</innerdir>
+    <innerdir refid="dir_28b47b074e0de03430469744c7cd2342">assets/js</innerdir>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="assets/"/>
+  </compounddef>
+</doxygen>

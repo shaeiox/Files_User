@@ -1,0 +1,104 @@
+# ==============================================================================
+# PROJECT SETTINGS
+# ==============================================================================
+PROJECT_NAME           = "CloudAvid File Portal"
+OUTPUT_DIRECTORY       = docs/en
+OUTPUT_LANGUAGE        = English
+ENABLED_SECTIONS       = EN
+
+# ==============================================================================
+# INPUT & EXCLUSION (Unrestricted Support)
+# ==============================================================================
+# Search in the current directory and all subdirectories
+INPUT                  = .
+RECURSIVE              = YES
+
+# Support all standard and modern web development file types
+FILE_PATTERNS          = *.html \
+                         *.js \
+                         *.jsx \
+                         *.ts \
+                         *.tsx \
+                         *.css \
+                         *.scss \
+                         *.json \
+                         *.md \
+                         *.dox
+
+# Ignore dependencies and output folders to prevent infinite loops / clutter
+EXCLUDE                = node_modules \
+                         docs \
+                         .git
+
+# Tell Doxygen how to parse web files (Crucial for JS and HTML)
+EXTENSION_MAPPING      = html=C \
+                         css=C \
+                         js=Javascript \
+                         ts=Javascript \
+                         dox=C
+
+# Required for @snippet commands to find your source files
+EXAMPLE_PATH           = .
+EXAMPLE_RECURSIVE      = YES
+
+# ==============================================================================
+# PATH & EXTRACTION SETTINGS
+# ==============================================================================
+FULL_PATH_NAMES        = YES
+STRIP_FROM_PATH        = .
+
+# Set to NO so anonymous JS functions inside HTML scripts aren't extracted
+EXTRACT_ALL            = NO
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+
+# Hide internal code that does not have explicit Doxygen comments
+HIDE_UNDOC_MEMBERS     = YES
+
+# Auto-generate brief descriptions from the first sentence
+JAVADOC_AUTOBRIEF      = YES
+QT_AUTOBRIEF           = YES
+
+# ==============================================================================
+# OUTPUT FORMATS & UI
+# ==============================================================================
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+GENERATE_XML           = YES
+
+# Enable a modern Tree-View sidebar instead of just top navigation
+GENERATE_TREEVIEW      = YES
+DISABLE_INDEX          = NO
+
+# Enable Markdown support for beautiful formatting
+MARKDOWN_SUPPORT       = YES
+
+# ==============================================================================
+# SOURCE BROWSING
+# ==============================================================================
+# Allow users to click and see the actual source code with line numbers
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = YES
+
+# ==============================================================================
+# WARNINGS & LOGS
+# ==============================================================================
+QUIET                  = NO
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+WARN_NO_PARAMDOC       = NO
+WARN_LOGFILE           = doxygen_warnings.log
+
+# ==============================================================================
+# GRAPHS & DIAGRAMS (Requires Graphviz/DOT)
+# ==============================================================================
+HAVE_DOT               = YES
+CALL_GRAPH             = YES
+CALLER_GRAPH           = YES
+DIRECTORY_GRAPH        = YES
+DOT_IMAGE_FORMAT       = svg
+INTERACTIVE_SVG        = YES
+
+# Enable search bar functionality in the generated HTML
+SEARCHENGINE           = YES

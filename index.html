@@ -12,7 +12,6 @@
 
       var root = document.documentElement;
 
-      /* ── Apply theme before first paint ── */
       var theme = 'light';
 
       try {
@@ -34,7 +33,6 @@
 
       root.setAttribute('data-theme', theme);
 
-      /* ── Apply cached performance tier before first paint ── */
       var perfTier = 'medium';
       var reducedMotion = false;
 
@@ -82,38 +80,39 @@
       }
     }, { once: true });
   </script>
+  <script src="/assets/js/banner.js"></script>
+
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&family=Cinzel:wght@400..700&family=Vazirmatn:wght@300..700&family=Sora:wght@400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&family=Cinzel:wght@400..700&family=Vazirmatn:wght@300..700&family=Sora:wght@400;500;600&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/tokens.css">
   <link rel="stylesheet" href="/assets/css/base.css">
   <link rel="stylesheet" href="/assets/css/components.css">
   <link rel="stylesheet" href="/assets/css/home.css">
   <link rel="stylesheet" href="/assets/css/browse.css">
   <link rel="stylesheet" href="/assets/css/performance-modes.css">
+
   <link rel="icon" href="/assets/icon/files-logo.webp">
 </head>
 
 <body>
-  <!-- ═══════════════════════════════════════════════════════════════
-       BACKGROUND AURA BACKDROP (Glow Effects)
-       ═══════════════════════════════════════════════════════════════ -->
+
   <div class="aura-backdrop" aria-hidden="true">
     <div class="aura-base"></div>
     <div class="aura-glow-1"></div>
     <div class="aura-glow-2"></div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════════
-       PAGE CONTAINER
-       ═══════════════════════════════════════════════════════════════ -->
+
   <div class="page">
 
-    <!-- MAIN NAVIGATION HEADER -->
+
     <header class="nav">
       <div class="nav-bar">
 
-        <!-- BRAND LOGO -->
         <a class="nav-logo" href="/" data-link>
           <img src="/assets/icon/logo.webp" alt="CloudAvid Logo" class="nav-logo-img"
             onerror="this.style.display='none'">
@@ -123,7 +122,7 @@
           </div>
         </a>
 
-        <!-- CENTER NAVIGATION TABS -->
+
         <div class="nav-tabs" role="tablist" aria-label="Primary">
           <a class="nav-tab" href="https://cloudavid.com" target="_blank" rel="noopener">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -156,10 +155,10 @@
           </a>
         </div>
 
-        <!-- RIGHT ACTIONS TOOLBAR -->
+
         <div class="nav-actions">
 
-          <!-- 1. Performance Selector Dropdown -->
+
           <div class="perf-dropdown-wrap">
             <button class="perf-pill" type="button" aria-haspopup="true" aria-expanded="false"
               title="Performance Settings" aria-label="Performance Settings">
@@ -197,7 +196,7 @@
             </div>
           </div>
 
-          <!-- 2. Language Selector Dropdown -->
+
           <div class="lang-dropdown-wrap">
             <button class="lang-pill" id="langBtn" type="button" aria-haspopup="true" aria-expanded="false"
               title="Select language" aria-label="Select language">
@@ -225,7 +224,7 @@
             </div>
           </div>
 
-          <!-- 3. Theme Toggle Button -->
+
           <button class="theme-btn" id="themeBtn" type="button" title="Toggle theme" aria-label="Toggle theme">
             <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -243,10 +242,9 @@
       </div>
     </header>
 
-    <!-- SPA DYNAMIC CONTENT MOUNT POINT -->
     <main id="app"></main>
 
-    <!-- FOOTER -->
+
     <footer class="footer" style="display:none">
       <span>© 2025 CloudAvid Co</span>
       <a href="https://cloudavid.com" target="_blank" rel="noopener">cloudavid.com</a>
@@ -257,7 +255,6 @@
   <script src="/assets/js/theme.js" defer></script>
   <script src="/assets/js/i18n.js" defer></script>
   <script src="/assets/js/autocomplete.js" defer></script>
-  <script src="/assets/js/banner.js"></script>
   <script src="/assets/js/home.js" defer></script>
   <script src="/assets/js/browse.js" defer></script>
   <script src="/assets/js/router.js" defer></script>

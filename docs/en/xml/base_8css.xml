@@ -1,0 +1,1033 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="base_8css" kind="file" language="C++">
+    <compoundname>base.css</compoundname>
+    <sectiondef kind="var">
+      <memberdef kind="variable" id="base_8css_1a03346576b6acd300639bd7e7018e9f58" prot="public" static="no" mutable="no">
+        <type>margin</type>
+        <definition>margin __pad0__</definition>
+        <argsstring></argsstring>
+        <name>__pad0__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="10" column="5" bodyfile="assets/css/base.css" bodystart="10" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1aa5cd2155ac03abebb317ba2a8dfb5b46" prot="public" static="no" mutable="no">
+        <type>padding</type>
+        <definition>padding __pad1__</definition>
+        <argsstring></argsstring>
+        <name>__pad1__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="11" column="5" bodyfile="assets/css/base.css" bodystart="11" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a4713f41db60bb4fda5bb46d317b89fbc" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>hero html</definition>
+        <argsstring></argsstring>
+        <name>html</name>
+        <initializer>{
+    scroll-behavior: smooth</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="14" column="1" bodyfile="assets/css/base.css" bodystart="14" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1adc4ce1f968ee8ec33e73ded86c31c609" prot="public" static="no" mutable="no">
+        <type>webkit text size</type>
+        <definition>webkit text size adjust</definition>
+        <argsstring></argsstring>
+        <name>adjust</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="16" column="19" bodyfile="assets/css/base.css" bodystart="16" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a3bde6b4886c4ab24a02f8de7b5d74ede" prot="public" static="no" mutable="no">
+        <type>font</type>
+        <definition>color font family</definition>
+        <argsstring></argsstring>
+        <name>family</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="17" column="9" bodyfile="assets/css/base.css" bodystart="17" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a14d48c2e9f05d0b03044eb45f308fcb0" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>body</definition>
+        <argsstring></argsstring>
+        <name>body</name>
+        <initializer>{
+    background: var(--bg)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="20" column="1" bodyfile="assets/css/base.css" bodystart="20" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1ae20d3ca2acbfbfe24798ca800435f9f1" prot="public" static="no" mutable="no">
+        <type>font</type>
+        <definition>font size</definition>
+        <argsstring></argsstring>
+        <name>size</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="23" column="9" bodyfile="assets/css/base.css" bodystart="23" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1ad6d040b79093a1652d3e3a0f02172d83" prot="public" static="no" mutable="no">
+        <type>font line</type>
+        <definition>line height</definition>
+        <argsstring></argsstring>
+        <name>height</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="24" column="9" bodyfile="assets/css/base.css" bodystart="24" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1ae579efcc03bd327169f5bab7e8b7635d" prot="public" static="no" mutable="no">
+        <type>letter</type>
+        <definition>letter spacing</definition>
+        <argsstring></argsstring>
+        <name>spacing</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="25" column="11" bodyfile="assets/css/base.css" bodystart="25" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1ae269a1b6fd1174f5cba41110f090bbb4" prot="public" static="no" mutable="no">
+        <type>color</type>
+        <definition>color __pad2__</definition>
+        <argsstring></argsstring>
+        <name>__pad2__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="26" column="5" bodyfile="assets/css/base.css" bodystart="26" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a652345655b0eae712bc898ae31687fca" prot="public" static="no" mutable="no">
+        <type>webkit font</type>
+        <definition>moz osx font smoothing</definition>
+        <argsstring></argsstring>
+        <name>smoothing</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="28" column="15" bodyfile="assets/css/base.css" bodystart="28" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a0d3c27755b286d7f2832c5579071c6be" prot="public" static="no" mutable="no">
+        <type>overflow</type>
+        <definition>overflow x</definition>
+        <argsstring></argsstring>
+        <name>x</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="30" column="13" bodyfile="assets/css/base.css" bodystart="30" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a2959c9933947e441e08fab575a578b51" prot="public" static="no" mutable="no">
+        <type>transition</type>
+        <definition>transition __pad3__</definition>
+        <argsstring></argsstring>
+        <name>__pad3__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="31" column="5" bodyfile="assets/css/base.css" bodystart="31" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a21aea63d8581cde25311000aa5c77740" prot="public" static="no" mutable="no">
+        <type>body</type>
+        <definition>body rtl</definition>
+        <argsstring></argsstring>
+        <name>rtl</name>
+        <initializer>{
+    font-family: var(--font-fa)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="38" column="5" bodyfile="assets/css/base.css" bodystart="38" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a4985cfa16ffaca78ca9505906cc67eb1" prot="public" static="no" mutable="no">
+        <type>color</type>
+        <definition>color __pad4__</definition>
+        <argsstring></argsstring>
+        <name>__pad4__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="51" column="5" bodyfile="assets/css/base.css" bodystart="51" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a399cdd17dba87ba7fd179492e8aec98b" prot="public" static="no" mutable="no">
+        <type>color</type>
+        <definition>color __pad5__</definition>
+        <argsstring></argsstring>
+        <name>__pad5__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="56" column="5" bodyfile="assets/css/base.css" bodystart="56" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a5e2f696554d94708d4a280cfedc32e0b" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>res info a</definition>
+        <argsstring></argsstring>
+        <name>a</name>
+        <initializer>{
+    color: inherit</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="59" column="1" bodyfile="assets/css/base.css" bodystart="59" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1ad1ba8052b5e15f7bd3093dcb839f840b" prot="public" static="no" mutable="no">
+        <type>text</type>
+        <definition>text decoration</definition>
+        <argsstring></argsstring>
+        <name>decoration</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="61" column="9" bodyfile="assets/css/base.css" bodystart="61" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a14139799dd4b2fc41ecb6cb14936322f" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>button</definition>
+        <argsstring></argsstring>
+        <name>button</name>
+        <initializer>{
+    font-family: inherit</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="64" column="1" bodyfile="assets/css/base.css" bodystart="64" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1ae37c9f6f31bb827df728dc1fff62feb6" prot="public" static="no" mutable="no">
+        <type>cursor</type>
+        <definition>cursor __pad6__</definition>
+        <argsstring></argsstring>
+        <name>__pad6__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="66" column="5" bodyfile="assets/css/base.css" bodystart="66" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a86d0d51ceb4bc3bd26707520f257a5a4" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>img</definition>
+        <argsstring></argsstring>
+        <name>img</name>
+        <initializer>{
+    display: block</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="70" column="1" bodyfile="assets/css/base.css" bodystart="70" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a4e1600da4c5f6d7a478fce1c0026bd97" prot="public" static="no" mutable="no">
+        <type>max</type>
+        <definition>min width</definition>
+        <argsstring></argsstring>
+        <name>width</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="72" column="8" bodyfile="assets/css/base.css" bodystart="72" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a05430e67d4ad4dc578863c9d0c4fdd3f" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>page</definition>
+        <argsstring></argsstring>
+        <name>page</name>
+        <initializer>{
+    position: relative</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="77" column="1" bodyfile="assets/css/base.css" bodystart="77" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1ac2233f863740297618b646dc35bb8d07" prot="public" static="no" mutable="no">
+        <type>z</type>
+        <definition>z index</definition>
+        <argsstring></argsstring>
+        <name>index</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="79" column="6" bodyfile="assets/css/base.css" bodystart="79" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1aee712ef969e5290ccb322afbea77103f" prot="public" static="no" mutable="no">
+        <type>width</type>
+        <definition>width __pad7__</definition>
+        <argsstring></argsstring>
+        <name>__pad7__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="80" column="5" bodyfile="assets/css/base.css" bodystart="80" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a809edd33e6eba77a7f9edea268c5c64f" prot="public" static="no" mutable="no">
+        <type>margin</type>
+        <definition>margin __pad8__</definition>
+        <argsstring></argsstring>
+        <name>__pad8__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="82" column="5" bodyfile="assets/css/base.css" bodystart="82" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a6e209ed33383770038d99b5b39d484ff" prot="public" static="no" mutable="no">
+        <type>padding</type>
+        <definition>padding __pad9__</definition>
+        <argsstring></argsstring>
+        <name>__pad9__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="83" column="5" bodyfile="assets/css/base.css" bodystart="83" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a74b66729e4b29e255534904ed5b6f11f" prot="public" static="no" mutable="no">
+        <type>aura</type>
+        <definition>aura backdrop</definition>
+        <argsstring></argsstring>
+        <name>backdrop</name>
+        <initializer>{
+    position: fixed</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="95" column="5" bodyfile="assets/css/base.css" bodystart="95" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1abeda78079be07002362c0102a40a88a8" prot="public" static="no" mutable="no">
+        <type>inset</type>
+        <definition>inset __pad10__</definition>
+        <argsstring></argsstring>
+        <name>__pad10__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="97" column="5" bodyfile="assets/css/base.css" bodystart="97" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1aedfc09e301087f5b51050e358000da3d" prot="public" static="no" mutable="no">
+        <type>overflow</type>
+        <definition>overflow __pad11__</definition>
+        <argsstring></argsstring>
+        <name>__pad11__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="98" column="5" bodyfile="assets/css/base.css" bodystart="98" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a2d15fbaba67b436f6b1a801d8ce193a4" prot="public" static="no" mutable="no">
+        <type>pointer</type>
+        <definition>pointer events</definition>
+        <argsstring></argsstring>
+        <name>events</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="99" column="12" bodyfile="assets/css/base.css" bodystart="99" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1ae0b18b0ab99ca5a3e5f4d091c2673054" prot="public" static="no" mutable="no">
+        <type>aura</type>
+        <definition>aura base</definition>
+        <argsstring></argsstring>
+        <name>base</name>
+        <initializer>{
+    position: absolute</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="103" column="5" bodyfile="assets/css/base.css" bodystart="103" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1aef77ab42c32ff0cb41337e448b39b4c6" prot="public" static="no" mutable="no">
+        <type>inset</type>
+        <definition>inset __pad12__</definition>
+        <argsstring></argsstring>
+        <name>__pad12__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="105" column="5" bodyfile="assets/css/base.css" bodystart="105" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1ad4cb8bbd256bae64919babacfd8c21dd" prot="public" static="no" mutable="no">
+        <type>background</type>
+        <definition>background __pad13__</definition>
+        <argsstring></argsstring>
+        <name>__pad13__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="106" column="5" bodyfile="assets/css/base.css" bodystart="106" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a3aee943e0e7f6f12b927ea9c5ea87fff" prot="public" static="no" mutable="no">
+        <type>aura</type>
+        <definition>surface nav hero input glow ember glow</definition>
+        <argsstring></argsstring>
+        <name>glow</name>
+        <initializer>{
+    position: absolute</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="109" column="5" bodyfile="assets/css/base.css" bodystart="109" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1ae98414f768a53c8fd3bb19254e061d42" prot="public" static="no" mutable="no">
+        <type>top</type>
+        <definition>top __pad14__</definition>
+        <argsstring></argsstring>
+        <name>__pad14__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="111" column="5" bodyfile="assets/css/base.css" bodystart="111" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a80b1f37ee6490d2c3fa16bde8f9dd73a" prot="public" static="no" mutable="no">
+        <type>left</type>
+        <definition>left __pad15__</definition>
+        <argsstring></argsstring>
+        <name>__pad15__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="112" column="5" bodyfile="assets/css/base.css" bodystart="112" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a8d2ef71b336e13d130b2229d7b696eef" prot="public" static="no" mutable="no">
+        <type>transform</type>
+        <definition>transform __pad16__</definition>
+        <argsstring></argsstring>
+        <name>__pad16__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="113" column="5" bodyfile="assets/css/base.css" bodystart="113" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1ab4c61b1bdba86f829dc646d367396078" prot="public" static="no" mutable="no">
+        <type>width</type>
+        <definition>width __pad17__</definition>
+        <argsstring></argsstring>
+        <name>__pad17__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="114" column="5" bodyfile="assets/css/base.css" bodystart="114" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a1d945bdd7134e6885c70934ef368e8ab" prot="public" static="no" mutable="no">
+        <type>height</type>
+        <definition>height __pad18__</definition>
+        <argsstring></argsstring>
+        <name>__pad18__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="115" column="5" bodyfile="assets/css/base.css" bodystart="115" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1afe1a8bf47f48bee7d6ea8e8d0ca0478a" prot="public" static="no" mutable="no">
+        <type>background</type>
+        <definition>background __pad19__</definition>
+        <argsstring></argsstring>
+        <name>__pad19__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="116" column="5" bodyfile="assets/css/base.css" bodystart="116" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a55a6d32bd3793bf3b40d6d91b721fae7" prot="public" static="no" mutable="no">
+        <type>background</type>
+        <definition>background transparent</definition>
+        <argsstring></argsstring>
+        <name>transparent</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="119" column="13" bodyfile="assets/css/base.css" bodystart="119" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1ad9dad4cd1ddf0121ce0c9d41cb6903bb" prot="public" static="no" mutable="no">
+        <type>filter</type>
+        <definition>filter __pad20__</definition>
+        <argsstring></argsstring>
+        <name>__pad20__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="120" column="5" bodyfile="assets/css/base.css" bodystart="120" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a6b7097f65d402418dc4935cb9ad74bd0" prot="public" static="no" mutable="no">
+        <type>bottom</type>
+        <definition>bottom __pad21__</definition>
+        <argsstring></argsstring>
+        <name>__pad21__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="125" column="5" bodyfile="assets/css/base.css" bodystart="125" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a4494a16627369de67e73c878c7f37b46" prot="public" static="no" mutable="no">
+        <type>left</type>
+        <definition>left __pad22__</definition>
+        <argsstring></argsstring>
+        <name>__pad22__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="126" column="5" bodyfile="assets/css/base.css" bodystart="126" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1ad5738191f148b494994e67b5f36db2e3" prot="public" static="no" mutable="no">
+        <type>width</type>
+        <definition>width __pad23__</definition>
+        <argsstring></argsstring>
+        <name>__pad23__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="127" column="5" bodyfile="assets/css/base.css" bodystart="127" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1aa7facfd4858a5b57ba7ee72121182520" prot="public" static="no" mutable="no">
+        <type>height</type>
+        <definition>height __pad24__</definition>
+        <argsstring></argsstring>
+        <name>__pad24__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="128" column="5" bodyfile="assets/css/base.css" bodystart="128" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a680ecdded50b97b4584a5a346d1831f5" prot="public" static="no" mutable="no">
+        <type>background</type>
+        <definition>background __pad25__</definition>
+        <argsstring></argsstring>
+        <name>__pad25__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="129" column="5" bodyfile="assets/css/base.css" bodystart="129" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a706f62b7c2663711a43e969fa0cb84ef" prot="public" static="no" mutable="no">
+        <type>filter</type>
+        <definition>filter __pad26__</definition>
+        <argsstring></argsstring>
+        <name>__pad26__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="132" column="5" bodyfile="assets/css/base.css" bodystart="132" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="base_8css_1a1284add293702e14d0111242bb582ac4" prot="public" static="no" mutable="no">
+        <type>aura</type>
+        <definition>aura vignette</definition>
+        <argsstring></argsstring>
+        <name>vignette</name>
+        <initializer>{
+    display: none</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="135" column="5" bodyfile="assets/css/base.css" bodystart="135" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="base_8css_1aa286da57fa1949693d397d051c93bfc1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>transition color</type>
+        <definition>transition box shadow var</definition>
+        <argsstring>(--dur-2) ease</argsstring>
+        <name>var</name>
+        <param>
+          <type>--dur-</type>
+          <declname>2</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="31" column="22" declfile="assets/css/base.css" declline="31" declcolumn="22"/>
+      </memberdef>
+      <memberdef kind="function" id="base_8css_1a53fcefc341b2fac9497a6733e3ebdeb0" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>media</definition>
+        <argsstring>(max-width:768px)</argsstring>
+        <name>media</name>
+        <param>
+          <type>max-width:768px</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="86" column="1" bodyfile="assets/css/base.css" bodystart="86" bodyend="91"/>
+      </memberdef>
+      <memberdef kind="function" id="base_8css_1aa940fb212a13ff4f102ca4dda8b758b0" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>background</type>
+        <definition>background rgba</definition>
+        <argsstring>(86, 131, 218, 0.06) 0%</argsstring>
+        <name>rgba</name>
+        <param>
+          <type>86</type>
+        </param>
+        <param>
+          <type>131</type>
+        </param>
+        <param>
+          <type>218</type>
+        </param>
+        <param>
+          <type>0.</type>
+          <declname>06</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="117" column="13"/>
+      </memberdef>
+      <memberdef kind="function" id="base_8css_1a2eaaf63165e39d770f6df88d98cb034c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>background</type>
+        <definition>background rgba</definition>
+        <argsstring>(255, 137, 100, 0.03) 0%</argsstring>
+        <name>rgba</name>
+        <param>
+          <type>255</type>
+        </param>
+        <param>
+          <type>137</type>
+        </param>
+        <param>
+          <type>100</type>
+        </param>
+        <param>
+          <type>0.</type>
+          <declname>03</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="assets/css/base.css" line="130" column="13"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">/*<sp/>═══════════════════════════════════════════════════════════════</highlight></codeline>
+<codeline lineno="2"><highlight class="comment"><sp/><sp/><sp/>base.css<sp/>—<sp/>Foundation<sp/>&amp;<sp/>Layout<sp/>(Huly<sp/>aurora<sp/>system)</highlight></codeline>
+<codeline lineno="3"><highlight class="comment"><sp/><sp/><sp/>Reset,<sp/>typography,<sp/>page<sp/>container,<sp/>ambient<sp/>backdrop</highlight></codeline>
+<codeline lineno="4"><highlight class="comment"><sp/><sp/><sp/>═══════════════════════════════════════════════════════════════<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal">*,</highlight></codeline>
+<codeline lineno="7"><highlight class="normal">*::before,</highlight></codeline>
+<codeline lineno="8"><highlight class="normal">*::after<sp/>{</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"><sp/><sp/><sp/><sp/>box-sizing:<sp/>border-box;</highlight></codeline>
+<codeline lineno="10"><highlight class="normal"><sp/><sp/><sp/><sp/>margin:<sp/>0;</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"><sp/><sp/><sp/><sp/>padding:<sp/>0;</highlight></codeline>
+<codeline lineno="12"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal">html<sp/>{</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"><sp/><sp/><sp/><sp/>scroll-behavior:<sp/>smooth;</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"><sp/><sp/><sp/><sp/>-webkit-text-size-adjust:<sp/>100%;</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"><sp/><sp/><sp/><sp/>font-family:<sp/>var(--font);</highlight></codeline>
+<codeline lineno="18"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal">body<sp/>{</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>var(--bg);</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/><sp/><sp/><sp/>font-family:<sp/>var(--font);</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/><sp/><sp/>font-size:<sp/>var(--text-body,<sp/>14px);</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/><sp/><sp/>line-height:<sp/>1.5;</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/><sp/><sp/><sp/>letter-spacing:<sp/>-0.14px;</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>var(--text);</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/><sp/><sp/>min-height:<sp/>100vh;</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/>-webkit-font-smoothing:<sp/>antialiased;</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/>-moz-osx-font-smoothing:<sp/>grayscale;</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/><sp/><sp/>overflow-x:<sp/>hidden;</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/><sp/><sp/>transition:<sp/>background-color<sp/>var(--dur-2)<sp/>ease,<sp/>color<sp/>var(--dur-2)<sp/>ease;</highlight></codeline>
+<codeline lineno="32"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>Persian:<sp/>Vazirmatn<sp/>everywhere<sp/>—<sp/>generous<sp/>line-height<sp/>for<sp/>joined<sp/>scripts,</highlight></codeline>
+<codeline lineno="35"><highlight class="comment"><sp/><sp/><sp/>no<sp/>negative<sp/>tracking<sp/>(it<sp/>distorts<sp/>Arabic-script<sp/>letterforms)<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="36"><highlight class="normal">[lang=</highlight><highlight class="stringliteral">&quot;fa&quot;</highlight><highlight class="normal">],</highlight></codeline>
+<codeline lineno="37"><highlight class="normal">[dir=</highlight><highlight class="stringliteral">&quot;rtl&quot;</highlight><highlight class="normal">]<sp/>body,</highlight></codeline>
+<codeline lineno="38"><highlight class="normal">body.rtl<sp/>{</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/><sp/><sp/>font-family:<sp/>var(--font-fa);</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/><sp/><sp/>line-height:<sp/>1.75;</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/>letter-spacing:<sp/>0;</highlight></codeline>
+<codeline lineno="42"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight></codeline>
+<codeline lineno="44"><highlight class="normal">[lang=</highlight><highlight class="stringliteral">&quot;fa&quot;</highlight><highlight class="normal">]<sp/>::selection,</highlight></codeline>
+<codeline lineno="45"><highlight class="normal">[dir=</highlight><highlight class="stringliteral">&quot;rtl&quot;</highlight><highlight class="normal">]<sp/>::selection<sp/>{</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>rgba(86,<sp/>131,<sp/>218,<sp/>0.32);</highlight></codeline>
+<codeline lineno="47"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"></highlight></codeline>
+<codeline lineno="49"><highlight class="normal">::selection<sp/>{</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>rgba(86,<sp/>131,<sp/>218,<sp/>0.28);</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>#ffffff;</highlight></codeline>
+<codeline lineno="52"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"></highlight></codeline>
+<codeline lineno="54"><highlight class="normal">[data-theme=</highlight><highlight class="stringliteral">&quot;light&quot;</highlight><highlight class="normal">]<sp/>::selection<sp/>{</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>rgba(86,<sp/>131,<sp/>218,<sp/>0.2);</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>inherit;</highlight></codeline>
+<codeline lineno="57"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"></highlight></codeline>
+<codeline lineno="59"><highlight class="normal">a<sp/>{</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/>color:<sp/>inherit;</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/>text-decoration:<sp/>none;</highlight></codeline>
+<codeline lineno="62"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"></highlight></codeline>
+<codeline lineno="64"><highlight class="normal">button<sp/>{</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/>font-family:<sp/>inherit;</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/><sp/><sp/>cursor:<sp/>pointer;</highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/><sp/><sp/>letter-spacing:<sp/>inherit;</highlight></codeline>
+<codeline lineno="68"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"></highlight></codeline>
+<codeline lineno="70"><highlight class="normal">img<sp/>{</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>block;</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/>max-width:<sp/>100%;</highlight></codeline>
+<codeline lineno="73"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"></highlight></codeline>
+<codeline lineno="75"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>──<sp/>Page<sp/>container<sp/>—<sp/>wide<sp/>fluid<sp/>enterprise<sp/>layout<sp/>──</highlight></codeline>
+<codeline lineno="76"><highlight class="comment"><sp/><sp/><sp/>One<sp/>shared<sp/>container:<sp/>navbar,<sp/>hero,<sp/>and<sp/>every<sp/>section<sp/>align<sp/>to<sp/>it.<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="77"><highlight class="normal">.page<sp/>{</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"><sp/><sp/><sp/><sp/>position:<sp/>relative;</highlight></codeline>
+<codeline lineno="79"><highlight class="normal"><sp/><sp/><sp/><sp/>z-index:<sp/>1;</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/><sp/><sp/>width:<sp/>calc(100%<sp/>-<sp/>48px);</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><sp/><sp/>max-width:<sp/>1720px;</highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/><sp/><sp/>margin:<sp/>0<sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/><sp/><sp/>padding:<sp/>16px<sp/>0<sp/>32px;</highlight></codeline>
+<codeline lineno="84"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"></highlight></codeline>
+<codeline lineno="86"><highlight class="normal">@media<sp/>(max-width:<sp/>768px)<sp/>{</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/><sp/><sp/>.page<sp/>{</highlight></codeline>
+<codeline lineno="88"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>width:<sp/>calc(100%<sp/>-<sp/>24px);</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>padding:<sp/>12px<sp/>0<sp/>24px;</highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="91"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"></highlight></codeline>
+<codeline lineno="93"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>──<sp/>Ambient<sp/>backdrop<sp/>—<sp/>the<sp/>aurora&apos;s<sp/>quiet<sp/>echo<sp/>──</highlight></codeline>
+<codeline lineno="94"><highlight class="comment"><sp/><sp/><sp/>Dark:<sp/>iris<sp/>wash<sp/>top,<sp/>ember<sp/>wash<sp/>bottom.<sp/>Light:<sp/>barely-there<sp/>cool<sp/>tint.<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="95"><highlight class="normal">.aura-backdrop<sp/>{</highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/><sp/><sp/>position:<sp/>fixed;</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"><sp/><sp/><sp/><sp/>inset:<sp/>0;</highlight></codeline>
+<codeline lineno="98"><highlight class="normal"><sp/><sp/><sp/><sp/>overflow:<sp/>hidden;</highlight></codeline>
+<codeline lineno="99"><highlight class="normal"><sp/><sp/><sp/><sp/>pointer-events:<sp/>none;</highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/><sp/><sp/>z-index:<sp/>0;</highlight></codeline>
+<codeline lineno="101"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="102"><highlight class="normal"></highlight></codeline>
+<codeline lineno="103"><highlight class="normal">.aura-base<sp/>{</highlight></codeline>
+<codeline lineno="104"><highlight class="normal"><sp/><sp/><sp/><sp/>position:<sp/>absolute;</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"><sp/><sp/><sp/><sp/>inset:<sp/>0;</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>var(--bg);</highlight></codeline>
+<codeline lineno="107"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="108"><highlight class="normal"></highlight></codeline>
+<codeline lineno="109"><highlight class="normal">.aura-glow-1<sp/>{</highlight></codeline>
+<codeline lineno="110"><highlight class="normal"><sp/><sp/><sp/><sp/>position:<sp/>absolute;</highlight></codeline>
+<codeline lineno="111"><highlight class="normal"><sp/><sp/><sp/><sp/>top:<sp/>-14%;</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"><sp/><sp/><sp/><sp/>left:<sp/>50%;</highlight></codeline>
+<codeline lineno="113"><highlight class="normal"><sp/><sp/><sp/><sp/>transform:<sp/>translateX(-50%);</highlight></codeline>
+<codeline lineno="114"><highlight class="normal"><sp/><sp/><sp/><sp/>width:<sp/>46%;</highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/><sp/><sp/>height:<sp/>42%;</highlight></codeline>
+<codeline lineno="116"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>radial-gradient(ellipse<sp/>at<sp/>center,</highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>rgba(86,<sp/>131,<sp/>218,<sp/>0.06)<sp/>0%,</highlight></codeline>
+<codeline lineno="118"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>rgba(86,<sp/>131,<sp/>218,<sp/>0.025)<sp/>38%,</highlight></codeline>
+<codeline lineno="119"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>transparent<sp/>70%);</highlight></codeline>
+<codeline lineno="120"><highlight class="normal"><sp/><sp/><sp/><sp/>filter:<sp/>blur(48px);</highlight></codeline>
+<codeline lineno="121"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="122"><highlight class="normal"></highlight></codeline>
+<codeline lineno="123"><highlight class="normal">.aura-glow-2<sp/>{</highlight></codeline>
+<codeline lineno="124"><highlight class="normal"><sp/><sp/><sp/><sp/>position:<sp/>absolute;</highlight></codeline>
+<codeline lineno="125"><highlight class="normal"><sp/><sp/><sp/><sp/>bottom:<sp/>-18%;</highlight></codeline>
+<codeline lineno="126"><highlight class="normal"><sp/><sp/><sp/><sp/>left:<sp/>-8%;</highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/><sp/><sp/>width:<sp/>44%;</highlight></codeline>
+<codeline lineno="128"><highlight class="normal"><sp/><sp/><sp/><sp/>height:<sp/>42%;</highlight></codeline>
+<codeline lineno="129"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>radial-gradient(ellipse<sp/>at<sp/>center,</highlight></codeline>
+<codeline lineno="130"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>rgba(255,<sp/>137,<sp/>100,<sp/>0.03)<sp/>0%,</highlight></codeline>
+<codeline lineno="131"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>transparent<sp/>65%);</highlight></codeline>
+<codeline lineno="132"><highlight class="normal"><sp/><sp/><sp/><sp/>filter:<sp/>blur(56px);</highlight></codeline>
+<codeline lineno="133"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="134"><highlight class="normal"></highlight></codeline>
+<codeline lineno="135"><highlight class="normal">.aura-vignette<sp/>{</highlight></codeline>
+<codeline lineno="136"><highlight class="normal"><sp/><sp/><sp/><sp/>display:<sp/>none;</highlight></codeline>
+<codeline lineno="137"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="138"><highlight class="normal"></highlight></codeline>
+<codeline lineno="139"><highlight class="normal">[data-theme=</highlight><highlight class="stringliteral">&quot;dark&quot;</highlight><highlight class="normal">]<sp/>.aura-glow-1<sp/>{</highlight></codeline>
+<codeline lineno="140"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>radial-gradient(ellipse<sp/>at<sp/>center,</highlight></codeline>
+<codeline lineno="141"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>rgba(86,<sp/>131,<sp/>218,<sp/>0.08)<sp/>0%,</highlight></codeline>
+<codeline lineno="142"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>rgba(86,<sp/>131,<sp/>218,<sp/>0.03)<sp/>38%,</highlight></codeline>
+<codeline lineno="143"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>transparent<sp/>70%);</highlight></codeline>
+<codeline lineno="144"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="145"><highlight class="normal"></highlight></codeline>
+<codeline lineno="146"><highlight class="normal">[data-theme=</highlight><highlight class="stringliteral">&quot;dark&quot;</highlight><highlight class="normal">]<sp/>.aura-glow-2<sp/>{</highlight></codeline>
+<codeline lineno="147"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>radial-gradient(ellipse<sp/>at<sp/>center,</highlight></codeline>
+<codeline lineno="148"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>rgba(255,<sp/>137,<sp/>100,<sp/>0.045)<sp/>0%,</highlight></codeline>
+<codeline lineno="149"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>transparent<sp/>65%);</highlight></codeline>
+<codeline lineno="150"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="151"><highlight class="normal"></highlight></codeline>
+<codeline lineno="152"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>──<sp/>Animations<sp/>(reduced-motion<sp/>aware)<sp/>──<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="153"><highlight class="normal">@keyframes<sp/>fadeUp<sp/>{</highlight></codeline>
+<codeline lineno="154"><highlight class="normal"><sp/><sp/><sp/><sp/>from<sp/>{</highlight></codeline>
+<codeline lineno="155"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>opacity:<sp/>0;</highlight></codeline>
+<codeline lineno="156"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>transform:<sp/>translateY(8px);</highlight></codeline>
+<codeline lineno="157"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="158"><highlight class="normal"></highlight></codeline>
+<codeline lineno="159"><highlight class="normal"><sp/><sp/><sp/><sp/>to<sp/>{</highlight></codeline>
+<codeline lineno="160"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>opacity:<sp/>1;</highlight></codeline>
+<codeline lineno="161"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>transform:<sp/>translateY(0);</highlight></codeline>
+<codeline lineno="162"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="163"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="164"><highlight class="normal"></highlight></codeline>
+<codeline lineno="165"><highlight class="normal">@keyframes<sp/>scaleIn<sp/>{</highlight></codeline>
+<codeline lineno="166"><highlight class="normal"><sp/><sp/><sp/><sp/>from<sp/>{</highlight></codeline>
+<codeline lineno="167"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>opacity:<sp/>0;</highlight></codeline>
+<codeline lineno="168"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>transform:<sp/>scale(0.98);</highlight></codeline>
+<codeline lineno="169"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="170"><highlight class="normal"></highlight></codeline>
+<codeline lineno="171"><highlight class="normal"><sp/><sp/><sp/><sp/>to<sp/>{</highlight></codeline>
+<codeline lineno="172"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>opacity:<sp/>1;</highlight></codeline>
+<codeline lineno="173"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>transform:<sp/>scale(1);</highlight></codeline>
+<codeline lineno="174"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="175"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="176"><highlight class="normal"></highlight></codeline>
+<codeline lineno="177"><highlight class="normal">@keyframes<sp/>shimmer<sp/>{</highlight></codeline>
+<codeline lineno="178"><highlight class="normal"><sp/><sp/><sp/><sp/>0%<sp/>{</highlight></codeline>
+<codeline lineno="179"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>transform:<sp/>translateX(-100%)</highlight></codeline>
+<codeline lineno="180"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="181"><highlight class="normal"></highlight></codeline>
+<codeline lineno="182"><highlight class="normal"><sp/><sp/><sp/><sp/>100%<sp/>{</highlight></codeline>
+<codeline lineno="183"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>transform:<sp/>translateX(100%)</highlight></codeline>
+<codeline lineno="184"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="185"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="186"><highlight class="normal"></highlight></codeline>
+<codeline lineno="187"><highlight class="normal">.anim-fade-up<sp/>{</highlight></codeline>
+<codeline lineno="188"><highlight class="normal"><sp/><sp/><sp/><sp/>animation:<sp/>fadeUp<sp/>220ms<sp/>var(--ease)<sp/>both;</highlight></codeline>
+<codeline lineno="189"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="190"><highlight class="normal"></highlight></codeline>
+<codeline lineno="191"><highlight class="normal">.stagger&gt;*<sp/>{</highlight></codeline>
+<codeline lineno="192"><highlight class="normal"><sp/><sp/><sp/><sp/>animation:<sp/>fadeUp<sp/>220ms<sp/>var(--ease)<sp/>both;</highlight></codeline>
+<codeline lineno="193"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="194"><highlight class="normal"></highlight></codeline>
+<codeline lineno="195"><highlight class="normal">.stagger&gt;*:nth-child(1)<sp/>{</highlight></codeline>
+<codeline lineno="196"><highlight class="normal"><sp/><sp/><sp/><sp/>animation-delay:<sp/>0</highlight></codeline>
+<codeline lineno="197"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="198"><highlight class="normal"></highlight></codeline>
+<codeline lineno="199"><highlight class="normal">.stagger&gt;*:nth-child(2)<sp/>{</highlight></codeline>
+<codeline lineno="200"><highlight class="normal"><sp/><sp/><sp/><sp/>animation-delay:<sp/>40ms</highlight></codeline>
+<codeline lineno="201"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="202"><highlight class="normal"></highlight></codeline>
+<codeline lineno="203"><highlight class="normal">.stagger&gt;*:nth-child(3)<sp/>{</highlight></codeline>
+<codeline lineno="204"><highlight class="normal"><sp/><sp/><sp/><sp/>animation-delay:<sp/>80ms</highlight></codeline>
+<codeline lineno="205"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="206"><highlight class="normal"></highlight></codeline>
+<codeline lineno="207"><highlight class="normal">.stagger&gt;*:nth-child(4)<sp/>{</highlight></codeline>
+<codeline lineno="208"><highlight class="normal"><sp/><sp/><sp/><sp/>animation-delay:<sp/>120ms</highlight></codeline>
+<codeline lineno="209"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="210"><highlight class="normal"></highlight></codeline>
+<codeline lineno="211"><highlight class="normal">.stagger&gt;*:nth-child(5)<sp/>{</highlight></codeline>
+<codeline lineno="212"><highlight class="normal"><sp/><sp/><sp/><sp/>animation-delay:<sp/>160ms</highlight></codeline>
+<codeline lineno="213"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="214"><highlight class="normal"></highlight></codeline>
+<codeline lineno="215"><highlight class="normal">.stagger&gt;*:nth-child(6)<sp/>{</highlight></codeline>
+<codeline lineno="216"><highlight class="normal"><sp/><sp/><sp/><sp/>animation-delay:<sp/>200ms</highlight></codeline>
+<codeline lineno="217"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="218"><highlight class="normal"></highlight></codeline>
+<codeline lineno="219"><highlight class="normal">@media<sp/>(prefers-reduced-motion:<sp/>reduce)<sp/>{</highlight></codeline>
+<codeline lineno="220"><highlight class="normal"></highlight></codeline>
+<codeline lineno="221"><highlight class="normal"><sp/><sp/><sp/><sp/>*,</highlight></codeline>
+<codeline lineno="222"><highlight class="normal"><sp/><sp/><sp/><sp/>*::before,</highlight></codeline>
+<codeline lineno="223"><highlight class="normal"><sp/><sp/><sp/><sp/>*::after<sp/>{</highlight></codeline>
+<codeline lineno="224"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>animation-duration:<sp/>0.01ms<sp/>!important;</highlight></codeline>
+<codeline lineno="225"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>transition-duration:<sp/>0.01ms<sp/>!important;</highlight></codeline>
+<codeline lineno="226"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="227"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="228"><highlight class="normal"></highlight></codeline>
+<codeline lineno="229"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>──<sp/>Scrollbar<sp/>──<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="230"><highlight class="normal">::-webkit-scrollbar<sp/>{</highlight></codeline>
+<codeline lineno="231"><highlight class="normal"><sp/><sp/><sp/><sp/>width:<sp/>6px;</highlight></codeline>
+<codeline lineno="232"><highlight class="normal"><sp/><sp/><sp/><sp/>height:<sp/>6px;</highlight></codeline>
+<codeline lineno="233"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="234"><highlight class="normal"></highlight></codeline>
+<codeline lineno="235"><highlight class="normal">::-webkit-scrollbar-track<sp/>{</highlight></codeline>
+<codeline lineno="236"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>transparent;</highlight></codeline>
+<codeline lineno="237"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="238"><highlight class="normal"></highlight></codeline>
+<codeline lineno="239"><highlight class="normal">::-webkit-scrollbar-thumb<sp/>{</highlight></codeline>
+<codeline lineno="240"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>var(--n-5);</highlight></codeline>
+<codeline lineno="241"><highlight class="normal"><sp/><sp/><sp/><sp/>border-radius:<sp/>999px;</highlight></codeline>
+<codeline lineno="242"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="243"><highlight class="normal"></highlight></codeline>
+<codeline lineno="244"><highlight class="normal">::-webkit-scrollbar-thumb:hover<sp/>{</highlight></codeline>
+<codeline lineno="245"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>var(--n-6);</highlight></codeline>
+<codeline lineno="246"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="247"><highlight class="normal"></highlight></codeline>
+<codeline lineno="248"><highlight class="normal">[data-theme=</highlight><highlight class="stringliteral">&quot;dark&quot;</highlight><highlight class="normal">]<sp/>::-webkit-scrollbar-thumb<sp/>{</highlight></codeline>
+<codeline lineno="249"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>#4a4b50;</highlight></codeline>
+<codeline lineno="250"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="251"><highlight class="normal"></highlight></codeline>
+<codeline lineno="252"><highlight class="normal">[data-theme=</highlight><highlight class="stringliteral">&quot;dark&quot;</highlight><highlight class="normal">]<sp/>::-webkit-scrollbar-thumb:hover<sp/>{</highlight></codeline>
+<codeline lineno="253"><highlight class="normal"><sp/><sp/><sp/><sp/>background:<sp/>#6b6c6d;</highlight></codeline>
+<codeline lineno="254"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="255"><highlight class="normal"></highlight></codeline>
+<codeline lineno="256"><highlight class="normal">:focus-visible<sp/>{</highlight></codeline>
+<codeline lineno="257"><highlight class="normal"><sp/><sp/><sp/><sp/>outline:<sp/>2px<sp/>solid<sp/>var(--border-focus);</highlight></codeline>
+<codeline lineno="258"><highlight class="normal"><sp/><sp/><sp/><sp/>outline-offset:<sp/>2px;</highlight></codeline>
+<codeline lineno="259"><highlight class="normal">}</highlight></codeline>
+    </programlisting>
+    <location file="assets/css/base.css"/>
+  </compounddef>
+</doxygen>

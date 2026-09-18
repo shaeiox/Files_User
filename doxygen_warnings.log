@@ -1,0 +1,18 @@
+C:/PRO/files-server-web/assets/css/base.css:7: warning: documented symbol '* before' was not declared or defined.
+C:/PRO/files-server-web/assets/css/base.css:8: warning: documented symbol '* after' was not declared or defined.
+C:/PRO/files-server-web/assets/css/components.css:406: warning: documented symbol 'input wrap input::placeholder' was not declared or defined.
+C:/PRO/files-server-web/assets/css/home.css:38: warning: documented symbol 'hero max::before' was not declared or defined.
+C:/PRO/files-server-web/assets/css/home.css:55: warning: documented symbol 'hero max::after' was not declared or defined.
+C:/PRO/files-server-web/assets/css/home.css:90: warning: documented symbol 'padding hero max::before' was not declared or defined.
+C:/PRO/files-server-web/assets/css/home.css:97: warning: documented symbol 'hero max::after' was not declared or defined.
+C:/PRO/files-server-web/assets/css/home.css:273: warning: documented symbol 'hero search input wrap input::placeholder' was not declared or defined.
+C:/PRO/files-server-web/assets/css/home.css:415: warning: documented symbol 'hero max::before' was not declared or defined.
+C:/PRO/files-server-web/assets/css/home.css:423: warning: documented symbol 'hero max::after' was not declared or defined.
+C:/PRO/files-server-web/assets/css/home.css:467: warning: documented symbol 'hero search input wrap input::placeholder' was not declared or defined.
+C:/PRO/files-server-web/assets/css/home.css:917: warning: documented symbol 'resource card::after' was not declared or defined.
+C:/PRO/files-server-web/assets/css/performance-modes.css:135: warning: documented symbol 'hero max::before' was not declared or defined.
+C:/PRO/files-server-web/assets/css/performance-modes.css:163: warning: documented symbol 'aura aura logo hero max::before' was not declared or defined.
+C:/PRO/files-server-web/assets/css/performance-modes.css:170: warning: documented symbol '* before' was not declared or defined.
+C:/PRO/files-server-web/assets/css/performance-modes.css:171: warning: documented symbol '* after' was not declared or defined.
+C:/PRO/files-server-web/dox/main/browse.dox:187: warning: ignoring \startuml command because PLANTUML_JAR_PATH is not set
+C:/PRO/files-server-web/dox/main/files-service.dox:240: warning: ignoring \startuml command because PLANTUML_JAR_PATH is not set

@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="condv4_after_page" kind="page">
+    <compoundname>condv4_after_page</compoundname>
+    <title>After Variant 4</title>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<sect1 id="condv4_after_page_1cv4_b">
+<title>B</title><para>Body B. </para>
+</sect1>
+    </detaileddescription>
+    <location file="dox/main/cond_test.dox"/>
+  </compounddef>
+</doxygen>
