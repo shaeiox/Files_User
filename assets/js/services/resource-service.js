@@ -161,11 +161,28 @@ const ResourceService = (function () {
         return res.json();
     }
 
-    async function getReleases(limit = 8) {
-        const res = await fetch("/api/releases?limit=" + encodeURIComponent(limit), { cache: "no-store" });
+    /**
+     * @brief   Fetches latest release artifacts along with dynamic browsePath.
+     * @param   {number} [limit=5]  Max number of releases to fetch.
+     * @param   {string|null} [os=null] OS filter category (e.g. "el8", "el9").
+     * @returns {Promise<{browsePath: string, items: Array}>}
+     */
+    async function getReleases(limit = 5, os = null) {
+        const params = new URLSearchParams();
+        if (limit) params.set("limit", String(limit));
+        if (os) params.set("os", String(os));
+
+        const res = await fetch("/api/releases?" + params.toString(), { cache: "no-store" });
         if (!res.ok) throw new Error(await parseError(res));
         const data = await res.json();
-        return Array.isArray(data) ? data : [];
+
+        if (data && Array.isArray(data.items)) {
+            return { browsePath: data.browsePath || "", items: data.items };
+        }
+        if (Array.isArray(data)) {
+            return { browsePath: os || "", items: data };
+        }
+        return { browsePath: os || "", items: [] };
     }
 
     return {

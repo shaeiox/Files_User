@@ -618,8 +618,25 @@ kbd {
 }
 
 /* ─────────────────────────────────────────────
-   AUTOCOMPLETE DROPDOWN
+   AUTOCOMPLETE DROPDOWN (FIXED OVERFLOW & CLIPPING)
    ───────────────────────────────────────────── */
+
+
+.hero-max {
+    overflow: visible !important;
+}
+
+.hero-max::before,
+.hero-max::after {
+    clip-path: inset(0 0 0 0 round var(--radius-panels));
+}
+
+.hero-search,
+.hero-search .input-wrap {
+    position: relative !important;
+    z-index: 1000 !important;
+}
+
 .ac-dropdown {
     position: absolute;
     top: calc(100% + 8px);
@@ -628,15 +645,15 @@ kbd {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 12px;
-    box-shadow: var(--shadow-xl);
-    z-index: 100;
+    box-shadow: var(--shadow-xl), 0 20px 40px rgba(0, 0, 0, 0.4);
+    z-index: 99999 !important;
     overflow: hidden;
     opacity: 0;
     transform: translateY(-6px) scale(0.98);
     pointer-events: none;
     transition: opacity 180ms ease, transform 180ms ease;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
 .ac-dropdown.show {

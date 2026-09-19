@@ -27,28 +27,11 @@
     background: var(--hero-grad);
     border: 1px solid var(--border);
     border-radius: var(--radius-panels);
-    overflow: hidden;
+    overflow: visible;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 40px;
-}
-
-/* — The beam: iris → ember → white, narrow vertical streak — */
-.hero-max::before {
-    content: "";
-    position: absolute;
-    top: -30%;
-    left: 6%;
-    width: clamp(160px, 24%, 300px);
-    height: 160%;
-    background: linear-gradient(180deg,
-            rgba(86, 131, 218, 0.60) 0%,
-            rgba(255, 137, 100, 0.42) 55%,
-            rgba(255, 255, 255, 0.05) 100%);
-    filter: blur(64px);
-    pointer-events: none;
-    z-index: 0;
 }
 
 /* — Radial sunburst glow at the beam's base — */
@@ -66,6 +49,57 @@
     filter: blur(36px);
     pointer-events: none;
     z-index: 0;
+}
+
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.hero-bg::before {
+    content: "";
+    position: absolute;
+    top: -30%;
+    left: 6%;
+    width: clamp(160px, 24%, 300px);
+    height: 160%;
+    background: linear-gradient(180deg,
+            rgba(86, 131, 218, 0.60) 0%,
+            rgba(255, 137, 100, 0.42) 55%,
+            rgba(255, 255, 255, 0.05) 100%);
+    filter: blur(64px);
+}
+
+.hero-bg::after {
+    content: "";
+    position: absolute;
+    bottom: -240px;
+    left: -60px;
+    width: 480px;
+    height: 480px;
+    background: radial-gradient(circle,
+            rgba(255, 170, 129, 0.30) 0%,
+            rgba(255, 218, 159, 0.12) 35%,
+            transparent 70%);
+    filter: blur(36px);
+}
+
+[dir="rtl"] .hero-bg::before,
+html[lang="fa"] .hero-bg::before,
+body.rtl .hero-bg::before {
+    left: auto;
+    right: 6%;
+}
+
+[dir="rtl"] .hero-bg::after,
+html[lang="fa"] .hero-bg::after,
+body.rtl .hero-bg::after {
+    left: auto;
+    right: -60px;
 }
 
 .hero-content {
@@ -1550,4 +1584,13 @@ body.rtl .hero-visual {
     border-radius: var(--radius-cards);
     color: var(--danger);
     font-size: 14px;
+}
+
+.aura-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+    z-index: -1;
 }

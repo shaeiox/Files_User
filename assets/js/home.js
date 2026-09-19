@@ -20,6 +20,7 @@ const HomePage = (function () {
   let rawResources = [];      // Cached raw data from API
   let activeCategory = "all"; // Current active category filter
   let activeSort = "latest";  // Current active sort filter
+  let activeOsTab = "el9"; // Current active OS for releases tab
 
   /* ═══════════════════════════════════════════════
      MAIN RENDER
@@ -48,6 +49,8 @@ const HomePage = (function () {
   function renderHeroSection(d) {
     return `
       <section class="hero-max">
+        <div class="hero-bg"></div>
+
         <div class="hero-content">
           <div class="hero-pill">
             <span class="hero-pill-dot"></span>
@@ -151,12 +154,17 @@ const HomePage = (function () {
   /* ═══════════════════════════════════════════════
      SECTION: BOTTOM PANELS (Latest Releases + Quick Access)
      ═══════════════════════════════════════════════ */
+  /**
+ * @brief   Renders the bottom layout including Latest Releases (with OS tabs) and Quick Access.
+ * @param   {object} d  Dictionary object for i18n.
+ * @returns {string}    HTML template string.
+ */
   function renderBottomSection(d) {
     return `
       <section class="bottom-grid">
         <div class="panel">
-          <div class="panel-head">
-            <div class="panel-head-left">
+          <div class="panel-head" style="flex-wrap: wrap; gap: 12px;">
+            <div class="panel-head-left" style="flex: 1; min-width: 200px;">
               <div class="panel-icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff8964" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               </div>
@@ -165,7 +173,14 @@ const HomePage = (function () {
                 <div class="panel-sub">${d.latestSub || "Recently published packages and updates."}</div>
               </div>
             </div>
-            <a class="panel-link" id="viewAllReleases" href="#">${d.viewAll || "View all"} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+            
+            <!-- [NEW] OS Selection Tabs -->
+            <div class="view-toggle" id="osTabs">
+              <button class="vt-btn active" data-os="el9" type="button" style="width:auto; padding:0 12px; font-size:11px; font-weight:600; font-family:var(--mono);">EL9</button>
+              <button class="vt-btn" data-os="el8" type="button" style="width:auto; padding:0 12px; font-size:11px; font-weight:600; font-family:var(--mono);">EL8</button>
+            </div>
+
+            <a class="panel-link" id="viewAllReleases" href="/browse/el9">${d.viewAll || "View all"} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
           </div>
           <div style="overflow-x:auto">
             <table class="releases-table">
@@ -486,33 +501,60 @@ const HomePage = (function () {
     });
   }
 
-  async function loadSidebarPanels() {
+  /**
+   * @brief   Fetches and renders the Releases table dynamically based on active OS tab.
+   */
+  async function loadReleasesTable() {
     if (typeof ResourceService === "undefined") return;
     const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
     const lang = typeof window.getLang === 'function' ? window.getLang() : getLang();
     const body = document.getElementById("releasesBody");
-    const quick = document.getElementById("quickAccessList");
     const viewAll = document.getElementById("viewAllReleases");
 
+    if (!body) return;
+    body.innerHTML = `<tr><td colspan="6" class="mono">${d.scanning || "Loading…"}</td></tr>`;
+
     try {
-      const releases = await ResourceService.getReleases(8);
-      if (viewAll && releases[0] && releases[0].category) {
-        viewAll.href = ResourceService.browseHref(releases[0].category);
+      // Get releases + dynamic browsePath from backend
+      const { browsePath, items: releases } = await ResourceService.getReleases(5, activeOsTab);
+
+      if (viewAll) {
+        // Automatically builds correct href regardless of .env configuration
+        viewAll.href = ResourceService.browseHref(browsePath);
       }
-      if (body) {
-        if (!releases.length) {
-          body.innerHTML = `<tr><td colspan="6">${d.noReleases || "No files found yet."}</td></tr>`;
-        } else {
-          const newest = releases[0] ? new Date(releases[0].mtime).getTime() : 0;
-          body.innerHTML = releases.map((item, idx) => {
-            const isNew = idx === 0 || (newest && (newest - new Date(item.mtime).getTime()) < 24 * 60 * 60 * 1000);
-            return releaseRow(item, isNew, lang, d);
-          }).join("");
-        }
+
+      if (!releases || !releases.length) {
+        body.innerHTML = `<tr><td colspan="6">${d.noReleases || `No packages found for ${activeOsTab.toUpperCase()}.`}</td></tr>`;
+        return;
       }
-      if (quick) {
-        const top = releases.slice(0, 4);
-        if (!top.length) {
+
+      const newest = releases[0] ? new Date(releases[0].mtime).getTime() : 0;
+      body.innerHTML = releases.map((item, idx) => {
+        const isNew = idx === 0 || (newest && (newest - new Date(item.mtime).getTime()) < 24 * 60 * 60 * 1000);
+        return releaseRow(item, isNew, lang, d);
+      }).join("");
+
+    } catch (err) {
+      body.innerHTML = `<tr><td colspan="6">${d.resourcesLoadError || "Unable to load releases."}</td></tr>`;
+    }
+  }
+
+  /**
+   * @brief   Initializes both bottom sidebar panels (Releases & Quick Access).
+   */
+  async function loadSidebarPanels() {
+    if (typeof ResourceService === "undefined") return;
+    const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
+
+    // 1. Load Releases Table
+    await loadReleasesTable();
+
+    // 2. Load Quick Access
+    const quick = document.getElementById("quickAccessList");
+    if (quick) {
+      try {
+        const { items: top } = await ResourceService.getReleases(4);
+        if (!top || !top.length) {
           quick.innerHTML = `<div class="ac-empty" style="padding:16px">${d.noReleases || "No files found yet."}</div>`;
         } else {
           quick.innerHTML = top.map((item) => {
@@ -520,9 +562,9 @@ const HomePage = (function () {
             return quickItem(item.name, (item.category || "") + " · " + humanSize(item.size), iconType, ResourceService.downloadHref(item.path));
           }).join("");
         }
+      } catch (err) {
+        quick.innerHTML = `<div class="ac-empty" style="padding:16px">${d.resourcesLoadError || "Error loading."}</div>`;
       }
-    } catch {
-      if (body) body.innerHTML = `<tr><td colspan="6">${d.resourcesLoadError || "Unable to load resources."}</td></tr>`;
     }
   }
 
@@ -575,6 +617,7 @@ const HomePage = (function () {
     bindViewToggleEvents();
     bindRefreshEvent();
     bindFilterEvents();
+    bindOsTabs();
   }
 
   function bindFilterEvents() {
@@ -611,6 +654,31 @@ const HomePage = (function () {
     });
   }
 
+
+  /**
+   * @brief   Binds click events to the OS selection tabs in the Releases Panel.
+   * @details Switches the activeOsTab state and triggers a re-fetch of the table.
+   */
+  function bindOsTabs() {
+    const osButtons = document.querySelectorAll("#osTabs .vt-btn");
+    if (!osButtons.length) return;
+
+    osButtons.forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        // Remove active class from all tabs
+        osButtons.forEach(b => b.classList.remove("active"));
+
+        // Set active class to clicked tab
+        const target = e.currentTarget;
+        target.classList.add("active");
+
+        // Update state and reload ONLY the table
+        activeOsTab = target.getAttribute("data-os");
+        loadReleasesTable();
+      });
+    });
+  }
+
   function bindSearchEvents() {
     const qInput = document.getElementById("globalSearch");
     const searchBtn = document.getElementById("searchBtn");
@@ -623,16 +691,33 @@ const HomePage = (function () {
     }
 
     const doSearch = () => {
-      if (typeof Autocomplete !== "undefined") Autocomplete.hide();
-      scanAll(qInput.value || "");
+      const query = qInput.value ? qInput.value.trim() : "";
+      if (!query) {
+        qInput.focus();
+        return;
+      }
+      if (typeof Autocomplete !== "undefined" && typeof Autocomplete.hide === "function") {
+        Autocomplete.hide();
+      }
+      scanAll(query);
     };
 
     searchBtn.addEventListener("click", doSearch);
-    stopBtn.addEventListener("click", () => { stopFlag = true; });
+
+    if (stopBtn) {
+      stopBtn.addEventListener("click", () => {
+        stopFlag = true;
+      });
+    }
 
     qInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") { e.preventDefault(); doSearch(); }
-      if (e.key === "Escape") clearResults();
+      if (e.key === "Enter") {
+        e.preventDefault();
+        doSearch();
+      }
+      if (e.key === "Escape") {
+        clearResults();
+      }
     });
 
     // Global keyboard shortcut: Cmd/Ctrl + K
@@ -640,10 +725,10 @@ const HomePage = (function () {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         qInput.focus();
+        qInput.select();
       }
     };
 
-    // Remove previous listener to avoid duplicates if re-rendered
     window.removeEventListener("keydown", window._homeKeyHandler);
     window.addEventListener("keydown", window._homeKeyHandler);
   }
@@ -715,6 +800,7 @@ const HomePage = (function () {
     list.appendChild(row);
   }
 
+
   async function scanAll(query) {
     const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
     stopFlag = false;
@@ -724,19 +810,24 @@ const HomePage = (function () {
     const progressEl = document.getElementById("progress");
     const searchBtn = document.getElementById("searchBtn");
     const stopBtn = document.getElementById("stopBtn");
-    const qInput = document.getElementById("globalSearch");
 
-    if (!resultsBox) return;
+    if (!resultsBox || !resultsList) return;
 
+    const q = String(query || "").trim();
+    if (!q) {
+      clearResults();
+      return;
+    }
+
+    // UI Reset
     resultsList.innerHTML = "";
     resultsBox.style.display = "block";
     resultsBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    progressEl.textContent = d.scanning || "Scanning…";
-    stopBtn.style.display = "inline-flex";
-    searchBtn.disabled = true;
-    qInput.disabled = true;
 
-    const q = query.trim();
+    if (progressEl) progressEl.textContent = d.scanning || "Scanning…";
+    if (stopBtn) stopBtn.style.display = "inline-flex";
+    if (searchBtn) searchBtn.disabled = true;
+
     let found = 0;
     let scanned = 0;
 
@@ -744,27 +835,34 @@ const HomePage = (function () {
       const data = await ResourceService.search(q, { limit: SEARCH_MAX_RESULTS });
       scanned = data.scanned || 0;
       const entries = data.results || [];
+
       for (const e of entries) {
         if (stopFlag) break;
         if (!e || !e.name) continue;
+
         const type = e.type === "directory" ? "directory" : "file";
         const href = type === "directory"
           ? ResourceService.browseHref(e.path)
           : ResourceService.downloadHref(e.path);
+
         addResult({ name: e.name, href, path: e.path, type });
         found++;
       }
-    } catch { }
 
-    progressEl.textContent = `${d.scannedDirs || 'Scanned'} ${scanned} · ${found} ${d.foundText || 'found'}`;
+      if (progressEl) {
+        progressEl.textContent = `${d.done || 'Done'} · ${found} ${d.foundText || 'found'}`;
+      }
+    } catch (err) {
+      console.error("[Search Error]:", err);
+      if (progressEl) progressEl.textContent = d.resourcesLoadError || "Search failed";
+      resultsList.innerHTML = `<div class="resources-error" style="padding:20px;">${escapeHtml(err.message || "Failed to perform search.")}</div>`;
+    } finally {
+      if (stopBtn) stopBtn.style.display = "none";
+      if (searchBtn) searchBtn.disabled = false;
+    }
 
-    progressEl.textContent = `${d.done || 'Done'} · ${found} ${d.foundText || 'found'}`;
-    stopBtn.style.display = "none";
-    searchBtn.disabled = false;
-    qInput.disabled = false;
-
-    if (!found) {
-      resultsList.innerHTML = `<div class="ac-empty">${d.emptySearch || 'No results for'} "${query}"</div>`;
+    if (!found && !stopFlag && resultsList.children.length === 0) {
+      resultsList.innerHTML = `<div class="ac-empty" style="padding:24px; text-align:center;">${d.emptySearch || 'No results for'} "${escapeHtml(q)}"</div>`;
     }
   }
 

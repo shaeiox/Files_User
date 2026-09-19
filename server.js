@@ -267,9 +267,10 @@ const server = http.createServer(async (req, res) => {
 
         if (pathname === "/api/releases") {
             const limit = url.searchParams.get("limit");
-            const releases = await filesService.listLatestReleases(PROJECT_ROOT, limit);
-            sendJSON(res, 200, releases);
-            log("GET", 200, pathname, `${releases.length} · ${Date.now() - start}ms`);
+            const osFilter = url.searchParams.get("os");
+            const result = await filesService.listLatestReleases(PROJECT_ROOT, limit, osFilter);
+            sendJSON(res, 200, result);
+            log("GET", 200, pathname, `os:${osFilter || 'all'} | count:${result.items ? result.items.length : 0} · ${Date.now() - start}ms`);
             return;
         }
 
