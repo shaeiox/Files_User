@@ -530,19 +530,27 @@ const HomePage = (function () {
     const href = ResourceService.downloadHref(item.path);
     const icon = getResourceIcon(ResourceService.inferIcon(item.category || item.name));
     return `
-      <tr>
-        <td><div class="version-cell">${escapeHtml(item.name)} ${isNew ? `<span class="badge badge-new">${d.badgeNew || "NEW"}</span>` : ``}</div></td>
-        <td><div class="type-cell">${icon} ${escapeHtml(item.category || "")}</div></td>
-        <td class="mono">${formatDate(item.mtime, lang)}</td>
-        <td class="mono">${humanSize(item.size)}</td>
-        <td><span class="mono">—</span></td>
-        <td style="text-align:${d.dir === 'rtl' ? 'left' : 'right'}">
-          <div class="row-actions">
-            <a class="download-btn" href="${href}" data-file="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> ${d.btnDownload || "Download"}</a>
-          </div>
-        </td>
-      </tr>
-    `;
+    <tr>
+      <td>
+        <div class="version-cell">
+          <span class="version-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</span>
+          ${isNew ? `<span class="badge badge-new">${d.badgeNew || "NEW"}</span>` : ``}
+        </div>
+      </td>
+      <td><div class="type-cell">${icon} <span>${escapeHtml(item.category || "File")}</span></div></td>
+      <td class="mono">${formatDate(item.mtime, lang)}</td>
+      <td class="mono">${humanSize(item.size)}</td>
+      <td class="mono">—</td>
+      <td style="text-align:${d.dir === 'rtl' ? 'left' : 'right'}">
+        <div class="row-actions">
+          <a class="download-btn" href="${href}" data-file="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            ${d.btnDownload || "Download"}
+          </a>
+        </div>
+      </td>
+    </tr>
+  `;
   }
 
   function quickItem(title, sub, iconType, href) {
