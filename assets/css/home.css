@@ -1,13 +1,29 @@
 /* ═══════════════════════════════════════════════════════════════
    home.css — AVID Download (Huly aurora system)
    ───────────────────────────────────────────────────────────────
-   1. Aurora hero (full-bleed void, iris→ember beam, Sora display)
-   2. Infrastructure Resources (charcoal cards)
-   3. Latest Releases + Quick Access panels
-   4. Search Results panel
-   5. Skeletons & states
+   Structure
+   ─ PART A · Base styles, ordered by section:
+       1. Aurora hero         — full-bleed void, iris→ember beam
+       2. Infrastructure      — cards, filters, view toggle
+       3. Bottom grid         — releases table + quick access
+       4. Search results panel
+       5. Skeletons & states
+       6. Authentication UI   — locked state & login modal
+   ─ PART B · Responsive — every breakpoint media query lives in
+     one centralized place at the bottom, ordered large → small:
+         ≥1440px · ≤1024px · ≤768px · ≤640px · ≤480px
+     Within each breakpoint, rules are subgrouped by section
+     (Hero / Resources / Bottom grid / Auth) so narrower
+     breakpoints cascade naturally over wider ones.
+   ─ @media (prefers-reduced-motion: reduce) stays beside the
+     logo-swap hook it disables (accessibility, not a breakpoint).
    ═══════════════════════════════════════════════════════════════ */
 
+/* ═══════════════════════════════════════════════════════════════
+   PART A — BASE STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Page layout ── */
 .home-layout {
     display: flex;
     flex-direction: column;
@@ -508,10 +524,6 @@ body.rtl .hero-visual {
     color: #6b6c6d;
 }
 
-[data-theme="light"] .logo-shader {
-    background: radial-gradient(circle, rgba(86, 131, 218, 0.16) 0%, transparent 70%);
-}
-
 /* Light theme: same background treatment on the pale panel —
    faded logo melting into the wash, glow kept subtle. */
 [data-theme="light"] .logo-swap {
@@ -524,204 +536,6 @@ body.rtl .hero-visual {
     background:
         radial-gradient(circle at 55% 45%, rgba(86, 131, 218, 0.22) 0%, transparent 58%);
     opacity: 0.8;
-}
-
-/* — Responsive hero — */
-@media (min-width: 1440px) {
-    .hero-max {
-        padding: clamp(56px, 7vh, 80px) clamp(40px, 5vw, 88px);
-    }
-
-    .hero-content h1 {
-        font-size: clamp(44px, 4vw, 72px);
-    }
-}
-
-@media (max-width: 1024px) {
-    .hero-max {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 40px 28px 48px;
-        gap: 28px;
-        text-align: center;
-    }
-
-    .hero-content {
-        max-width: none;
-        padding-left: 0;
-        margin: 0 auto;
-    }
-
-    [dir="rtl"] .hero-content {
-        padding-right: 0;
-    }
-
-    .hero-desc {
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .hero-search {
-        max-width: 560px;
-        margin: 0 auto;
-    }
-
-    /* Watermark pinned to the TOP-right corner: medium size, scales down
-       with the viewport, sits fully inside the panel with breathing room
-       from its top edge (never clipped) */
-    .hero-visual {
-        top: clamp(20px, 4vw, 36px);
-        bottom: auto;
-        right: clamp(8px, 2vw, 24px);
-        transform: none;
-        width: clamp(180px, 30vw, 320px);
-    }
-
-    .logo-swap {
-        opacity: 0.3;
-    }
-
-    [data-theme="light"] .logo-swap {
-        opacity: 0.4;
-    }
-
-    [dir="rtl"] .hero-visual,
-    html[lang="fa"] .hero-visual {
-        right: auto;
-        left: clamp(8px, 2vw, 24px);
-    }
-}
-
-/* ── View toggle — pill segmented control ── */
-.view-toggle {
-    display: flex;
-    padding: 3px;
-    border-radius: var(--radius-buttons);
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    gap: 2px;
-}
-
-@media (max-width: 640px) {
-    .hero-max {
-        padding: 28px 18px 36px;
-        gap: 20px;
-    }
-
-    .hero-content h1 {
-        font-size: clamp(28px, 8vw, 40px);
-        letter-spacing: -0.03em;
-    }
-
-    /* Persian mobile: keep Vazirmatn + the relaxed FA line-height */
-    [dir="rtl"] .hero-content h1,
-    html[lang="fa"] .hero-content h1,
-    body.rtl .hero-content h1 {
-        font-size: clamp(24px, 6.4vw, 32px);
-        line-height: 1.5;
-        letter-spacing: 0;
-    }
-
-    .hero-pill {
-        margin-bottom: 14px;
-    }
-
-    .hero-desc {
-        margin-bottom: 20px;
-        font-size: 14px;
-    }
-
-    [dir="rtl"] .hero-desc,
-    html[lang="fa"] .hero-desc,
-    body.rtl .hero-desc {
-        font-size: 14px;
-        line-height: 1.85;
-    }
-
-    /* Compact, balanced mobile search: taller input, smaller button,
-       equal widths, tight vertical rhythm */
-    .hero-search {
-        flex-direction: column;
-        align-items: stretch;
-        width: 100%;
-        max-width: 100%;
-        gap: 12px;
-    }
-
-    .hero-search .input-wrap {
-        flex: none;
-        width: 100%;
-        height: 50px;
-        box-sizing: border-box;
-    }
-
-    .hero-search .btn-primary {
-        width: 100%;
-        height: 50px;
-        flex-shrink: 0;
-    }
-
-    /* Small in-flow brand emblem ABOVE the status pill:
-       crisp, centered, part of the content stack (no overlap) */
-    .hero-visual {
-        position: relative;
-        top: auto;
-        order: -1;
-        transform: none;
-        width: min(140px, 36vw);
-        margin: 0 auto 2px;
-        flex: 0 0 auto;
-    }
-
-    .hero-visual,
-    [dir="rtl"] .hero-visual,
-    html[lang="fa"] .hero-visual {
-        left: auto;
-        right: auto;
-    }
-
-    .logo-shader {
-        width: 100%;
-        height: 100%;
-        opacity: 0.55;
-    }
-
-    .logo-swap {
-        opacity: 0.95;
-        filter: none;
-        -webkit-mask-image: none;
-        mask-image: none;
-    }
-
-    [data-theme="light"] .logo-swap {
-        opacity: 0.95;
-    }
-
-    /* Single-column grid makes the grid/list toggle pointless — hide it.
-       Section controls stretch: the two filter pills share the row,
-       refresh tucks to the right. */
-    .section-controls .view-toggle {
-        display: none;
-    }
-
-    .section-controls {
-        width: 100%;
-        gap: 8px;
-    }
-
-    .section-controls .filter-dropdown-wrap {
-        flex: 1 1 auto;
-        min-width: 0;
-    }
-
-    .section-controls .filter-pill {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .section-controls .icon-btn {
-        margin-left: auto;
-    }
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -885,6 +699,16 @@ body.rtl .hero-visual {
     color: #a9c3ee;
 }
 
+/* ── View toggle — pill segmented control ── */
+.view-toggle {
+    display: flex;
+    padding: 3px;
+    border-radius: var(--radius-buttons);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    gap: 2px;
+}
+
 .vt-btn {
     width: 28px;
     height: 28px;
@@ -917,18 +741,6 @@ body.rtl .hero-visual {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
-}
-
-@media (max-width: 1024px) {
-    .resources-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 640px) {
-    .resources-grid {
-        grid-template-columns: 1fr;
-    }
 }
 
 .resource-card {
@@ -1079,12 +891,6 @@ body.rtl .hero-visual {
     grid-template-columns: 1.65fr 0.9fr;
     gap: 12px;
     align-items: start;
-}
-
-@media (max-width: 1024px) {
-    .bottom-grid {
-        grid-template-columns: 1fr;
-    }
 }
 
 .panel {
@@ -1277,30 +1083,6 @@ body.rtl .hero-visual {
     background: var(--bg-hover);
     border-color: var(--border);
     color: var(--text);
-}
-
-@media (max-width: 768px) {
-    .releases-table {
-        width: 100%;
-        min-width: 100%;
-    }
-
-    .releases-table th:nth-child(3),
-    .releases-table td:nth-child(3),
-    .releases-table th:nth-child(5),
-    .releases-table td:nth-child(5) {
-        display: none;
-    }
-
-    .releases-table th:nth-child(3),
-    .releases-table td:nth-child(3) {
-        display: none;
-    }
-
-    .releases-table th:nth-child(5),
-    .releases-table td:nth-child(5) {
-        display: none;
-    }
 }
 
 /* — Quick access list — */
@@ -1668,94 +1450,6 @@ body.rtl .hero-visual {
     white-space: normal !important;
 }
 
-/* ── Tablet ── */
-@media (max-width: 1024px) {
-    .locked-state {
-        padding: 40px 20px;
-        min-height: 200px;
-    }
-}
-
-/* ── Mobile ── */
-@media (max-width: 768px) {
-    .locked-state {
-        padding: 32px 16px;
-        min-height: 180px;
-    }
-
-    .locked-icon {
-        width: 42px;
-        height: 42px;
-        margin-bottom: 12px;
-    }
-
-    .locked-icon svg {
-        width: 20px;
-        height: 20px;
-    }
-
-    .locked-title {
-        font-size: 13px;
-    }
-
-    .locked-desc {
-        font-size: 11px;
-        max-width: 100%;
-        margin-bottom: 16px;
-        padding: 0 4px;
-    }
-
-    .locked-state .btn,
-    .locked-state .btn-primary {
-        width: 100%;
-        max-width: 260px;
-        height: 44px;
-        font-size: 13px;
-    }
-}
-
-/* ── Small phones ── */
-@media (max-width: 480px) {
-    .locked-state {
-        padding: 28px 12px;
-        min-height: 160px;
-    }
-
-    .locked-desc {
-        font-size: 11px;
-        line-height: 1.45;
-    }
-
-    .locked-state .btn,
-    .locked-state .btn-primary {
-        max-width: 100%;
-        width: 100%;
-        padding: 0 12px;
-        font-size: 12px;
-    }
-
-    .panel-head {
-        gap: 10px !important;
-        padding: 14px 14px 12px;
-    }
-
-    #releaseAuthAction {
-        order: 3;
-        width: 100%;
-        justify-content: flex-end;
-    }
-
-    #osTabs {
-        order: 2;
-    }
-}
-
-/* RTL */
-[dir="rtl"] .locked-state,
-html[lang="fa"] .locked-state {
-    text-align: center;
-}
-
 /* — Login Modal Overlay — */
 .auth-overlay {
     position: fixed;
@@ -1955,8 +1649,294 @@ html[lang="fa"] .locked-state {
     flex-wrap: wrap;
 }
 
-/* ── Mobile Layout ── */
+/* ═══════════════════════════════════════════════════════════════
+   PART B — RESPONSIVE · CENTRALIZED BREAKPOINTS
+   ───────────────────────────────────────────────────────────────
+   Every breakpoint media query in this file lives here — none in
+   Part A. Blocks are ordered large → small so narrower breakpoints
+   cascade naturally over wider ones. Rules are subgrouped by
+   section (Hero / Resources / Bottom grid / Auth). When adding
+   responsive styles, put them in the matching breakpoint block
+   below instead of scattering them through Part A.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ───────────────────────────────────────────────────────────────
+   ≥ 1440px — large desktops
+   ─────────────────────────────────────────────────────────────── */
+@media (min-width: 1440px) {
+
+    /* — Hero: more generous padding + display type — */
+    .hero-max {
+        padding: clamp(56px, 7vh, 80px) clamp(40px, 5vw, 88px);
+    }
+
+    .hero-content h1 {
+        font-size: clamp(44px, 4vw, 72px);
+    }
+}
+
+/* ───────────────────────────────────────────────────────────────
+   ≤ 1024px — tablets
+   ─────────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+
+    /* — Hero: single column, watermark pinned top-right — */
+    .hero-max {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 40px 28px 48px;
+        gap: 28px;
+        text-align: center;
+    }
+
+    .hero-content {
+        max-width: none;
+        padding-left: 0;
+        margin: 0 auto;
+    }
+
+    [dir="rtl"] .hero-content {
+        padding-right: 0;
+    }
+
+    .hero-desc {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .hero-search {
+        max-width: 560px;
+        margin: 0 auto;
+    }
+
+    /* Watermark pinned to the TOP-right corner: medium size, scales down
+       with the viewport, sits fully inside the panel with breathing room
+       from its top edge (never clipped) */
+    .hero-visual {
+        top: clamp(20px, 4vw, 36px);
+        bottom: auto;
+        right: clamp(8px, 2vw, 24px);
+        transform: none;
+        width: clamp(180px, 30vw, 320px);
+    }
+
+    .logo-swap {
+        opacity: 0.3;
+    }
+
+    [data-theme="light"] .logo-swap {
+        opacity: 0.4;
+    }
+
+    [dir="rtl"] .hero-visual,
+    html[lang="fa"] .hero-visual {
+        right: auto;
+        left: clamp(8px, 2vw, 24px);
+    }
+
+    /* — Resources: 2-column card grid — */
+    .resources-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* — Bottom grid: releases + quick access stack — */
+    .bottom-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* — Auth locked state — */
+    .locked-state {
+        padding: 40px 20px;
+        min-height: 200px;
+    }
+}
+
+/* ───────────────────────────────────────────────────────────────
+   ≤ 768px — small tablets / large phones
+   ─────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+    /* — Releases table: fill panel width, hide Type + Size columns — */
+    .releases-table {
+        min-width: 100%;
+    }
+
+    .releases-table th:nth-child(3),
+    .releases-table td:nth-child(3),
+    .releases-table th:nth-child(5),
+    .releases-table td:nth-child(5) {
+        display: none;
+    }
+
+    /* — Auth locked state — */
+    .locked-state {
+        padding: 32px 16px;
+        min-height: 180px;
+    }
+
+    .locked-icon {
+        width: 42px;
+        height: 42px;
+        margin-bottom: 12px;
+    }
+
+    .locked-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .locked-title {
+        font-size: 13px;
+    }
+
+    .locked-desc {
+        font-size: 11px;
+        max-width: 100%;
+        margin-bottom: 16px;
+        padding: 0 4px;
+    }
+
+    .locked-state .btn,
+    .locked-state .btn-primary {
+        width: 100%;
+        max-width: 260px;
+        height: 44px;
+        font-size: 13px;
+    }
+}
+
+/* ───────────────────────────────────────────────────────────────
+   ≤ 640px — mobile
+   ─────────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
+
+    /* — Hero: compact mobile stack — */
+    .hero-max {
+        padding: 28px 18px 36px;
+        gap: 20px;
+    }
+
+    .hero-content h1 {
+        font-size: clamp(28px, 8vw, 40px);
+        letter-spacing: -0.03em;
+    }
+
+    /* Persian mobile: keep Vazirmatn + the relaxed FA line-height */
+    [dir="rtl"] .hero-content h1,
+    html[lang="fa"] .hero-content h1,
+    body.rtl .hero-content h1 {
+        font-size: clamp(24px, 6.4vw, 32px);
+        line-height: 1.5;
+        letter-spacing: 0;
+    }
+
+    .hero-pill {
+        margin-bottom: 14px;
+    }
+
+    .hero-desc {
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    [dir="rtl"] .hero-desc,
+    html[lang="fa"] .hero-desc,
+    body.rtl .hero-desc {
+        font-size: 14px;
+        line-height: 1.85;
+    }
+
+    /* Compact, balanced mobile search: taller input, smaller button,
+       equal widths, tight vertical rhythm */
+    .hero-search {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        max-width: 100%;
+        gap: 12px;
+    }
+
+    .hero-search .input-wrap {
+        flex: none;
+        width: 100%;
+        height: 50px;
+        box-sizing: border-box;
+    }
+
+    .hero-search .btn-primary {
+        width: 100%;
+        height: 50px;
+        flex-shrink: 0;
+    }
+
+    /* Small in-flow brand emblem ABOVE the status pill:
+       crisp, centered, part of the content stack (no overlap) */
+    .hero-visual {
+        position: relative;
+        top: auto;
+        order: -1;
+        transform: none;
+        width: min(140px, 36vw);
+        margin: 0 auto 2px;
+        flex: 0 0 auto;
+    }
+
+    .hero-visual,
+    [dir="rtl"] .hero-visual,
+    html[lang="fa"] .hero-visual {
+        left: auto;
+        right: auto;
+    }
+
+    .logo-shader {
+        width: 100%;
+        height: 100%;
+        opacity: 0.55;
+    }
+
+    .logo-swap {
+        opacity: 0.95;
+        filter: none;
+        -webkit-mask-image: none;
+        mask-image: none;
+    }
+
+    [data-theme="light"] .logo-swap {
+        opacity: 0.95;
+    }
+
+    /* — Resources: single-column grid, stretched section controls — */
+    .resources-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Single-column grid makes the grid/list toggle pointless — hide it.
+       Section controls stretch: the two filter pills share the row,
+       refresh tucks to the right. */
+    .section-controls .view-toggle {
+        display: none;
+    }
+
+    .section-controls {
+        width: 100%;
+        gap: 8px;
+    }
+
+    .section-controls .filter-dropdown-wrap {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .section-controls .filter-pill {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .section-controls .icon-btn {
+        margin-left: auto;
+    }
+
+    /* — Bottom grid: stacked panel heads, full-width OS tabs — */
     .panel-head {
         flex-direction: column;
         align-items: stretch;
@@ -1978,5 +1958,46 @@ html[lang="fa"] .locked-state {
         min-height: 34px;
         justify-content: center;
         text-align: center;
+    }
+}
+
+/* ───────────────────────────────────────────────────────────────
+   ≤ 480px — small phones
+   ─────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+    /* — Auth locked state — */
+    .locked-state {
+        padding: 28px 12px;
+        min-height: 160px;
+    }
+
+    .locked-desc {
+        font-size: 11px;
+        line-height: 1.45;
+    }
+
+    .locked-state .btn,
+    .locked-state .btn-primary {
+        max-width: 100%;
+        width: 100%;
+        padding: 0 12px;
+        font-size: 12px;
+    }
+
+    /* — Bottom grid: compact panel head, stacked action order — */
+    .panel-head {
+        gap: 10px !important;
+        padding: 14px 14px 12px;
+    }
+
+    #releaseAuthAction {
+        order: 3;
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    #osTabs {
+        order: 2;
     }
 }
