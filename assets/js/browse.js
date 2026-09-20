@@ -203,31 +203,31 @@ const BrowsePage = (function () {
 
             if (!container) return;
 
-            // Hide filters/search since there's no data to manipulate
             if (controls) controls.style.display = "none";
 
-            // ▶ Architecture: In-Page 404 State
+            // ▶ Architecture: In-Page 404 State (i18n applied)
             if (err.status === 404 || err.code === "NOT_FOUND") {
                 container.innerHTML = `
                   <div class="resources-error" style="flex-direction: column; padding: 64px 24px; text-align: center; border: 1px dashed var(--border); border-radius: var(--radius-panels); background: var(--bg-card);">
                     <div style="font-size: 48px; font-weight: 900; color: var(--danger); font-family: var(--mono); margin-bottom: 8px;">404</div>
-                    <div style="font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 6px;">Directory Not Found</div>
+                    <div style="font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 6px;">${d.error404Title || "Directory Not Found"}</div>
                     <div style="font-size: 13px; color: var(--text-4); max-width: 400px; margin: 0 auto 24px;">
-                      The requested path <code class="mono" style="color:var(--text-accent); padding:2px 6px; background:var(--glow); border-radius:4px;">${escapeHtml(relPath)}</code> does not exist on CloudAvid infrastructure or you lack permission.
+                      ${d.error404Desc || "The requested path does not exist on CloudAvid infrastructure or you lack permission."}
+                      <br><code class="mono" style="display:inline-block; margin-top:8px; color:var(--text-accent); padding:2px 6px; background:var(--glow); border-radius:4px;">${escapeHtml(relPath)}</code>
                     </div>
-                    <a href="/" class="btn btn-primary" style="text-decoration:none; margin: 0 auto;">Back to Downloads</a>
+                    <a href="/" class="btn btn-primary" style="text-decoration:none; margin: 0 auto;">${d.btnBackPortal || "Back to Downloads"}</a>
                   </div>
                 `;
                 return;
             }
 
-            // ▶ Generic Server Error State
+            // ▶ Generic Server Error State (i18n applied)
             container.innerHTML = `
               <div class="resources-error" style="padding: 32px; border-radius: var(--radius-cards);">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:left;">
-                    <span style="font-weight:600; color:var(--text);">Failed to load directory.</span>
-                    <span style="font-size:12px; color:var(--text-4); margin-top:4px;">${escapeHtml(err.message || "Network or server error.")}</span>
+                    <span style="font-weight:600; color:var(--text);">${d.errorServerLoad || "Failed to load directory."}</span>
+                    <span style="font-size:12px; color:var(--text-4); margin-top:4px;">${escapeHtml(err.message || d.errorServerSub || "Network or server error.")}</span>
                 </div>
               </div>
             `;

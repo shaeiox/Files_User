@@ -221,7 +221,7 @@ const HomePage = (function () {
       </section>
     `;
   }
-  
+
   /* ═══════════════════════════════════════════════
      SECTION: SEARCH RESULTS PANEL
      ═══════════════════════════════════════════════ */
@@ -529,9 +529,9 @@ const HomePage = (function () {
             <div class="locked-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             </div>
-            <div class="locked-title">Authentication Required</div>
-            <div class="locked-desc">Access to the PVM release infrastructure requires clearance.</div>
-            <button class="btn btn-primary" onclick="HomePage.showLoginModal()">Authenticate to Access</button>
+            <div class="locked-title">${d.authRequired || "Authentication Required"}</div>
+            <div class="locked-desc">${d.authRequiredDesc || "Access to the PVM release infrastructure requires clearance."}</div>
+            <button class="btn btn-primary" onclick="HomePage.showLoginModal()">${d.btnAuth || "Authenticate to Access"}</button>
           </div>`;
         return;
       }
@@ -540,7 +540,7 @@ const HomePage = (function () {
         const username = authStatus.user?.username || "admin";
         authActionEl.innerHTML = `
           <span class="mono" style="font-size: 11px; color: var(--text-4); opacity: 0.8;">${escapeHtml(username)}</span>
-          <button class="icon-btn" id="releaseLogoutBtn" title="Sign Out / Lock" style="color: var(--danger);" type="button">
+          <button class="icon-btn" id="releaseLogoutBtn" title="${d.btnSignOut || 'Sign Out / Lock'}" style="color: var(--danger);" type="button">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           </button>
         `;
@@ -929,39 +929,40 @@ const HomePage = (function () {
      AUTHENTICATION MODAL
      ═══════════════════════════════════════════════ */
   function showLoginModal() {
-
+    const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
     if (document.getElementById('authOverlay')) return;
 
     const overlay = document.createElement('div');
     overlay.className = 'auth-overlay';
     overlay.id = 'authOverlay';
 
+    const formDir = d.dir === 'rtl' ? 'text-align: right;' : 'text-align: left;';
+
     overlay.innerHTML = `
-      <div class="auth-modal">
-        <button class="btn-close-modal" id="closeAuthBtn">
+      <div class="auth-modal" style="${formDir}">
+        <button class="btn-close-modal" id="closeAuthBtn" style="${d.dir === 'rtl' ? 'left: 16px; right: auto;' : ''}">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
-        <div class="auth-header">
+        <div class="auth-header" style="text-align: center;">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <h2>Clearance Required</h2>
+          <h2>${d.clearanceReq || "Clearance Required"}</h2>
         </div>
         <form class="auth-form" id="authForm">
           <div class="auth-input-group">
-            <label>Username</label>
-            <input type="text" id="authUsername" autocomplete="username" required autofocus />
+            <label>${d.lblUsername || "Username"}</label>
+            <input type="text" id="authUsername" autocomplete="username" style="${formDir}" required autofocus />
           </div>
           <div class="auth-input-group">
-            <label>Password</label>
-            <input type="password" id="authPassword" autocomplete="current-password" required />
+            <label>${d.lblPassword || "Password"}</label>
+            <input type="password" id="authPassword" autocomplete="current-password" style="${formDir}" required />
           </div>
           <div class="auth-error" id="authError"></div>
-          <button type="submit" class="btn-login" id="authSubmitBtn">Sign In</button>
+          <button type="submit" class="btn-login" id="authSubmitBtn">${d.btnSignIn || "Sign In"}</button>
         </form>
       </div>
     `;
 
     document.body.appendChild(overlay);
-
     requestAnimationFrame(() => overlay.classList.add('show'));
 
     const closeModal = () => {
@@ -980,7 +981,7 @@ const HomePage = (function () {
 
       errDiv.textContent = "";
       submitBtn.disabled = true;
-      submitBtn.innerHTML = "Authenticating...";
+      submitBtn.innerHTML = d.btnAuthenticating || "Authenticating...";
 
       try {
         await ResourceService.login(user, pass);
@@ -989,7 +990,7 @@ const HomePage = (function () {
       } catch (err) {
         errDiv.textContent = err.message;
         submitBtn.disabled = false;
-        submitBtn.innerHTML = "Sign In";
+        submitBtn.innerHTML = d.btnSignIn || "Sign In";
 
         if (err.message.includes("Too many")) {
           document.getElementById('authUsername').disabled = true;

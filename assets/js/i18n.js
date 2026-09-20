@@ -2,7 +2,6 @@
    i18n.js — Shared Internationalization & Language System
    Skill: UI UX Pro Max — Multi-language Engine & Dropdown Controller
    ═══════════════════════════════════════════════════════════════ */
-
 const i18n = {
     en: {
         dir: "ltr",
@@ -49,6 +48,10 @@ const i18n = {
         folder: "Folder",
         file: "File",
         updated: "Updated",
+        refresh: "Refresh",
+        unavailable: "Unavailable",
+        emptyFolder: "Empty",
+        offline: "Offline",
 
         // Latest Releases & Quick Access
         latestReleases: "Latest Releases",
@@ -112,6 +115,22 @@ const i18n = {
         sortNameDesc: "Name (Z-A)",
         sortOldest: "Oldest First",
         sortSize: "Largest First",
+
+        // ── NEW: Auth & 404 Messages ──
+        authRequired: "Authentication Required",
+        authRequiredDesc: "Access to the PVM release infrastructure requires clearance.",
+        btnAuth: "Authenticate to Access",
+        clearanceReq: "Clearance Required",
+        lblUsername: "Username",
+        lblPassword: "Password",
+        btnSignIn: "Sign In",
+        btnAuthenticating: "Authenticating...",
+        btnSignOut: "Sign Out / Lock",
+        error404Title: "Directory Not Found",
+        error404Desc: "The requested path does not exist on CloudAvid infrastructure or you lack permission.",
+        btnBackPortal: "Back to Downloads",
+        errorServerLoad: "Failed to load directory.",
+        errorServerSub: "Network or server error."
     },
 
     fa: {
@@ -159,6 +178,10 @@ const i18n = {
         folder: "پوشه",
         file: "فایل",
         updated: "به‌روزرسانی شد",
+        refresh: "بروزرسانی",
+        unavailable: "در دسترس نیست",
+        emptyFolder: "خالی",
+        offline: "آفلاین",
 
         // Latest Releases & Quick Access
         latestReleases: "آخرین انتشارها",
@@ -222,6 +245,22 @@ const i18n = {
         sortNameDesc: "نام (ی - الف)",
         sortOldest: "قدیمی‌ترین",
         sortSize: "بیشترین حجم",
+
+        // ── NEW: Auth & 404 Messages ──
+        authRequired: "نیاز به احراز هویت",
+        authRequiredDesc: "دسترسی به زیرساخت ریلیزها مستلزم تایید هویت است.",
+        btnAuth: "تایید هویت و ورود",
+        clearanceReq: "تاییدیه امنیتی نیاز است",
+        lblUsername: "نام کاربری",
+        lblPassword: "کلمه عبور",
+        btnSignIn: "ورود به سیستم",
+        btnAuthenticating: "در حال ورود...",
+        btnSignOut: "خروج / قفل",
+        error404Title: "مسیر یافت نشد",
+        error404Desc: "مسیر درخواستی در زیرساخت کلود آوید وجود ندارد یا سطح دسترسی شما کافی نیست.",
+        btnBackPortal: "بازگشت به مرکز دانلود",
+        errorServerLoad: "خطا در بارگذاری مسیر.",
+        errorServerSub: "ارتباط با سرور قطع شده است."
     }
 };
 
