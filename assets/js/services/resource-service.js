@@ -185,6 +185,27 @@ const ResourceService = (function () {
         return { browsePath: os || "", items: [] };
     }
 
+    // --- Auth API ---
+    async function checkAuthStatus() {
+        const res = await fetch("/api/auth/status", { cache: "no-store" });
+        return res.json();
+    }
+
+    async function login(username, password) {
+        const res = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Authentication failed");
+        return data;
+    }
+
+    async function logout() {
+        await fetch("/api/auth/logout", { method: "POST" });
+    }
+
     return {
         getResources,
         getRegistry,
@@ -195,6 +216,9 @@ const ResourceService = (function () {
         browseHref,
         downloadHref,
         encodeRelPath,
-        inferIcon
+        inferIcon,
+        checkAuthStatus,
+        login,
+        logout
     };
 })();
