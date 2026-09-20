@@ -88,7 +88,7 @@ const HomePage = (function () {
       </section>
     `;
   }
-  
+
   /* ═══════════════════════════════════════════════
      SECTION: INFRASTRUCTURE RESOURCES
      ═══════════════════════════════════════════════ */
@@ -933,7 +933,7 @@ const HomePage = (function () {
   /* ═══════════════════════════════════════════════
      AUTHENTICATION MODAL
      ═══════════════════════════════════════════════ */
-  function showLoginModal() {
+  function showLoginModal(onSuccessCallback) {
     const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
     if (document.getElementById('authOverlay')) return;
 
@@ -992,6 +992,11 @@ const HomePage = (function () {
         await ResourceService.login(user, pass);
         closeModal();
         loadReleasesTable();
+        if (typeof onSuccessCallback === "function") {
+          onSuccessCallback();
+        } else {
+          if (typeof loadReleasesTable === "function") loadReleasesTable();
+        }
       } catch (err) {
         errDiv.textContent = err.message;
         submitBtn.disabled = false;
@@ -1002,7 +1007,9 @@ const HomePage = (function () {
           document.getElementById('authPassword').disabled = true;
         }
       }
+
     });
+    window.triggerAuthModal = showLoginModal;
   }
 
   /* ═══════════════════════════════════════════════

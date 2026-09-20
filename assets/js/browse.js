@@ -200,19 +200,53 @@ const BrowsePage = (function () {
             console.error("[BrowsePage] Fetch Error:", err);
             const container = document.getElementById("tableContainer");
             const controls = document.getElementById("browseControls");
+            const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
 
             if (!container) return;
-
             if (controls) controls.style.display = "none";
 
-            // ▶ Architecture: In-Page 404 State (i18n applied)
+            // ▶ Architecture: 401 Unauthorized State (Auth Required)
+            if (err.status === 401 || err.code === "AUTH_REQUIRED") {
+                container.innerHTML = `
+                  <div class="locked-state" style="padding: 64px 24px; text-align: center; border: 1px solid var(--border); border-radius: var(--radius-panels); background: var(--bg-card);">
+                    <div class="locked-icon" style="margin: 0 auto 16px;">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <div class="locked-title" style="font-size: 18px; font-weight: 600; margin-bottom: 6px;">
+                      ${d.authRequired || "Authentication Required"}
+                    </div>
+                    <div class="locked-desc" style="font-size: 13px; color: var(--text-4); max-width: 400px; margin: 0 auto 24px;">
+                      ${d.authRequiredDesc || "Access to this infrastructure path requires clearance."}
+                    </div>
+                    <button class="btn btn-primary" id="browseAuthBtn" style="margin: 0 auto;">
+                      ${d.btnAuth || "Authenticate to Access"}
+                    </button>
+                  </div>
+                `;
+
+                const btn = document.getElementById("browseAuthBtn");
+                if (btn) {
+                    btn.addEventListener("click", () => {
+                        if (typeof HomePage !== "undefined" && typeof HomePage.showLoginModal === "function") {
+                            HomePage.showLoginModal(fetchList);
+                        } else if (typeof window.triggerAuthModal === "function") {
+                            window.triggerAuthModal(fetchList);
+                        } else {
+                            Router.navigate("/");
+                        }
+                    });
+                }
+                return;
+            }
+
+            // ▶ Architecture: In-Page 404 State
             if (err.status === 404 || err.code === "NOT_FOUND") {
                 container.innerHTML = `
                   <div class="resources-error" style="flex-direction: column; padding: 64px 24px; text-align: center; border: 1px dashed var(--border); border-radius: var(--radius-panels); background: var(--bg-card);">
                     <div style="font-size: 48px; font-weight: 900; color: var(--danger); font-family: var(--mono); margin-bottom: 8px;">404</div>
                     <div style="font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 6px;">${d.error404Title || "Directory Not Found"}</div>
                     <div style="font-size: 13px; color: var(--text-4); max-width: 400px; margin: 0 auto 24px;">
-                      ${d.error404Desc || "The requested path does not exist on CloudAvid infrastructure or you lack permission."}
+                      ${d.error404Desc || "The requested path does not exist on CloudAvid infrastructure."}
                       <br><code class="mono" style="display:inline-block; margin-top:8px; color:var(--text-accent); padding:2px 6px; background:var(--glow); border-radius:4px;">${escapeHtml(relPath)}</code>
                     </div>
                     <a href="/" class="btn btn-primary" style="text-decoration:none; margin: 0 auto;">${d.btnBackPortal || "Back to Downloads"}</a>
@@ -221,9 +255,9 @@ const BrowsePage = (function () {
                 return;
             }
 
-            // ▶ Generic Server Error State (i18n applied)
+            // ▶ Generic Server Error State
             container.innerHTML = `
-              <div class="resources-error" style="padding: 32px; border-radius: var(--radius-cards);">
+              <div class="resources-error" style="padding: 32px; border-radius: var(--radius-card);">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:left;">
                     <span style="font-weight:600; color:var(--text);">${d.errorServerLoad || "Failed to load directory."}</span>
