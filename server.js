@@ -466,9 +466,12 @@ const server = http.createServer(async (req, res) => {
             const rel = pathname === "/api/files"
                 ? (url.searchParams.get("path") || "")
                 : relFromPrefix(pathname, "/api/files");
+
             const entries = await filesService.listPath(PROJECT_ROOT, rel);
-            sendJSON(res, 200, entries);
-            log("GET", 200, pathname, `${entries.length} items · ${Date.now() - start}ms`);
+            const list = Array.isArray(entries) ? entries : [];
+
+            sendJSON(res, 200, list);
+            log("GET", 200, pathname, `${list.length} items · ${Date.now() - start}ms`);
             return;
         }
 
