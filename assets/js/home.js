@@ -159,7 +159,6 @@ const HomePage = (function () {
  * @param   {object} d  Dictionary object for i18n.
  * @returns {string}    HTML template string.
  */
-
   /* ═══════════════════════════════════════════════
      SECTION: BOTTOM PANELS (Latest Releases + Quick Access)
      ═══════════════════════════════════════════════ */
@@ -169,8 +168,8 @@ const HomePage = (function () {
         
         <!-- 1. Left Panel: Latest Releases -->
         <div class="panel">
-          <div class="panel-head" style="flex-wrap: wrap; gap: 12px;">
-            <div class="panel-head-left" style="flex: 1; min-width: 200px;">
+          <div class="panel-head">
+            <div class="panel-head-left">
               <div class="panel-icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff8964" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               </div>
@@ -179,20 +178,23 @@ const HomePage = (function () {
                 <div class="panel-sub">${d.latestSub || "Recently published packages and updates."}</div>
               </div>
             </div>
-            
-            <div id="releaseAuthAction" style="display: flex; align-items: center; gap: 8px;"></div>
 
-            <!-- OS Selection Tabs -->
-            <div class="view-toggle" id="osTabs">
-              <button class="vt-btn active" data-os="el9" type="button" style="width:auto; padding:0 12px; font-size:11px; font-weight:600; font-family:var(--mono);">EL9</button>
-              <button class="vt-btn" data-os="el8" type="button" style="width:auto; padding:0 12px; font-size:11px; font-weight:600; font-family:var(--mono);">EL8</button>
+            <!-- Controls Group (Auth info, OS Tabs, View all) -->
+            <div class="panel-head-controls">
+              <div id="releaseAuthAction" style="display: flex; align-items: center; gap: 8px;"></div>
+
+              <!-- OS Selection Tabs (Using .os-tabs class) -->
+              <div class="os-tabs" id="osTabs">
+                <button class="vt-btn active" data-os="el9" type="button">EL9</button>
+                <button class="vt-btn" data-os="el8" type="button">EL8</button>
+              </div>
+
+              <!-- View All Link -->
+              <a class="panel-link" id="viewAllReleases" href="#" style="display:none;">${d.viewAll || "View all"} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
             </div>
-
-            <!-- View All Link (Initially hidden, shown via JS if authorized) -->
-            <a class="panel-link" id="viewAllReleases" href="#" style="display:none;">${d.viewAll || "View all"} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
           </div>
 
-          <!-- Dynamic Container: JS will inject EITHER the Lock Box OR the Full Table here -->
+          <!-- Dynamic Container -->
           <div id="releasesContainer" style="overflow-x:auto;">
             <div style="padding: 32px; text-align: center; color: var(--text-4); font-family: var(--mono); font-size: 11px;">
               ${d.scanning || "Loading…"}
@@ -219,7 +221,7 @@ const HomePage = (function () {
       </section>
     `;
   }
-
+  
   /* ═══════════════════════════════════════════════
      SECTION: SEARCH RESULTS PANEL
      ═══════════════════════════════════════════════ */
