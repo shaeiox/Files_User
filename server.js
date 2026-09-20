@@ -12,6 +12,7 @@ const { loadEnv } = require("./lib/load-env");
 loadEnv(PROJECT_ROOT);
 
 const filesService = require("./lib/files-service");
+const authService = require("./lib/auth-service");
 
 const HOST = "0.0.0.0";
 const PORT = process.env.PORT || 3000;
@@ -101,6 +102,47 @@ function sendServiceError(res, err) {
         error: err.message || "Unexpected error",
         code: err.code || "INTERNAL",
     });
+}
+
+/**
+ * @brief   Reads a JSON body from the request stream with size limit.
+ * @param   {http.IncomingMessage} req
+ * @param   {number} [maxBytes=8192]  Maximum accepted body size.
+ * @returns {Promise<object>}
+ */
+function readJsonBody(req, maxBytes = 8192) {
+    return new Promise((resolve, reject) => {
+        const chunks = [];
+        let size = 0;
+        req.on('data', (chunk) => {
+            size += chunk.length;
+            if (size > maxBytes) {
+                req.destroy();
+                reject(new Error('Payload too large'));
+                return;
+            }
+            chunks.push(chunk);
+        });
+        req.on('end', () => {
+            try {
+                const raw = Buffer.concat(chunks).toString('utf8').trim();
+                resolve(raw ? JSON.parse(raw) : {});
+            } catch {
+                reject(new Error('Invalid JSON body'));
+            }
+        });
+        req.on('error', reject);
+    });
+}
+
+/**
+ * @brief   Determines whether the current connection is HTTPS.
+ * @param   {http.IncomingMessage} req
+ * @returns {boolean}
+ */
+function isSecureRequest(req) {
+    return req.socket && req.socket.encrypted === true
+        || String(req.headers['x-forwarded-proto'] || '').toLowerCase() === 'https';
 }
 
 function securityHeaders(res) {
@@ -223,24 +265,122 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "OPTIONS") {
         res.writeHead(204, {
             "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
             "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Credentials": "true",
             "Access-Control-Max-Age": "86400",
         });
         res.end();
         return;
     }
 
-    if (req.method !== "GET" && req.method !== "HEAD") {
+    const isAuthEndpoint = pathname.startsWith("/api/auth/");
+    if (req.method !== "GET" && req.method !== "HEAD" && !(isAuthEndpoint && req.method === "POST")) {
         sendText(res, 405, "Method Not Allowed");
         return;
     }
 
-    const blocked = pathname === "/.env" || pathname.startsWith("/lib/") || pathname.startsWith("/node_modules/");
+    const blocked = pathname === "/.env" || pathname.startsWith("/lib/") || pathname.startsWith("/data/") || pathname.startsWith("/node_modules/");
     if (blocked) {
         sendText(res, 403, "Forbidden");
         log(req.method, 403, pathname);
         return;
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // AUTH ENDPOINTS
+    // ═══════════════════════════════════════════════════════
+
+    // GET /api/auth/status → { enabled, authenticated, user?, expiresIn? }
+    if (pathname === "/api/auth/status") {
+        const enabled = authService.isAuthEnabled();
+        if (!enabled) {
+            sendJSON(res, 200, { enabled: false, authenticated: true });
+            log("GET", 200, pathname, `disabled · ${Date.now() - start}ms`);
+            return;
+        }
+        const session = authService.verifySession(req);
+        sendJSON(res, 200, {
+            enabled: true,
+            authenticated: session.ok,
+            user: session.ok ? session.user : null,
+            reason: session.ok ? null : session.reason,
+        });
+        log("GET", 200, pathname, `auth:${session.ok} · ${Date.now() - start}ms`);
+        return;
+    }
+
+    // POST /api/auth/login
+    if (pathname === "/api/auth/login" && req.method === "POST") {
+        if (!authService.isAuthEnabled()) {
+            sendJSON(res, 403, { error: "Authentication is disabled", code: "AUTH_DISABLED" });
+            log("POST", 403, pathname);
+            return;
+        }
+        let body;
+        try { body = await readJsonBody(req); }
+        catch { sendJSON(res, 400, { error: "Invalid body", code: "BAD_BODY" }); return; }
+
+        const { username, password } = body || {};
+        if (!username || !password) {
+            sendJSON(res, 400, { error: "Missing credentials", code: "MISSING_FIELDS" });
+            return;
+        }
+
+        const result = await authService.login(PROJECT_ROOT, username, password);
+        if (!result.ok) {
+            const status = result.reason === "LOCKED_OUT" ? 429 : 401;
+            sendJSON(res, status, {
+                error: result.reason === "LOCKED_OUT"
+                    ? "Too many failed attempts. Please try again later."
+                    : "Invalid username or password.",
+                code: result.reason,
+                retryAfterMs: result.retryAfterMs,
+            });
+            log("POST", status, pathname, `${username} · ${result.reason}`);
+            return;
+        }
+
+        const cookie = authService.makeSessionCookieHeader(
+            result.token, result.ttlSec, isSecureRequest(req)
+        );
+        sendJSON(res, 200, {
+            ok: true,
+            user: result.user,
+            expiresIn: result.ttlSec,
+        }, { "Set-Cookie": cookie });
+        log("POST", 200, pathname, `login:${username}`);
+        return;
+    }
+
+    // POST /api/auth/logout
+    if (pathname === "/api/auth/logout" && req.method === "POST") {
+        const cookie = authService.makeClearCookieHeader();
+        sendJSON(res, 200, { ok: true }, { "Set-Cookie": cookie });
+        log("POST", 200, pathname);
+        return;
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // AUTH GATE — protects RELEASE_PVM routes
+    // ═══════════════════════════════════════════════════════
+    if (authService.pathRequiresAuth(pathname, PROJECT_ROOT)) {
+        const session = authService.verifySession(req);
+        if (!session.ok) {
+            sendJSON(res, 401, {
+                error: "Authentication required to access release resources.",
+                code: "AUTH_REQUIRED",
+                reason: session.reason,
+            });
+            log(req.method, 401, pathname, `blocked · ${session.reason}`);
+            return;
+        }
+        // Sliding session: renew cookie on activity
+        const renewed = authService.renewSession(session.user);
+        res.setHeader("Set-Cookie", authService.makeSessionCookieHeader(
+            renewed.token, renewed.ttlSec, isSecureRequest(req)
+        ));
     }
 
     try {
