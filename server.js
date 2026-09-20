@@ -218,6 +218,19 @@ function serveSPA(res) {
     });
 }
 
+function serve404(res) {
+    const notFoundPath = path.join(ROOT, "404.html");
+    fs.readFile(notFoundPath, (err, data) => {
+        securityHeaders(res);
+        if (err) {
+            sendText(res, 404, "404 — Page Not Found");
+            return;
+        }
+        res.writeHead(404, { "Content-Type": "text/html; charset=utf-8" });
+        res.end(data);
+    });
+}
+
 function serveStatic(reqPath, res) {
     const safe = path.normalize(reqPath).replace(/^(\.\.[/\\])+/, "");
     const fp = path.join(ROOT, safe === "/" || safe === "" ? "index.html" : safe);
@@ -231,18 +244,12 @@ function serveStatic(reqPath, res) {
     fs.readFile(fp, (err, data) => {
         if (err) {
             if ([".png", ".jpg", ".jpeg", ".webp", ".ico", ".svg"].includes(ext)) {
-                const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3" opacity="0.3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`;
+                // SVG Placeholder
                 res.writeHead(200, { "Content-Type": "image/svg+xml" });
                 res.end(svg);
                 return;
             }
-
-            if (!ext || ext === ".html") {
-                serveSPA(res);
-                return;
-            }
-
-            sendText(res, 404, `404 — ${reqPath}`);
+            serve404(res);
             return;
         }
 
@@ -499,6 +506,13 @@ const server = http.createServer(async (req, res) => {
             }
             serveSPA(res);
             log("GET", 200, pathname, `SPA · ${Date.now() - start}ms`);
+            return;
+        }
+
+        // Optional: explicit /404
+        if (pathname === "/404" || pathname === "/404.html") {
+            serve404(res);
+            log("GET", 404, pathname, `not-found-page · ${Date.now() - start}ms`);
             return;
         }
 

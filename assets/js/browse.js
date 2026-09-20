@@ -1,32 +1,64 @@
-/* ═══════════════════════════════════════════════════════════════
-   browse.js — Enterprise File Browser Renderer
-   Skill: UI UX Pro Max — Data Pipeline (Search + Filter + Sort)
-   
-   Responsibilities:
-   - Render directory contents (Grid / List)
-   - Handle Breadcrumb navigation
-   - Unified Data Pipeline: Local Search + Type Filter + Sort
-   - Custom Dropdowns with Click-Outside handling
-   - Skeleton Loaders & Empty States
-   ═══════════════════════════════════════════════════════════════ */
+/**
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * @file        browse.js
+ * @module      BrowsePage
+ * @brief       Enterprise File Browser Renderer for CloudAvid File Portal.
+ *
+ * @description
+ * Handles the rendering, navigation, and data manipulation for the file browser
+ * interface. This module operates as a Single Page Application (SPA) component.
+ *
+ * Key Responsibilities:
+ *   - Fetches directory contents via `ResourceService`.
+ *   - Manages an in-memory Data Pipeline: Search -> Filter -> Sort -> Render.
+ *   - Handles in-page 404 error states without redirecting to a hard 404 page.
+ *   - Renders Breadcrumbs for hierarchical navigation.
+ *   - Supports Grid and List views with `localStorage` persistence.
+ *
+ * Dependencies:
+ *   - ResourceService (resource-service.js)
+ *   - getDict(), getLang() (from i18n/theme engine)
+ *
+ * @author      ShaiyaAzizi
+ * @version     2.1.0
+ * ═══════════════════════════════════════════════════════════════════════════════
+ */
 
 const BrowsePage = (function () {
     'use strict';
 
-    /* ── Internal State ── */
-    let allFiles = [];         // Raw fetched directory contents
-    let currentPath = "/";
-    let activeType = "all";    // 'all' | 'directory' | 'file'
-    let activeSort = "name-asc"; // 'name-asc' | 'name-desc' | 'date-desc' | 'size-desc'
-    let searchQuery = "";      // Local search query
+    /* ─────────────────────────────────────────────────────────────────────────────
+     * INTERNAL STATE
+     * ───────────────────────────────────────────────────────────────────────────── */
 
-    /* ═══════════════════════════════════════════════
-       MAIN RENDERER
-       ═══════════════════════════════════════════════ */
+    /** @type {Array} Raw directory contents fetched from the API */
+    let allFiles = [];
+
+    /** @type {string} Current absolute path within the SPA */
+    let currentPath = "/";
+
+    /** @type {string} Active item type filter ('all' | 'directory' | 'file') */
+    let activeType = "all";
+
+    /** @type {string} Active sorting strategy ('name-asc' | 'date-desc' etc.) */
+    let activeSort = "name-asc";
+
+    /** @type {string} Current local search query (case-insensitive) */
+    let searchQuery = "";
+
+    /* ═══════════════════════════════════════════════════════════════════════════════
+     * MAIN RENDERER
+     * ═══════════════════════════════════════════════════════════════════════════════ */
+
+    /**
+     * @brief   Initializes and renders the Browse page shell.
+     * @param   {HTMLElement} container  The DOM element to render into.
+     * @param   {string} path            The requested browse path (e.g. "/browse/el9").
+     */
     function render(container, path) {
         const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
 
-        // Reset state for new path
+        // 1. Reset state for the new path navigation
         currentPath = path.endsWith("/") ? path : path + "/";
         if (!currentPath.startsWith("/browse")) {
             currentPath = "/browse/";
@@ -37,6 +69,7 @@ const BrowsePage = (function () {
 
         document.title = d.browseTitle || "Downloads • CloudAvid";
 
+        // 2. Inject Page Shell (Headers, Controls, Table Shell)
         container.innerHTML = `
       <div class="browse-layout anim-fade-up">
 
@@ -61,7 +94,7 @@ const BrowsePage = (function () {
               </div>
             </div>
 
-            <div class="browse-controls">
+            <div class="browse-controls" id="browseControls">
               <!-- Local Search -->
               <div class="input-wrap browse-search">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -124,19 +157,29 @@ const BrowsePage = (function () {
       </div>
     `;
 
+        // 3. Initialize components
         buildCrumbs();
         bindEvents();
         renderSkeletons();
         fetchList();
     }
 
-    /* ═══════════════════════════════════════════════
-       DATA FETCHING
-       ═══════════════════════════════════════════════ */
+    /* ═══════════════════════════════════════════════════════════════════════════════
+     * DATA FETCHING & ERROR HANDLING
+     * ═══════════════════════════════════════════════════════════════════════════════ */
+
+    /**
+     * @brief   Fetches directory contents and delegates to the data pipeline.
+     * @details Implements intelligent 404 handling. If the requested directory
+     *          doesn't exist, it transforms the table into an in-page 404 state.
+     */
     async function fetchList() {
         const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
+        const relPath = currentPath.replace(/^\/browse\/?/, "");
+
         try {
-            const relPath = currentPath.replace(/^\/browse\/?/, "");
+            if (typeof ResourceService === 'undefined') throw new Error("ResourceService missing");
+
             const data = await ResourceService.listFiles(relPath);
             if (!Array.isArray(data)) throw new Error("Bad JSON");
 
@@ -151,33 +194,68 @@ const BrowsePage = (function () {
                     modified: x.mtime || x.modified || x.time || 0
                 }));
 
-            // Initial render
             applyFiltersAndRender();
 
-        } catch (e) {
-            console.error(e);
-            showEmpty(`<strong>${d.loadErrTitle || "Failed to load"}</strong><div style="margin-top:8px">${d.loadErrHint || "Check API endpoint."}</div>`, true);
+        } catch (err) {
+            console.error("[BrowsePage] Fetch Error:", err);
+            const container = document.getElementById("tableContainer");
+            const controls = document.getElementById("browseControls");
+
+            if (!container) return;
+
+            // Hide filters/search since there's no data to manipulate
+            if (controls) controls.style.display = "none";
+
+            // ▶ Architecture: In-Page 404 State
+            if (err.status === 404 || err.code === "NOT_FOUND") {
+                container.innerHTML = `
+                  <div class="resources-error" style="flex-direction: column; padding: 64px 24px; text-align: center; border: 1px dashed var(--border); border-radius: var(--radius-panels); background: var(--bg-card);">
+                    <div style="font-size: 48px; font-weight: 900; color: var(--danger); font-family: var(--mono); margin-bottom: 8px;">404</div>
+                    <div style="font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 6px;">Directory Not Found</div>
+                    <div style="font-size: 13px; color: var(--text-4); max-width: 400px; margin: 0 auto 24px;">
+                      The requested path <code class="mono" style="color:var(--text-accent); padding:2px 6px; background:var(--glow); border-radius:4px;">${escapeHtml(relPath)}</code> does not exist on CloudAvid infrastructure or you lack permission.
+                    </div>
+                    <a href="/" class="btn btn-primary" style="text-decoration:none; margin: 0 auto;">Back to Downloads</a>
+                  </div>
+                `;
+                return;
+            }
+
+            // ▶ Generic Server Error State
+            container.innerHTML = `
+              <div class="resources-error" style="padding: 32px; border-radius: var(--radius-cards);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:left;">
+                    <span style="font-weight:600; color:var(--text);">Failed to load directory.</span>
+                    <span style="font-size:12px; color:var(--text-4); margin-top:4px;">${escapeHtml(err.message || "Network or server error.")}</span>
+                </div>
+              </div>
+            `;
         }
     }
 
-    /* ═══════════════════════════════════════════════
-       DATA PIPELINE (Filter -> Search -> Sort -> Render)
-       ═══════════════════════════════════════════════ */
+    /* ═══════════════════════════════════════════════════════════════════════════════
+     * DATA PIPELINE (Filter -> Search -> Sort -> Render)
+     * ═══════════════════════════════════════════════════════════════════════════════ */
+
+    /**
+     * @brief   Applies current state constraints to the raw data and triggers render.
+     */
     function applyFiltersAndRender() {
         const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
         let filtered = [...allFiles];
 
-        // 1. Apply Search Query
+        // 1. Local Search Filter
         if (searchQuery) {
             filtered = filtered.filter(f => f.name.toLowerCase().includes(searchQuery));
         }
 
-        // 2. Apply Type Filter
+        // 2. Type Filter
         if (activeType !== "all") {
             filtered = filtered.filter(f => f.type === activeType);
         }
 
-        // Update counts visually (based on un-searched but type-filtered data)
+        // 3. Visual Stats Update (Counts absolute available files, ignoring search)
         const dirsCount = allFiles.filter(f => f.type === "directory").length;
         const filesCount = allFiles.filter(f => f.type === "file").length;
         const fcEl = document.getElementById("folderCount");
@@ -185,12 +263,12 @@ const BrowsePage = (function () {
         if (fcEl) fcEl.textContent = dirsCount;
         if (flcEl) flcEl.textContent = filesCount;
 
-        // 3. Apply Sorting (Directories ALWAYS first, then sort logic)
+        // 4. Sorting Strategy
         filtered.sort((a, b) => {
             const isDirA = a.type === "directory" ? 1 : 0;
             const isDirB = b.type === "directory" ? 1 : 0;
 
-            // Directories always bubble to the top
+            // Folders always bubble to the top regardless of sort order
             if (isDirA !== isDirB) return isDirB - isDirA;
 
             if (activeSort === "name-asc") {
@@ -202,12 +280,11 @@ const BrowsePage = (function () {
             } else if (activeSort === "date-desc") {
                 const tA = new Date(a.modified).getTime();
                 const tB = new Date(b.modified).getTime();
-                return tB - tA;
+                return tB - tA; // Newest first
             } else if (activeSort === "date-asc") {
-                // Oldest First
                 const tA = new Date(a.modified).getTime() || 0;
                 const tB = new Date(b.modified).getTime() || 0;
-                return tA - tB;
+                return tA - tB; // Oldest first
             }
             return 0;
         });
@@ -215,6 +292,11 @@ const BrowsePage = (function () {
         renderFilesList(filtered, d);
     }
 
+    /**
+     * @brief   Renders the processed array into DOM rows.
+     * @param   {Array} files  The filtered & sorted array.
+     * @param   {object} d     i18n dictionary.
+     */
     function renderFilesList(files, d) {
         const lang = typeof window.getLang === 'function' ? window.getLang() : getLang();
         const rowsEl = document.getElementById("rows");
@@ -227,15 +309,18 @@ const BrowsePage = (function () {
         }
 
         hideEmpty();
+
+        // Use DocumentFragment to minimize DOM reflows
         const frag = document.createDocumentFragment();
 
         files.forEach((f, idx) => {
             const href = f.type === "directory"
                 ? ResourceService.browseHref(f.relPath)
                 : ResourceService.downloadHref(f.relPath);
+
             const row = document.createElement("div");
             row.className = "trow anim-fade-up";
-            row.style.animationDelay = Math.min(idx * 15, 300) + "ms";
+            row.style.animationDelay = Math.min(idx * 15, 300) + "ms"; // Staggered entry
 
             const linkAttr = f.type === "directory" ? `href="${href}"` : `href="${href}" data-file="true"`;
             const iconStr = f.type === "directory" ? 'f-icon-dir' : 'f-icon-file';
@@ -244,7 +329,7 @@ const BrowsePage = (function () {
 
             row.innerHTML = `
                 <div class="f-icon ${iconStr}">${svgIcon(f.type)}</div>
-                <div class="f-name"><a class="f-link" ${linkAttr} title="${f.name}">${f.name}</a></div>
+                <div class="f-name"><a class="f-link" ${linkAttr} title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</a></div>
                 <div><span class="badge ${badgeStr}">${badgeLabel}</span></div>
                 <div class="f-sub">${fmtDate(f.modified, lang)}</div>
                 <div class="f-sub">${f.type === 'directory' ? '—' : humanSize(f.size, lang)}</div>
@@ -255,12 +340,11 @@ const BrowsePage = (function () {
         rowsEl.appendChild(frag);
     }
 
-    /* ═══════════════════════════════════════════════
-       EVENT BINDINGS
-       ═══════════════════════════════════════════════ */
-    function bindEvents() {
-        const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
+    /* ═══════════════════════════════════════════════════════════════════════════════
+     * EVENT BINDINGS
+     * ═══════════════════════════════════════════════════════════════════════════════ */
 
+    function bindEvents() {
         // 1. Search Input Binding
         const searchInput = document.getElementById("localSearchInput");
         if (searchInput) {
@@ -270,7 +354,7 @@ const BrowsePage = (function () {
             });
         }
 
-        // 2. Custom Dropdowns Binding
+        // 2. Custom Dropdowns Binding (Filter & Sort)
         const filterWraps = document.querySelectorAll(".filter-dropdown-wrap");
         filterWraps.forEach(wrap => {
             const pill = wrap.querySelector(".filter-pill");
@@ -279,6 +363,7 @@ const BrowsePage = (function () {
 
             pill.addEventListener("click", (e) => {
                 e.stopPropagation();
+                // Close others
                 filterWraps.forEach(w => { if (w !== wrap) w.classList.remove("show"); });
                 wrap.classList.toggle("show");
             });
@@ -307,7 +392,7 @@ const BrowsePage = (function () {
             filterWraps.forEach(w => w.classList.remove("show"));
         });
 
-        // 3. View Toggles Binding
+        // 3. View Toggles Binding (Grid vs List)
         const listBtn = document.getElementById("viewList");
         const gridBtn = document.getElementById("viewGrid");
         const tableEl = document.getElementById("tableContainer");
@@ -327,16 +412,20 @@ const BrowsePage = (function () {
                 try { localStorage.setItem("view_mode", "grid"); } catch { }
             });
 
-            // Restore preference
+            // Restore preference from LocalStorage
             try {
                 if (localStorage.getItem("view_mode") === "grid") gridBtn.click();
             } catch { }
         }
     }
 
-    /* ═══════════════════════════════════════════════
-       HELPERS & UI COMPONENTS
-       ═══════════════════════════════════════════════ */
+    /* ═══════════════════════════════════════════════════════════════════════════════
+     * HELPERS & UI COMPONENTS
+     * ═══════════════════════════════════════════════════════════════════════════════ */
+
+    /**
+     * @brief Dynamically constructs the breadcrumb navigation based on `currentPath`.
+     */
     function buildCrumbs() {
         const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
         const el = document.getElementById("breadcrumb");
@@ -356,6 +445,7 @@ const BrowsePage = (function () {
             acc = acc ? acc + "/" + part : part;
             const sep = document.createElement("span");
             sep.className = "crumb-sep";
+            // RTL-aware chevron
             sep.innerHTML = d.dir === "rtl"
                 ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`
                 : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
@@ -374,8 +464,18 @@ const BrowsePage = (function () {
                 el.appendChild(link);
             }
         });
+
         const fn = document.getElementById("folderName");
         if (fn) fn.textContent = parts.length ? decodeURIComponent(parts[parts.length - 1]) : (d.root || "Home");
+    }
+
+    /**
+     * @brief Sanitizes strings to prevent XSS when setting innerHTML.
+     */
+    function escapeHtml(str) {
+        return String(str || "").replace(/[&<>'"]/g, tag => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        }[tag]));
     }
 
     function isHidden(n) {
@@ -440,7 +540,7 @@ const BrowsePage = (function () {
                 ? `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
                 : `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"/><line x1="9" y1="14" x2="15" y2="14"/></svg>`}
       </div>
-      <div class="empty-text">${msg}</div>`;
+      <div class="empty-text">${escapeHtml(msg)}</div>`;
     }
 
     function hideEmpty() {

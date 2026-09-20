@@ -99,11 +99,17 @@ const ResourceService = (function () {
     }
 
     async function parseError(res) {
+        const err = new Error();
+        err.status = res.status;
         try {
             const body = await res.json();
-            if (body && body.error) return body.error;
-        } catch { }
-        return "HTTP " + res.status;
+            err.message = body.error || ("HTTP " + res.status);
+            err.code = body.code || null;
+        } catch {
+            err.message = "HTTP " + res.status;
+            err.code = null;
+        }
+        return err;
     }
 
     async function getResources(options = {}) {

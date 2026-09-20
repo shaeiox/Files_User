@@ -20,10 +20,55 @@ const Router = (function () {
     function navigate(path, pushState = true) {
         const route = resolveRoute(path);
 
-        // Fallback for external or unknown routes
-        if (!route) {
-            window.location.href = path;
-            return;
+        function resolveRoute(path) {
+            if (path === "/" || path === "/index.html") return "home";
+            if (path === "/browse" || path.startsWith("/browse/")) return "browse";
+            if (path === "/404" || path === "/404.html") return "notfound";
+            return null;
+        }
+
+        function navigate(path, pushState = true) {
+            const route = resolveRoute(path);
+
+            // Unknown client route → one-shot full navigation to real 404 page (no loop)
+            if (!route) {
+                if (path !== "/404.html" && path !== "/404") {
+                    window.location.replace("/404.html"); // replace = no back-button trap
+                }
+                return;
+            }
+
+            currentPath = path;
+            if (pushState) {
+                history.pushState({ path }, "", path);
+            }
+
+            app.style.opacity = "0";
+            app.style.transform = "translateY(8px)";
+
+            setTimeout(() => {
+                if (route === "home") {
+                    HomePage.render(app);
+                } else if (route === "browse") {
+                    BrowsePage.render(app, path);
+                } else if (route === "notfound") {
+                    // Hard page is preferred; if landed here via SPA, bounce once
+                    window.location.replace("/404.html");
+                    return;
+                }
+
+                if (typeof applyLang === "function") {
+                    applyLang(getLang());
+                }
+
+                requestAnimationFrame(() => {
+                    app.style.transition = "opacity 250ms ease, transform 250ms ease";
+                    app.style.opacity = "1";
+                    app.style.transform = "translateY(0)";
+                });
+
+                window.scrollTo({ top: 0, behavior: "instant" });
+            }, 150);
         }
 
         // Update State & Browser History
