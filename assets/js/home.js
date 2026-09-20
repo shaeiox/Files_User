@@ -49,7 +49,12 @@ const HomePage = (function () {
   function renderHeroSection(d) {
     return `
       <section class="hero-max">
-        <div class="hero-bg"></div>
+        
+        <!-- [NEW] Background Isolation Layer (overflow: hidden applied here via CSS) -->
+        <div class="hero-bg">
+          <!-- هاله نوری لوگو حالا اینجا حبس می‌شود -->
+          <div class="logo-shader" aria-hidden="true"></div>
+        </div>
 
         <div class="hero-content">
           <div class="hero-pill">
@@ -74,7 +79,7 @@ const HomePage = (function () {
         </div>
 
         <div class="hero-visual">
-          <div class="logo-shader" aria-hidden="true"></div>
+          <!-- لوگوی شفاف اینجا می‌ماند، اما نورش به لایه بک‌گراند رفت -->
           <div class="logo-swap" id="logoSwap">
             <img class="logo-layer logo-dark" src="/assets/icon/logo-2-dark.webp" alt="AVID Download" draggable="false">
             <img class="logo-layer logo-light" src="/assets/icon/logo-2-light.webp" alt="AVID Download" draggable="false">
@@ -83,7 +88,7 @@ const HomePage = (function () {
       </section>
     `;
   }
-
+  
   /* ═══════════════════════════════════════════════
      SECTION: INFRASTRUCTURE RESOURCES
      ═══════════════════════════════════════════════ */

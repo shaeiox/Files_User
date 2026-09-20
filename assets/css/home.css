@@ -386,11 +386,11 @@ body.rtl .hero-visual {
 
 .logo-shader {
     position: absolute;
-    top: 52%;
-    left: 52%;
-    width: 120%;
-    height: 120%;
-    transform: translate(-50%, -50%);
+    top: 50%;
+    right: 5%;
+    width: min(700px, 50vw);
+    aspect-ratio: 1;
+    transform: translateY(-50%);
     background:
         radial-gradient(circle at 40% 65%, rgba(255, 170, 129, 0.22) 0%, transparent 55%),
         radial-gradient(circle at 62% 38%, rgba(86, 131, 218, 0.26) 0%, transparent 60%);
@@ -400,6 +400,14 @@ body.rtl .hero-visual {
     z-index: 0;
 }
 
+[dir="rtl"] .logo-shader,
+html[lang="fa"] .logo-shader,
+body.rtl .logo-shader {
+    right: auto;
+    left: 5%;
+}
+
+
 .logo-swap {
     display: grid;
     place-items: center;
@@ -408,6 +416,12 @@ body.rtl .hero-visual {
     filter: drop-shadow(0 10px 44px rgba(255, 170, 129, 0.12));
     -webkit-mask-image: radial-gradient(ellipse 78% 78% at 46% 42%, #000 52%, rgba(0, 0, 0, 0.45) 74%, transparent 96%);
     mask-image: radial-gradient(ellipse 78% 78% at 46% 42%, #000 52%, rgba(0, 0, 0, 0.45) 74%, transparent 96%);
+}
+
+[data-theme="light"] .logo-shader {
+    background: radial-gradient(circle, rgba(86, 131, 218, 0.16) 0%, transparent 70%),
+        radial-gradient(circle at 55% 45%, rgba(86, 131, 218, 0.22) 0%, transparent 58%);
+    opacity: 0.8;
 }
 
 .logo-layer {
@@ -530,12 +544,6 @@ body.rtl .hero-visual {
     opacity: 0.6;
     -webkit-mask-image: radial-gradient(ellipse 80% 80% at 46% 42%, #000 62%, transparent 98%);
     mask-image: radial-gradient(ellipse 80% 80% at 46% 42%, #000 62%, transparent 98%);
-}
-
-[data-theme="light"] .logo-shader {
-    background:
-        radial-gradient(circle at 55% 45%, rgba(86, 131, 218, 0.22) 0%, transparent 58%);
-    opacity: 0.8;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1729,9 +1737,10 @@ body.rtl .hero-visual {
     }
 
     [dir="rtl"] .hero-visual,
-    html[lang="fa"] .hero-visual {
+    html[lang="fa"] .hero-visual,
+    body.rtl .hero-visual {
         right: auto;
-        left: clamp(8px, 2vw, 24px);
+        left: clamp(-72px, -2vw, -8px);
     }
 
     /* — Resources: 2-column card grid — */
@@ -1748,6 +1757,19 @@ body.rtl .hero-visual {
     .locked-state {
         padding: 40px 20px;
         min-height: 200px;
+    }
+
+    .logo-shader {
+        top: clamp(20px, 4vw, 36px);
+        right: clamp(8px, 2vw, 24px);
+        transform: none;
+        width: clamp(200px, 35vw, 360px);
+    }
+
+    [dir="rtl"] .logo-shader,
+    html[lang="fa"] .logo-shader {
+        right: auto;
+        left: clamp(8px, 2vw, 24px);
     }
 }
 
@@ -1872,13 +1894,16 @@ body.rtl .hero-visual {
     /* Small in-flow brand emblem ABOVE the status pill:
        crisp, centered, part of the content stack (no overlap) */
     .hero-visual {
-        position: relative;
-        top: auto;
-        order: -1;
-        transform: none;
-        width: min(140px, 36vw);
-        margin: 0 auto 2px;
-        flex: 0 0 auto;
+        position: absolute;
+        z-index: 1;
+        right: clamp(-72px, -2vw, -8px);
+        top: 50%;
+        transform: translateY(-50%);
+        width: min(680px, 48vw);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
     }
 
     .hero-visual,
@@ -1958,6 +1983,16 @@ body.rtl .hero-visual {
         min-height: 34px;
         justify-content: center;
         text-align: center;
+    }
+
+    .logo-shader {
+        position: relative;
+        top: auto;
+        right: auto;
+        left: auto;
+        width: 100%;
+        height: 100%;
+        opacity: 0.55;
     }
 }
 
