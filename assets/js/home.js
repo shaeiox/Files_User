@@ -159,9 +159,15 @@ const HomePage = (function () {
  * @param   {object} d  Dictionary object for i18n.
  * @returns {string}    HTML template string.
  */
+
+  /* ═══════════════════════════════════════════════
+     SECTION: BOTTOM PANELS (Latest Releases + Quick Access)
+     ═══════════════════════════════════════════════ */
   function renderBottomSection(d) {
     return `
       <section class="bottom-grid">
+        
+        <!-- 1. Left Panel: Latest Releases -->
         <div class="panel">
           <div class="panel-head" style="flex-wrap: wrap; gap: 12px;">
             <div class="panel-head-left" style="flex: 1; min-width: 200px;">
@@ -174,33 +180,27 @@ const HomePage = (function () {
               </div>
             </div>
             
-            <!-- [NEW] OS Selection Tabs -->
+            <div id="releaseAuthAction" style="display: flex; align-items: center; gap: 8px;"></div>
+
+            <!-- OS Selection Tabs -->
             <div class="view-toggle" id="osTabs">
               <button class="vt-btn active" data-os="el9" type="button" style="width:auto; padding:0 12px; font-size:11px; font-weight:600; font-family:var(--mono);">EL9</button>
               <button class="vt-btn" data-os="el8" type="button" style="width:auto; padding:0 12px; font-size:11px; font-weight:600; font-family:var(--mono);">EL8</button>
             </div>
 
-            <a class="panel-link" id="viewAllReleases" href="/browse/el9">${d.viewAll || "View all"} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+            <!-- View All Link (Initially hidden, shown via JS if authorized) -->
+            <a class="panel-link" id="viewAllReleases" href="#" style="display:none;">${d.viewAll || "View all"} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
           </div>
-          <div style="overflow-x:auto">
-            <table class="releases-table">
-              <thead>
-                <tr>
-                  <th>${d.thVersion || "Version"}</th>
-                  <th>${d.thType || "Package Type"}</th>
-                  <th>${d.thUpdated || "Updated"}</th>
-                  <th>${d.thSize || "Size"}</th>
-                  <th>${d.thChecksum || "Checksum"}</th>
-                  <th style="text-align:${d.dir === 'rtl' ? 'left' : 'right'}">${d.thAction || "Action"}</th>
-                </tr>
-              </thead>
-              <tbody id="releasesBody">
-                <tr><td colspan="6" class="mono">${d.scanning || "Loading…"}</td></tr>
-              </tbody>
-            </table>
+
+          <!-- Dynamic Container: JS will inject EITHER the Lock Box OR the Full Table here -->
+          <div id="releasesContainer" style="overflow-x:auto;">
+            <div style="padding: 32px; text-align: center; color: var(--text-4); font-family: var(--mono); font-size: 11px;">
+              ${d.scanning || "Loading…"}
+            </div>
           </div>
         </div>
 
+        <!-- 2. Right Panel: Quick Access -->
         <div class="panel">
           <div class="panel-head">
             <div class="panel-head-left">
@@ -215,6 +215,7 @@ const HomePage = (function () {
           </div>
           <div class="quick-list" id="quickAccessList"></div>
         </div>
+        
       </section>
     `;
   }
@@ -508,36 +509,69 @@ const HomePage = (function () {
     if (typeof ResourceService === "undefined") return;
     const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
     const lang = typeof window.getLang === 'function' ? window.getLang() : getLang();
-    const body = document.getElementById("releasesBody");
+    const container = document.getElementById("releasesContainer");
     const viewAll = document.getElementById("viewAllReleases");
+    const authActionEl = document.getElementById("releaseAuthAction");
 
-    if (!body) return;
-    body.innerHTML = `<tr><td colspan="6" class="mono">${d.scanning || "Loading…"}</td></tr>`;
+    if (!container) return;
 
     try {
       const authStatus = await ResourceService.checkAuthStatus();
 
       if (authStatus.enabled && !authStatus.authenticated) {
         if (viewAll) viewAll.style.display = "none";
+        if (authActionEl) authActionEl.innerHTML = "";
 
-        body.innerHTML = `
-          <tr>
-            <td colspan="6" style="padding: 0; border: none;">
-              <div class="locked-state">
-                <div class="locked-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                </div>
-                <div class="locked-title">Authentication Required</div>
-                <div class="locked-desc">Access to the PVM release infrastructure requires clearance.</div>
-                <button class="btn btn-primary" onclick="HomePage.showLoginModal()">Authenticate to Access</button>
-              </div>
-            </td>
-          </tr>`;
+        container.innerHTML = `
+          <div class="locked-state">
+            <div class="locked-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div class="locked-title">Authentication Required</div>
+            <div class="locked-desc">Access to the PVM release infrastructure requires clearance.</div>
+            <button class="btn btn-primary" onclick="HomePage.showLoginModal()">Authenticate to Access</button>
+          </div>`;
         return;
+      }
+
+      if (authStatus.enabled && authStatus.authenticated && authActionEl) {
+        const username = authStatus.user?.username || "admin";
+        authActionEl.innerHTML = `
+          <span class="mono" style="font-size: 11px; color: var(--text-4); opacity: 0.8;">${escapeHtml(username)}</span>
+          <button class="icon-btn" id="releaseLogoutBtn" title="Sign Out / Lock" style="color: var(--danger);" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </button>
+        `;
+        document.getElementById("releaseLogoutBtn")?.addEventListener("click", async () => {
+          await ResourceService.logout();
+          loadReleasesTable();
+        });
+      } else if (authActionEl) {
+        authActionEl.innerHTML = "";
       }
 
       if (viewAll) viewAll.style.display = "inline-flex";
 
+      if (!document.getElementById("releasesBody")) {
+        container.innerHTML = `
+          <table class="releases-table">
+            <thead>
+              <tr>
+                <th>${d.thVersion || "Version"}</th>
+                <th>${d.thType || "Package Type"}</th>
+                <th>${d.thUpdated || "Updated"}</th>
+                <th>${d.thSize || "Size"}</th>
+                <th>${d.thChecksum || "Checksum"}</th>
+                <th style="text-align:${d.dir === 'rtl' ? 'left' : 'right'}">${d.thAction || "Action"}</th>
+              </tr>
+            </thead>
+            <tbody id="releasesBody">
+              <tr><td colspan="6" class="mono">${d.scanning || "Loading…"}</td></tr>
+            </tbody>
+          </table>`;
+      }
+
+      const body = document.getElementById("releasesBody");
       const res = await ResourceService.getReleases(5, activeOsTab);
       const { browsePath, items: releases } = res || {};
 
@@ -558,7 +592,7 @@ const HomePage = (function () {
 
     } catch (err) {
       if (viewAll) viewAll.href = "#";
-      body.innerHTML = `<tr><td colspan="6">${d.resourcesLoadError || "Unable to load releases."}</td></tr>`;
+      container.innerHTML = `<div class="resources-error" style="margin:20px;">${d.resourcesLoadError || "Unable to load releases."}</div>`;
     }
   }
 
