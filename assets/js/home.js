@@ -39,7 +39,7 @@ const HomePage = (function () {
       </div>
     `;
 
-    bindEvents();
+    bindEvents(container);
     loadResources(); // Async fetch infrastructure resources
   }
 
@@ -512,10 +512,30 @@ const HomePage = (function () {
   /**
    * @brief   Fetches and renders the Releases table dynamically based on active OS tab.
    */
+
   async function loadReleasesTable() {
     if (typeof ResourceService === "undefined") return;
-    const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
-    const lang = typeof window.getLang === 'function' ? window.getLang() : getLang();
+
+    const getDictFn = typeof window !== "undefined" && typeof window.getDict === "function"
+      ? window.getDict
+      : (typeof getDict === "function" ? getDict : () => ({}));
+    const getLangFn = typeof window !== "undefined" && typeof window.getLang === "function"
+      ? window.getLang
+      : (typeof getLang === "function" ? getLang : () => "en");
+
+    const d = getDictFn() || {};
+    const lang = getLangFn() || "en";
+
+    const safeEscape = (str) => {
+      if (typeof escapeHtml === "function") return escapeHtml(str);
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    };
+
     const container = document.getElementById("releasesContainer");
     const viewAll = document.getElementById("viewAllReleases");
     const authActionEl = document.getElementById("releaseAuthAction");
@@ -525,126 +545,147 @@ const HomePage = (function () {
     try {
       const authStatus = await ResourceService.checkAuthStatus();
 
-      if (authStatus.enabled && !authStatus.authenticated) {
+      if (authStatus?.enabled && !authStatus?.authenticated) {
+        if (typeof IdleTimer !== "undefined") IdleTimer.stop();
+
+        if (viewAll) viewAll.style.display = "none";
+        if (authActionEl) authActionEl.innerHTML = "";
+
+        container.innerHTML = `
+        <div class="locked-state">
+          <div class="locked-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <div class="locked-title">${d.authRequired || "Authentication Required"}</div>
+          <div class="locked-desc">${d.authRequiredDesc || "Access to the PVM release infrastructure requires clearance."}</div>
+          <button class="btn btn-primary" onclick="typeof HomePage !== 'undefined' && HomePage.showLoginModal ? HomePage.showLoginModal() : null">
+            ${d.btnAuth || "Authenticate to Access"}
+          </button>
+        </div>`;
+        return;
+      }
+
+      if (authStatus?.enabled && authStatus?.authenticated) {
         if (typeof IdleTimer !== "undefined") {
           IdleTimer.start(30, async () => {
             await ResourceService.logout();
             loadReleasesTable();
           });
         }
-      } else {
-        if (typeof IdleTimer !== "undefined") IdleTimer.stop();
-      }
-      if (viewAll) viewAll.style.display = "none";
-      if (authActionEl) authActionEl.innerHTML = "";
 
-      container.innerHTML = `
-          <div class="locked-state">
-            <div class="locked-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            </div>
-            <div class="locked-title">${d.authRequired || "Authentication Required"}</div>
-            <div class="locked-desc">${d.authRequiredDesc || "Access to the PVM release infrastructure requires clearance."}</div>
-            <button class="btn btn-primary" onclick="HomePage.showLoginModal()">${d.btnAuth || "Authenticate to Access"}</button>
-          </div>`;
-      return;
-    }
-
-      if (authStatus.enabled && authStatus.authenticated && authActionEl) {
-      const username = authStatus.user?.username || "admin";
-      authActionEl.innerHTML = `
-          <span class="mono" style="font-size: 11px; color: var(--text-4); opacity: 0.8;">${escapeHtml(username)}</span>
+        if (authActionEl) {
+          const username = authStatus.user?.username || "admin";
+          authActionEl.innerHTML = `
+          <span class="mono" style="font-size: 11px; color: var(--text-4); opacity: 0.8;">${safeEscape(username)}</span>
           <button class="icon-btn" id="releaseLogoutBtn" title="${d.btnSignOut || 'Sign Out / Lock'}" style="color: var(--danger);" type="button">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
           </button>
         `;
-      document.getElementById("releaseLogoutBtn")?.addEventListener("click", async () => {
-        await ResourceService.logout();
-        loadReleasesTable();
-      });
-    } else if (authActionEl) {
-      authActionEl.innerHTML = "";
+
+          document.getElementById("releaseLogoutBtn")?.addEventListener("click", async () => {
+            await ResourceService.logout();
+            loadReleasesTable();
+          });
+        }
+      } else {
+        if (typeof IdleTimer !== "undefined") IdleTimer.stop();
+        if (authActionEl) authActionEl.innerHTML = "";
+      }
+
+      if (viewAll) viewAll.style.display = "inline-flex";
+
+      if (!document.getElementById("releasesBody")) {
+        container.innerHTML = `
+        <table class="releases-table">
+          <thead>
+            <tr>
+              <th>${d.thVersion || "Version"}</th>
+              <th>${d.thType || "Package Type"}</th>
+              <th>${d.thUpdated || "Updated"}</th>
+              <th>${d.thSize || "Size"}</th>
+              <th>${d.thChecksum || "Checksum"}</th>
+              <th style="text-align:${d.dir === 'rtl' ? 'left' : 'right'}">${d.thAction || "Action"}</th>
+            </tr>
+          </thead>
+          <tbody id="releasesBody">
+            <tr><td colspan="6" class="mono">${d.scanning || "Loading…"}</td></tr>
+          </tbody>
+        </table>`;
+      }
+
+      const body = document.getElementById("releasesBody");
+
+      const currentOsTab = typeof activeOsTab !== "undefined" ? activeOsTab : "linux";
+      const res = await ResourceService.getReleases(5, currentOsTab);
+      const { browsePath, items: releases } = res || {};
+
+      if (viewAll && browsePath && typeof ResourceService.browseHref === "function") {
+        viewAll.href = ResourceService.browseHref(browsePath);
+      }
+
+      if (!releases || !releases.length) {
+        body.innerHTML = `<tr><td colspan="6">${d.noReleases || `No packages found for ${String(currentOsTab).toUpperCase()}.`}</td></tr>`;
+        return;
+      }
+
+      const newest = releases[0]?.mtime ? new Date(releases[0].mtime).getTime() : 0;
+      body.innerHTML = releases.map((item, idx) => {
+        const itemTime = item?.mtime ? new Date(item.mtime).getTime() : 0;
+        const isNew = idx === 0 || (newest && (newest - itemTime) < 24 * 60 * 60 * 1000);
+
+        return typeof releaseRow === "function"
+          ? releaseRow(item, isNew, lang, d)
+          : `<tr><td colspan="6">${safeEscape(item.name || item.version)}</td></tr>`;
+      }).join("");
+
+    } catch (err) {
+      console.error("Failed to load releases table:", err);
+      if (viewAll) viewAll.href = "#";
+      container.innerHTML = `<div class="resources-error" style="margin:20px;">${d.resourcesLoadError || "Unable to load releases."}</div>`;
     }
-
-    if (viewAll) viewAll.style.display = "inline-flex";
-
-    if (!document.getElementById("releasesBody")) {
-      container.innerHTML = `
-          <table class="releases-table">
-            <thead>
-              <tr>
-                <th>${d.thVersion || "Version"}</th>
-                <th>${d.thType || "Package Type"}</th>
-                <th>${d.thUpdated || "Updated"}</th>
-                <th>${d.thSize || "Size"}</th>
-                <th>${d.thChecksum || "Checksum"}</th>
-                <th style="text-align:${d.dir === 'rtl' ? 'left' : 'right'}">${d.thAction || "Action"}</th>
-              </tr>
-            </thead>
-            <tbody id="releasesBody">
-              <tr><td colspan="6" class="mono">${d.scanning || "Loading…"}</td></tr>
-            </tbody>
-          </table>`;
-    }
-
-    const body = document.getElementById("releasesBody");
-    const res = await ResourceService.getReleases(5, activeOsTab);
-    const { browsePath, items: releases } = res || {};
-
-    if (viewAll && browsePath) {
-      viewAll.href = ResourceService.browseHref(browsePath);
-    }
-
-    if (!releases || !releases.length) {
-      body.innerHTML = `<tr><td colspan="6">${d.noReleases || `No packages found for ${activeOsTab.toUpperCase()}.`}</td></tr>`;
-      return;
-    }
-
-    const newest = releases[0] ? new Date(releases[0].mtime).getTime() : 0;
-    body.innerHTML = releases.map((item, idx) => {
-      const isNew = idx === 0 || (newest && (newest - new Date(item.mtime).getTime()) < 24 * 60 * 60 * 1000);
-      return releaseRow(item, isNew, lang, d);
-    }).join("");
-
-  } catch (err) {
-    if (viewAll) viewAll.href = "#";
-    container.innerHTML = `<div class="resources-error" style="margin:20px;">${d.resourcesLoadError || "Unable to load releases."}</div>`;
   }
-}
+
 
   /**
    * @brief   Initializes both bottom sidebar panels (Releases & Quick Access).
    */
   async function loadSidebarPanels() {
-  if (typeof ResourceService === "undefined") return;
-  const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
+    if (typeof ResourceService === "undefined") return;
+    const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
 
-  // 1. Load Releases Table
-  await loadReleasesTable();
+    // 1. Load Releases Table
+    await loadReleasesTable();
 
-  // 2. Load Quick Access
-  const quick = document.getElementById("quickAccessList");
-  if (quick) {
-    try {
-      const { items: top } = await ResourceService.getReleases(4);
-      if (!top || !top.length) {
-        quick.innerHTML = `<div class="ac-empty" style="padding:16px">${d.noReleases || "No files found yet."}</div>`;
-      } else {
-        quick.innerHTML = top.map((item) => {
-          const iconType = ResourceService.inferIcon(item.category || item.name);
-          return quickItem(item.name, (item.category || "") + " · " + humanSize(item.size), iconType, ResourceService.downloadHref(item.path));
-        }).join("");
+    // 2. Load Quick Access
+    const quick = document.getElementById("quickAccessList");
+    if (quick) {
+      try {
+        const { items: top } = await ResourceService.getReleases(4);
+        if (!top || !top.length) {
+          quick.innerHTML = `<div class="ac-empty" style="padding:16px">${d.noReleases || "No files found yet."}</div>`;
+        } else {
+          quick.innerHTML = top.map((item) => {
+            const iconType = ResourceService.inferIcon(item.category || item.name);
+            return quickItem(item.name, (item.category || "") + " · " + humanSize(item.size), iconType, ResourceService.downloadHref(item.path));
+          }).join("");
+        }
+      } catch (err) {
+        quick.innerHTML = `<div class="ac-empty" style="padding:16px">${d.resourcesLoadError || "Error loading."}</div>`;
       }
-    } catch (err) {
-      quick.innerHTML = `<div class="ac-empty" style="padding:16px">${d.resourcesLoadError || "Error loading."}</div>`;
     }
   }
-}
 
-function releaseRow(item, isNew, lang, d) {
-  const href = ResourceService.downloadHref(item.path);
-  const icon = getResourceIcon(ResourceService.inferIcon(item.category || item.name));
-  return `
+  function releaseRow(item, isNew, lang, d) {
+    const href = ResourceService.downloadHref(item.path);
+    const icon = getResourceIcon(ResourceService.inferIcon(item.category || item.name));
+    return `
     <tr>
       <td>
         <div class="version-cell">
@@ -666,11 +707,11 @@ function releaseRow(item, isNew, lang, d) {
       </td>
     </tr>
   `;
-}
+  }
 
-function quickItem(title, sub, iconType, href) {
-  const icon = getResourceIcon(iconType);
-  return `
+  function quickItem(title, sub, iconType, href) {
+    const icon = getResourceIcon(iconType);
+    return `
       <a class="quick-item" href="${href}" data-file="true">
         <div class="quick-icon">${icon}</div>
         <div class="quick-meta">
@@ -680,187 +721,237 @@ function quickItem(title, sub, iconType, href) {
         <div class="quick-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
       </a>
     `;
-}
-
-/* ═══════════════════════════════════════════════
-   DOM BINDINGS
-   ═══════════════════════════════════════════════ */
-function bindEvents() {
-  bindSearchEvents();
-  bindViewToggleEvents();
-  bindRefreshEvent();
-  bindFilterEvents();
-  bindOsTabs();
-}
-
-function bindFilterEvents() {
-  const filterWraps = document.querySelectorAll(".filter-dropdown-wrap");
-
-  filterWraps.forEach(wrap => {
-    const pill = wrap.querySelector(".filter-pill");
-    const valueSpan = pill.querySelector(".filter-value");
-
-    pill.addEventListener("click", (e) => {
-      e.stopPropagation();
-      filterWraps.forEach(w => { if (w !== wrap) w.classList.remove("show"); });
-      wrap.classList.toggle("show");
-    });
-
-    wrap.addEventListener("click", (e) => {
-      const opt = e.target.closest(".filter-option");
-      if (!opt || !wrap.contains(opt)) return;
-      e.stopPropagation();
-      const val = opt.getAttribute("data-val");
-      const text = opt.textContent;
-      valueSpan.textContent = text;
-      wrap.querySelectorAll(".filter-option").forEach(o => o.classList.remove("active"));
-      opt.classList.add("active");
-      if (wrap.id === "catFilterWrap") activeCategory = val;
-      if (wrap.id === "sortFilterWrap") activeSort = val;
-      wrap.classList.remove("show");
-      applyFiltersAndRender();
-    });
-  });
-
-  document.addEventListener("click", () => {
-    filterWraps.forEach(w => w.classList.remove("show"));
-  });
-}
-
-
-/**
- * @brief   Binds click events to the OS selection tabs in the Releases Panel.
- * @details Switches the activeOsTab state and triggers a re-fetch of the table.
- */
-function bindOsTabs() {
-  const osButtons = document.querySelectorAll("#osTabs .vt-btn");
-  if (!osButtons.length) return;
-
-  osButtons.forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      // Remove active class from all tabs
-      osButtons.forEach(b => b.classList.remove("active"));
-
-      // Set active class to clicked tab
-      const target = e.currentTarget;
-      target.classList.add("active");
-
-      // Update state and reload ONLY the table
-      activeOsTab = target.getAttribute("data-os");
-      loadReleasesTable();
-    });
-  });
-}
-
-function bindSearchEvents() {
-  const qInput = document.getElementById("globalSearch");
-  const searchBtn = document.getElementById("searchBtn");
-  const stopBtn = document.getElementById("stopBtn");
-
-  if (!qInput || !searchBtn) return;
-
-  if (typeof Autocomplete !== "undefined") {
-    Autocomplete.bind(qInput);
   }
 
-  const doSearch = () => {
-    const query = qInput.value ? qInput.value.trim() : "";
-    if (!query) {
-      qInput.focus();
-      return;
-    }
-    if (typeof Autocomplete !== "undefined" && typeof Autocomplete.hide === "function") {
-      Autocomplete.hide();
-    }
-    scanAll(query);
-  };
+  /* ═══════════════════════════════════════════════
+     DOM BINDINGS
+     ═══════════════════════════════════════════════ */
+  function bindEvents(container) {
+    bindSearchEvents();
+    bindViewToggleEvents();
+    bindRefreshEvent();
+    bindFilterEvents();
+    bindOsTabs();
 
-  searchBtn.addEventListener("click", doSearch);
+    bindDownloadInterception(container || document);
+  }
 
-  if (stopBtn) {
-    stopBtn.addEventListener("click", () => {
-      stopFlag = true;
+  function bindDownloadInterception(container) {
+    const root = container || document;
+
+    root.addEventListener("click", async (e) => {
+      const link = e.target.closest('[data-url]');
+      if (!link) return;
+
+      const href = link.getAttribute("data-url");
+      if (!href || href === "javascript:void(0)") return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      link.style.pointerEvents = "none";
+      link.style.opacity = "0.5"; 
+
+      try {
+        const res = await fetch(href, {
+          method: "HEAD",
+          credentials: "same-origin",
+          cache: "no-store"
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          if (typeof window.triggerAuthModal === "function") window.triggerAuthModal();
+          else if (typeof showLoginModal === "function") showLoginModal();
+          return;
+        }
+        if (res.ok) {
+          const a = document.createElement("a");
+          a.href = href;
+          a.download = "";
+          a.style.display = "none";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+      } catch (err) {
+        console.error("Download error:", err);
+      } finally {
+        link.style.pointerEvents = "auto";
+        link.style.opacity = "1";
+      }
     });
   }
 
-  qInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      doSearch();
+
+
+  function bindFilterEvents() {
+    const filterWraps = document.querySelectorAll(".filter-dropdown-wrap");
+
+    filterWraps.forEach(wrap => {
+      const pill = wrap.querySelector(".filter-pill");
+      const valueSpan = pill.querySelector(".filter-value");
+
+      pill.addEventListener("click", (e) => {
+        e.stopPropagation();
+        filterWraps.forEach(w => { if (w !== wrap) w.classList.remove("show"); });
+        wrap.classList.toggle("show");
+      });
+
+      wrap.addEventListener("click", (e) => {
+        const opt = e.target.closest(".filter-option");
+        if (!opt || !wrap.contains(opt)) return;
+        e.stopPropagation();
+        const val = opt.getAttribute("data-val");
+        const text = opt.textContent;
+        valueSpan.textContent = text;
+        wrap.querySelectorAll(".filter-option").forEach(o => o.classList.remove("active"));
+        opt.classList.add("active");
+        if (wrap.id === "catFilterWrap") activeCategory = val;
+        if (wrap.id === "sortFilterWrap") activeSort = val;
+        wrap.classList.remove("show");
+        applyFiltersAndRender();
+      });
+    });
+
+    document.addEventListener("click", () => {
+      filterWraps.forEach(w => w.classList.remove("show"));
+    });
+  }
+
+
+  /**
+   * @brief   Binds click events to the OS selection tabs in the Releases Panel.
+   * @details Switches the activeOsTab state and triggers a re-fetch of the table.
+   */
+  function bindOsTabs() {
+    const osButtons = document.querySelectorAll("#osTabs .vt-btn");
+    if (!osButtons.length) return;
+
+    osButtons.forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        // Remove active class from all tabs
+        osButtons.forEach(b => b.classList.remove("active"));
+
+        // Set active class to clicked tab
+        const target = e.currentTarget;
+        target.classList.add("active");
+
+        // Update state and reload ONLY the table
+        activeOsTab = target.getAttribute("data-os");
+        loadReleasesTable();
+      });
+    });
+  }
+
+  function bindSearchEvents() {
+    const qInput = document.getElementById("globalSearch");
+    const searchBtn = document.getElementById("searchBtn");
+    const stopBtn = document.getElementById("stopBtn");
+
+    if (!qInput || !searchBtn) return;
+
+    if (typeof Autocomplete !== "undefined") {
+      Autocomplete.bind(qInput);
     }
-    if (e.key === "Escape") {
-      clearResults();
+
+    const doSearch = () => {
+      const query = qInput.value ? qInput.value.trim() : "";
+      if (!query) {
+        qInput.focus();
+        return;
+      }
+      if (typeof Autocomplete !== "undefined" && typeof Autocomplete.hide === "function") {
+        Autocomplete.hide();
+      }
+      scanAll(query);
+    };
+
+    searchBtn.addEventListener("click", doSearch);
+
+    if (stopBtn) {
+      stopBtn.addEventListener("click", () => {
+        stopFlag = true;
+      });
     }
-  });
 
-  // Global keyboard shortcut: Cmd/Ctrl + K
-  window._homeKeyHandler = (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
-      e.preventDefault();
-      qInput.focus();
-      qInput.select();
-    }
-  };
+    qInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        doSearch();
+      }
+      if (e.key === "Escape") {
+        clearResults();
+      }
+    });
 
-  window.removeEventListener("keydown", window._homeKeyHandler);
-  window.addEventListener("keydown", window._homeKeyHandler);
-}
+    // Global keyboard shortcut: Cmd/Ctrl + K
+    window._homeKeyHandler = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        qInput.focus();
+        qInput.select();
+      }
+    };
 
-function bindViewToggleEvents() {
-  const gridBtn = document.getElementById("viewGridBtn");
-  const listBtn = document.getElementById("viewListBtn");
-  const grid = document.querySelector(".resources-grid");
-  if (!gridBtn || !listBtn || !grid) return;
+    window.removeEventListener("keydown", window._homeKeyHandler);
+    window.addEventListener("keydown", window._homeKeyHandler);
+  }
 
-  listBtn.addEventListener("click", () => {
-    grid.style.gridTemplateColumns = "1fr";
-    listBtn.classList.add("active");
-    gridBtn.classList.remove("active");
-  });
+  function bindViewToggleEvents() {
+    const gridBtn = document.getElementById("viewGridBtn");
+    const listBtn = document.getElementById("viewListBtn");
+    const grid = document.querySelector(".resources-grid");
+    if (!gridBtn || !listBtn || !grid) return;
 
-  gridBtn.addEventListener("click", () => {
-    grid.style.gridTemplateColumns = "";
-    gridBtn.classList.add("active");
-    listBtn.classList.remove("active");
-  });
-}
+    listBtn.addEventListener("click", () => {
+      grid.style.gridTemplateColumns = "1fr";
+      listBtn.classList.add("active");
+      gridBtn.classList.remove("active");
+    });
 
-function bindRefreshEvent() {
-  const refreshBtn = document.getElementById("refreshResourcesBtn");
-  if (!refreshBtn) return;
+    gridBtn.addEventListener("click", () => {
+      grid.style.gridTemplateColumns = "";
+      gridBtn.classList.add("active");
+      listBtn.classList.remove("active");
+    });
+  }
 
-  refreshBtn.addEventListener("click", async () => {
-    refreshBtn.classList.add("spinning");
-    const grid = document.getElementById("resourcesGrid");
-    if (grid) grid.innerHTML = renderSkeletonCards();
+  function bindRefreshEvent() {
+    const refreshBtn = document.getElementById("refreshResourcesBtn");
+    if (!refreshBtn) return;
 
-    try {
-      await loadResources({ forceRefresh: true });
-    } finally {
-      setTimeout(() => refreshBtn.classList.remove("spinning"), 500);
-    }
-  });
-}
+    refreshBtn.addEventListener("click", async () => {
+      refreshBtn.classList.add("spinning");
+      const grid = document.getElementById("resourcesGrid");
+      if (grid) grid.innerHTML = renderSkeletonCards();
 
-/* ═══════════════════════════════════════════════
-   SEARCH ENGINE
-   ═══════════════════════════════════════════════ */
-function clearResults() {
-  const box = document.getElementById("resultsList");
-  const panel = document.getElementById("resultsBox");
-  if (box) box.innerHTML = "";
-  if (panel) panel.style.display = "none";
-}
+      try {
+        await loadResources({ forceRefresh: true });
+      } finally {
+        setTimeout(() => refreshBtn.classList.remove("spinning"), 500);
+      }
+    });
+  }
 
-function addResult(item) {
-  const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
-  const list = document.getElementById("resultsList");
-  if (!list) return;
+  /* ═══════════════════════════════════════════════
+     SEARCH ENGINE
+     ═══════════════════════════════════════════════ */
+  function clearResults() {
+    const box = document.getElementById("resultsList");
+    const panel = document.getElementById("resultsBox");
+    if (box) box.innerHTML = "";
+    if (panel) panel.style.display = "none";
+  }
 
-  const row = document.createElement("div");
-  row.className = "res-row";
-  const fileAttr = item.type === "file" ? ' data-file="true"' : "";
-  row.innerHTML = `
+  function addResult(item) {
+    const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
+    const list = document.getElementById("resultsList");
+    if (!list) return;
+
+    const row = document.createElement("div");
+    row.className = "res-row";
+    const fileAttr = item.type === "file" ? ' data-file="true"' : "";
+    row.innerHTML = `
       <div class="res-info">
         <a href="${item.href}"${fileAttr}>${item.name}</a>
         <div class="res-path">${item.path || item.href}</div>
@@ -870,89 +961,89 @@ function addResult(item) {
           ${item.type === 'directory' ? (d.dirBadge || 'DIR') : (d.fileBadge || 'FILE')}
         </span>
       </div>`;
-  list.appendChild(row);
-}
-
-
-async function scanAll(query) {
-  const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
-  stopFlag = false;
-
-  const resultsBox = document.getElementById("resultsBox");
-  const resultsList = document.getElementById("resultsList");
-  const progressEl = document.getElementById("progress");
-  const searchBtn = document.getElementById("searchBtn");
-  const stopBtn = document.getElementById("stopBtn");
-
-  if (!resultsBox || !resultsList) return;
-
-  const q = String(query || "").trim();
-  if (!q) {
-    clearResults();
-    return;
+    list.appendChild(row);
   }
 
-  // UI Reset
-  resultsList.innerHTML = "";
-  resultsBox.style.display = "block";
-  resultsBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
 
-  if (progressEl) progressEl.textContent = d.scanning || "Scanning…";
-  if (stopBtn) stopBtn.style.display = "inline-flex";
-  if (searchBtn) searchBtn.disabled = true;
+  async function scanAll(query) {
+    const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
+    stopFlag = false;
 
-  let found = 0;
-  let scanned = 0;
+    const resultsBox = document.getElementById("resultsBox");
+    const resultsList = document.getElementById("resultsList");
+    const progressEl = document.getElementById("progress");
+    const searchBtn = document.getElementById("searchBtn");
+    const stopBtn = document.getElementById("stopBtn");
 
-  try {
-    const data = await ResourceService.search(q, { limit: SEARCH_MAX_RESULTS });
-    scanned = data.scanned || 0;
-    const entries = data.results || [];
+    if (!resultsBox || !resultsList) return;
 
-    for (const e of entries) {
-      if (stopFlag) break;
-      if (!e || !e.name) continue;
-
-      const type = e.type === "directory" ? "directory" : "file";
-      const href = type === "directory"
-        ? ResourceService.browseHref(e.path)
-        : ResourceService.downloadHref(e.path);
-
-      addResult({ name: e.name, href, path: e.path, type });
-      found++;
+    const q = String(query || "").trim();
+    if (!q) {
+      clearResults();
+      return;
     }
 
-    if (progressEl) {
-      progressEl.textContent = `${d.done || 'Done'} · ${found} ${d.foundText || 'found'}`;
+    // UI Reset
+    resultsList.innerHTML = "";
+    resultsBox.style.display = "block";
+    resultsBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+    if (progressEl) progressEl.textContent = d.scanning || "Scanning…";
+    if (stopBtn) stopBtn.style.display = "inline-flex";
+    if (searchBtn) searchBtn.disabled = true;
+
+    let found = 0;
+    let scanned = 0;
+
+    try {
+      const data = await ResourceService.search(q, { limit: SEARCH_MAX_RESULTS });
+      scanned = data.scanned || 0;
+      const entries = data.results || [];
+
+      for (const e of entries) {
+        if (stopFlag) break;
+        if (!e || !e.name) continue;
+
+        const type = e.type === "directory" ? "directory" : "file";
+        const href = type === "directory"
+          ? ResourceService.browseHref(e.path)
+          : ResourceService.downloadHref(e.path);
+
+        addResult({ name: e.name, href, path: e.path, type });
+        found++;
+      }
+
+      if (progressEl) {
+        progressEl.textContent = `${d.done || 'Done'} · ${found} ${d.foundText || 'found'}`;
+      }
+    } catch (err) {
+      console.error("[Search Error]:", err);
+      if (progressEl) progressEl.textContent = d.resourcesLoadError || "Search failed";
+      resultsList.innerHTML = `<div class="resources-error" style="padding:20px;">${escapeHtml(err.message || "Failed to perform search.")}</div>`;
+    } finally {
+      if (stopBtn) stopBtn.style.display = "none";
+      if (searchBtn) searchBtn.disabled = false;
     }
-  } catch (err) {
-    console.error("[Search Error]:", err);
-    if (progressEl) progressEl.textContent = d.resourcesLoadError || "Search failed";
-    resultsList.innerHTML = `<div class="resources-error" style="padding:20px;">${escapeHtml(err.message || "Failed to perform search.")}</div>`;
-  } finally {
-    if (stopBtn) stopBtn.style.display = "none";
-    if (searchBtn) searchBtn.disabled = false;
+
+    if (!found && !stopFlag && resultsList.children.length === 0) {
+      resultsList.innerHTML = `<div class="ac-empty" style="padding:24px; text-align:center;">${d.emptySearch || 'No results for'} "${escapeHtml(q)}"</div>`;
+    }
   }
 
-  if (!found && !stopFlag && resultsList.children.length === 0) {
-    resultsList.innerHTML = `<div class="ac-empty" style="padding:24px; text-align:center;">${d.emptySearch || 'No results for'} "${escapeHtml(q)}"</div>`;
-  }
-}
+  /* ═══════════════════════════════════════════════
+     AUTHENTICATION MODAL
+     ═══════════════════════════════════════════════ */
+  function showLoginModal(onSuccessCallback) {
+    const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
+    if (document.getElementById('authOverlay')) return;
 
-/* ═══════════════════════════════════════════════
-   AUTHENTICATION MODAL
-   ═══════════════════════════════════════════════ */
-function showLoginModal(onSuccessCallback) {
-  const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
-  if (document.getElementById('authOverlay')) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'auth-overlay';
+    overlay.id = 'authOverlay';
 
-  const overlay = document.createElement('div');
-  overlay.className = 'auth-overlay';
-  overlay.id = 'authOverlay';
+    const formDir = d.dir === 'rtl' ? 'text-align: right;' : 'text-align: left;';
 
-  const formDir = d.dir === 'rtl' ? 'text-align: right;' : 'text-align: left;';
-
-  overlay.innerHTML = `
+    overlay.innerHTML = `
       <div class="auth-modal" style="${formDir}">
         <button class="btn-close-modal" id="closeAuthBtn" style="${d.dir === 'rtl' ? 'left: 16px; right: auto;' : ''}">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -976,57 +1067,57 @@ function showLoginModal(onSuccessCallback) {
       </div>
     `;
 
-  document.body.appendChild(overlay);
-  requestAnimationFrame(() => overlay.classList.add('show'));
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add('show'));
 
-  const closeModal = () => {
-    overlay.classList.remove('show');
-    setTimeout(() => overlay.remove(), 250);
+    const closeModal = () => {
+      overlay.classList.remove('show');
+      setTimeout(() => overlay.remove(), 250);
+    };
+    document.getElementById('closeAuthBtn').addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+
+    document.getElementById('authForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const user = document.getElementById('authUsername').value.trim();
+      const pass = document.getElementById('authPassword').value;
+      const errDiv = document.getElementById('authError');
+      const submitBtn = document.getElementById('authSubmitBtn');
+
+      errDiv.textContent = "";
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = d.btnAuthenticating || "Authenticating...";
+
+      try {
+        await ResourceService.login(user, pass);
+        closeModal();
+        loadReleasesTable();
+        if (typeof onSuccessCallback === "function") {
+          onSuccessCallback();
+        } else {
+          if (typeof loadReleasesTable === "function") loadReleasesTable();
+        }
+      } catch (err) {
+        errDiv.textContent = err.message;
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = d.btnSignIn || "Sign In";
+
+        if (err.message.includes("Too many")) {
+          document.getElementById('authUsername').disabled = true;
+          document.getElementById('authPassword').disabled = true;
+        }
+      }
+
+    });
+    window.triggerAuthModal = showLoginModal;
+  }
+
+  /* ═══════════════════════════════════════════════
+     PUBLIC API
+     ═══════════════════════════════════════════════ */
+  return {
+    render,
+    refreshResources: () => loadResources({ forceRefresh: true }),
+    showLoginModal
   };
-  document.getElementById('closeAuthBtn').addEventListener('click', closeModal);
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
-
-  document.getElementById('authForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const user = document.getElementById('authUsername').value.trim();
-    const pass = document.getElementById('authPassword').value;
-    const errDiv = document.getElementById('authError');
-    const submitBtn = document.getElementById('authSubmitBtn');
-
-    errDiv.textContent = "";
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = d.btnAuthenticating || "Authenticating...";
-
-    try {
-      await ResourceService.login(user, pass);
-      closeModal();
-      loadReleasesTable();
-      if (typeof onSuccessCallback === "function") {
-        onSuccessCallback();
-      } else {
-        if (typeof loadReleasesTable === "function") loadReleasesTable();
-      }
-    } catch (err) {
-      errDiv.textContent = err.message;
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = d.btnSignIn || "Sign In";
-
-      if (err.message.includes("Too many")) {
-        document.getElementById('authUsername').disabled = true;
-        document.getElementById('authPassword').disabled = true;
-      }
-    }
-
-  });
-  window.triggerAuthModal = showLoginModal;
-}
-
-/* ═══════════════════════════════════════════════
-   PUBLIC API
-   ═══════════════════════════════════════════════ */
-return {
-  render,
-  refreshResources: () => loadResources({ forceRefresh: true }),
-  showLoginModal
-};
-}) ();
+})();

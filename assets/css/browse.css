@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
-   browse.css — File Browser (Huly aurora system)
-   Filter dropdowns & view toggle live in home.css (shared)
+   browse.css — Enterprise File Browser (CloudAvid File Portal)
+   Architecture: Modular BEM/Fluid Grid with strict overflow protection
    ═══════════════════════════════════════════════════════════════ */
 
 .browse-layout {
@@ -8,9 +8,11 @@
     flex-direction: column;
     gap: 16px;
     margin-top: 16px;
+    min-width: 0;
+    /* Prevents layout blowout at layout root */
 }
 
-/* ── BROWSE HEADER — charcoal panel ── */
+/* ── BROWSE HEADER — Charcoal Panel ── */
 .browse-head {
     display: flex;
     flex-direction: column;
@@ -21,7 +23,7 @@
     border: 1px solid var(--border);
 }
 
-/* Breadcrumbs — pill crumbs */
+/* Breadcrumbs — Pill Crumbs */
 .crumbs {
     display: flex;
     align-items: center;
@@ -39,6 +41,7 @@
     color: var(--text-3);
     font-weight: 500;
     transition: all 120ms ease;
+    text-decoration: none;
 }
 
 a.crumb:hover {
@@ -62,6 +65,7 @@ a.crumb:hover {
     color: var(--text-4);
     display: flex;
     align-items: center;
+    flex-shrink: 0;
 }
 
 html[dir="rtl"] .crumb-sep svg {
@@ -77,6 +81,12 @@ html[dir="rtl"] .crumb-sep svg {
     flex-wrap: wrap;
 }
 
+.browse-title-left {
+    min-width: 0;
+    /* Protects title text truncation */
+    flex: 1;
+}
+
 .browse-title-left h1 {
     font-family: var(--font-display);
     font-size: 28px;
@@ -85,6 +95,7 @@ html[dir="rtl"] .crumb-sep svg {
     color: var(--text);
     word-break: break-all;
     line-height: 1.1;
+    margin: 0;
 }
 
 .browse-stats {
@@ -100,6 +111,7 @@ html[dir="rtl"] .crumb-sep svg {
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    flex-shrink: 0;
 }
 
 .stat-val {
@@ -118,9 +130,10 @@ html[dir="rtl"] .crumb-sep svg {
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
+    flex-shrink: 0;
 }
 
-/* Local Search — pill */
+/* Local Search — Pill */
 .browse-search {
     height: 34px;
     padding: 0 10px 0 14px;
@@ -138,17 +151,24 @@ html[dir="rtl"] .crumb-sep svg {
     font-size: 12px;
 }
 
-/* ── FILE TABLE ── */
+/* ── FILE TABLE (LIST VIEW) ── */
 .file-tbl {
     border-radius: var(--radius-cards);
     background: var(--bg-card);
     border: 1px solid var(--border);
     overflow: hidden;
+    width: 100%;
+}
+
+/* Container query-like safety fallback for ultra-small screens */
+.file-tbl {
+    overflow-x: auto;
 }
 
 .file-tbl .trow {
     display: grid;
-    grid-template-columns: 40px 1fr 90px 160px 90px;
+    /* Enterprise Fix: minmax(0, 1fr) forces the name track to shrink if needed, preventing overflow */
+    grid-template-columns: 40px minmax(0, 1fr) 90px 160px 90px;
     gap: 12px;
     align-items: center;
     height: 52px;
@@ -175,6 +195,16 @@ html[dir="rtl"] .crumb-sep svg {
     color: var(--text-4);
 }
 
+/* Static Column Robustness — prevents system badges/dates from shrinking or wrapping weirdly */
+.file-tbl .trow>div:nth-child(3),
+.file-tbl .trow>div:nth-child(4),
+.file-tbl .trow>div:nth-child(5) {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
+}
+
 .f-icon {
     width: 32px;
     height: 32px;
@@ -183,6 +213,7 @@ html[dir="rtl"] .crumb-sep svg {
     justify-content: center;
     border-radius: 10px;
     border: 1px solid var(--border);
+    flex-shrink: 0;
 }
 
 .f-icon-dir {
@@ -209,10 +240,15 @@ html[dir="rtl"] .crumb-sep svg {
     color: #95979e;
 }
 
+/* File/Folder Name Wrapper */
 .f-name {
     min-width: 0;
+    /* Essential flex/grid layout fix for text-truncation */
+    width: 100%;
+    overflow: hidden;
 }
 
+/* List View Truncation */
 .f-link {
     display: block;
     font-weight: 500;
@@ -222,6 +258,7 @@ html[dir="rtl"] .crumb-sep svg {
     white-space: nowrap;
     color: var(--text);
     transition: color 120ms ease;
+    text-decoration: none;
 }
 
 .f-link:hover {
@@ -275,14 +312,14 @@ html[dir="rtl"] .crumb-sep svg {
     margin-bottom: 2px;
 }
 
-/* Grid Mode */
+/* ── FILE GRID MODE (CARDS VIEW) ── */
 .file-tbl.grid-mode .thead {
     display: none;
 }
 
 .file-tbl.grid-mode #rows {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 12px;
     padding: 16px;
 }
@@ -311,6 +348,33 @@ html[dir="rtl"] .crumb-sep svg {
 .file-tbl.grid-mode .f-icon {
     width: 40px;
     height: 40px;
+    margin-bottom: 4px;
+}
+
+.file-tbl.grid-mode .f-name {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 4px;
+}
+
+/* Grid View Truncation: Max 2 lines with hyphen/break word fallback */
+.file-tbl.grid-mode .f-link {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    /* Truncate after exactly 2 lines */
+    -webkit-box-orient: vertical;
+    white-space: normal;
+    /* Overrides the 'nowrap' of List View */
+    word-break: break-all;
+    /* Safely break super long single-word names */
+    overflow-wrap: anywhere;
+    /* Edge and modern browser safety */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+    max-height: 2.8em;
+    /* Prevents text overflow outside container */
+    text-align: center;
 }
 
 .file-tbl.grid-mode .trow>div:nth-child(3),
@@ -319,7 +383,7 @@ html[dir="rtl"] .crumb-sep svg {
     display: none;
 }
 
-/* ── RESPONSIVE ── */
+/* ── RESPONSIVE ADAPTABILITY ── */
 @media (max-width: 900px) {
     .browse-search {
         width: 100%;
@@ -345,8 +409,9 @@ html[dir="rtl"] .crumb-sep svg {
         justify-content: space-between;
     }
 
+    /* Safe Grid Row template on extreme small screens */
     .file-tbl .trow {
-        grid-template-columns: 36px 1fr;
+        grid-template-columns: 36px minmax(0, 1fr);
         height: auto;
         padding: 10px 14px;
     }

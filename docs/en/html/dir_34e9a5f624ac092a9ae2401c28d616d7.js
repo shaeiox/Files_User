@@ -1,5 +1,0 @@
-var dir_34e9a5f624ac092a9ae2401c28d616d7 =
-[
-    [ "css", "dir_45719ce4813446001deb773d097fe0a2.html", "dir_45719ce4813446001deb773d097fe0a2" ],
-    [ "js", "dir_28b47b074e0de03430469744c7cd2342.html", "dir_28b47b074e0de03430469744c7cd2342" ]
-];
