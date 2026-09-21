@@ -183,6 +183,18 @@ const BrowsePage = (function () {
             const data = await ResourceService.listFiles(relPath);
             if (!Array.isArray(data)) throw new Error("Bad JSON");
 
+            const authStatus = await ResourceService.checkAuthStatus();
+            if (authStatus.enabled && authStatus.authenticated) {
+                if (typeof IdleTimer !== "undefined") {
+                    IdleTimer.start(30, async () => {
+                        await ResourceService.logout();
+                        fetchList();
+                    });
+                }
+            } else {
+                if (typeof IdleTimer !== "undefined") IdleTimer.stop();
+            }
+
             allFiles = data
                 .filter(x => x && x.name && x.name !== "." && x.name !== "..")
                 .filter(x => !isHidden(x.name))
@@ -200,12 +212,10 @@ const BrowsePage = (function () {
             console.error("[BrowsePage] Fetch Error:", err);
             const container = document.getElementById("tableContainer");
             const controls = document.getElementById("browseControls");
-            const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
 
             if (!container) return;
             if (controls) controls.style.display = "none";
 
-            // ▶ Architecture: 401 Unauthorized State (Auth Required)
             if (err.status === 401 || err.code === "AUTH_REQUIRED") {
                 container.innerHTML = `
                   <div class="locked-state" style="padding: 64px 24px; text-align: center; border: 1px solid var(--border); border-radius: var(--radius-panels); background: var(--bg-card);">
@@ -239,7 +249,6 @@ const BrowsePage = (function () {
                 return;
             }
 
-            // ▶ Architecture: In-Page 404 State
             if (err.status === 404 || err.code === "NOT_FOUND") {
                 container.innerHTML = `
                   <div class="resources-error" style="flex-direction: column; padding: 64px 24px; text-align: center; border: 1px dashed var(--border); border-radius: var(--radius-panels); background: var(--bg-card);">
@@ -255,9 +264,8 @@ const BrowsePage = (function () {
                 return;
             }
 
-            // ▶ Generic Server Error State
             container.innerHTML = `
-              <div class="resources-error" style="padding: 32px; border-radius: var(--radius-card);">
+              <div class="resources-error" style="padding: 32px; border-radius: var(--radius-panels);">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:left;">
                     <span style="font-weight:600; color:var(--text);">${d.errorServerLoad || "Failed to load directory."}</span>
