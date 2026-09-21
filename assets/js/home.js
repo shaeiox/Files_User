@@ -743,20 +743,20 @@ const HomePage = (function () {
       const link = e.target.closest('[data-url]');
       if (!link) return;
 
-      const href = link.getAttribute("data-url");
-      if (!href || href === "javascript:void(0)") return;
+      const downloadUrl = link.getAttribute("data-url");
+      if (!downloadUrl) return;
 
       e.preventDefault();
       e.stopPropagation();
 
+      const originalContent = link.innerHTML;
       link.style.pointerEvents = "none";
-      link.style.opacity = "0.5"; 
+      link.innerHTML = "Checking...";
 
       try {
-        const res = await fetch(href, {
+        const res = await fetch(downloadUrl, {
           method: "HEAD",
-          credentials: "same-origin",
-          cache: "no-store"
+          credentials: "same-origin"
         });
 
         if (res.status === 401 || res.status === 403) {
@@ -764,25 +764,26 @@ const HomePage = (function () {
           else if (typeof showLoginModal === "function") showLoginModal();
           return;
         }
+
         if (res.ok) {
           const a = document.createElement("a");
-          a.href = href;
+          a.href = downloadUrl;
           a.download = "";
-          a.style.display = "none";
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
+        } else {
+          alert("خطا در برقراری ارتباط با سرور: " + res.status);
         }
+
       } catch (err) {
-        console.error("Download error:", err);
+        console.error("Download Interception Error:", err);
       } finally {
         link.style.pointerEvents = "auto";
-        link.style.opacity = "1";
+        link.innerHTML = originalContent;
       }
     });
   }
-
-
 
   function bindFilterEvents() {
     const filterWraps = document.querySelectorAll(".filter-dropdown-wrap");
