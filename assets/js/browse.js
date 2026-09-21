@@ -265,7 +265,7 @@ const BrowsePage = (function () {
             }
 
             container.innerHTML = `
-              <div class="resources-error" style="padding: 32px; border-radius: var(--radius-panels);">
+              <div class="resources-error" style="padding: 32px; border-radius: var(--radius-card);">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:left;">
                     <span style="font-weight:600; color:var(--text);">${d.errorServerLoad || "Failed to load directory."}</span>
