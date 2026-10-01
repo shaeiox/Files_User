@@ -168,7 +168,13 @@ html[dir="rtl"] .crumb-sep svg {
 .file-tbl .trow {
     display: grid;
     /* Enterprise Fix: minmax(0, 1fr) forces the name track to shrink if needed, preventing overflow */
-    grid-template-columns: 40px minmax(0, 1fr) 90px 160px 90px auto;
+    /* Action track is a fixed 26px, matching `.f-action { width: 26px }`. Every .trow is its own
+       grid container, so an `auto` action track is content-derived: directory rows (empty
+       .f-actions) resolve it to 0px while file rows resolve it to 26px, and the 1fr name track
+       absorbs the difference and shifts the fixed type/modified/size columns. Pinning the track
+       keeps the header and every row on identical column boundaries. If the action icon size
+       changes, update BOTH this track and the one in the <=640px block below, plus .f-action. */
+    grid-template-columns: 40px minmax(0, 1fr) 90px 160px 90px 26px;
     gap: 12px;
     align-items: center;
     height: 52px;
@@ -214,6 +220,25 @@ html[dir="rtl"] .crumb-sep svg {
     border-radius: 10px;
     border: 1px solid var(--border);
     flex-shrink: 0;
+}
+
+/* Interactive primary target inside the icon cell — same target as the name link.
+   Fills the cell, inherits the icon's color/theming, and never changes size or
+   position so hover/focus emphasis causes no layout shift. */
+.f-icon-link {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+    text-decoration: none;
+    transition: color 120ms ease;
+}
+
+.f-icon-link:hover,
+.f-icon-link:focus-visible {
+    color: var(--text-accent);
 }
 
 .f-icon-dir {
@@ -462,7 +487,9 @@ html[dir="rtl"] .crumb-sep svg {
 
     /* Safe Grid Row template on extreme small screens */
     .file-tbl .trow {
-        grid-template-columns: 36px minmax(0, 1fr) auto;
+        /* Keep in sync with the desktop action track above: 26px == `.f-action { width: 26px }`.
+           Required, or directory and file rows drift apart again on small screens. */
+        grid-template-columns: 36px minmax(0, 1fr) 26px;
         height: auto;
         padding: 10px 14px;
     }

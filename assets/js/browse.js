@@ -370,8 +370,11 @@ const BrowsePage = (function () {
             const badgeStr = f.type === "directory" ? 'badge-dir' : 'badge-file';
             const badgeLabel = f.type === "directory" ? (d.folder || 'Folder') : (d.file || 'File');
 
+            const iconVerb = f.type === "directory" ? (d.btnOpen || 'Open') : (d.btnDownload || 'Download');
+            const iconLabel = escapeHtml(iconVerb + " " + f.name);
+
             row.innerHTML = `
-                <div class="f-icon ${iconStr}">${svgIcon(f.type)}</div>
+                <div class="f-icon ${iconStr}"><a class="f-icon-link" ${linkAttr} title="${iconLabel}" aria-label="${iconLabel}">${svgIcon(f.type)}</a></div>
                 <div class="f-name"><a class="f-link" ${linkAttr} title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</a></div>
                 <div><span class="badge ${badgeStr}">${badgeLabel}</span></div>
                 <div class="f-sub">${fmtDate(f.modified, lang)}</div>
@@ -547,8 +550,8 @@ const BrowsePage = (function () {
 
     function svgIcon(type) {
         return type === "directory"
-            ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"/></svg>`
-            : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>`;
+            ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"/></svg>`
+            : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>`;
     }
 
     function renderSkeletons() {
