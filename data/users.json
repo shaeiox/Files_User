@@ -3,10 +3,10 @@
     {
       "id": "admin-001",
       "username": "admin",
-      "passwordHash": "$2b$12$9uWRxg03qTg/C5/SZ1PqIOEPpj2lvF.PTk3vWU/MhVHIWpefbhRD.",
+      "passwordHash": "scrypt$16384$bd781124c88575f862b366aa7f1cbc8d$2cca409dfec29bf95221a0c9d019191b60c158c677fb43f4e326351fce272c7d6182ff50964a617567c141a782f7f4b84777a62ba8dbe097695ca9b600e6d05d.",
       "role": "release-viewer",
       "createdAt": "2025-01-01T00:00:00.000Z",
-      "lastLogin": "2026-09-21T12:35:18.683Z"
+      "lastLogin": "2026-10-01T05:50:18.404Z"
     }
   ]
 }
