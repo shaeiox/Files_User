@@ -168,7 +168,7 @@ html[dir="rtl"] .crumb-sep svg {
 .file-tbl .trow {
     display: grid;
     /* Enterprise Fix: minmax(0, 1fr) forces the name track to shrink if needed, preventing overflow */
-    grid-template-columns: 40px minmax(0, 1fr) 90px 160px 90px;
+    grid-template-columns: 40px minmax(0, 1fr) 90px 160px 90px auto;
     gap: 12px;
     align-items: center;
     height: 52px;
@@ -269,6 +269,57 @@ html[dir="rtl"] .crumb-sep svg {
     font-size: 11px;
     color: var(--text-4);
     font-variant-numeric: tabular-nums;
+}
+
+/* ── FILE ACTIONS (per-row action controls, child 6 of .trow) ── */
+.f-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 2px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 120ms ease;
+}
+
+.file-tbl .trow:hover .f-actions,
+.file-tbl .trow:focus-within .f-actions {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@media (hover: none) {
+    .f-actions {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+.f-action {
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-tags);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-4);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background var(--dur-1) ease, border-color var(--dur-1) ease, color var(--dur-1) ease;
+}
+
+.f-action:hover {
+    background: var(--bg-hover);
+    border-color: var(--border);
+    color: var(--text);
+}
+
+.file-tbl.grid-mode .f-actions {
+    justify-content: center;
 }
 
 /* Empty State */
@@ -411,7 +462,7 @@ html[dir="rtl"] .crumb-sep svg {
 
     /* Safe Grid Row template on extreme small screens */
     .file-tbl .trow {
-        grid-template-columns: 36px minmax(0, 1fr);
+        grid-template-columns: 36px minmax(0, 1fr) auto;
         height: auto;
         padding: 10px 14px;
     }

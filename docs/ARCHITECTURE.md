@@ -72,6 +72,7 @@ HTTP Request
 |--------|---------|--------|
 | `router.js` | SPA routing, page navigation | `assets/js/router.js` |
 | `home.js` | HomePage component, resource cards, search | `assets/js/home.js` |
+| `file-actions.js` | File Actions module (Browse row actions: Open/Download) | `assets/js/file-actions.js` |
 | `browse.js` | BrowsePage component, file table | `assets/js/browse.js` |
 | `resource-service.js` | API client, caching, auth status | `assets/js/resource-service.js` |
 | `i18n.js` | Internationalization (en/fa) | `assets/js/i18n.js` |
@@ -93,10 +94,38 @@ index.html
 ├── assets/js/i18n.js
 ├── assets/js/autocomplete.js
 ├── assets/js/home.js
+├── assets/js/file-actions.js
 ├── assets/js/browse.js
 ├── lib/idle-timer.js
 └── assets/js/router.js
 ```
+
+### File Actions Module
+
+Browse row actions are owned by a dedicated module; `browse.js` only places its output into each row. Relationship: **BrowsePage → FileActions → ResourceService / Router**.
+
+```
+BrowsePage (browse.js) renderFilesList()
+  └─ FileActions.render(item, d)   → '<div class="f-actions">…</div>' — sixth grid child of the row
+       ├─ applicability: item.type only ("directory" → Open, "file" → Download)
+       └─ hrefs: ResourceService.browseHref(relPath) / downloadHref(relPath)
+Router (router.js) intercepts the anchor:
+  Open     (href, no data-file)          → preventDefault + SPA navigation
+  Download (href + data-file="true")     → router bypass → native browser download
+```
+
+| Concern | Owner | Source |
+|---------|-------|--------|
+| Action definitions, applicability, markup, accessible labels (`aria-label`/`title`), escaping | `FileActions` | `assets/js/file-actions.js` |
+| Row construction; single integration call `FileActions.render(item, d)` as the sixth cell | `BrowsePage` | `assets/js/browse.js` → `renderFilesList()` |
+| Resource URLs (`browseHref`, `downloadHref`) | `ResourceService` | `assets/js/services/resource-service.js` |
+| SPA navigation and the `data-file="true"` native-download bypass | `Router` | `assets/js/router.js` |
+
+- Current actions: directory rows render an **Open** anchor; file rows render a **Download** anchor. Action controls are siblings of the file-name link (never nested); `browse.js` contains no action-specific URLs or handlers.
+- The module is a flat action-definition list exposing only `render(item, d)` — no generic command/action framework.
+- Labels use the i18n keys `btnOpen`/`btnDownload` with in-code English fallback (`assets/js/i18n.js`).
+
+**Source:** `assets/js/file-actions.js` → `render()`, `assets/js/browse.js` → `renderFilesList()`, `assets/js/router.js` → document click interceptor
 
 ## Environment Variables
 

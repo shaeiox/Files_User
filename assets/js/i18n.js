@@ -65,6 +65,7 @@ const i18n = {
         thAction: "Action",
         badgeNew: "NEW",
         btnDownload: "Download",
+        btnOpen: "Open",
         quickAccess: "Quick Access",
         quickSub: "Frequently used downloads.",
 
@@ -195,6 +196,7 @@ const i18n = {
         thAction: "عملیات",
         badgeNew: "جدید",
         btnDownload: "دانلود",
+        btnOpen: "باز کن",
         quickAccess: "دسترسی سریع",
         quickSub: "دانلودهای پرکاربرد.",
 

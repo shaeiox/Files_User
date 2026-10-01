@@ -16,7 +16,7 @@ const filesService = require("./lib/files-service");
 const { c } = logger;
 
 const HOST = "0.0.0.0";
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 const server = http.createServer((req, res) => {
     apiRouter.handleRequest(req, res, PROJECT_ROOT, PORT);

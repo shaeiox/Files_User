@@ -149,6 +149,7 @@ const BrowsePage = (function () {
             <div>${d.type || "Type"}</div>
             <div>${d.modified || "Modified"}</div>
             <div>${d.size || "Size"}</div>
+            <div></div>
           </div>
           <div id="rows"></div>
           <div class="empty-box" id="empty" style="display:none"></div>
@@ -375,6 +376,7 @@ const BrowsePage = (function () {
                 <div><span class="badge ${badgeStr}">${badgeLabel}</span></div>
                 <div class="f-sub">${fmtDate(f.modified, lang)}</div>
                 <div class="f-sub">${f.type === 'directory' ? '—' : humanSize(f.size, lang)}</div>
+                ${FileActions.render(f, d)}
             `;
             frag.appendChild(row);
         });

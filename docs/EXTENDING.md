@@ -153,6 +153,7 @@ Scripts load in order via `<script>` tags in `index.html`. The router (`assets/j
 |--------|---------|
 | `router.js` | SPA routing |
 | `home.js` | HomePage component |
+| `file-actions.js` | File Actions component (Browse row actions) |
 | `browse.js` | BrowsePage component |
 | `resource-service.js` | API client |
 | `i18n.js` | Internationalization |
@@ -165,6 +166,21 @@ Scripts load in order via `<script>` tags in `index.html`. The router (`assets/j
 1. Create `assets/js/myComponent.js` using IIFE pattern
 2. Add `<script src="/assets/js/myComponent.js"></script>` in `index.html` before `router.js`
 3. Register with router if it's a page component
+
+### Adding a Browse File Action
+
+File actions are owned by `assets/js/file-actions.js` (`FileActions`). `browse.js` only renders whatever the module returns for each row — action knowledge never moves into the Browse Page.
+
+1. Add or modify an entry in the module's internal `ACTIONS` list (`id`, `appliesTo(item)`, `render(item, d)`)
+2. Base applicability on the existing item model (`item.type` — `"directory"` | `"file"`); do not introduce a second capability/permission model
+3. Build resource URLs only with `ResourceService.browseHref()` / `ResourceService.downloadHref()` — never concatenate URL strings
+4. Use `<a>` for navigation/download actions: the router intercepts `a[href]` for SPA navigation, and downloads carry `data-file="true"` to bypass the router (native browser download)
+5. Use `<button type="button">` only for future non-navigation actions (the router ignores non-anchor elements)
+6. Keep action-specific behavior — markup, labels, escaping, event handling — inside `FileActions`; each control gets `aria-label`/`title` of the form `"{verb} {item name}"` and its SVG gets `aria-hidden="true"`
+7. Do not duplicate action markup, URLs, or handlers in `browse.js` — the row already renders the module's output as its sixth cell
+8. Keep the module a flat definition list; do not introduce a generic action/command framework unless a future requirement genuinely demands one
+
+**Source:** `assets/js/file-actions.js`, `assets/js/browse.js` → `renderFilesList()`, `assets/js/router.js`
 
 ### API Client
 
