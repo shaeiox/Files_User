@@ -72,7 +72,7 @@ HTTP Request
 |--------|---------|--------|
 | `router.js` | SPA routing, page navigation | `assets/js/router.js` |
 | `home.js` | HomePage component, resource cards, search | `assets/js/home.js` |
-| `file-actions.js` | File Actions module (Browse row actions: Open/Download) | `assets/js/file-actions.js` |
+| `file-actions.js` | File Actions module (dedicated per-item actions: Download for files) | `assets/js/file-actions.js` |
 | `browse.js` | BrowsePage component, file table | `assets/js/browse.js` |
 | `resource-service.js` | API client, caching, auth status | `assets/js/resource-service.js` |
 | `i18n.js` | Internationalization (en/fa) | `assets/js/i18n.js` |
@@ -100,30 +100,59 @@ index.html
 └── assets/js/router.js
 ```
 
-### File Actions Module
+### Browse Row Targets and File Actions
 
-Browse row actions are owned by a dedicated module; `browse.js` only places its output into each row. Relationship: **BrowsePage → FileActions → ResourceService / Router**.
+Each Browse item exposes **two distinct categories of interactive target**. They are deliberately kept in
+separate owners and must not be collapsed:
+
+1. **Primary Browse navigation target** — the item **name** and the **icon beside it**. Both resolve to the
+   *same* primary destination. Owned by `BrowsePage`; **not** a File Action.
+2. **Dedicated File Actions** — rendered by the `FileActions` module into a dedicated trailing column.
+   Currently **Download for files only**; directories have **no** dedicated File Action.
+
+#### Primary navigation target (BrowsePage-owned)
+
+```
+BrowsePage (browse.js) renderFilesList()
+  href     = type === "directory" ? ResourceService.browseHref(relPath)
+                                  : ResourceService.downloadHref(relPath)
+  linkAttr = type === "directory" ? `href="${href}"`
+                                  : `href="${href}" data-file="true"`
+  ├─ cell 1  .f-icon > a.f-icon-link ${linkAttr}   ← primary icon target (always present)
+  └─ cell 2  .f-name  > a.f-link       ${linkAttr}   ← primary name target (always present)
+```
+
+The icon and the name are **two sibling anchors**, never nested, each appearing exactly once in the tab
+order. Both interpolate the same `linkAttr`, so the two primary targets cannot diverge. The icon's
+accessible name is composed by `BrowsePage` from the existing `btnOpen` / `btnDownload` i18n keys plus the
+item name. `btnOpen` here labels the **primary icon**; it does **not** imply a File Action named `Open`.
+
+#### Dedicated File Actions
+
+`browse.js` only places the module's output into each row as its sixth cell; all action knowledge lives in
+`file-actions.js`. Relationship: **BrowsePage → FileActions → ResourceService / Router**.
 
 ```
 BrowsePage (browse.js) renderFilesList()
   └─ FileActions.render(item, d)   → '<div class="f-actions">…</div>' — sixth grid child of the row
-       ├─ applicability: item.type only ("directory" → Open, "file" → Download)
-       └─ hrefs: ResourceService.browseHref(relPath) / downloadHref(relPath)
+       ├─ applicability: item.type === "file"  → Download; directories render an empty container
+       └─ href: ResourceService.downloadHref(relPath)
 Router (router.js) intercepts the anchor:
-  Open     (href, no data-file)          → preventDefault + SPA navigation
   Download (href + data-file="true")     → router bypass → native browser download
 ```
 
 | Concern | Owner | Source |
 |---------|-------|--------|
-| Action definitions, applicability, markup, accessible labels (`aria-label`/`title`), escaping | `FileActions` | `assets/js/file-actions.js` |
+| Primary navigation target for an item: the name link and the icon beside it, the shared `href`/`data-file` attributes, and the icon's accessible label | `BrowsePage` | `assets/js/browse.js` → `renderFilesList()` |
+| Dedicated File Action definitions, applicability, markup, accessible labels (`aria-label`/`title`), escaping, action SVG | `FileActions` | `assets/js/file-actions.js` |
 | Row construction; single integration call `FileActions.render(item, d)` as the sixth cell | `BrowsePage` | `assets/js/browse.js` → `renderFilesList()` |
 | Resource URLs (`browseHref`, `downloadHref`) | `ResourceService` | `assets/js/services/resource-service.js` |
 | SPA navigation and the `data-file="true"` native-download bypass | `Router` | `assets/js/router.js` |
 
-- Current actions: directory rows render an **Open** anchor; file rows render a **Download** anchor. Action controls are siblings of the file-name link (never nested); `browse.js` contains no action-specific URLs or handlers.
+- Current actions: **file rows render a Download anchor; directory rows render none.** Action controls are siblings of the file-name link (never nested); `browse.js` contains no action-specific URLs or handlers. There is no dedicated `Open` action — directory navigation is reached through the primary icon and name targets.
 - The module is a flat action-definition list exposing only `render(item, d)` — no generic command/action framework.
-- Labels use the i18n keys `btnOpen`/`btnDownload` with in-code English fallback (`assets/js/i18n.js`).
+- Labels come from the i18n dictionary (`assets/js/i18n.js`): the Download action uses `btnDownload`; `btnOpen` is used by `BrowsePage` for the primary icon's accessible label, not by the module.
+- Layout note: every `.trow` is an independent grid container, so the sixth (action) track is pinned to a fixed `26px` in both the list and the ≤640px templates. A content-sized track would let rows with and without an action resolve different column boundaries.
 
 **Source:** `assets/js/file-actions.js` → `render()`, `assets/js/browse.js` → `renderFilesList()`, `assets/js/router.js` → document click interceptor
 

@@ -397,13 +397,28 @@ measured behavior. **Documentation only — no implementation change.** `specs/f
 no edit: its requirements already demanded correct column alignment and were being violated, so the fix
 satisfies them as written.
 
-**Applied:** `design.md` — D5's "layout-safe" rationale corrected and the five-child-skeleton "proof"
-withdrawn; D9 retitled and rewritten to authorise the pinned track with the full option comparison; new
-D11a recording the decision; §Validation item 9 extended to assert zero offsets across all three row types
-at all required viewports and to exercise both declarations; R16 closed; R16p provenance correction added;
-R18 (squashing trade-off) and R19 (reserved width on directory rows) added; CSS-ownership and
-change-sizing tables updated. `proposal.md` — `browse.css` impact row and the layout-preservation bullet
-corrected. `tasks.md` — R16 provenance note, R16.1/R16.2/R16.3 records, and Phase 4 prerequisites updated.
+**Applied — round 1 (pre-incident):** `design.md` — D5's "layout-safe" rationale corrected and the
+five-child-skeleton "proof" withdrawn; D9 retitled and rewritten to authorise the pinned track with the full
+option comparison; new D11a recording the decision; §Validation item 9 extended to assert zero offsets across
+all three row types at all required viewports and to exercise both declarations; R16 closed; R16p provenance
+correction added; R18 (squashing trade-off) and R19 (reserved width on directory rows) added; CSS-ownership
+and change-sizing tables updated. `proposal.md` — `browse.css` impact row and the layout-preservation bullet
+corrected.
+
+**Applied — round 2 (after the R16.3-R line-structure recovery):** the same stale rationale survived in the
+**R3** risk-table row, which still presented the five-child skeleton as proof that a row renders *and*
+aligns correctly; R3 now separates **render structure** (which the skeleton child count does evidence) from
+**cross-row column alignment** (which it does not), and cites D5/D9/D11a instead of the withdrawn proof. The
+recovery had also left a **duplicate `R17` row**; the stray copy was removed, leaving the intended ordering
+**R17 → R18 → R19**. R18 was completed with the two statements it was still missing: that it is a **future
+extension constraint rather than a current defect**, and that **no current-scope implementation change is
+required or implied**.
+
+**R16 status: RESOLVED** (fixed in R16.2, documented here; see `design.md` R16 and R16p for provenance).
+
+**R18 status: documented future risk — NOT a current implementation task.** It is recorded in `design.md`
+only, as a constraint on whoever next widens the File Action set. No task in this plan implements it, and
+none should be created for it in this scope.
 
 ---
 
@@ -412,10 +427,12 @@ corrected. `tasks.md` — R16 provenance note, R16.1/R16.2/R16.3 records, and Ph
 **Objective:** Verify the combined result against every requirement and scenario in
 `specs/file-actions/spec.md`, including the browser checklist that the previous plan left unrun.
 
-**Prerequisites:** Phases 2, 3, 3.6, R16.1, and R16.2 complete and individually verified. **Blocking:** none
-— R16 was resolved in R16.2 (`design.md` D11a) and documented in R16.3, so Phase 4 is unblocked. Phase 4 must
-still re-verify the layout scenarios rather than assume R16.2's measurements (§Validation item 9), and must
-now also carry the R18/R19 consequences of the pinned track in its report.
+**Prerequisites:** Phases 2, 3, 3.6, R16.1, and R16.2 complete and individually verified.
+
+**Status: UNBLOCKED.** R16 was resolved in R16.2 (`design.md` D11a) and documented in R16.3; no blocking
+defect remains ahead of this phase. Phase 4 must still **re-verify** the layout scenarios rather than assume
+R16.2's measurements (§Validation item 9), and must now also carry the R18/R19 consequences of the pinned
+track in its report.
 
 **Files/modules expected to change:** None. Defect fixes only, and only inside files owned by Phases 2-3
 (`browse.js` row template lines, `browse.css` `.f-icon-link` rules, `file-actions.js`). Any fix requiring

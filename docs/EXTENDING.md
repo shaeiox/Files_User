@@ -153,7 +153,7 @@ Scripts load in order via `<script>` tags in `index.html`. The router (`assets/j
 |--------|---------|
 | `router.js` | SPA routing |
 | `home.js` | HomePage component |
-| `file-actions.js` | File Actions component (Browse row actions) |
+| `file-actions.js` | File Actions module (dedicated per-item actions) |
 | `browse.js` | BrowsePage component |
 | `resource-service.js` | API client |
 | `i18n.js` | Internationalization |
@@ -167,9 +167,26 @@ Scripts load in order via `<script>` tags in `index.html`. The router (`assets/j
 2. Add `<script src="/assets/js/myComponent.js"></script>` in `index.html` before `router.js`
 3. Register with router if it's a page component
 
-### Adding a Browse File Action
+### Browse Row Targets: Two Separate Categories
 
-File actions are owned by `assets/js/file-actions.js` (`FileActions`). `browse.js` only renders whatever the module returns for each row — action knowledge never moves into the Browse Page.
+Before extending anything in a Browse row, identify which category you are changing:
+
+| Category | What it is | Owner |
+|----------|-----------|-------|
+| **Primary navigation target** | The item **name** and the **icon beside it** — two sibling anchors resolving to the *same* destination (directory → browse target, file → download target) | `BrowsePage` (`assets/js/browse.js`) |
+| **Dedicated File Action** | An independent per-item control rendered into a dedicated trailing column by the module | `FileActions` (`assets/js/file-actions.js`) |
+
+The primary Browse icon is **not** a File Action and must not be implemented as one. Changing where an item
+navigates to — including the icon target — is a `BrowsePage` / Browse-row-rendering change in
+`renderFilesList()`, not an entry in the module's `ACTIONS` list.
+
+**Current state:** directories have **no** dedicated File Action, and there is **no** dedicated `Open`
+action; directory navigation is reached through the primary icon and name targets. The only dedicated
+File Action today is **Download, for files**.
+
+### Adding a Dedicated Browse File Action
+
+Dedicated File Actions are owned by `assets/js/file-actions.js` (`FileActions`). `browse.js` only renders whatever the module returns for each row — action knowledge never moves into the Browse Page.
 
 1. Add or modify an entry in the module's internal `ACTIONS` list (`id`, `appliesTo(item)`, `render(item, d)`)
 2. Base applicability on the existing item model (`item.type` — `"directory"` | `"file"`); do not introduce a second capability/permission model
@@ -177,8 +194,15 @@ File actions are owned by `assets/js/file-actions.js` (`FileActions`). `browse.j
 4. Use `<a>` for navigation/download actions: the router intercepts `a[href]` for SPA navigation, and downloads carry `data-file="true"` to bypass the router (native browser download)
 5. Use `<button type="button">` only for future non-navigation actions (the router ignores non-anchor elements)
 6. Keep action-specific behavior — markup, labels, escaping, event handling — inside `FileActions`; each control gets `aria-label`/`title` of the form `"{verb} {item name}"` and its SVG gets `aria-hidden="true"`
-7. Do not duplicate action markup, URLs, or handlers in `browse.js` — the row already renders the module's output as its sixth cell
-8. Keep the module a flat definition list; do not introduce a generic action/command framework unless a future requirement genuinely demands one
+7. Add any new localized label to `assets/js/i18n.js` for both `en` and `fa`; do not reuse `btnOpen` as an action label — it belongs to `BrowsePage`'s primary icon
+8. Do not duplicate action markup, URLs, or handlers in `browse.js` — the row already renders the module's output as its sixth cell
+9. Keep the module a flat definition list; do not introduce a generic action/command framework unless a future requirement genuinely demands one
+
+**Layout constraint (future consideration, not current behavior):** every `.trow` is an independent grid
+container and the sixth (action) track is a **fixed `26px`**. A second action that does not fit inside 26px
+will be squeezed by `flex-shrink` rather than expanding the track. If you add or widen a dedicated action,
+revisit that track width (and `.f-actions`) in `assets/css/browse.css` so the header and every row keep
+identical column boundaries.
 
 **Source:** `assets/js/file-actions.js`, `assets/js/browse.js` → `renderFilesList()`, `assets/js/router.js`
 
