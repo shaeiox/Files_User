@@ -131,7 +131,26 @@ const i18n = {
         error404Desc: "The requested path does not exist on CloudAvid infrastructure or you lack permission.",
         btnBackPortal: "Back to Downloads",
         errorServerLoad: "Failed to load directory.",
-        errorServerSub: "Network or server error."
+        errorServerSub: "Network or server error.",
+
+        // Enterprise Footer (markup: Phase 5 / D10; keys: Phase 8)
+        "footer.about": "CloudAvid cloud computing with over 15 years of experience, providing secure and scalable services in virtualization, cloud infrastructure, and enterprise support.",
+        "footer.linksTitle": "Useful Links",
+        "footer.linkHome": "Home",
+        "footer.linkBrowse": "Browse Portal",
+        "footer.linkDocs": "Documentation",
+        "footer.linkMainSite": "CloudAvid Main Site",
+        "footer.linkRakaard": "Rakaard",
+        "footer.contactTitle": "Contact Us",
+        "footer.phoneYazd": "Yazd:",
+        "footer.phoneTehran": "Tehran:",
+        "footer.emailLabel": "Email:",
+        "footer.address": "Yazd, Safaieh, University Blvd, Mirdamad St, Mirdamad 3, No 12",
+        "footer.socialTitle": "Connect With Us",
+        "footer.socialTelegramPh": "Telegram",
+        "footer.socialLinkedInPh": "LinkedIn",
+        "footer.socialGithubPh": "GitHub",
+        "footer.copyright": "All rights reserved for CloudAvid Technology Co."
     },
 
     fa: {
@@ -262,7 +281,25 @@ const i18n = {
         error404Desc: "مسیر درخواستی در زیرساخت کلود آوید وجود ندارد یا سطح دسترسی شما کافی نیست.",
         btnBackPortal: "بازگشت به مرکز دانلود",
         errorServerLoad: "خطا در بارگذاری مسیر.",
-        errorServerSub: "ارتباط با سرور قطع شده است."
+        errorServerSub: "ارتباط با سرور قطع شده است.",
+        // Enterprise Footer (markup: Phase 5 / D10; keys: Phase 8)
+        "footer.about": "CloudAvid — بیش از ۱۵ سال تجربه در رایانش ابری، ارائه‌دهنده خدمات امن و مقیاس‌پذیر در حوزه مجازی‌سازی، زیرساخت ابری و پشتیبانی سازمانی.",
+        "footer.linksTitle": "لینک‌های کاربردی",
+        "footer.linkHome": "صفحه اصلی",
+        "footer.linkBrowse": "پورتال فایل‌ها",
+        "footer.linkDocs": "مستندات",
+        "footer.linkMainSite": "سایت اصلی کلودآوید",
+        "footer.linkRakaard": "راکارد",
+        "footer.contactTitle": "با ما در تماس باشید",
+        "footer.phoneYazd": "یزد:",
+        "footer.phoneTehran": "تهران:",
+        "footer.emailLabel": "ایمیل:",
+        "footer.address": "یزد، صفائیه، بلوار دانشگاه، خیابان میرداماد، میرداماد ۳، پلاک ۱۲",
+        "footer.socialTitle": "همراه ما باشید",
+        "footer.socialTelegramPh": "تلگرام",
+        "footer.socialLinkedInPh": "لینکدین",
+        "footer.socialGithubPh": "گیت‌هاب",
+        "footer.copyright": "تمامی حقوق برای شرکت رایانش ابری کلودآوید محفوظ است."
     }
 };
 

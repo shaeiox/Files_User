@@ -26,17 +26,40 @@
    Strategy: Reduce heavy compositing tasks (blur intensity) and
    slow down infinite background animations to save GPU cycles.
    ─────────────────────────────────────────────────────────────── */
-[data-perf="medium"] .aura-glow-1,
+/* Backdrop glows — Obsidian Kinetic (Phase 2).
+   Base blurs are 80px (glow-1) and 100px (glow-2); medium halves them and
+   dims opacity by ~30%. Glows stay STATIC at every tier (D5 — no animation). */
+[data-perf="medium"] .aura-glow-1 {
+    filter: blur(40px);
+    /* Halved from 80px */
+    opacity: 0.42;
+    /* 0.6 x 0.7 */
+}
+
 [data-perf="medium"] .aura-glow-2 {
-    filter: blur(20px);
-    /* Reduced from 40-50px */
+    filter: blur(50px);
+    /* Halved from 100px */
+    opacity: 0.28;
+    /* 0.4 x 0.7 */
+}
+
+[data-perf="medium"] .aura-base {
+    background: var(--bg);
+    /* Flat — no vignette gradient */
 }
 
 [data-perf="medium"] .nav-bar,
 [data-perf="medium"] .ac-dropdown {
-    backdrop-filter: blur(6px);
-    /* Reduced from 12px */
-    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(8px);
+    /* Reduced from 16px */
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Navbar dropdowns — Obsidian Kinetic glass (Phase 3). */
+[data-perf="medium"] .perf-dropdown-menu,
+[data-perf="medium"] .lang-dropdown-menu {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 [data-perf="medium"] .logo-shader {
@@ -64,11 +87,43 @@
     -webkit-backdrop-filter: none !important;
 }
 
+/* Navbar glass effects added in Phase 3 — flat fill, no blur, no inset
+   highlight, single cheap shadow. */
+[data-perf="low"] .perf-dropdown-menu,
+[data-perf="low"] .lang-dropdown-menu {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+    background: var(--bg-card);
+}
+
+[data-perf="low"] .nav-bar {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+    background: var(--bg-card);
+}
+
+[data-perf="low"] .perf-pill {
+    background: transparent;
+    border-color: var(--border);
+}
+
 /* Remove ambient background glows entirely */
 [data-perf="low"] .aura-glow-1,
 [data-perf="low"] .aura-glow-2,
 [data-perf="low"] .logo-shader {
     display: none;
+}
+
+/* Backdrop falls back to a single flat fill — no blur, no vignette gradient.
+   The Hero-scoped selector above is left untouched: it is frozen per D8/I21,
+   so its low-tier behaviour must not change. */
+[data-perf="low"] .aura-base {
+    background: var(--bg);
+    filter: none !important;
+}
+
+[data-perf="low"] .aura-backdrop {
+    background: var(--bg);
 }
 
 /* Simplify logo transition, remove blur filter */
@@ -79,20 +134,16 @@
 
 /* Flatten multi-layered shadows to a single, cheap drop-shadow */
 [data-perf="low"] .resource-card,
-[data-perf="low"] .panel,
 [data-perf="low"] .file-tbl,
 [data-perf="low"] .browse-head,
-[data-perf="low"] .status-bar,
 [data-perf="low"] .results-panel {
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
 }
 
 /* Dark mode specific simplified shadows */
 [data-theme="dark"][data-perf="low"] .resource-card,
-[data-theme="dark"][data-perf="low"] .panel,
 [data-theme="dark"][data-perf="low"] .file-tbl,
 [data-theme="dark"][data-perf="low"] .browse-head,
-[data-theme="dark"][data-perf="low"] .status-bar,
 [data-theme="dark"][data-perf="low"] .results-panel {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
 }
@@ -131,6 +182,30 @@
     transform: none !important;
 }
 
+/* Home page glass + glow effects introduced in Phase 4.
+   .filter-dropdown-wrap still toggles .show on the WRAPPER — only the visual
+   effect is removed here, never the mechanism (I8). */
+[data-perf="medium"] .filter-dropdown-menu {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+[data-perf="low"] .filter-dropdown-menu {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+    background: var(--bg-card);
+}
+
+[data-perf="low"] .resource-card:hover,
+[data-theme="dark"][data-perf="low"] .resource-card:hover {
+    box-shadow: none !important;
+}
+
+[data-perf="low"] .locked-icon {
+    box-shadow: none !important;
+}
+
 /* Remove decorative layout elements */
 [data-perf="low"] .hero-max::before {
     display: none;
@@ -156,7 +231,20 @@
     -webkit-backdrop-filter: none !important;
 }
 
-/* Nuke all background aesthetics */
+/* Navbar glass effects (Phase 3) */
+[data-perf="potato"] .perf-dropdown-menu,
+[data-perf="potato"] .lang-dropdown-menu {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    background: var(--bg-card);
+}
+
+[data-perf="potato"] .nav-bar {
+    background: var(--bg-card);
+}
+
+/* Nuke all background aesthetics.
 [data-perf="potato"] .aura-glow-1,
 [data-perf="potato"] .aura-glow-2,
 [data-perf="potato"] .logo-shader,
@@ -177,10 +265,8 @@
 
 /* Eradicate all box-shadows to bypass drawing entirely */
 [data-perf="potato"] .resource-card,
-[data-perf="potato"] .panel,
 [data-perf="potato"] .file-tbl,
 [data-perf="potato"] .browse-head,
-[data-perf="potato"] .status-bar,
 [data-perf="potato"] .results-panel,
 [data-perf="potato"] .nav-bar,
 [data-perf="potato"] .ac-dropdown,
@@ -203,6 +289,22 @@
     animation: none !important;
     background: var(--n-4) !important;
     opacity: 0.6;
+}
+
+/* Home page glass + glow effects (Phase 4) */
+[data-perf="potato"] .filter-dropdown-menu {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    background: var(--bg-card);
+}
+
+[data-perf="potato"] .resource-card:hover {
+    box-shadow: none !important;
+}
+
+[data-perf="potato"] .locked-icon {
+    box-shadow: none !important;
 }
 
 /* Remove functional toggle animations (Theme, Wipe, etc.) */
@@ -238,23 +340,23 @@
     position: relative;
     display: inline-flex;
     align-items: stretch;
-    height: 36px;
+    height: 32px;
 }
 
 /* Trigger Button (Pill) */
 .perf-pill {
-    height: 36px;
+    height: 32px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 7px;
     padding: 0 11px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-    background: var(--bg-card);
-    color: var(--text-3);
-    font-family: inherit;
-    font-size: 13px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(255, 184, 0, 0.3);
+    background: rgba(255, 184, 0, 0.1);
+    color: var(--color-ember-pulse);
+    font-family: var(--font-mono);
+    font-size: var(--text-label-mono-sm);
     font-weight: 600;
     line-height: 1;
     cursor: pointer;
@@ -264,22 +366,22 @@
 
 /* SVG Icon in Pill */
 .perf-pill svg {
-    color: var(--text-4);
+    color: var(--color-ember-pulse);
     transition: color var(--dur-1) ease;
 }
 
 /* Pill Hover & Active State */
 .perf-dropdown-wrap:hover .perf-pill,
 .perf-dropdown-wrap.show .perf-pill {
-    border-color: var(--border-hover);
-    background: var(--bg-hover);
+    border-color: var(--color-ember-pulse);
+    background: rgba(255, 184, 0, 0.18);
     color: var(--text);
 }
 
 /* Highlight icon with brand color when active/hovered */
 .perf-dropdown-wrap:hover .perf-pill svg,
 .perf-dropdown-wrap.show .perf-pill svg {
-    color: var(--a-5);
+    color: var(--color-ember-pulse);
 }
 
 /* Dropdown Menu Panel */
@@ -289,15 +391,17 @@
     right: 0;
     min-width: 170px;
     padding: 4px;
-    background: var(--bg-card);
+    background: var(--surface-glass);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     opacity: 0;
     visibility: hidden;
     transform: translateY(-4px) scale(0.98);
     transition: all 0.15s ease;
-    z-index: 200;
+    z-index: var(--z-dropdown-high);
     /* Stays above general content */
     display: flex;
     flex-direction: column;
@@ -339,7 +443,7 @@
 }
 
 .perf-option:hover {
-    background: var(--bg-hover);
+    background: rgba(255, 255, 255, 0.04);
     color: var(--text);
 }
 
@@ -360,25 +464,25 @@
 /* Selected Item - Light Theme */
 :root .perf-option.active,
 [data-theme="light"] .perf-option.active {
-    background: rgba(86, 131, 218, 0.12);
-    color: #3d6bc7;
+    background: rgba(255, 184, 0, 0.14);
+    color: var(--text-accent);
 }
 
 :root .perf-option.active .perf-indicator-dot,
 [data-theme="light"] .perf-option.active .perf-indicator-dot {
-    background: #5683da;
-    box-shadow: 0 0 6px rgba(86, 131, 218, 0.5);
+    background: var(--color-ember-pulse);
+    box-shadow: 0 0 6px rgba(255, 184, 0, 0.5);
 }
 
 /* Selected Item - Dark Theme */
 [data-theme="dark"] .perf-option.active {
-    background: rgba(86, 131, 218, 0.16);
-    color: #a9c3ee;
+    background: rgba(255, 184, 0, 0.16);
+    color: var(--text-accent);
 }
 
 [data-theme="dark"] .perf-option.active .perf-indicator-dot {
-    background: #5683da;
-    box-shadow: 0 0 6px rgba(86, 131, 218, 0.6);
+    background: var(--color-ember-pulse);
+    box-shadow: 0 0 6px rgba(255, 184, 0, 0.6);
 }
 
 /* Mobile Responsiveness for Dropdown Trigger */
@@ -582,4 +686,88 @@
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
+}
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHASE 7 - PERFORMANCE / RTL / RESPONSIVE AUDIT (D10-aware)
+
+   Closes the tier gaps left behind when Phase 6 (Overlays) was skipped and
+   Phase 5 added the Enterprise Footer.
+
+   Coverage matrix added here:
+     .auth-overlay        backdrop-filter: blur(12px)  - NO tier existed
+     .resource-card       Phase 4 glass blur            - low/potato only
+     .footer              opaque --bg-card, no blur     - documented, no rule
+     .social-icon-btn     flat border, no blur         - transition-gated
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── MEDIUM tier: halve the remaining blur radii (~50%) ── */
+[data-perf="medium"] .auth-overlay {
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+[data-perf="medium"] .resource-card {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+[data-perf="medium"] .resource-card::after {
+    opacity: 0;
+}
+
+/* ── LOW tier: disable backdrop-filter entirely (heaviest CSS property) ── */
+[data-perf="low"] .auth-overlay {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(9, 10, 12, 0.92);
+}
+
+[data-theme="light"][data-perf="low"] .auth-overlay {
+    background: rgba(255, 255, 255, 0.94);
+}
+
+[data-perf="low"] .resource-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: var(--bg-card);
+}
+
+/* Footer + social buttons carry no backdrop-filter, but flatten their
+   hover work so the low tier stays cheap. */
+[data-perf="low"] .social-icon-btn:hover,
+[data-perf="potato"] .social-icon-btn:hover {
+    border-color: var(--border);
+}
+
+/* ── POTATO tier: no blur, no shadows, no transitions anywhere ── */
+[data-perf="potato"] .auth-overlay {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: #121316;
+}
+
+[data-theme="light"][data-perf="potato"] .auth-overlay {
+    background: #ffffff;
+}
+
+[data-perf="potato"] .resource-card,
+[data-perf="potato"] .filter-dropdown-menu,
+[data-perf="potato"] .auth-overlay {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* The Enterprise Footer is already flat: opaque --bg-card background, a 1px
+   hairline border and no shadow. Under the potato tier the hover affordance
+   degrades to a colour change only (no transitions, no glow). */
+[data-perf="potato"] .footer a:hover,
+[data-perf="potato"] .social-icon-btn:hover {
+    color: var(--text-accent);
+    border-color: var(--border);
+    transition: none !important;
+}
+
+[data-perf="potato"] .footer {
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
 }

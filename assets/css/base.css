@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   base.css — Foundation & Layout (Huly aurora system)
+   base.css — Foundation & Layout (Obsidian Kinetic)
    Reset, typography, page container, ambient backdrop
    ═══════════════════════════════════════════════════════════════ */
 
@@ -90,8 +90,25 @@ img {
     }
 }
 
-/* ── Ambient backdrop — the aurora's quiet echo ──
-   Dark: iris wash top, ember wash bottom. Light: barely-there cool tint. */
+/* Phase 7: <480px small mobile - compress the shell gutters so the four
+   footer columns (already collapsed to one) and the resource cards keep
+   their breathing room. I2: this only shrinks width, never introduces
+   overflow. */
+@media (max-width: 480px) {
+    .page {
+        width: calc(100% - 16px);
+        padding: 10px 0 20px;
+    }
+}
+
+/* ── Ambient backdrop — Obsidian Kinetic ──────────────────────────────
+   Pure CSS only, and fully static: no shader, no animation, no script (D5).
+   Layer order: body void -> .aura-base (wash + vignette)
+   -> .aura-glow-1 (amber bloom, top-right) -> .aura-glow-2 (indigo bloom,
+   bottom-left). All sit behind .page (z-index 1) and behind .nav (z-index 50).
+   Colours come from --color-ember-pulse / --color-electric-iris via
+   color-mix(), with a literal rgba() declared first as a fallback for
+   engines without color-mix support. */
 .aura-backdrop {
     position: fixed;
     inset: 0;
@@ -100,53 +117,94 @@ img {
     z-index: 0;
 }
 
+/* Base wash + peripheral vignette (depth without an extra element). */
 .aura-base {
     position: absolute;
     inset: 0;
-    background: var(--bg);
+    background: radial-gradient(ellipse 120% 95% at 50% 45%,
+            transparent 0%,
+            transparent 45%,
+            var(--bg) 100%);
 }
 
 .aura-glow-1 {
     position: absolute;
-    top: -14%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 46%;
-    height: 42%;
-    background: radial-gradient(ellipse at center,
-            rgba(86, 131, 218, 0.06) 0%,
-            rgba(86, 131, 218, 0.025) 38%,
+    top: -20%;
+    right: -10%;
+    width: 80vw;
+    height: 80vw;
+    border-radius: 50%;
+    background: radial-gradient(circle at center,
+            rgba(255, 184, 0, 0.10) 0%,
+            rgba(255, 184, 0, 0.04) 40%,
             transparent 70%);
-    filter: blur(48px);
+    background: radial-gradient(circle at center,
+            color-mix(in srgb, var(--color-ember-pulse) 10%, transparent) 0%,
+            color-mix(in srgb, var(--color-ember-pulse) 4%, transparent) 40%,
+            transparent 70%);
+    filter: blur(80px);
+    opacity: 0.6;
+    pointer-events: none;
 }
 
 .aura-glow-2 {
     position: absolute;
-    bottom: -18%;
-    left: -8%;
-    width: 44%;
-    height: 42%;
-    background: radial-gradient(ellipse at center,
-            rgba(255, 137, 100, 0.03) 0%,
+    bottom: -15%;
+    left: -10%;
+    width: 70vw;
+    height: 70vw;
+    border-radius: 50%;
+    background: radial-gradient(circle at center,
+            rgba(195, 192, 255, 0.07) 0%,
             transparent 65%);
-    filter: blur(56px);
+    background: radial-gradient(circle at center,
+            color-mix(in srgb, var(--color-electric-iris) 7%, transparent) 0%,
+            transparent 65%);
+    filter: blur(100px);
+    opacity: 0.4;
+    pointer-events: none;
 }
 
+/* No matching element exists in the markup; rule retained unchanged. */
 .aura-vignette {
     display: none;
 }
 
 [data-theme="dark"] .aura-glow-1 {
-    background: radial-gradient(ellipse at center,
-            rgba(86, 131, 218, 0.08) 0%,
-            rgba(86, 131, 218, 0.03) 38%,
+    background: radial-gradient(circle at center,
+            rgba(255, 184, 0, 0.10) 0%,
+            rgba(255, 184, 0, 0.04) 40%,
+            transparent 70%);
+    background: radial-gradient(circle at center,
+            color-mix(in srgb, var(--color-ember-pulse) 10%, transparent) 0%,
+            color-mix(in srgb, var(--color-ember-pulse) 4%, transparent) 40%,
             transparent 70%);
 }
 
 [data-theme="dark"] .aura-glow-2 {
-    background: radial-gradient(ellipse at center,
-            rgba(255, 137, 100, 0.045) 0%,
+    background: radial-gradient(circle at center,
+            rgba(195, 192, 255, 0.07) 0%,
             transparent 65%);
+    background: radial-gradient(circle at center,
+            color-mix(in srgb, var(--color-electric-iris) 7%, transparent) 0%,
+            transparent 65%);
+}
+
+/* Light theme: the obsidian aesthetic is dark-primary, so the backdrop is
+   barely perceptible — a faint warm tint only. */
+[data-theme="light"] .aura-glow-1 {
+    opacity: 0.08;
+}
+
+[data-theme="light"] .aura-glow-2 {
+    opacity: 0.05;
+}
+
+[data-theme="light"] .aura-base {
+    background: radial-gradient(ellipse 120% 95% at 50% 45%,
+            transparent 0%,
+            transparent 55%,
+            var(--bg) 100%);
 }
 
 /* ── Animations (reduced-motion aware) ── */
@@ -222,7 +280,27 @@ img {
     *::before,
     *::after {
         animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    /* Phase 7: the Enterprise Footer and the Phase 4 resource cards both
+       animate on hover. The 0.01ms duration above already collapses the
+       transition, but the transform itself is motion - neutralise it so
+       nothing shifts spatially for reduced-motion users. */
+    .footer a,
+    .social-icon-btn,
+    .copyright-text {
+        transition: none !important;
+    }
+
+    .resource-card:hover {
+        transform: none !important;
+    }
+
+    .resource-card:hover .resource-arrow {
+        transform: none !important;
     }
 }
 

@@ -655,7 +655,7 @@ body.rtl .logo-shader {
 .filter-dropdown-menu {
     position: absolute;
     top: calc(100% + 8px);
-    left: 0;
+    inset-inline-start: 0;
     min-width: 100%;
     padding: 4px;
     background: var(--bg-card);
@@ -673,9 +673,10 @@ body.rtl .logo-shader {
     white-space: nowrap;
 }
 
-[dir="rtl"] .filter-dropdown-menu {
-    left: auto;
-    right: 0;
+/* Phase 7 (I13): .filter-dropdown-menu is now inset-inline-start, so the
+   manual RTL mirror is no longer required. */
+.filter-dropdown-menu {
+    inset-inline-end: auto;
 }
 
 .filter-dropdown-wrap.show .filter-dropdown-menu {
@@ -757,7 +758,7 @@ body.rtl .logo-shader {
 /* ── Resource cards grid ── */
 .resources-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
 }
 
@@ -782,7 +783,7 @@ body.rtl .logo-shader {
     content: "";
     position: absolute;
     top: -40px;
-    right: -40px;
+    inset-inline-end: -40px;
     width: 140px;
     height: 140px;
     border-radius: 50%;
@@ -901,187 +902,10 @@ body.rtl .logo-shader {
     transform: translateX(-2px);
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   3. BOTTOM GRID — releases table + quick access
-   ═══════════════════════════════════════════════════════════════ */
-.bottom-grid {
-    display: grid;
-    grid-template-columns: 1.65fr 0.9fr;
-    gap: 12px;
-    align-items: start;
-}
-
-.panel {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-cards);
-    overflow: hidden;
-}
-
-.panel-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px 14px;
-    border-bottom: 1px solid var(--border);
-}
-
-.panel-head-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.panel-icon {
-    width: 22px;
-    height: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-ember-pulse);
-}
-
-.panel-title {
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    color: var(--text);
-    line-height: 1;
-}
-
-.panel-sub {
-    font-size: 11px;
-    color: var(--text-4);
-    margin-top: 3px;
-}
-
-.panel-link {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-accent);
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    transition: opacity var(--dur-1) ease;
-}
-
-.panel-link:hover {
-    opacity: 0.8;
-}
-
-/* — Releases table — */
-.releases-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: auto;
-}
-
-.releases-table th {
-    text-align: left;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--text-4);
-    background: var(--n-4);
-    padding: 9px 16px;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-}
-
-.releases-table td {
-    padding: 12px 16px;
-    font-size: 12px;
-    border-bottom: 1px solid var(--border);
-    vertical-align: middle;
-    color: var(--text-2);
-    white-space: nowrap;
-}
-
-.releases-table tr:last-child td {
-    border-bottom: none;
-}
-
-.releases-table tr:hover td {
-    background: var(--bg-hover);
-}
-
-.version-cell {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    color: var(--text);
-    max-width: 240px;
-}
-
-.version-cell span.version-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.version-cell .badge-new {
-    font-size: 9px;
-    height: 16px;
-    padding: 0 6px;
-}
-
-.type-cell {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--text-3);
-    font-size: 11px;
-}
-
-.type-cell svg {
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
-    opacity: 0.7;
-}
-
 .mono {
     font-family: var(--mono);
     font-size: 11px;
     color: var(--text-4);
-}
-
-.download-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    height: 28px;
-    padding: 0 13px;
-    border-radius: var(--radius-buttons);
-    background: var(--glow);
-    border: 1px solid rgba(86, 131, 218, 0.35);
-    color: var(--text-accent);
-    font-size: 11px;
-    font-weight: 500;
-    transition: all 120ms ease;
-    white-space: nowrap;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-.download-btn:hover {
-    background: var(--color-electric-iris);
-    border-color: var(--color-electric-iris);
-    color: #ffffff;
-}
-
-.download-btn svg {
-    width: 12px;
-    height: 12px;
-}
-
-.row-actions {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    justify-content: flex-end;
 }
 
 .icon-btn {
@@ -1101,89 +925,6 @@ body.rtl .logo-shader {
     background: var(--bg-hover);
     border-color: var(--border);
     color: var(--text);
-}
-
-/* — Quick access list — */
-.quick-list {
-    display: flex;
-    flex-direction: column;
-}
-
-.quick-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 13px 16px;
-    border-bottom: 1px solid var(--border);
-    transition: background 120ms ease;
-    cursor: pointer;
-    text-decoration: none;
-    color: inherit;
-}
-
-.quick-item:last-child {
-    border-bottom: none;
-}
-
-.quick-item:hover {
-    background: var(--bg-hover);
-}
-
-.quick-icon {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-    background: var(--n-4);
-    border: 1px solid var(--border);
-    color: var(--text-3);
-    flex-shrink: 0;
-}
-
-.quick-icon svg {
-    width: 16px;
-    height: 16px;
-}
-
-.quick-meta {
-    flex: 1;
-    min-width: 0;
-}
-
-.quick-meta-title {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text);
-    line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.quick-meta-sub {
-    font-size: 11px;
-    color: var(--text-4);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-top: 1px;
-}
-
-.quick-arrow {
-    color: var(--text-4);
-    flex-shrink: 0;
-    transition: all 120ms ease;
-}
-
-.quick-item:hover .quick-arrow {
-    color: var(--text-accent);
-    transform: translateX(2px);
-}
-
-[dir="rtl"] .quick-item:hover .quick-arrow {
-    transform: translateX(-2px);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1332,12 +1073,7 @@ body.rtl .logo-shader {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    margin-left: 6px;
-}
-
-[dir="rtl"] .resource-status {
-    margin-left: 0;
-    margin-right: 6px;
+    margin-inline-start: 6px;
 }
 
 .status-live {
@@ -1461,13 +1197,6 @@ body.rtl .logo-shader {
     max-width: 100%;
 }
 
-.releases-table td:has(.locked-state),
-.releases-table tr:has(.locked-state) td {
-    padding: 0 !important;
-    border-bottom: none !important;
-    white-space: normal !important;
-}
-
 /* — Login Modal Overlay — */
 .auth-overlay {
     position: fixed;
@@ -1517,7 +1246,7 @@ body.rtl .logo-shader {
     content: "";
     position: absolute;
     top: -50%;
-    left: -20%;
+    inset-inline-start: -20%;
     width: 140%;
     height: 100%;
     background: radial-gradient(circle at 50% 100%, rgba(86, 131, 218, 0.15) 0%, transparent 60%);
@@ -1621,7 +1350,7 @@ body.rtl .logo-shader {
 .btn-close-modal {
     position: absolute;
     top: 16px;
-    right: 16px;
+    inset-inline-end: 16px;
     width: 28px;
     height: 28px;
     background: transparent;
@@ -1639,32 +1368,6 @@ body.rtl .logo-shader {
 .btn-close-modal:hover {
     background: var(--bg-hover);
     color: var(--text);
-}
-
-/* ── OS Tabs (Segmented Control) ── */
-.os-tabs {
-    display: flex;
-    padding: 3px;
-    border-radius: var(--radius-buttons);
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    gap: 2px;
-}
-
-.os-tabs .vt-btn {
-    width: auto;
-    padding: 0 14px;
-    height: 28px;
-    font-size: 11px;
-    font-weight: 600;
-    font-family: var(--mono);
-}
-
-.panel-head-controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1698,10 +1401,15 @@ body.rtl .logo-shader {
    ─────────────────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
 
-    /* — Hero: single column, watermark pinned top-right — */
+    /* — Hero: centred single-column stack —
+       Phase 9 (I21 exception, human-approved): layout-only change so the
+       logo sits ABOVE the Hero text as a centred element instead of an
+       absolutely-positioned corner watermark. Colors, type, tokens, markup
+       and every breakpoint >1024px are untouched. */
     .hero-max {
         flex-direction: column;
-        align-items: stretch;
+        align-items: center;
+        justify-content: center;
         padding: 40px 28px 48px;
         gap: 28px;
         text-align: center;
@@ -1711,6 +1419,8 @@ body.rtl .logo-shader {
         max-width: none;
         padding-left: 0;
         margin: 0 auto;
+        /* keep full width under the new align-items: center */
+        width: 100%;
     }
 
     [dir="rtl"] .hero-content {
@@ -1727,15 +1437,25 @@ body.rtl .logo-shader {
         margin: 0 auto;
     }
 
-    /* Watermark pinned to the TOP-right corner: medium size, scales down
-       with the viewport, sits fully inside the panel with breathing room
-       from its top edge (never clipped) */
+    /* Logo enters normal flow, is ordered above the text, and is centred.
+       Every absolute offset from the base rule is explicitly reset so the
+       in-flow element is not shifted. */
     .hero-visual {
-        top: clamp(20px, 4vw, 36px);
+        order: -1;
+        position: relative;
+        z-index: 1;
+        top: auto;
+        right: auto;
         bottom: auto;
-        right: clamp(8px, 2vw, 24px);
+        left: auto;
         transform: none;
-        width: clamp(180px, 30vw, 320px);
+        width: clamp(170px, 26vw, 250px);
+        height: auto;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
     }
 
     .logo-swap {
@@ -1746,22 +1466,24 @@ body.rtl .logo-shader {
         opacity: 0.4;
     }
 
+    /* RTL: the base rule offsets the visual with a negative `left`, which
+       would displace it now that it is in flow. Reset to auto and centre. */
     [dir="rtl"] .hero-visual,
     html[lang="fa"] .hero-visual,
     body.rtl .hero-visual {
         right: auto;
-        left: clamp(-72px, -2vw, -8px);
+        left: auto;
+        margin-inline: auto;
     }
 
-    /* — Resources: 2-column card grid — */
-    .resources-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    /* — Bottom grid: releases + quick access stack — */
-    .bottom-grid {
-        grid-template-columns: 1fr;
-    }
+/* — Resources: 2-column card grid —
+   minmax(0, 1fr) rather than bare 1fr: grid items default to
+   min-width:auto, so a long unbroken string inside a card can push a
+   track wider than its share and force horizontal overflow (I2).
+   Phase 9 fix. */
+.resources-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
 
     /* — Auth locked state — */
     .locked-state {
@@ -1787,18 +1509,6 @@ body.rtl .logo-shader {
    ≤ 768px — small tablets / large phones
    ─────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-
-    /* — Releases table: fill panel width, hide Type + Size columns — */
-    .releases-table {
-        min-width: 100%;
-    }
-
-    .releases-table th:nth-child(3),
-    .releases-table td:nth-child(3),
-    .releases-table th:nth-child(5),
-    .releases-table td:nth-child(5) {
-        display: none;
-    }
 
     /* — Auth locked state — */
     .locked-state {
@@ -1902,14 +1612,22 @@ body.rtl .logo-shader {
     }
 
     /* Small in-flow brand emblem ABOVE the status pill:
-       crisp, centered, part of the content stack (no overlap) */
+       crisp, centered, part of the content stack (no overlap).
+       Phase 9: this rule previously re-applied `position: absolute` with a
+       negative `right`, which undid the <=1024px stacking fix at phone
+       widths. It now stays in normal flow and only shrinks. */
     .hero-visual {
-        position: absolute;
+        position: relative;
         z-index: 1;
-        right: clamp(-72px, -2vw, -8px);
-        top: 50%;
-        transform: translateY(-50%);
-        width: min(680px, 48vw);
+        top: auto;
+        right: auto;
+        bottom: auto;
+        left: auto;
+        transform: none;
+        order: -1;
+        width: clamp(140px, 38vw, 190px);
+        height: auto;
+        margin: 0 auto;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1968,31 +1686,13 @@ body.rtl .logo-shader {
     }
 
     .section-controls .icon-btn {
-        margin-left: auto;
+        margin-inline-start: auto;
     }
 
-    /* — Bottom grid: stacked panel heads, full-width OS tabs — */
-    .panel-head {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-    }
-
-    .panel-head-controls {
-        justify-content: space-between;
-        width: 100%;
-        gap: 8px;
-    }
-
-    .os-tabs {
-        flex: 1 1 auto;
-    }
-
-    .os-tabs .vt-btn {
-        flex: 1;
-        min-height: 34px;
-        justify-content: center;
-        text-align: center;
+    /* Phase 7 (I13): mirror the control row under RTL */
+    [dir="rtl"] .section-controls .icon-btn {
+        margin-inline-start: 0;
+        margin-inline-end: auto;
     }
 
     .logo-shader {
@@ -2030,19 +1730,433 @@ body.rtl .logo-shader {
         font-size: 12px;
     }
 
-    /* — Bottom grid: compact panel head, stacked action order — */
-    .panel-head {
-        gap: 10px !important;
-        padding: 14px 14px 12px;
-    }
-
     #releaseAuthAction {
         order: 3;
         width: 100%;
         justify-content: flex-end;
     }
+}
 
-    #osTabs {
-        order: 2;
-    }
+/* ==========================================================================
+   OBSIDIAN KINETIC — HOME PAGE COMPONENTS (Phase 4)
+   --------------------------------------------------------------------------
+   Scope: .resources-section, .results-panel, skeletons, and the
+   empty/error/locked states.
+
+   Phase 5 (D10) removed the .bottom-grid (releases + quick access) and the
+   .status-bar from both the DOM and this stylesheet.
+
+   The Hero (.hero-max and every descendant) is FROZEN per D8/I21 and is NOT
+   touched here. The HERO DRIFT INSULATION block below is left byte-identical.
+
+   This block is appended last, so it overrides the base rules above at equal
+   specificity. Direction-sensitive rules use logical properties, so no
+   [dir="rtl"] counter-rules are required for anything new here.
+   ========================================================================== */
+
+/* ── SECTION HEADER + CONTROLS ─────────────────────────────────────────── */
+
+.section-title {
+    font-family: var(--font);
+    font-size: var(--text-headline-sm);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+}
+
+.section-sub {
+    font-family: var(--font);
+    font-size: var(--text-body-md);
+    color: var(--text-3);
+}
+
+.section-icon {
+    border-radius: var(--radius-md);
+    background: rgba(255, 184, 0, 0.08);
+    background: color-mix(in srgb, var(--color-ember-pulse) 8%, transparent);
+    border: 1px solid rgba(255, 184, 0, 0.22);
+    border-color: color-mix(in srgb, var(--color-ember-pulse) 22%, transparent);
+    color: var(--color-ember-pulse);
+}
+
+/* Filter / sort triggers — glass, matching the navbar dropdowns. */
+.filter-pill {
+    border-radius: var(--radius-md);
+    background: var(--surface-glass);
+    color: var(--text-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-label-mono-sm);
+}
+
+.filter-pill:hover,
+.filter-dropdown-wrap.show .filter-pill {
+    background: var(--bg-hover);
+    color: var(--text);
+}
+
+/* Mechanism FROZEN (I8): .show on the WRAPPER, closed via opacity+visibility. */
+.filter-dropdown-menu {
+    background: var(--surface-glass);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: var(--z-dropdown);
+}
+
+.filter-option {
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+    font-size: var(--text-label-mono-sm);
+}
+
+.filter-option:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.filter-option.active,
+[data-theme="dark"] .filter-option.active {
+    background: rgba(255, 184, 0, 0.14);
+    color: var(--text-accent);
+}
+
+/* View toggle — ghost segmented control with amber active state. */
+.view-toggle {
+    border-radius: var(--radius-md);
+    background: var(--surface-glass);
+}
+
+.vt-btn {
+    border-radius: var(--radius-sm);
+    color: var(--text-3);
+}
+
+.vt-btn.active,
+[data-theme="dark"] .vt-btn.active {
+    background: rgba(255, 184, 0, 0.1);
+    color: var(--color-ember-pulse);
+}
+
+.vt-btn:hover {
+    color: var(--text);
+}
+
+/* ── RESOURCE CARDS ─────────────────────────────────────────────────────── */
+
+.resources-grid {
+    gap: var(--space-md);
+}
+
+.resource-card {
+    padding: var(--space-lg);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: none;
+}
+
+.resource-card:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-hover);
+    box-shadow: 0 0 16px -4px rgba(255, 184, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+[data-theme="dark"] .resource-card:hover {
+    border-color: var(--border-hover);
+    box-shadow: 0 0 16px -4px rgba(255, 184, 0, 0.08);
+}
+
+/* Corner bleed retinted from coral to amber. */
+.resource-card::after {
+    background: radial-gradient(circle, rgba(255, 184, 0, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle,
+            color-mix(in srgb, var(--color-ember-pulse) 10%, transparent) 0%,
+            transparent 70%);
+}
+
+.resource-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 184, 0, 0.08);
+    background: color-mix(in srgb, var(--color-ember-pulse) 8%, transparent);
+    border: 1px solid rgba(255, 184, 0, 0.22);
+    border-color: color-mix(in srgb, var(--color-ember-pulse) 22%, transparent);
+    color: var(--color-ember-pulse);
+}
+
+.resource-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.resource-card:hover .resource-icon {
+    background: rgba(255, 184, 0, 0.16);
+    background: color-mix(in srgb, var(--color-ember-pulse) 16%, transparent);
+    border-color: rgba(255, 184, 0, 0.4);
+    border-color: color-mix(in srgb, var(--color-ember-pulse) 40%, transparent);
+    color: var(--color-ember-pulse);
+}
+
+.resource-meta h3 {
+    font-family: var(--font);
+    font-size: var(--text-body-lg);
+    font-weight: 600;
+    color: var(--text);
+}
+
+.resource-meta p {
+    font-family: var(--font);
+    font-size: var(--text-body-md);
+    color: var(--text-3);
+}
+
+.resource-bottom {
+    font-family: var(--font-mono);
+    font-size: var(--text-label-mono-sm);
+    color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+}
+
+.resource-status {
+    margin-inline-start: 6px;
+}
+
+.resource-arrow {
+    border-radius: var(--radius-md);
+    color: var(--text-3);
+}
+
+.resource-card:hover .resource-arrow {
+    background: var(--color-ember-pulse);
+    border-color: var(--color-ember-pulse);
+    color: #412d00;
+}
+
+.status-live {
+    color: var(--success);
+}
+
+.status-error {
+    color: var(--danger);
+}
+
+.mono {
+    font-family: var(--font-mono);
+    font-size: var(--text-label-mono-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-3);
+}
+
+.icon-btn {
+    border-radius: var(--radius-md);
+    color: var(--text-3);
+}
+
+.icon-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text);
+}
+
+/* ── SEARCH RESULTS PANEL ───────────────────────────────────────────────── */
+
+.results-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.results-bar-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-label-code);
+    color: var(--text-2);
+}
+
+.results-bar-meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-label-mono-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-3);
+}
+
+/* HARD GATE: max-height/overflow must survive — this is one of only three
+   nested scroll containers in the application. */
+.results-body {
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.res-row {
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.res-row:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.res-info a {
+    font-family: var(--font);
+    font-size: var(--text-body-md);
+    color: var(--text);
+}
+
+.res-path {
+    font-family: var(--font-mono);
+    font-size: var(--text-label-mono-sm);
+    color: var(--text-3);
+}
+
+/* ── SKELETONS ──────────────────────────────────────────────────────────── */
+
+.resource-card-skeleton {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.skeleton-box,
+.skeleton-line {
+    background: linear-gradient(90deg,
+            var(--bg-hover) 25%,
+            var(--bg-elevated) 50%,
+            var(--bg-hover) 75%);
+    background-size: 200% 100%;
+    border-radius: var(--radius-sm);
+}
+
+[data-theme="light"] .skeleton-box,
+[data-theme="light"] .skeleton-line {
+    background: linear-gradient(90deg,
+            var(--bg-hover) 25%,
+            var(--bg-elevated) 50%,
+            var(--bg-hover) 75%);
+    background-size: 200% 100%;
+}
+
+/* ── EMPTY / ERROR / LOCKED STATES ──────────────────────────────────────── */
+
+.ac-empty {
+    font-family: var(--font);
+    font-size: var(--text-body-md);
+    color: var(--text-3);
+}
+
+.resources-error {
+    background: rgba(147, 0, 10, 0.1);
+    border: 1px solid var(--error-container);
+    border-radius: var(--radius-lg);
+    color: var(--danger);
+    font-family: var(--font);
+    font-size: var(--text-body-lg);
+}
+
+.locked-state {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.locked-icon {
+    background: rgba(255, 184, 0, 0.1);
+    background: color-mix(in srgb, var(--color-ember-pulse) 10%, transparent);
+    color: var(--color-ember-pulse);
+    box-shadow: 0 0 20px rgba(255, 184, 0, 0.15);
+}
+
+.locked-title {
+    font-family: var(--font);
+    font-size: var(--text-body-lg);
+    font-weight: 600;
+    color: var(--text);
+}
+
+.locked-desc {
+    font-family: var(--font);
+    font-size: var(--text-body-md);
+    color: var(--text-3);
+}
+
+/* ── LIGHT THEME ────────────────────────────────────────────────────────── */
+
+[data-theme="light"] .resource-card:hover,
+[data-theme="light"] .resource-icon {
+    box-shadow: none;
+}
+
+[data-theme="light"] .filter-pill:hover,
+[data-theme="light"] .filter-dropdown-wrap.show .filter-pill,
+[data-theme="light"] .vt-btn:hover,
+[data-theme="light"] .res-row:hover {
+    background: rgba(28, 28, 30, 0.04);
+}
+
+[data-theme="light"] .resource-card::after {
+    background: radial-gradient(circle,
+            color-mix(in srgb, var(--color-ember-pulse) 12%, transparent) 0%,
+            transparent 70%);
+}
+
+/* ==========================================================================
+   HERO DRIFT INSULATION -- Phase 1 / D8 / I21
+   --------------------------------------------------------------------------
+   The Home Hero (.hero-max) is FROZEN. Phase 1 repointed the global design
+   tokens to the Obsidian Kinetic palette, which would have visibly changed the
+   Hero. The tokens below are re-declared INSIDE a .hero-max scope, pinned to
+   their exact pre-redesign values, so the Hero renders identically while the
+   rest of the app adopts the new palette.
+
+   This is the ONLY CSS change permitted inside the Hero (D8 clause 3).
+
+   Scope is deliberate: .input-wrap is a SHARED component (also used by
+   .browse-search on the Browse page). Scoping to .hero-max insulates only the
+   Hero copy and leaves the Browse copy free to adopt the new tokens in Phase 5.
+
+   NOTE: --font is intentionally NOT pinned. It is inherited from <body>, and
+   D6 mandates self-hosted Inter application-wide. Pinning it would leave the
+   Hero on a different typeface from the rest of the app.
+
+   Do NOT add, remove, or alter any Hero rule outside this block.
+   ========================================================================== */
+
+/* Light theme is the :root default, so the unqualified block carries the
+   light pins. [data-theme="dark"] overrides them below.
+
+   --input-bg is pinned to `transparent` deliberately: it was UNDEFINED in the
+   light theme before Phase 1, so `.input-wrap { background: var(--input-bg) }`
+   computed to no background. Phase 1 added a real light value globally, so the
+   Hero must neutralize it to keep its original appearance. `transparent`
+   reproduces the pre-change computed result exactly. */
+.hero-max {
+    --border: var(--n-5);
+    --radius-panels: 20px;
+    --color-ember-pulse: #ff8964;
+    --color-electric-iris: #5683da;
+    --text: var(--n-11);
+    --text-2: var(--n-10);
+    --text-3: var(--n-8);
+    --text-4: var(--n-7);
+    --text-body-lg: 16px;
+    --glow: oklch(58% 0.170 224 / 0.07);
+    --border-focus: var(--a-5);
+    --input-bg: transparent;
+}
+
+/* Dark theme (explicit; overrides the :root-default pins above). */
+[data-theme="dark"] .hero-max {
+    --border: #4a4b50;
+    --radius-panels: 20px;
+    --color-ember-pulse: #ff8964;
+    --color-electric-iris: #5683da;
+    --text: #ffffff;
+    --text-2: #d1d1d1;
+    --text-3: #a9a9aa;
+    --text-4: #95979e;
+    --text-body-lg: 16px;
+    --glow: rgba(86, 131, 218, 0.10);
+    --border-focus: #5683da;
+    --input-bg: rgba(9, 10, 12, 0.55);
 }

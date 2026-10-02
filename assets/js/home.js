@@ -20,7 +20,6 @@ const HomePage = (function () {
   let rawResources = [];      // Cached raw data from API
   let activeCategory = "all"; // Current active category filter
   let activeSort = "latest";  // Current active sort filter
-  let activeOsTab = "el9"; // Current active OS for releases tab
 
   /* ═══════════════════════════════════════════════
      MAIN RENDER
@@ -33,9 +32,7 @@ const HomePage = (function () {
       <div class="home-layout">
         ${renderHeroSection(d)}
         ${renderResourcesSection(d)}
-        ${renderBottomSection(d)}
         ${renderSearchResultsPanel(d)}
-        ${renderStatusBar(d)}
       </div>
     `;
 
@@ -165,69 +162,6 @@ const HomePage = (function () {
  * @returns {string}    HTML template string.
  */
   /* ═══════════════════════════════════════════════
-     SECTION: BOTTOM PANELS (Latest Releases + Quick Access)
-     ═══════════════════════════════════════════════ */
-  function renderBottomSection(d) {
-    return `
-      <section class="bottom-grid">
-        
-        <!-- 1. Left Panel: Latest Releases -->
-        <div class="panel">
-          <div class="panel-head">
-            <div class="panel-head-left">
-              <div class="panel-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff8964" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              </div>
-              <div>
-                <div class="panel-title">${d.latestReleases || "Latest Releases"}</div>
-                <div class="panel-sub">${d.latestSub || "Recently published packages and updates."}</div>
-              </div>
-            </div>
-
-            <!-- Controls Group (Auth info, OS Tabs, View all) -->
-            <div class="panel-head-controls">
-              <div id="releaseAuthAction" style="display: flex; align-items: center; gap: 8px;"></div>
-
-              <!-- OS Selection Tabs (Using .os-tabs class) -->
-              <div class="os-tabs" id="osTabs">
-                <button class="vt-btn active" data-os="el9" type="button">EL9</button>
-                <button class="vt-btn" data-os="el8" type="button">EL8</button>
-              </div>
-
-              <!-- View All Link -->
-              <a class="panel-link" id="viewAllReleases" href="#" style="display:none;">${d.viewAll || "View all"} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
-            </div>
-          </div>
-
-          <!-- Dynamic Container -->
-          <div id="releasesContainer" style="overflow-x:auto;">
-            <div style="padding: 32px; text-align: center; color: var(--text-4); font-family: var(--mono); font-size: 11px;">
-              ${d.scanning || "Loading…"}
-            </div>
-          </div>
-        </div>
-
-        <!-- 2. Right Panel: Quick Access -->
-        <div class="panel">
-          <div class="panel-head">
-            <div class="panel-head-left">
-              <div class="panel-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff8964" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              </div>
-              <div>
-                <div class="panel-title">${d.quickAccess || "Quick Access"}</div>
-                <div class="panel-sub">${d.quickSub || "Frequently used downloads."}</div>
-              </div>
-            </div>
-          </div>
-          <div class="quick-list" id="quickAccessList"></div>
-        </div>
-        
-      </section>
-    `;
-  }
-
-  /* ═══════════════════════════════════════════════
      SECTION: SEARCH RESULTS PANEL
      ═══════════════════════════════════════════════ */
   function renderSearchResultsPanel(d) {
@@ -242,52 +176,6 @@ const HomePage = (function () {
         </div>
         <div class="results-body" id="resultsList"></div>
       </section>
-    `;
-  }
-
-  /* ═══════════════════════════════════════════════
-     SECTION: STATUS BAR
-     ═══════════════════════════════════════════════ */
-  function renderStatusBar(d) {
-    return `
-      <div class="status-bar">
-        <div class="status-item">
-          <div class="status-item-icon">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-          </div>
-          <div class="status-item-text">
-            <span class="status-item-label">${d.statusInfra || "Infrastructure Status"}</span>
-            <span class="status-item-sub"><span class="status-dot"></span> ${d.statusOperational || "All systems operational"}</span>
-          </div>
-        </div>
-        <div class="status-item">
-          <div class="status-item-icon">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 6 4 4 4-4"/><path d="M12 18v-8"/><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-          </div>
-          <div class="status-item-text">
-            <span class="status-item-label">${d.statusMalware || "Malware Scanning"}</span>
-            <span class="status-item-sub"><span class="status-dot" style="background:#10b981"></span> 7 ${d.statusEngines || "engines active"}</span>
-          </div>
-        </div>
-        <div class="status-item">
-          <div class="status-item-icon">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-          </div>
-          <div class="status-item-text">
-            <span class="status-item-label">${d.statusStorage || "Storage"}</span>
-            <span class="status-item-sub"><span class="status-dot" style="background:#ff8964"></span> 72% ${d.statusUsed || "used"} (1.4 TB / 2 TB)</span>
-          </div>
-        </div>
-        <div class="status-item">
-          <div class="status-item-icon">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          </div>
-          <div class="status-item-text">
-            <span class="status-item-label">${d.statusSync || "Last Sync"}</span>
-            <span class="status-item-sub"><span class="status-dot" style="background:#5683da"></span> <span id="lastSyncTime">—</span></span>
-          </div>
-        </div>
-      </div>
     `;
   }
 
@@ -382,8 +270,6 @@ const HomePage = (function () {
 
       return resourceCard(resource.path, title, desc, statsBadge, resource.iconType, statusHtml);
     }).join('');
-
-    updateLastSyncTime();
   }
 
   function resourceCard(href, title, desc, meta, iconType, statusHtml) {
@@ -433,7 +319,6 @@ const HomePage = (function () {
       rawResources = await ResourceService.getResources(options);
       populateCategoryFilter(rawResources);
       applyFiltersAndRender();
-      loadSidebarPanels();
     } catch (err) {
       console.error("[Home] Failed to load resources:", err);
       const grid = document.getElementById("resourcesGrid");
@@ -447,16 +332,6 @@ const HomePage = (function () {
         `;
       }
     }
-  }
-
-  function updateLastSyncTime() {
-    const el = document.getElementById("lastSyncTime");
-    if (!el) return;
-    const now = new Date();
-    const lang = typeof window.getLang === 'function' ? window.getLang() : getLang();
-    const locale = lang === "fa" ? "fa-IR" : "en-US";
-    el.textContent = now.toLocaleDateString(locale) + " " +
-      now.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
   }
 
   /* ═══════════════════════════════════════════════
@@ -509,220 +384,6 @@ const HomePage = (function () {
     });
   }
 
-  /**
-   * @brief   Fetches and renders the Releases table dynamically based on active OS tab.
-   */
-
-  async function loadReleasesTable() {
-    if (typeof ResourceService === "undefined") return;
-
-    const getDictFn = typeof window !== "undefined" && typeof window.getDict === "function"
-      ? window.getDict
-      : (typeof getDict === "function" ? getDict : () => ({}));
-    const getLangFn = typeof window !== "undefined" && typeof window.getLang === "function"
-      ? window.getLang
-      : (typeof getLang === "function" ? getLang : () => "en");
-
-    const d = getDictFn() || {};
-    const lang = getLangFn() || "en";
-
-    const safeEscape = (str) => {
-      if (typeof escapeHtml === "function") return escapeHtml(str);
-      return String(str ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    };
-
-    const container = document.getElementById("releasesContainer");
-    const viewAll = document.getElementById("viewAllReleases");
-    const authActionEl = document.getElementById("releaseAuthAction");
-
-    if (!container) return;
-
-    try {
-      const authStatus = await ResourceService.checkAuthStatus();
-
-      if (authStatus?.enabled && !authStatus?.authenticated) {
-        if (typeof IdleTimer !== "undefined") IdleTimer.stop();
-
-        if (viewAll) viewAll.style.display = "none";
-        if (authActionEl) authActionEl.innerHTML = "";
-
-        container.innerHTML = `
-        <div class="locked-state">
-          <div class="locked-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
-          </div>
-          <div class="locked-title">${d.authRequired || "Authentication Required"}</div>
-          <div class="locked-desc">${d.authRequiredDesc || "Access to the PVM release infrastructure requires clearance."}</div>
-          <button class="btn btn-primary" onclick="typeof HomePage !== 'undefined' && HomePage.showLoginModal ? HomePage.showLoginModal() : null">
-            ${d.btnAuth || "Authenticate to Access"}
-          </button>
-        </div>`;
-        return;
-      }
-
-      if (authStatus?.enabled && authStatus?.authenticated) {
-        if (typeof IdleTimer !== "undefined") {
-          IdleTimer.start(30, async () => {
-            await ResourceService.logout();
-            loadReleasesTable();
-          });
-        }
-
-        if (authActionEl) {
-          const username = authStatus.user?.username || "admin";
-          authActionEl.innerHTML = `
-          <span class="mono" style="font-size: 11px; color: var(--text-4); opacity: 0.8;">${safeEscape(username)}</span>
-          <button class="icon-btn" id="releaseLogoutBtn" title="${d.btnSignOut || 'Sign Out / Lock'}" style="color: var(--danger);" type="button">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-              <polyline points="16 17 21 12 16 7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-          </button>
-        `;
-
-          document.getElementById("releaseLogoutBtn")?.addEventListener("click", async () => {
-            await ResourceService.logout();
-            loadReleasesTable();
-          });
-        }
-      } else {
-        if (typeof IdleTimer !== "undefined") IdleTimer.stop();
-        if (authActionEl) authActionEl.innerHTML = "";
-      }
-
-      if (viewAll) viewAll.style.display = "inline-flex";
-
-      if (!document.getElementById("releasesBody")) {
-        container.innerHTML = `
-        <table class="releases-table">
-          <thead>
-            <tr>
-              <th>${d.thVersion || "Version"}</th>
-              <th>${d.thType || "Package Type"}</th>
-              <th>${d.thUpdated || "Updated"}</th>
-              <th>${d.thSize || "Size"}</th>
-              <th>${d.thChecksum || "Checksum"}</th>
-              <th style="text-align:${d.dir === 'rtl' ? 'left' : 'right'}">${d.thAction || "Action"}</th>
-            </tr>
-          </thead>
-          <tbody id="releasesBody">
-            <tr><td colspan="6" class="mono">${d.scanning || "Loading…"}</td></tr>
-          </tbody>
-        </table>`;
-      }
-
-      const body = document.getElementById("releasesBody");
-
-      const currentOsTab = typeof activeOsTab !== "undefined" ? activeOsTab : "linux";
-      const res = await ResourceService.getReleases(5, currentOsTab);
-      const { browsePath, items: releases } = res || {};
-
-      if (viewAll && browsePath && typeof ResourceService.browseHref === "function") {
-        viewAll.href = ResourceService.browseHref(browsePath);
-      }
-
-      if (!releases || !releases.length) {
-        body.innerHTML = `<tr><td colspan="6">${d.noReleases || `No packages found for ${String(currentOsTab).toUpperCase()}.`}</td></tr>`;
-        return;
-      }
-
-      const newest = releases[0]?.mtime ? new Date(releases[0].mtime).getTime() : 0;
-      body.innerHTML = releases.map((item, idx) => {
-        const itemTime = item?.mtime ? new Date(item.mtime).getTime() : 0;
-        const isNew = idx === 0 || (newest && (newest - itemTime) < 24 * 60 * 60 * 1000);
-
-        return typeof releaseRow === "function"
-          ? releaseRow(item, isNew, lang, d)
-          : `<tr><td colspan="6">${safeEscape(item.name || item.version)}</td></tr>`;
-      }).join("");
-
-    } catch (err) {
-      console.error("Failed to load releases table:", err);
-      if (viewAll) viewAll.href = "#";
-      container.innerHTML = `<div class="resources-error" style="margin:20px;">${d.resourcesLoadError || "Unable to load releases."}</div>`;
-    }
-  }
-
-
-  /**
-   * @brief   Initializes both bottom sidebar panels (Releases & Quick Access).
-   */
-  async function loadSidebarPanels() {
-    if (typeof ResourceService === "undefined") return;
-    const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
-
-    // 1. Load Releases Table
-    await loadReleasesTable();
-
-    // 2. Load Quick Access
-    const quick = document.getElementById("quickAccessList");
-    if (quick) {
-      try {
-        const { items: top } = await ResourceService.getReleases(4);
-        if (!top || !top.length) {
-          quick.innerHTML = `<div class="ac-empty" style="padding:16px">${d.noReleases || "No files found yet."}</div>`;
-        } else {
-          quick.innerHTML = top.map((item) => {
-            const iconType = ResourceService.inferIcon(item.category || item.name);
-            return quickItem(item.name, (item.category || "") + " · " + humanSize(item.size), iconType, ResourceService.downloadHref(item.path));
-          }).join("");
-        }
-      } catch (err) {
-        quick.innerHTML = `<div class="ac-empty" style="padding:16px">${d.resourcesLoadError || "Error loading."}</div>`;
-      }
-    }
-  }
-
-  function releaseRow(item, isNew, lang, d) {
-    const href = ResourceService.downloadHref(item.path);
-    const icon = getResourceIcon(ResourceService.inferIcon(item.category || item.name));
-    return `
-    <tr>
-      <td>
-        <div class="version-cell">
-          <span class="version-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</span>
-          ${isNew ? `<span class="badge badge-new">${d.badgeNew || "NEW"}</span>` : ``}
-        </div>
-      </td>
-      <td><div class="type-cell">${icon} <span>${escapeHtml(item.category || "File")}</span></div></td>
-      <td class="mono">${formatDate(item.mtime, lang)}</td>
-      <td class="mono">${humanSize(item.size)}</td>
-      <td class="mono">—</td>
-      <td style="text-align:${d.dir === 'rtl' ? 'left' : 'right'}">
-        <div class="row-actions">
-          <a class="download-btn" href="${href}" data-file="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            ${d.btnDownload || "Download"}
-          </a>
-        </div>
-      </td>
-    </tr>
-  `;
-  }
-
-  function quickItem(title, sub, iconType, href) {
-    const icon = getResourceIcon(iconType);
-    return `
-      <a class="quick-item" href="${href}" data-file="true">
-        <div class="quick-icon">${icon}</div>
-        <div class="quick-meta">
-          <div class="quick-meta-title">${escapeHtml(title)}</div>
-          <div class="quick-meta-sub">${escapeHtml(sub)}</div>
-        </div>
-        <div class="quick-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
-      </a>
-    `;
-  }
-
   /* ═══════════════════════════════════════════════
      DOM BINDINGS
      ═══════════════════════════════════════════════ */
@@ -731,7 +392,6 @@ const HomePage = (function () {
     bindViewToggleEvents();
     bindRefreshEvent();
     bindFilterEvents();
-    bindOsTabs();
 
     bindDownloadInterception(container || document);
   }
@@ -819,30 +479,6 @@ const HomePage = (function () {
     });
   }
 
-
-  /**
-   * @brief   Binds click events to the OS selection tabs in the Releases Panel.
-   * @details Switches the activeOsTab state and triggers a re-fetch of the table.
-   */
-  function bindOsTabs() {
-    const osButtons = document.querySelectorAll("#osTabs .vt-btn");
-    if (!osButtons.length) return;
-
-    osButtons.forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        // Remove active class from all tabs
-        osButtons.forEach(b => b.classList.remove("active"));
-
-        // Set active class to clicked tab
-        const target = e.currentTarget;
-        target.classList.add("active");
-
-        // Update state and reload ONLY the table
-        activeOsTab = target.getAttribute("data-os");
-        loadReleasesTable();
-      });
-    });
-  }
 
   function bindSearchEvents() {
     const qInput = document.getElementById("globalSearch");
@@ -1092,11 +728,8 @@ const HomePage = (function () {
       try {
         await ResourceService.login(user, pass);
         closeModal();
-        loadReleasesTable();
         if (typeof onSuccessCallback === "function") {
           onSuccessCallback();
-        } else {
-          if (typeof loadReleasesTable === "function") loadReleasesTable();
         }
       } catch (err) {
         errDiv.textContent = err.message;

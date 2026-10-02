@@ -5,11 +5,14 @@
 
 /* ─────────────────────────────────────────────
    TOP NAVIGATION — floating pill bar
+   Obsidian Kinetic. I1 HARD GATE: position / top / z-index are
+   frozen — never switch to fixed or absolute. --z-sticky resolves
+   to exactly 50, so the rendered stacking value is unchanged.
    ───────────────────────────────────────────── */
 .nav {
     position: sticky;
     top: 12px;
-    z-index: 50;
+    z-index: var(--z-sticky);
     animation: fadeUp 250ms var(--ease) both;
 }
 
@@ -18,14 +21,27 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    height: 56px;
-    padding: 0 10px 0 16px;
-    border-radius: var(--radius-buttons);
-    background: var(--nav-bg);
+    height: var(--nav-h);
+    /* Logical properties: auto-mirrors for RTL, no [dir] counter-rule needed. */
+    padding-block: 0;
+    padding-inline-start: 16px;
+    padding-inline-end: 10px;
+    /* Was var(--radius-panels), which Phase 1 repointed 20px -> 8px.
+       Pinned here to a deliberate Obsidian Kinetic value. */
+    border-radius: var(--radius-xl);
+    background: var(--surface-glass);
     border: 1px solid var(--border);
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.6),
+        0 0 1px 1px rgba(255, 255, 255, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
+    transition: border-color var(--dur-2) ease, box-shadow var(--dur-2) ease;
+}
+
+.nav-bar:hover,
+.nav-bar:focus-within {
+    border-color: var(--border-hover);
 }
 
 .nav-logo {
@@ -33,6 +49,12 @@
     align-items: center;
     gap: 10px;
     flex-shrink: 0;
+    border-radius: var(--radius-md);
+    transition: opacity var(--dur-1) ease;
+}
+
+.nav-logo:hover {
+    opacity: 0.85;
 }
 
 .nav-logo img {
@@ -57,14 +79,17 @@
 }
 
 .nav-logo-text span {
-    font-size: 9px;
+    font-family: var(--font-mono);
+    font-size: var(--text-label-mono-sm);
     font-weight: 600;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--text-4);
+    color: var(--text-3);
 }
 
 /* — Center tabs — */
+/* Absolute centering is load-bearing: .nav must stay a positioned ancestor,
+   which it is because position: sticky counts as positioned (I1). */
 .nav-tabs {
     display: flex;
     align-items: center;
@@ -80,10 +105,12 @@
     gap: 6px;
     height: 34px;
     padding: 0 14px;
-    border-radius: var(--radius-buttons);
-    font-size: 13px;
+    border-radius: var(--radius-md);
+    font-family: var(--font);
+    font-size: var(--text-body-md);
     font-weight: 500;
-    color: var(--text-3);
+    letter-spacing: -0.01em;
+    color: var(--text-2);
     border: none;
     transition: all var(--dur-1) ease;
     position: relative;
@@ -94,21 +121,37 @@
 }
 
 .nav-tab:hover {
-    background: var(--bg-hover);
+    background: rgba(255, 255, 255, 0.04);
     color: var(--text);
 }
 
-.nav-tab.active {
+/* Active tab. `.active` and [aria-current="page"] are both emitted on the
+   current tab, so both selectors are kept to honour either contract. */
+.nav-tab.active,
+.nav-tab[aria-current="page"] {
     color: var(--text-accent);
     font-weight: 600;
-    background: var(--glow-strong);
+    background: var(--glow);
+}
+
+.nav-tab.active::after,
+.nav-tab[aria-current="page"]::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -1px;
+    width: 14px;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--color-ember-pulse);
+    transform: translateX(-50%);
 }
 
 /* — Right actions — */
 .nav-actions {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     flex-shrink: 0;
 }
 
@@ -188,26 +231,28 @@
 }
 
 /* ─────────────────────────────────────────────
-   THEME TOGGLE — circular ghost
+   THEME TOGGLE — ghost control
+   `overflow: hidden` is load-bearing: the two absolutely
+   positioned sun/moon SVGs are clipped by it.
    ───────────────────────────────────────────── */
 .theme-btn {
-    width: 36px;
-    min-width: 36px;
-    height: 36px;
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-buttons);
+    border-radius: var(--radius-md);
     border: 1px solid var(--border);
     background: transparent;
-    color: var(--text-3);
+    color: var(--text-2);
     position: relative;
     overflow: hidden;
     transition: all var(--dur-1) ease;
 }
 
 .theme-btn:hover {
-    background: var(--bg-card);
+    background: rgba(255, 255, 255, 0.04);
     color: var(--text);
     border-color: var(--border-hover);
 }
@@ -241,24 +286,24 @@
    LANGUAGE PILL + DROPDOWN
    ───────────────────────────────────────────── */
 .lang-pill {
-    height: 36px;
-    min-height: 36px;
+    height: 32px;
+    min-height: 32px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 7px;
     padding: 0 12px;
-    border-radius: var(--radius-buttons);
+    border-radius: var(--radius-md);
     border: 1px solid var(--border);
     background: transparent;
-    color: var(--text-3);
+    color: var(--text-2);
     font: inherit;
-    font-size: 13px;
+    font-size: var(--text-body-md);
     font-weight: 500;
     line-height: 1;
     cursor: default;
     white-space: nowrap;
-    transition: border-color var(--dur-1) ease, background var(--dur-1) ease;
+    transition: border-color var(--dur-1) ease, background var(--dur-1) ease, color var(--dur-1) ease;
 }
 
 .lang-pill svg {
@@ -268,31 +313,36 @@
 
 .lang-dropdown-wrap:hover .lang-pill {
     border-color: var(--border-hover);
-    background: var(--bg-card);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
 }
 
 .lang-dropdown-wrap {
     position: relative;
     display: inline-flex;
     align-items: stretch;
-    height: 36px;
+    height: 32px;
 }
 
+/* MECHANISM FROZEN (I8): this menu opens via CSS :hover ONLY. There is no
+   `.show` path and no script toggles it. Do not add one. */
 .lang-dropdown-menu {
     position: absolute;
     top: calc(100% + 8px);
-    right: 0;
+    inset-inline-end: 0;
     min-width: 148px;
     padding: 4px;
-    background: var(--bg-card);
+    background: var(--surface-glass);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    box-shadow: var(--shadow-xl);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     opacity: 0;
     visibility: hidden;
     transform: translateY(-4px) scale(0.98);
     transition: all 0.15s ease;
-    z-index: 200;
+    z-index: var(--z-dropdown-high);
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -304,9 +354,10 @@
     transform: translateY(0) scale(1);
 }
 
-[dir="rtl"] .lang-dropdown-menu {
-    right: auto;
-    left: 0;
+/* Phase 7 (I13): .lang-dropdown-menu now uses inset-inline-end, so the
+   start edge is free in both directions - no manual mirror required. */
+.lang-dropdown-menu {
+    inset-inline-start: 0;
 }
 
 .lang-option {
@@ -316,10 +367,10 @@
     width: 100%;
     padding: 8px 12px;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     background: transparent;
     color: var(--text-2);
-    font-size: 13px;
+    font-size: var(--text-body-md);
     font-weight: 500;
     font-family: inherit;
     cursor: pointer;
@@ -327,13 +378,14 @@
 }
 
 .lang-option span {
-    font-size: 10px;
+    font-family: var(--font-mono);
+    font-size: var(--text-label-mono-sm);
     font-weight: 600;
     color: var(--text-4);
 }
 
 .lang-option:hover {
-    background: var(--bg-hover);
+    background: rgba(255, 255, 255, 0.04);
     color: var(--text);
 }
 
@@ -489,132 +541,304 @@ kbd {
 }
 
 /* ─────────────────────────────────────────────
-   FOOTER
+   ENTERPRISE FOOTER (Phase 5 / D10)
+   Shell chrome: lives in index.html as a sibling of .nav, never inside #app.
+   Styled here (not home.css) because every route shares it.
    ───────────────────────────────────────────── */
 .footer {
-    margin-top: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 20px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-cards);
-    font-size: 11px;
-    color: var(--text-4);
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.footer a {
-    color: var(--text-3);
-    transition: color var(--dur-1) ease;
-}
-
-.footer a:hover {
-    color: var(--text-accent);
-}
-
-/* ─────────────────────────────────────────────
-   STATUS BAR — 4-up trust strip
-   ───────────────────────────────────────────── */
-.status-bar {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    margin-top: var(--space-xl);
+    padding: 0;
     background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-cards);
-    overflow: hidden;
-    box-shadow: var(--shadow-card);
-}
-
-.status-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 18px;
-    position: relative;
-}
-
-.status-item+.status-item {
-    border-left: 1px solid var(--border);
-}
-
-.status-item-icon {
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    background: var(--n-4);
+    border: none;
+    border-top: 1px solid var(--border);
+    border-radius: var(--radius-panels);
+    font-size: 12px;
     color: var(--text-3);
-    flex-shrink: 0;
 }
 
-.status-item-text {
+.footer-container {
+    padding: var(--space-xl) var(--gutter-desktop);
+    margin: 0 auto;
+    width: 100%;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.5fr 1fr;
+    gap: var(--space-xl);
+    align-items: start;
+}
+
+.footer-col {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 10px;
     min-width: 0;
 }
 
-.status-item-label {
-    font-size: 11px;
+.footer-col-title {
+    margin: 0 0 2px;
+    font-family: var(--font-mono);
+    font-size: var(--text-label-code);
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text);
     font-weight: 600;
-    color: var(--text-2);
-    line-height: 1;
-    letter-spacing: -0.01em;
 }
 
-.status-item-sub {
-    font-size: 11px;
-    color: var(--text-4);
+/* ── Col 1: brand ── */
+.footer-brand-logo {
     display: flex;
     align-items: center;
-    gap: 5px;
-    white-space: nowrap;
+    gap: 10px;
 }
 
-.status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--success);
-    box-shadow: 0 0 6px rgba(16, 185, 129, 0.45);
+.footer-logo-img {
+    height: 26px;
+    width: auto;
+    display: block;
 }
 
-@media (max-width: 900px) {
-    .status-bar {
-        grid-template-columns: 1fr 1fr;
+.footer-brand-name {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text);
+}
+
+.footer-about-text {
+    margin: 0;
+    line-height: 1.7;
+    color: var(--text-3);
+    max-width: 46ch;
+}
+
+/* ── Col 2: links ── */
+.footer-links-list,
+.footer-contact-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.footer-links-list a,
+.footer-contact-list a {
+    color: var(--text-3);
+    text-decoration: none;
+    transition: color var(--dur-1) ease;
+}
+
+.footer-links-list a:hover,
+.footer-contact-list a:hover {
+    color: var(--text-accent);
+}
+
+.footer-links-list a:focus-visible,
+.footer-contact-list a:focus-visible,
+.footer .social-icon-btn:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+
+/* ── Col 3: contact ── */
+.footer-contact-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.contact-label {
+    color: var(--text-4);
+}
+
+.contact-val {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-decoration: none;
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+
+.footer-contact-list li:last-child {
+    display: block;
+}
+
+.contact-address {
+    display: block;
+    line-height: 1.7;
+    color: var(--text-3);
+    max-width: 34ch;
+}
+
+/* ── Col 4: socials ── */
+.footer-social-links {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.social-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-3);
+    background: transparent;
+    transition: color var(--dur-1) ease, border-color var(--dur-1) ease;
+}
+
+.social-icon-btn:hover {
+    color: var(--text-accent);
+    border-color: var(--border-focus);
+}
+
+.social-svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+/* ── Copyright bar ── */
+.footer-bottom {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--border);
+    text-align: center;
+}
+
+.copyright-text {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-4);
+}
+
+/* ── Responsive: 4 -> 2x2 -> 1 column, fully centred ──
+   Phase 9: the tablet and phone layouts are now centred as a block.
+   `justify-items` centres each grid item in its track; the column
+   contents are centred via `align-items`/`justify-content` so the brand
+   block and the social icon row sit in the middle of their cells. */
+@media (max-width: 1024px) {
+    .footer-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        justify-items: center;
+        text-align: center;
+        gap: var(--space-lg) var(--space-xl);
     }
 
-    .status-item+.status-item {
-        border-left: none;
-        border-top: 1px solid var(--border);
+    .footer-col {
+        align-items: center;
+        text-align: center;
     }
 
-    .status-item:nth-child(2) {
-        border-top: none;
+    .footer-brand-logo {
+        align-items: center;
+        justify-content: center;
     }
 
-    .status-item:nth-child(even) {
-        border-left: 1px solid var(--border);
+    .footer-about-text,
+    .contact-address {
+        max-width: 42ch;
+        text-align: center;
+    }
+
+    .footer-links-list,
+    .footer-contact-list {
+        align-items: center;
+    }
+
+    .footer-social-links {
+        justify-content: center;
     }
 }
 
+@media (max-width: 640px) {
+    .footer-grid {
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: center;
+        text-align: center;
+        gap: var(--space-lg);
+    }
+
+    .footer-col {
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-links-list,
+    .footer-contact-list {
+        align-items: center;
+    }
+
+    .footer-contact-list li {
+        justify-content: center;
+    }
+
+    .footer-social-links {
+        justify-content: center;
+    }
+
+    .footer-container {
+        padding: var(--space-lg) var(--gutter-desktop);
+    }
+
+    .footer-bottom {
+        text-align: center;
+    }
+}
+
+/* ── RTL (I13) ──
+   CSS Grid columns flow in the inline direction automatically: under
+   [dir="rtl"] column 1 (Brand/About) renders rightmost and column 4
+   (Socials) leftmost, with no order override needed. Only physical
+   properties need explicit handling, and there are none left below -
+   the footer is authored entirely with logical/flow-relative properties. */
+[dir="rtl"] .footer-bottom {
+    text-align: start;
+}
+
+[dir="rtl"] .footer-brand-logo {
+    flex-direction: row;
+}
+
+/* ── Responsive (I2): compress spacing on small mobile ── */
 @media (max-width: 480px) {
-    .status-bar {
-        grid-template-columns: 1fr;
+    .footer {
+        margin-top: var(--space-lg);
     }
 
-    .status-item:nth-child(even) {
-        border-left: none;
+    .footer-container {
+        padding: var(--space-md) 12px;
     }
 
-    .status-item+.status-item {
-        border-left: none;
+    .footer-grid {
+        gap: var(--space-md);
     }
+
+    .footer-col {
+        gap: var(--space-xs);
+    }
+
+    .footer-bottom {
+        margin-top: var(--space-md);
+    }
+}
+
+/* ── Perf tiers (I12): drop the hover transitions on the low/potato tiers ── */
+[data-perf="low"] .footer a,
+[data-perf="low"] .social-icon-btn,
+[data-perf="potato"] .footer a,
+[data-perf="potato"] .social-icon-btn {
+    transition: none;
 }
 
 /* ─────────────────────────────────────────────
@@ -799,10 +1023,30 @@ kbd {
 
 @media (max-width: 640px) {
     .nav-bar {
-        height: 52px;
+        height: var(--nav-h-mobile);
     }
 
     .search-keys {
         display: none;
     }
+}
+
+/* ─────────────────────────────────────────────
+   LIGHT THEME NAVBAR
+   Obsidian Kinetic is dark-primary, so the light theme uses a
+   near-white glass and drops the dark inset highlight.
+   ───────────────────────────────────────────── */
+[data-theme="light"] .nav-bar {
+    box-shadow: 0 8px 24px -8px rgba(28, 28, 30, 0.12),
+        0 0 1px 1px rgba(28, 28, 30, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="light"] .nav-tab:hover,
+[data-theme="light"] .theme-btn:hover,
+[data-theme="light"] .lang-dropdown-wrap:hover .lang-pill,
+[data-theme="light"] .lang-option:hover,
+[data-theme="light"] .perf-dropdown-wrap:hover .perf-pill,
+[data-theme="light"] .perf-dropdown-wrap.show .perf-pill {
+    background: rgba(28, 28, 30, 0.04);
 }
