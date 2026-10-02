@@ -48,7 +48,17 @@
     align-items: center;
     justify-content: space-between;
     gap: 40px;
+
+    /* Layered shadow system:
+       1. tight ambient — fills the border gap and gives grounding
+       2. mid diffuse  — main depth, soft and neutral
+       3. wide bloom   — subtle glow that lifts the panel off the page */
+    box-shadow:
+        0 1px 2px oklch(0% 0 0 / 0.06),
+        0 4px 12px oklch(0% 0 0 / 0.08),
+        0 16px 40px oklch(0% 0 0 / 0.06);
 }
+
 
 /* — Radial sunburst glow at the beam's base — */
 .hero-max::after {
@@ -367,7 +377,7 @@ body.rtl .hero-search .input-wrap input {
 .hero-visual {
     position: absolute;
     z-index: 1;
-    right: clamp(-72px, -2vw, -8px);
+    right: clamp(10px, 5vw, 50px);
     top: 50%;
     transform: translateY(-50%);
     width: min(680px, 48vw);
