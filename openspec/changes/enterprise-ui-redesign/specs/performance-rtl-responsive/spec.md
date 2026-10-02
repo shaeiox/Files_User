@@ -406,6 +406,37 @@ The dead second page and the reference file SHALL NOT change.
 - **WHEN** the diff is scoped to the server library
 - **THEN** no security header, policy, or helper changed
 
+### Requirement: The Browse freeze holds for the whole change
+
+The final phase of this change SHALL prove that the Browse page was never touched. `assets/css/browse.css`,
+`assets/js/browse.js`, and `assets/js/file-actions.js` SHALL each remain byte-identical to their pre-redesign
+state, and no diff hunk may target a selector, id, `data-*` attribute, or render function that the Browse page
+owns. Because Browse is frozen, the performance tiers, the RTL mirrors, and the responsive rules SHALL NOT be
+extended to cover Browse: any effect Browse already has stays as it was, and any new shared rule that happens
+to match a Browse selector is not a reason to edit `browse.css`.
+
+#### Scenario: **HARD GATE** — The three Browse files are byte-identical
+
+- **GIVEN** D9 and I22 freeze the Browse page
+- **WHEN** the final diff is scoped to `assets/css/browse.css`, `assets/js/browse.js`, and
+  `assets/js/file-actions.js`
+- **THEN** the diff is empty, and each file's hash matches its pre-redesign baseline
+- **AND** any difference fails the final phase
+
+#### Scenario: No performance or RTL work is applied to Browse
+
+- **GIVEN** the low and potato tiers and the direction mirrors are enumerated in the final phase
+- **WHEN** the enumerated selectors are filtered
+- **THEN** no Browse selector is added to `performance-modes.css` for the purpose of restyling Browse
+- **AND** the Browse page keeps its pre-existing tier and direction behavior untouched
+
+#### Scenario: Browse responsive behavior is not modified
+
+- **GIVEN** Browse has its own narrow-viewport collapse that hides specific row children
+- **WHEN** the responsive work of this change is completed
+- **THEN** that collapse still hides the same children at the same breakpoint
+- **AND** no Browse breakpoint value was edited to accommodate a new shared rule
+
 ### Requirement: The performance tier cache still round-trips
 
 The cached performance tier SHALL continue to be written when the user selects a tier, SHALL continue to be

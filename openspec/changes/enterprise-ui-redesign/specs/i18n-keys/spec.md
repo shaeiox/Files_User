@@ -300,3 +300,41 @@ version claim, and no fabricated data.
 - **GIVEN** the reference design's fixed package counts, version strings, and card figures
 - **WHEN** both dictionaries are searched for those values
 - **THEN** none is present, and no dictionary entry encodes a fabricated figure
+### Requirement: The Enterprise Footer keys are added in Phase 8
+
+The Enterprise Footer introduced by D10 is the largest single source of new user-visible text in this change.
+Its keys SHALL be added in Phase 8 to **both** `i18n.en` and `i18n.fa`, at mirrored positions. Phase 5 ships the
+footer markup with its English source text so the footer renders before this phase; Phase 8 is what makes the
+Persian rendering real. Every `data-i18n` and `data-i18n-html` attribute in the footer SHALL resolve to a key
+in both dictionaries.
+
+The key set covers: the about paragraph (a `data-i18n-html` key); the Useful Links column heading plus one key
+per link name; the Contact column heading plus the labels for phone, email, and address; accessible names for
+the four social placeholders and the trust-badge placeholders; and the copyright line.
+
+Brand names, phone numbers, email addresses, and URLs are **not** translated — they are proper nouns and
+contact data. Their surrounding labels are.
+
+#### Scenario: Every footer attribute resolves in English
+
+- **GIVEN** the footer markup from Phase 5
+- **WHEN** each `data-i18n` and `data-i18n-html` attribute in it is looked up in `i18n.en`
+- **THEN** every one resolves to a key, and no footer string is left as untranslated English source
+
+#### Scenario: The Persian dictionary carries the same footer keys
+
+- **GIVEN** `i18n.fa` must stay structurally parallel to `i18n.en`
+- **WHEN** the footer key set is compared across both dictionaries
+- **THEN** every key added to `i18n.en` exists in `i18n.fa` at the mirrored position, with a Persian value
+
+#### Scenario: The footer re-renders on a language switch
+
+- **GIVEN** the footer markup is static shell content in `index.html`
+- **WHEN** the user switches language
+- **THEN** every footer label, link name, contact label, and the copyright line update to the new language
+
+#### Scenario: Proper nouns are not translated
+
+- **GIVEN** the footer shows phone numbers, an email address, and external URLs
+- **WHEN** Persian is selected
+- **THEN** those values are unchanged, while the labels around them are translated

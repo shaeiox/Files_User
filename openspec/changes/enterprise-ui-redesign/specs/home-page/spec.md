@@ -2,12 +2,20 @@
 
 ## Purpose
 
-`assets/js/home.js` renders the landing page into `#app` as five sections — a hero with search, a resources
-grid of category cards, a bottom grid holding the releases table and a quick-access list, a collapsible
-search-results panel, and a status bar. It also owns the login modal, the category filter menu, the OS tab
-control, the releases table, and the global search that drives the autocomplete. This capability restyles all
-of that presentation and permits a tightly whitelisted set of markup edits, while preserving every id,
-`data-*` attribute, `data-i18n` attribute, element count, and text contract that JavaScript depends on.
+`assets/js/home.js` renders the landing page into `#app`. It once rendered five sections — a hero with search,
+a resources grid of category cards, a bottom grid holding the releases table and a quick-access list, a
+collapsible search-results panel, and a status bar. Per **D10**, the bottom grid, the releases auth UI, and
+the status bar are **deleted**, leaving three: the hero, the resources grid, and the collapsible
+search-results panel.
+
+The module still owns the login modal, the category filter menu, the global search that drives the
+autocomplete, and the `showLoginModal` function that the frozen Browse page calls through a global alias. This
+capability restyles the surviving presentation and permits a tightly whitelisted set of markup edits, while
+preserving every id, `data-*` attribute, `data-i18n` attribute, element count, and text contract that
+JavaScript depends on — with the explicit deletions in D10 carved out of that guarantee.
+
+This capability also owns the **Enterprise Footer**, which is shell content in `index.html` rather than Home
+route content.
 
 ## ADDED Requirements
 
@@ -84,39 +92,35 @@ structural, or behavioral change throughout the entire redesign.
 - **WHEN** the Hero panel's overflow rule is inspected
 - **THEN** it still permits visible overflow, and the dropdown is not clipped
 
-### Requirement: Every Home id survives unchanged
+### Requirement: Every surviving Home id survives unchanged
 
 Every id consumed by JavaScript or written by JavaScript SHALL survive: `#globalSearch`, `#searchBtn`,
 `#stopBtn`, `#logoSwap`, `#resourcesGrid`, `#catFilterWrap`, `#sortFilterWrap`, `#refreshResourcesBtn`,
-`#viewGridBtn`, `#viewListBtn`, `#releasesContainer`, `#releasesBody`, `#releaseAuthAction`,
-`#viewAllReleases`, `#releaseLogoutBtn`, `#quickAccessList`, `#resultsBox`, `#resultsTitle`, `#progress`,
-`#resultsList`, `#lastSyncTime`, `#osTabs`. No id SHALL be added, removed, or renamed.
+`#viewGridBtn`, `#viewListBtn`, `#resultsBox`, `#resultsTitle`, `#progress`, `#resultsList`. No id SHALL be
+added, removed, or renamed.
 
-#### Scenario: All Home ids are still present
+**Deleted by D10 and therefore no longer guaranteed:** `#releasesContainer`, `#releasesBody`,
+`#releaseAuthAction`, `#viewAllReleases`, `#releaseLogoutBtn`, `#quickAccessList`, `#lastSyncTime`,
+`#osTabs`. These are removed on purpose; see the Home Page Pruning requirement.
+
+#### Scenario: All surviving Home ids are still present
 
 - **GIVEN** the Home ids listed above
 - **WHEN** each is searched for in the post-change source
 - **THEN** every one is found on the same element that carries it today
 
-#### Scenario: The diff introduces no id change
+#### Scenario: The diff introduces no unexpected id change
 
 - **GIVEN** the markup whitelist for this capability
 - **WHEN** the diff of `assets/js/home.js` is inspected for id attributes
-- **THEN** no id is added, removed, or renamed
+- **THEN** the only ids removed are the D10 deletion list, and no id outside it is added, removed, or renamed
 
-#### Scenario: Dynamically created ids keep their creation sites
+#### Scenario: The deleted ids are genuinely gone
 
-- **GIVEN** `#releasesBody` and `#releaseLogoutBtn` are created by JavaScript at runtime rather than declared
-  in a template
-- **WHEN** the change is complete
-- **THEN** both are still created with those exact ids, so the existence probes and listener attachments that
-  reference them still succeed
-
-#### Scenario: `#lastSyncTime` is still written after a successful load
-
-- **GIVEN** JavaScript writes a localized timestamp into the status bar after a successful fetch
-- **WHEN** resources load successfully
-- **THEN** the element still receives the timestamp, confirming it was neither removed nor renamed
+- **GIVEN** D10 removes the releases panel, the quick access list, the OS tabs, and the status bar
+- **WHEN** the post-change source is searched for `#releasesContainer`, `#releasesBody`, `#releaseAuthAction`,
+  `#viewAllReleases`, `#releaseLogoutBtn`, `#quickAccessList`, `#lastSyncTime`, and `#osTabs`
+- **THEN** none of them is found in the markup or in any surviving script
 
 ### Requirement: The search field keeps its autocomplete host
 
@@ -215,17 +219,28 @@ be unchanged.
 - **WHEN** Escape is pressed in the search field
 - **THEN** the results panel is cleared, unchanged from the pre-change behavior
 
-### Requirement: The login modal stays callable from all three sites
+### Requirement: The login modal stays callable after the pruning
 
-The login modal SHALL remain reachable from the releases locked state, from the download-interception path,
-and from the Browse locked state. The cross-module alias that lets Browse reach it SHALL survive unchanged.
-No new global SHALL be introduced.
+The `showLoginModal` function SHALL survive D10 in full. It SHALL remain reachable from the
+download-interception path and from the Browse locked state. The cross-module alias that lets Browse reach it
+SHALL survive unchanged, and `window.triggerAuthModal` SHALL still be bound to it. No new global SHALL be
+introduced.
 
-#### Scenario: The releases locked state opens the modal
+Only the **trigger** is removed by D10: the releases locked state's authenticate control disappears with the
+releases panel. The function it called is not touched.
 
-- **GIVEN** authentication is enabled and the visitor is unauthenticated
-- **WHEN** the releases panel renders its locked state
-- **THEN** the authenticate control opens the login modal
+#### Scenario: The releases locked state no longer exists as a trigger
+
+- **GIVEN** D10 deletes the releases panel
+- **WHEN** the Home page is searched for the inline `onclick` that opened the modal from that panel
+- **THEN** it is not found, because the markup that contained it was removed
+- **AND** the `showLoginModal` definition is still present
+
+#### Scenario: `showLoginModal` is still defined and exported
+
+- **GIVEN** D10 removes the releases trigger
+- **WHEN** `HomePage.showLoginModal` is inspected in `assets/js/home.js`
+- **THEN** the function is still defined and still exposed on the `HomePage` export, unchanged in behaviour
 
 #### Scenario: The Browse locked state opens the modal
 
@@ -344,44 +359,6 @@ cache-clearing refetch runs and to clear that state afterwards.
 - **WHEN** either is activated
 - **THEN** exactly one carries the active state at a time
 
-### Requirement: The releases panel and its column coupling survive
-
-The releases table SHALL keep its six-column structure, its header row, and its runtime body. The hard-coded
-column span used for the loading, empty, and error rows SHALL stay consistent with the six columns, because
-the responsive rules hide two specific column positions and a span mismatch would misalign the table. The
-authentication action slot SHALL keep being populated and cleared at runtime.
-
-#### Scenario: The table renders six columns
-
-- **GIVEN** releases load successfully
-- **WHEN** the table is inspected
-- **THEN** the header row has six cells, matching the six columns the rows use
-
-#### Scenario: The column span matches the column count
-
-- **GIVEN** loading, empty, and error states each render a single row spanning all columns
-- **WHEN** each such row is inspected
-- **THEN** its span equals the table's column count, so it aligns with the header
-
-#### Scenario: The responsive column hiding still matches
-
-- **GIVEN** two column positions are hidden at narrow widths
-- **WHEN** the responsive rules are compared against the table's column order
-- **THEN** the hidden positions are the same two as before, so the table does not show a header with no
-  matching data column
-
-#### Scenario: The authentication slot is populated and cleared
-
-- **GIVEN** the visitor is unauthenticated, authenticated, or authentication is disabled
-- **WHEN** the panel renders in each state
-- **THEN** the slot is respectively cleared, populated with the username and a sign-out control, or cleared
-
-#### Scenario: The sign-out control works
-
-- **GIVEN** the authenticated state populated a sign-out control
-- **WHEN** it is activated
-- **THEN** the session is ended and the panel re-renders, unchanged from the pre-change behavior
-
 ### Requirement: The results panel keeps its internal scroll container
 
 The results panel's body SHALL keep its fixed maximum height and its internal vertical scrolling. It is one of
@@ -399,30 +376,6 @@ change scroll behaviour.
 - **GIVEN** the results body has a maximum height
 - **WHEN** the rule is compared before and after the change
 - **THEN** the maximum height value is unchanged
-
-### Requirement: The status bar keeps its layout and sync field
-
-The status bar SHALL keep its four-item layout and its responsive collapses at the narrow breakpoints. The
-last-sync field SHALL survive. The per-item status indicator colours SHALL be expressed through tokens
-rather than inline literals where the restyle touches them.
-
-#### Scenario: Four items are present
-
-- **GIVEN** the status bar reports infrastructure, malware-scanning, storage, and sync information
-- **WHEN** it is rendered
-- **THEN** four items are present in the same order
-
-#### Scenario: Narrow collapses still apply
-
-- **GIVEN** the status bar reflows to two columns and then to one at the narrow breakpoints
-- **WHEN** the page is rendered at each of those widths
-- **THEN** the two-column and one-column layouts still apply, with their border rules
-
-#### Scenario: Indicator colours resolve through tokens
-
-- **GIVEN** three status indicator colours were previously inline literals
-- **WHEN** the restyled rules are inspected
-- **THEN** the indicators resolve through design tokens and no inline literal colour remains
 
 ### Requirement: The logo wipe contract survives
 
@@ -503,3 +456,101 @@ SHALL NOT fix them and SHALL NOT make them more likely to trigger.
 - **GIVEN** filter state persists across a re-render while its visible label resets
 - **WHEN** the redesign is exercised across a route change and back
 - **THEN** the behaviour is identical to the pre-change baseline, with no new desynchronisation introduced
+
+### Requirement: The bottom grid, releases UI, and status bar are removed
+
+Per D10, the Latest Releases panel, the Quick Access panel, the OS tabs, the releases auth UI, and the status
+bar SHALL be absent from the delivered application. Their DOM elements SHALL NOT exist, their render and logic
+functions SHALL NOT exist, and their CSS SHALL NOT exist. This is a deletion, not a restyle: no surviving rule
+SHALL reference any of them.
+
+The `showLoginModal` function, its `HomePage.showLoginModal` export, and the `window.triggerAuthModal` binding
+SHALL survive, because the frozen Browse page depends on them.
+
+#### Scenario: The deleted DOM elements are absent
+
+- **GIVEN** D10 removes the releases panel, the quick access list, the OS tabs, the releases auth UI, and the
+  status bar
+- **WHEN** the Home route renders
+- **THEN** `.bottom-grid`, `.panel`, `.releases-table`, `.res-row`, `#osTabs`, `#releasesContainer`,
+  `#releasesBody`, `#quickAccessList`, `.quick-item`, `#releaseAuthAction`, `#viewAllReleases`,
+  `#releaseLogoutBtn`, `.status-bar`, `.status-item`, `.status-dot`, and `#lastSyncTime` are all absent from the
+  rendered DOM
+
+#### Scenario: The deleted JavaScript is absent
+
+- **GIVEN** the bottom-section and status-bar logic lived in `assets/js/home.js`
+- **WHEN** that file is searched after the change
+- **THEN** `renderBottomSection`, `loadReleasesTable`, `renderStatusBar`, `updateLastSyncTime`, the OS-tab
+  `data-os` wiring, and the quick-access renderer are all gone, and no surviving function reads a removed element
+
+#### Scenario: The deleted CSS is absent
+
+- **GIVEN** the deleted components had rules in `assets/css/home.css`
+- **WHEN** that file is searched after the change
+- **THEN** no rule remains whose selector is one of the deleted classes or ids, and no shared primitive that
+  the auth modal or the error states still use has been removed along with them
+
+#### Scenario: The pruned Home page renders without error
+
+- **GIVEN** the deletions are applied
+- **WHEN** the Home route renders and the search flow is exercised
+- **THEN** no console error occurs, and no code path dereferences an element that no longer exists
+
+#### Scenario: `showLoginModal` survives the pruning
+
+- **GIVEN** only the Home page *trigger* for the login modal was removed
+- **WHEN** `HomePage.showLoginModal` and `window.triggerAuthModal` are inspected
+- **THEN** both are present and bound as before, and the Browse locked state still opens the modal through the
+  existing fallback chain
+
+### Requirement: The Enterprise Footer is real, bilingual shell content
+
+The footer SHALL be declared in `index.html`, as a sibling of `.nav` and never inside `#app`, and SHALL be
+styled in `assets/css/components.css`. The placeholder's inline `display:none` SHALL be removed. The footer
+SHALL contain four columns — Brand/About, Useful Links, Contact, and Socials/Trust — followed by a copyright bar.
+
+Every user-visible string in the footer SHALL carry a `data-i18n` attribute (or `data-i18n-html` for the about
+paragraph). No hardcoded English SHALL ship in the footer. Brand names, phone numbers, email addresses, and URLs
+are proper nouns and contact data and are not translated, but their labels are.
+
+#### Scenario: The footer renders in the application shell
+
+- **GIVEN** `index.html` contains the Enterprise Footer markup
+- **WHEN** any route is loaded
+- **THEN** the footer is visible below the routed content, is not inside `#app`, and survives navigation
+  between Home and Browse without re-rendering
+
+#### Scenario: The placeholder is gone
+
+- **GIVEN** the footer element previously carried `style="display:none"`
+- **WHEN** the footer element is inspected
+- **THEN** that inline style is removed and the footer is rendered by stylesheet rules rather than an inline
+  override
+
+#### Scenario: Every footer string is translatable
+
+- **GIVEN** the footer renders four columns plus a copyright bar
+- **WHEN** every user-visible string in it is inspected
+- **THEN** each carries a `data-i18n` or `data-i18n-html` attribute, and no string is hardcoded English
+
+#### Scenario: Both languages render
+
+- **GIVEN** Phase 8 adds the footer keys to both dictionaries
+- **WHEN** the language is switched between English and Persian
+- **THEN** every footer label, link name, contact label, and the copyright line re-render in the new language,
+  and the phone numbers, email address, and URLs stay untranslated
+
+#### Scenario: The footer collapses responsively
+
+- **GIVEN** the footer uses a grid layout
+- **WHEN** the viewport is 1024px or narrower, and then 640px or narrower
+- **THEN** the layout reduces from four columns to two and then to one, and no horizontal overflow appears at
+  any width
+
+#### Scenario: The footer introduces no overflow
+
+- **GIVEN** I2 forbids `.page` and `#app` from gaining an `overflow` value
+- **WHEN** the footer styles are added
+- **THEN** neither `.page` nor `#app` gains an `overflow` declaration, and the page scrolls without a
+  horizontal scrollbar at every supported width

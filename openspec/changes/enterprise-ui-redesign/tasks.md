@@ -574,77 +574,79 @@ autocomplete intact, and all content API-driven.
 
 ---
 
-## Phase 5 — Browse Page Redesign
+## Appendix A — Cancelled: Browse Page Redesign (D9/I22)
 
-**Objective:** Restyle the Browse row, controls, breadcrumbs, and states to Obsidian Kinetic, with the
-six-child row contract as the hardest gate in this change.
+**Objective:** CANCELLED. The Browse page is frozen per D9/I22. No work is to be performed; the
+purpose of this section is to record the cancellation and to state the freeze verification that
+replaces the original plan.
 
-**Prerequisites:** Phases 1–4 approved and their reports accepted.
+**Status:** CANCELLED. This section is not a phase and occupies no phase number.
 
 **In-scope files:**
 
+- **None.** No file may be edited. The only permitted action is read-only verification.
+
+**Frozen files (must remain byte-identical, D9/I22):**
+
 - `assets/css/browse.css`
-- `assets/js/browse.js` — row chrome only
-- `assets/css/performance-modes.css`
+- `assets/js/browse.js`
+- `assets/js/file-actions.js`
 
-**Out-of-scope files:** `base.css`, `home.css`, `components.css`, `tokens.css`, `browse.html`, `router.js`,
-`services/resource-service.js`, `file-actions.js`, `theme.js`, `autocomplete.js`, `i18n.js`,
-`lib/idle-timer.js`, all of `lib/**`, `template/new-home.html`.
+**Previously planned (now forbidden):** `assets/css/performance-modes.css` Browse-related overrides.
 
-**Allowed markup edits in `browse.js`:** class names, wrapper elements, inline decorative styles, inline SVG
-markup.
-
-**Forbidden markup edits in `browse.js`:** the child count, the child order, any id, any `data-*` attribute,
-the shared `linkAttr` computation, and any URL construction.
+**Allowed edits:** none. **Forbidden edits:** every file. The original allowed/forbidden markup-edit
+clauses for `browse.js` are withdrawn — `browse.js` is frozen outright, so class names, wrapper elements,
+inline styles, child count, child order, ids, `data-*` attributes, the shared `linkAttr` computation, and URL
+construction are all frozen.
 
 **Tasks:**
 
-- [ ] 5.1 Restyle `.browse-layout`, `.browse-head`, `.browse-title-row`, `.browse-title-left`,
+- [x] A.C1 ~~Restyle `.browse-layout`, `.browse-head`, `.browse-title-row`, `.browse-title-left`,~~ — CANCELLED by D9/I22
   `.browse-stats`, `.stat-item`, `.stat-val`, `.stat-dot`.
-- [ ] 5.2 Restyle `.crumbs`, `.crumb`, `.crumb-active`, `.crumb-sep`.
+- [x] A.C2 ~~Restyle `.crumbs`, `.crumb`, `.crumb-active`, `.crumb-sep`.~~ — CANCELLED by D9/I22
       - **HARD GATE (I13):** preserve the `html[dir="rtl"] .crumb-sep svg { transform: scaleX(-1) }` mirror —
         the separator chevron direction is flipped in CSS and is the visible RTL indicator.
-- [ ] 5.3 Restyle `.browse-controls`, `.browse-search`, `.filter-dropdown-wrap`, `.filter-pill`, `.filter-value`,
+- [x] A.C3 ~~Restyle `.browse-controls`, `.browse-search`, `.filter-dropdown-wrap`, `.filter-pill`, `.filter-value`,~~ — CANCELLED by D9/I22
   `.filter-option`, `.view-toggle`, `.vt-btn`.
-- [ ] 5.4 Preserve the `≤900px` rule that makes `.browse-search` full-width with `order: 1` and the
+- [x] A.C4 ~~Preserve the `≤900px` rule that makes `.browse-search` full-width with `order: 1` and the~~ — CANCELLED by D9/I22
   `:focus-within` grow — behavior, not chrome.
-- [ ] 5.5 Restyle `.file-tbl` — panel fill, `--radius-lg`, `--border-hairline`.
+- [x] A.C5 ~~Restyle `.file-tbl` — panel fill, `--radius-lg`, `--border-hairline`.~~ — CANCELLED by D9/I22
       - **HARD GATE (I2-adjacent):** `.file-tbl`'s `overflow: hidden` and `overflow-x: auto` must both
         survive. It is one of only three nested scroll containers and provides horizontal overflow protection.
-- [ ] 5.6 Restyle `.file-tbl .trow` chrome — hover wash, border, transition.
+- [x] A.C6 ~~Restyle `.file-tbl .trow` chrome — hover wash, border, transition.~~ — CANCELLED by D9/I22
       - **HARD GATE (I3):** do **not** change the desktop `grid-template-columns` track count or values,
         `gap`, `align-items`, `height`, or `padding` semantics in a way that breaks column alignment.
-- [ ] 5.7 Restyle `.thead`, and preserve the `≤640px` rule that sets `.thead { display: none }`.
-- [ ] 5.8 Restyle `.f-icon`, `.f-icon-dir`, `.f-icon-file`, `.f-icon-link`, and both `[data-theme="dark"]`
+- [x] A.C7 ~~Restyle `.thead`, and preserve the `≤640px` rule that sets `.thead { display: none }`.~~ — CANCELLED by D9/I22
+- [x] A.C8 ~~Restyle `.f-icon`, `.f-icon-dir`, `.f-icon-file`, `.f-icon-link`, and both `[data-theme="dark"]`~~ — CANCELLED by D9/I22
   variants. Keep the cell at its existing size so hover/focus emphasis causes no layout shift.
       - **HARD GATE (I3):** do **not** change the `.f-icon` box size, which would desynchronise it from the
         pinned 26 px action track.
-- [ ] 5.9 Restyle `.f-name`, `.f-link` (list view ellipsis), and the `.grid-mode` 2-line `-webkit-line-clamp`
+- [x] A.C9 ~~Restyle `.f-name`, `.f-link` (list view ellipsis), and the `.grid-mode` 2-line `-webkit-line-clamp`~~ — CANCELLED by D9/I22
   variant.
-- [ ] 5.10 Restyle `.badge`, `.badge-dir`, `.badge-file`, `.f-sub`.
-- [ ] 5.11 Restyle `.f-actions` and `.f-action`.
+- [x] A.C10 ~~Restyle `.badge`, `.badge-dir`, `.badge-file`, `.f-sub`.~~ — CANCELLED by D9/I22
+- [x] A.C11 ~~Restyle `.f-actions` and `.f-action`.~~ — CANCELLED by D9/I22
       - **HARD GATE (I20):** the `.f-actions` hidden state continues to use `opacity` + `pointer-events`.
         `display: none` and `visibility: hidden` are forbidden — they would remove the control from the tab
         order and the accessibility tree, violating the archived `file-actions` spec.
       - **HARD GATE (I3):** `.f-action` stays `26px × 26px`. If it changes, `browse.css:177`,
         `browse.css:492`, and `.f-action` must all change together in the same task.
-- [ ] 5.12 Preserve `:hover` and `:focus-within` reveal, and preserve the `@media (hover: none)` block that forces
+- [x] A.C12 ~~Preserve `:hover` and `:focus-within` reveal, and preserve the `@media (hover: none)` block that forces~~ — CANCELLED by D9/I22
   `opacity: 1; pointer-events: auto` for touch devices.
-- [ ] 5.13 Restyle `.empty-box`, `.empty-circle`, `.empty-circle.err`, `.empty-text`.
-- [ ] 5.14 Restyle `.locked-state`, `.locked-icon`, `.locked-title`, `.locked-desc` and its button, including the
+- [x] A.C13 ~~Restyle `.empty-box`, `.empty-circle`, `.empty-circle.err`, `.empty-text`.~~ — CANCELLED by D9/I22
+- [x] A.C14 ~~Restyle `.locked-state`, `.locked-icon`, `.locked-title`, `.locked-desc` and its button, including the~~ — CANCELLED by D9/I22
   `≤1024px`, `≤768px`, and `≤480px` size collapses.
       - **HARD GATE:** `#browseAuthBtn` must keep its three-step handler chain
         (`HomePage.showLoginModal` → `window.triggerAuthModal` → `Router.navigate("/")`).
-- [ ] 5.15 Restyle `.resources-error` and the in-page 404 block, preserving the dashed border treatment and the
+- [x] A.C15 ~~Restyle `.resources-error` and the in-page 404 block, preserving the dashed border treatment and the~~ — CANCELLED by D9/I22
   escaped `<code>` path display.
       - **HARD GATE:** the 404 path remains **in-page with no redirect**, and `#browseControls` is still hidden
         on error.
-- [ ] 5.16 Restyle `.skeleton-box`, `.skeleton-line` (including the `.skeleton-line-title`, `-desc`, `-desc-sm`,
+- [x] A.C16 ~~Restyle `.skeleton-box`, `.skeleton-line` (including the `.skeleton-line-title`, `-desc`, `-desc-sm`,~~ — CANCELLED by D9/I22
   `-meta` variants used by Home).
-- [ ] 5.17 If any row markup edit is made in `browse.js`, restrict it to the whitelist and document each edit.
-- [ ] 5.18 Do not add a new view mode, pagination, selection, or lazy loading.
-- [ ] 5.19 Add `[data-perf="low"]` / `[data-perf="potato"]` overrides (I12) and `[dir="rtl"]` mirrors (I13).
-- [ ] 5.20 Assert **no** D3-banned string appears.
+- [x] A.C17 ~~If any row markup edit is made in `browse.js`, restrict it to the whitelist and document each edit.~~ — CANCELLED by D9/I22
+- [x] A.C18 ~~Do not add a new view mode, pagination, selection, or lazy loading.~~ — CANCELLED by D9/I22
+- [x] A.C19 ~~Add `[data-perf="low"]` / `[data-perf="potato"]` overrides (I12) and `[dir="rtl"]` mirrors (I13).~~ — CANCELLED by D9/I22
+- [x] A.C20 ~~Assert **no** D3-banned string appears.~~ — CANCELLED by D9/I22
 
 **Validation:**
 
@@ -686,15 +688,15 @@ the shared `linkAttr` computation, and any URL construction.
 - RTL: switch to Persian; breadcrumb chevron mirrors; name truncation still ellipsizes.
 - Content: no fabricated data; all D3-banned strings absent (grep).
 
-**Completion condition:** Browse fully restyled with the 6-child contract, three independent targets,
-`data-file` coverage, sort semantics, and the `≤640px` collapse all verifiably intact.
+**Completion condition:** Phase cancelled. No work performed. `browse.css`, `browse.js`, and
+`file-actions.js` verified byte-identical to pre-redesign state.
 
 **Applicable Agent Skills:** `frontend-ui-engineering`, `incremental-implementation`.
 
-### Phase 5 — Final Report Template
+### Appendix A — Browse Page Redesign — Final Report Template (CANCELLED)
 
 ```
-## Phase 5 — Browse Page Redesign: COMPLETE / BLOCKED
+## Appendix A — Cancelled: Browse Page Redesign: COMPLETE / BLOCKED
 
 ### Files changed
 - (list with line counts)
@@ -746,6 +748,160 @@ the shared `linkAttr` computation, and any URL construction.
 
 ---
 
+## Phase 5 — Home Pruning & Enterprise Footer
+
+**Objective:** Delete the bottom grid (Latest Releases, Quick Access), the releases auth UI, and the status bar
+from `home.js` and `home.css`; replace the hidden placeholder footer with a real, fully bilingual,
+four-column CloudAvid Enterprise Footer.
+
+**Prerequisites:** Phases 1–4 approved and their reports accepted.
+
+**In-scope files:**
+
+- `assets/js/home.js` — remove the bottom-section and status-bar render functions and their logic
+- `assets/css/home.css` — remove the corresponding rules
+- `index.html` — replace `<footer class="footer" style="display:none">` (at `index.html:243`) with the real
+  footer markup
+- `assets/css/components.css` — footer styling (footer lives in the shell, so its CSS goes here, not in
+  `home.css`)
+
+**Out-of-scope files:** `assets/js/i18n.js` (footer keys land in Phase 8), `assets/css/tokens.css`,
+`assets/css/base.css`, `assets/js/browse.js`, `assets/css/browse.css`, `assets/js/file-actions.js`,
+`.hero-max` and all Hero descendants, `browse.html`, `router.js`, `services/resource-service.js`,
+`theme.js`, `autocomplete.js`, all of `lib/**`, `template/new-home.html`, `server.js`, `package.json`,
+`nginx.conf`.
+
+**Deletion list (D10):** `.bottom-grid`, `.panel`, `.releases-table`, `.res-row`, `#osTabs`,
+`#releasesContainer`, `#releasesBody`, `#quickAccessList`, `.quick-item`, `#releaseAuthAction`,
+`#viewAllReleases`, `#releaseLogoutBtn`, `.status-bar`, `.status-item`, `.status-dot`, `#lastSyncTime`, and
+the `updateLastSyncTime()` function.
+
+**MUST survive (D10):** `HomePage.showLoginModal`, the `window.triggerAuthModal = showLoginModal` binding,
+and all auth API logic. `showLoginModal` is a core logic contract and is the mechanism the frozen Browse page
+uses to open the auth modal.
+
+**Tasks:**
+
+- [ ] 5.1 Rip the bottom grid and the status bar out of `assets/js/home.js`. Remove `renderBottomSection`,
+      `loadReleasesTable`, the OS-tab wiring (`activeOsTab`, `data-os` handlers), the quick-access renderer,
+      `renderStatusBar`, and `updateLastSyncTime()` together with every call site of each.
+      - Remove the deleted ids from any surviving markup string: `#releasesContainer`, `#releasesBody`,
+        `#releaseAuthAction`, `#viewAllReleases`, `#releaseLogoutBtn`, `#quickAccessList`, `#lastSyncTime`,
+        `#osTabs`.
+      - Remove the inline `onclick="showLoginModal(...)"` at `home.js:564` that lived inside the Releases
+        locked-state markup. This removes a *trigger*, not the function.
+      - **HARD GATE:** `showLoginModal` itself, its `HomePage.showLoginModal` export, and
+        `window.triggerAuthModal = showLoginModal` are untouched.
+      - Confirm no other `home.js` function referenced a removed local (e.g. a shared helper) — a dangling
+        reference is a ReferenceError at render time.
+- [ ] 5.2 Rip the corresponding CSS out of `assets/css/home.css`: every rule whose selector is
+      `.bottom-grid`, `.panel*`, `.releases-table`, `.res-row`, `.os-tabs`, `.panel-link`, `.quick-list`,
+      `.quick-item`, `.status-bar`, `.status-item`, `.status-dot`, or the `#lastSyncTime` rules.
+      - Leave shared primitives that other surviving components use. `.panel-head`/`.panel-icon`/`.panel-title`
+        styling that the auth modal or error states rely on stays; only the bottom-grid-owned rules go.
+      - Grep `home.css` after the edit and assert zero remaining matches for the deletion list.
+- [ ] 5.3 Build the Enterprise Footer DOM in `index.html` at `<footer class="footer">`. Remove the inline
+      `style="display:none"`. Emit `.footer-grid` with four `.footer-col` children and a `.footer-bottom`
+      copyright bar.
+      - **Column 1 — Brand/About:** CloudAvid logo plus the about paragraph (cloud computing with over 15 years
+        of experience, providing secure and scalable services in virtualization, cloud infrastructure, and
+        enterprise support).
+      - **Column 2 — Useful Links:** Main Page (`/`), Contact Us (`#`), About Us (`#`), Blog (`#`),
+        Documentation (`https://docs.cloudavid.com`), Rakaard (`https://rakaard.ir`),
+        CloudAvid (`https://cloudavid.com`).
+      - **Column 3 — Contact:** phone `035-3106`, phone `021-66198680`, email `info@cloudavid.com`, address
+        (Yazd, Safaieh).
+      - **Column 4 — Socials/Trust:** SVG placeholder icons for Telegram, LinkedIn, X, and Github, plus
+        trust-badge placeholders. Placeholders are inert and clearly labelled; they must not present as
+        real partner or certification claims.
+      - **Copyright:** "All rights reserved for CloudAvid."
+      - **Every user-visible string carries `data-i18n`** (or `data-i18n-html` for the about paragraph). No
+        hardcoded English ships. Brand names, phone numbers, email addresses, and URLs are proper nouns and
+        are not translated, but their labels ("Phone", "Email", "Address", "Useful Links") are.
+      - The footer stays a **sibling of `.nav`**, never inside `#app` (I5).
+- [ ] 5.4 Style the footer in `assets/css/components.css` (not `home.css` — it is shell chrome shared by
+      every route).
+      - Background `var(--bg-card)` or `transparent` over the base shell; 1px `var(--border-hairline)` top
+        border; muted body text `var(--text-3)`, links `var(--text-2)`, headings `var(--text)`.
+      - Link hover uses `var(--accent-primary)` with the `--glow-amber` treatment that matches the resource
+        cards; keyboard focus uses a visible `var(--border-focus)` ring.
+      - `--radius-lg` container, spacing from the `--space-*` scale.
+      - Responsive grid: 4 columns above 1024px, 2 columns at `≤1024px`, 1 column at `≤640px`.
+      - **HARD GATE (I12):** the hover glow is tier-gated under `[data-perf="low"]` and
+        `[data-perf="potato"]`.
+      - **HARD GATE (I2):** the footer introduces no horizontal overflow at any width; `.page` and `#app`
+        gain no `overflow` value.
+- [ ] 5.5 **HARD GATE (D8/I21) — Hero still frozen.** `.hero-max` and all descendants remain byte-identical:
+      no CSS, markup, token, or behavioral change. Re-assert the Hero hash and re-run the D8 assertions.
+      - Pruning must not shift, remove, or reflow the Hero. `#globalSearch`, `#searchBtn`, `#stopBtn`,
+        `#logoSwap` are untouched.
+- [ ] 5.6 **HARD GATE (D9/I22) — Browse still frozen.** `assets/css/browse.css`, `assets/js/browse.js`, and
+      `assets/js/file-actions.js` remain byte-identical to their pre-redesign state.
+      - The footer must not edit `browse.css` to compensate for any shell spacing change.
+      - Assert `git diff --name-only -- assets/css/browse.css assets/js/browse.js assets/js/file-actions.js`
+        is empty.
+- [ ] 5.7 **HARD GATE (D10) — `showLoginModal` survives.** Assert `HomePage.showLoginModal` is still defined
+      and exported, `window.triggerAuthModal` is still bound to it, and the Browse locked state still opens
+      the modal through the fallback chain (`HomePage.showLoginModal` → `window.triggerAuthModal` →
+      `Router.navigate("/")`).
+      - Only the Releases-panel trigger was removed; the function and its two remaining call sites are intact.
+- [ ] 5.8 Assert no dangling references remain: grep `home.js` and `home.css` for every id and class in the
+      deletion list and confirm zero matches outside comments.
+      - Confirm no surviving `home.js` function reads a removed element (e.g. `$("#lastSyncTime")`,
+        `$("#osTabs")`, `$("#quickAccessList")`) — that would be a null dereference on every Home render.
+
+**Validation:**
+
+- **HARD GATE (D8/I21):** `.hero-max` innerHTML and computed styles byte-identical before and after Phase 5.
+- **HARD GATE (D9/I22):** `browse.css`, `browse.js`, `file-actions.js` byte-identical.
+- **HARD GATE (D10):** `showLoginModal` defined, exported, and bound to `window.triggerAuthModal`.
+- Grep assertion — zero occurrences of the deletion list in `home.js` and `home.css`.
+- Grep assertion — every footer string carries a `data-i18n`; no hardcoded English in the footer markup.
+- Visual: footer renders in the shell on both Home and Browse, appears after the routed content, and does not
+  appear inside `#app`.
+- Responsive: 4 / 2 / 1 column grid at the three breakpoints, no horizontal overflow at any width.
+- Manual: Home renders with no console errors after the deletions; the search flow still works end to end.
+
+**Completion condition:** the bottom grid, releases auth UI, and status bar are gone from both DOM and JS; the
+Enterprise Footer ships in `index.html` with full `data-i18n` coverage and Obsidian Kinetic styling; Hero and
+Browse remain frozen; `showLoginModal` is intact.
+
+**Applicable Agent Skills:** `frontend-ui-engineering`, `code-simplification`, `code-review-and-quality`.
+
+### Phase 5 — Home Pruning & Enterprise Footer — Final Report Template
+
+```
+### Files changed
+- (list with line counts)
+
+### Deletions
+- home.js: (list every removed function / helper)
+- home.css: (list every removed rule group)
+
+### Preserved (HARD GATE evidence)
+- showLoginModal: (definition line + export line + window.triggerAuthModal binding)
+- .hero-max hash before/after: (identical / DRIFT)
+- browse.css, browse.js, file-actions.js diff: (empty / DRIFT)
+
+### Footer markup added
+- index.html line range:
+- data-i18n keys referenced (Phase 8 must define these):
+- hardcoded strings found: (none / list)
+
+### Footer styling
+- components.css line range:
+- responsive breakpoints implemented:
+
+### Grep assertions
+- deletion list in home.js: (count)
+- deletion list in home.css: (count)
+
+### Risks / notes
+- (list, or "none")
+```
+
+---
+
 ## Phase 6 — Overlays & States
 
 **Objective:** Restyle the auth modal and all four dropdowns in place, plus the skeleton, empty, error, and
@@ -757,8 +913,11 @@ locked states.
 
 - `assets/css/home.css` (auth modal lives here at `home.css:1462-1630`)
 - `assets/css/components.css` (`.ac-dropdown` and any shared overlay primitive)
-- `assets/css/browse.css` (only if a Browse-scoped overlay needs parity)
 - `assets/css/performance-modes.css`
+
+**Frozen files (D9/I22 — read-only, never edit):** `assets/css/browse.css`, `assets/js/browse.js`,
+`assets/js/file-actions.js`. Overlay work covers Home and shell contexts only; Browse-scoped states are
+already styled and stay exactly as they are.
 
 **Out-of-scope files:** `base.css`, `tokens.css`, `assets/js/home.js`, `assets/js/browse.js`,
 `assets/js/router.js`, `assets/js/i18n.js`, `assets/js/autocomplete.js`, `assets/js/theme.js`,
@@ -851,7 +1010,7 @@ attachment preserved, and every existing open/close mechanism intact.
 
 **Applicable Agent Skills:** `frontend-ui-engineering`, `constraint-driven-development`.
 
-### Phase 6 — Final Report Template
+### Phase 6 — Overlays & States — Final Report Template
 
 ```
 ## Phase 6 — Overlays & States: COMPLETE / BLOCKED
@@ -899,18 +1058,22 @@ attachment preserved, and every existing open/close mechanism intact.
 
 **Objective:** Guarantee that every effect introduced in Phases 2–6 has a `low`/`potato` override, every new
 direction-sensitive rule has an `[dir="rtl"]` mirror, and all six responsive breakpoints plus the
-`hover: none` and `prefers-reduced-motion` paths behave correctly.
+`hover: none` and `prefers-reduced-motion` paths behave correctly — while proving the Browse freeze (D9/I22)
+has held.
 
 **Prerequisites:** Phases 1–6 approved and their reports accepted.
 
 **In-scope files:**
 
 - `assets/css/performance-modes.css`
-- `assets/css/components.css`, `assets/css/home.css`, `assets/css/browse.css`, `assets/css/base.css`
+- `assets/css/components.css`, `assets/css/home.css`, `assets/css/base.css`
   (parity additions only)
 
 **Out-of-scope files:** `tokens.css`, `index.html`, `browse.html`, all of `assets/js/**`, all of `lib/**`,
 `template/new-home.html`, `server.js`, `package.json`, `nginx.conf`.
+
+**Frozen files (D9/I22 — read-only verification only, never edit):** `assets/css/browse.css`,
+`assets/js/browse.js`, `assets/js/file-actions.js`.
 
 **Tasks:**
 
@@ -954,6 +1117,17 @@ direction-sensitive rule has an `[dir="rtl"]` mirror, and all six responsive bre
         `Cryptographically Verified Release Mirrors`, `v4.8`, `8 Packages`.
 - [ ] 7.16 Record whether any of the 11 pre-existing defects became **more likely to trigger** as a result of the
   redesign. Record as a risk; do not fix.
+- [ ] 7.17 **HARD GATE (D9/I22) — Browse freeze integrity.** Verify `assets/css/browse.css`,
+  `assets/js/browse.js`, and `assets/js/file-actions.js` are byte-identical to their pre-redesign state.
+      - Assertion: `git diff --name-only -- assets/css/browse.css assets/js/browse.js assets/js/file-actions.js`
+        is empty (or those paths are absent from every commit since the change began).
+      - Assertion: file hashes for the three files match the pre-redesign baseline recorded at the start of
+        this change.
+
+        Browse page.
+      - Confirm no `browse.css` rule was added to compensate for Phase 1 token drift (D9 §Accepted Token Drift).
+      - Confirm the `.ac-empty` override added to `home.css` in Phase 4 is a documented one-way dependency and
+        was not "fixed" by editing `browse.css`.
 
 **Validation:**
 
@@ -976,15 +1150,17 @@ direction-sensitive rule has an `[dir="rtl"]` mirror, and all six responsive bre
   `:focus-within`.
 - Hero responsive breakpoints (≤1024 stacking, ≤640 search-keys hiding) are byte-identical.
 - **HARD GATE (D8/I21):** `.hero-max` innerHTML and computed styles remain byte-identical after all phases.
+- **HARD GATE (D9/I22):** `browse.css`, `browse.js`, and `file-actions.js` are byte-identical to their
+  pre-redesign state. Any drift fails the whole phase.
 - Keyboard: full keyboard pass on navbar dropdowns, the hero search, autocomplete, Browse filters, the view
   toggle, row targets, and the auth modal (opening and closing only — no new handlers).
 
 **Completion condition:** every effect tier-gated, every direction-sensitive rule mirrored, all six
-breakpoints verified, and all greppable invariants re-asserted.
+breakpoints verified, all greppable invariants re-asserted, and the Browse freeze (D9/I22) proven intact.
 
 **Applicable Agent Skills:** `performance-optimization`, `code-review-and-quality`.
 
-### Phase 7 — Final Report Template
+### Phase 7 — Performance, RTL, Responsive Parity — Final Report Template
 
 ```
 ## Phase 7 — Performance, RTL, Responsive Parity: COMPLETE / BLOCKED
@@ -1039,16 +1215,15 @@ breakpoints verified, and all greppable invariants re-asserted.
 ---
 
 ## Phase 8 — i18n Keys & Final Verification
-
 **Objective:** Add any genuinely new user-visible strings to **both** dictionaries, then run the complete
 C1–C12 behavioral regression checklist and produce the final change report.
 
-**Prerequisites:** Phases 1–7 approved and their reports accepted.
+**Prerequisites:** Phases 1–6 approved and their reports accepted.
 
 **In-scope files:**
 
 - `assets/js/i18n.js` — **additive keys only**
-- `assets/css/**`, `assets/js/**`, `index.html` — **verification only, no edits** unless a Phase 1–7 defect is
+- `assets/css/**`, `assets/js/**`, `index.html` — **verification only, no edits** unless a Phase 1–6 defect is
   found, which must be reported rather than silently patched
 
 **Out-of-scope files:** `router.js`, `services/resource-service.js`, `file-actions.js`, `theme.js`,
@@ -1057,22 +1232,39 @@ C1–C12 behavioral regression checklist and produce the final change report.
 
 **Tasks:**
 
-- [ ] 8.1 Determine whether any genuinely new user-visible label was introduced in Phases 4 or 5. The expected
-  answer is **none**, because the redesign adds no new copy.
-- [ ] 8.2 For any new static label, add a `data-i18n` (or `data-i18n-ph` / `data-i18n-html`) attribute and add the
+- [ ] 8.1 Determine whether any genuinely new user-visible label was introduced in Phases 4, 5, or 6. Outside
+  the Enterprise Footer the expected answer is **none**, because the redesign adds no new copy elsewhere.
+- [ ] 8.2 **Enterprise Footer keys (D10).** Add the footer's dictionary keys to **both** `i18n.en` and
+  `i18n.fa`, at mirrored positions (I11). The footer markup shipped in Phase 5 references them; this task
+  makes them resolve.
+      - Brand / About: the about paragraph (use `data-i18n-html` in the markup, so the key holds the
+        sentence about 15 years of experience in virtualization, cloud infrastructure, and enterprise
+        support).
+      - Links column: the column heading plus one key per link label — main page, contact us, about us, blog,
+        documentation, Rakaard, CloudAvid.
+      - Contact column: the column heading plus the labels for phone, email, and address. The phone numbers,
+        email address, and URLs themselves are **not** translated — they are proper nouns and contact data.
+      - Socials / Trust: accessible names for the Telegram, LinkedIn, X, and Github placeholders, and for
+        each trust-badge placeholder.
+      - Copyright: "All rights reserved for CloudAvid."
+      - Assert every `data-i18n` / `data-i18n-html` attribute present in the footer markup has a matching key
+        in `i18n.en`, and that `i18n.fa` has the same key set. No footer string may remain hardcoded.
+      - Phase 5 shipped the English source text so the footer renders before this phase; this phase is what
+        makes the Persian (`fa`) rendering real.
+- [ ] 8.3 For any new static label, add a `data-i18n` (or `data-i18n-ph` / `data-i18n-html`) attribute and add the
   key to **both** `i18n.en` and `i18n.fa` at mirrored positions (I11).
-- [ ] 8.3 Do not delete, rename, or reword any existing key in either dictionary (I10).
-- [ ] 8.4 Confirm the sorted key sets of `i18n.en` and `i18n.fa` are identical.
-- [ ] 8.5 Confirm `dir` and `lang` remain the only intentionally-differing keys.
-- [ ] 8.6 Do **not** fix the two hard-coded English sort options in `home.js:126` and `home.js:130` (recorded
+- [ ] 8.4 Do not delete, rename, or reword any existing key in either dictionary (I10).
+- [ ] 8.5 Confirm the sorted key sets of `i18n.en` and `i18n.fa` are identical.
+- [ ] 8.6 Confirm `dir` and `lang` remain the only intentionally-differing keys.
+- [ ] 8.7 Do **not** fix the two hard-coded English sort options in `home.js:126` and `home.js:130` (recorded
   pre-existing defect).
-- [ ] 8.7 Run the full C1–C12 behavioral regression checklist.
-- [ ] 8.8 Confirm the self-hosted Vazirmatn activates for `[lang="fa"]` via the existing `base.css:39` rule.
-- [ ] 8.9 Confirm a language switch calls `Router.refresh()`, re-renders the current route, and rebuilds all
+- [ ] 8.8 Run the full C1–C12 behavioral regression checklist.
+- [ ] 8.9 Confirm the self-hosted Vazirmatn activates for `[lang="fa"]` via the existing `base.css:39` rule.
+- [ ] 8.10 Confirm a language switch calls `Router.refresh()`, re-renders the current route, and rebuilds all
   dynamic text from the new dictionary.
-- [ ] 8.10 Confirm both themes render correctly in both directions after the language switch.
-- [ ] 8.11 Re-assert every hard gate one final time.
-- [ ] 8.12 Produce the final change report and list every file changed across all eight phases.
+- [ ] 8.11 Confirm both themes render correctly in both directions after the language switch.
+- [ ] 8.12 Re-assert every hard gate one final time.
+- [ ] 8.13 Produce the final change report and list every file changed across all eight phases.
 
 **Validation — full C1–C12 regression checklist:**
 
@@ -1110,7 +1302,7 @@ gate re-asserted, and the final change report produced.
 
 **Applicable Agent Skills:** `code-review-and-quality`, `constraint-driven-development`.
 
-### Phase 8 — Final Report Template
+### Phase 8 — i18n Keys & Final Verification — Final Report Template
 
 ```
 ## Phase 8 — i18n Keys & Final Verification: COMPLETE / BLOCKED

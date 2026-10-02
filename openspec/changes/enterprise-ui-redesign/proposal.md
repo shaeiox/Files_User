@@ -25,13 +25,16 @@ the live tokens in `assets/css/tokens.css`.
 - **Navbar** — restyle `.nav`, `.nav-bar`, `.nav-logo`, `.nav-tabs`, `.nav-tab`, `.nav-actions`,
   `.perf-pill`, `.perf-dropdown-menu`, `.lang-dropdown-wrap`, `.lang-dropdown-menu`, and the theme button
   chrome, preserving `position: sticky; top: 12px`, every id, and every `data-*` contract.
-- **Home page** — restyle the resource cards, bottom grid, results panel, and status bar; permitted
-  presentational markup edits in `assets/js/home.js` render functions limited to class names, wrapper
-  elements, and inline decorative styles.
+- **Home page** — restyle the resource cards and results panel; permitted presentational markup edits in
+  `assets/js/home.js` render functions limited to class names, wrapper elements, and inline decorative styles.
+- **Home page pruning** — **remove** the bottom grid (Latest Releases, Quick Access), the releases auth UI,
+  and the status bar (including `#lastSyncTime` and `updateLastSyncTime()`) from both `home.js` and
+  `home.css`. See D10.
+- **Enterprise footer** — **add** a real, fully bilingual four-column CloudAvid footer to the application
+  shell in `index.html`, styled in `components.css` with the Obsidian Kinetic palette, every string routed
+  through `data-i18n`. See D10.
 - **Hero section (Home page):** EXPLICITLY EXCLUDED — frozen, no changes permitted (see D8, I21).
-- **Browse page** — restyle `.browse-layout`, `.browse-head`, `.file-tbl`, `.trow`, `.thead`, `.f-icon`,
-  `.f-name`, `.badge`, `.f-sub`, `.f-actions`, `.crumbs`, `.crumb*`, `.empty-box`, `.locked-state`,
-  `.resources-error`, and `.skeleton-*`, with the 6-child row contract as a hard gate.
+- **Browse page:** EXPLICITLY EXCLUDED — frozen, no changes permitted (see D9, I22). Phase 5 cancelled.
 - **Overlays and states** — restyle the auth modal, all four dropdowns, skeletons, empty states, error
   states, and the locked/auth-required state, preserving the 250 ms close delay and the `.show` toggle.
 - **Performance / RTL / responsive** — add a `[data-perf]` tier override for every new effect, a
@@ -324,6 +327,88 @@ CSS change is permitted in this area.
 - Navbar (Phase 3)
 - Overlays, modals, dropdowns outside the Hero (Phase 6)
 
+### D9 — Browse Page Frozen
+
+The entire Browse page is **out of scope** for this redesign. No visual, structural, markup, or CSS change is
+permitted in any Browse-related area.
+
+**Frozen elements (exhaustive list):**
+
+| Element | Selector / ID | File |
+|---|---|---|
+| Browse layout | `.browse-layout` | `browse.css`, `browse.js` |
+| Browse header | `.browse-head` | `browse.css`, `browse.js` |
+| File table | `.file-tbl`, `.thead`, `.trow`, `#rows`, `#tableContainer` | `browse.css`, `browse.js` |
+| File/folder rows | `.f-icon`, `.f-icon-link`, `.f-name`, `.f-link`, `.badge`, `.f-sub`, `.f-actions`, `.f-action` | `browse.css`, `browse.js`, `file-actions.js` |
+| Breadcrumbs | `#breadcrumb`, `.crumbs`, `.crumb`, `.crumb-sep`, `.crumb-active`, `#folderName` | `browse.css`, `browse.js` |
+| Browse search | `#localSearchInput` | `browse.css`, `browse.js` |
+| Browse filters | `#typeFilterWrap`, `#sortFilterWrap` | `browse.css`, `browse.js` |
+| Browse view toggle | `#viewList`, `#viewGrid` | `browse.css`, `browse.js` |
+| Browse stats | `#folderCount`, `#fileCount` | `browse.css`, `browse.js` |
+| Browse auth | `#browseAuthBtn` | `browse.css`, `browse.js` |
+| Browse states | `.empty-box`, `.empty-circle`, `.empty-text`, `.locked-state`, `.resources-error` (in Browse context) | `browse.css`, `browse.js` |
+| Browse skeletons | `.skeleton-box`, `.skeleton-line` (in Browse context) | `browse.css`, `browse.js` |
+| Grid mode | `#tableContainer.grid-mode` | `browse.css`, `browse.js` |
+| File actions | `FileActions.render()`, `.f-actions`, `.f-action` | `file-actions.js`, `browse.css` |
+
+**What "frozen" means:**
+
+1. No CSS rule in `browse.css` may be added, modified, or removed.
+2. No markup change in `browse.js` render functions.
+3. No change to `file-actions.js`.
+4. The 6-child row contract, `data-file="true"` markers, three independent targets, folders-first sort,
+   responsive collapse, and all Browse behavior remain byte-identical.
+5. `browse.css` and `browse.js` are byte-identical to their pre-redesign state throughout all remaining
+   phases.
+
+**What is NOT frozen (still redesigned in remaining phases):**
+
+- Auth modal (`.auth-overlay`, `.auth-modal`) — Phase 6
+- Dropdowns outside Browse — Phase 6
+- Skeletons/empty/error in Home context — already done in Phase 4
+- Performance modes, RTL, responsive for non-Browse areas — Phase 7
+- i18n keys — Phase 8
+
+### D10 — Home Page Pruning & Enterprise Footer
+
+Two coupled changes replace the placeholder footer with real content and remove the low-value Home panels
+that the redesign could not improve.
+
+**1. Pruning (deletions).** The following are permanently removed from the application:
+
+| Removed | Identifiers / selectors |
+|---|---|
+| Bottom grid | `.bottom-grid`, `.panel`, `.releases-table`, `.res-row`, `#osTabs`, `#releasesContainer`, `#releasesBody`, `#quickAccessList`, `.quick-item` |
+| Releases auth UI | `#releaseAuthAction`, `#viewAllReleases`, `#releaseLogoutBtn` |
+| Status bar | `.status-bar`, `.status-item`, `.status-dot`, `#lastSyncTime`, and the `updateLastSyncTime()` logic in `home.js` |
+
+These are ripped out of `assets/js/home.js` (render functions and logic) and `assets/css/home.css`.
+
+**`showLoginModal` MUST remain intact.** `HomePage.showLoginModal` is a core logic contract, and
+`window.triggerAuthModal = showLoginModal` is a cross-module contract consumed by the frozen Browse page
+(`browse.js:241-247`). Only the Home page UI that *triggers* it is removed. The function, the
+`window.triggerAuthModal` binding, and the auth API logic all survive, so the Browse locked state keeps
+working. This is the reason the Browse freeze does not break authentication.
+
+**2. Enterprise Footer (addition).** `index.html:243` already contains `<footer class="footer"
+style="display:none">`. That placeholder becomes a real, fully bilingual, four-column CloudAvid footer:
+
+| Column | Content |
+|---|---|
+| 1 — Brand / About | CloudAvid logo and the about text: cloud computing with over 15 years of experience, providing secure and scalable services in virtualization, cloud infrastructure, and enterprise support |
+| 2 — Useful Links | Main Page (`/`), Contact Us (`#`), About Us (`#`), Blog (`#`), Documentation (`https://docs.cloudavid.com`), Rakaard (`https://rakaard.ir`), CloudAvid (`https://cloudavid.com`) |
+| 3 — Contact | Phone `035-3106` / `021-66198680`, Email `info@cloudavid.com`, Address in Yazd, Safaieh |
+| 4 — Socials / Trust | SVG placeholder icons for Telegram, LinkedIn, X, Github, plus trust-badge placeholders |
+
+A copyright bar closes the footer: *"All rights reserved for CloudAvid."*
+
+**Strictly bilingual.** Every string in the footer MUST use a `data-i18n` attribute. No hardcoded text ships in
+the footer. The inline `style="display:none"` is removed as part of this work.
+
+**Placement.** The footer is application **shell** content, not Home route content: it lives in `index.html`
+beside `.nav` as a `#app` sibling (I5 — never moved into `#app`), and it is styled in
+`assets/css/components.css`. Phase 5 implements it; Phase 8 adds the dictionary keys for both languages.
+
 ## Locked Invariants
 
 The following invariants are non-negotiable acceptance conditions. Every requirement, scenario, and phase
@@ -344,15 +429,18 @@ stops.
 - **I6** — Every ID consumed by JS must survive: `#themeBtn`, `#langBtn`, `#currentLangLabel`,
   `.lang-dropdown-menu`, `.perf-pill`, `.perf-dropdown-menu`, `.nav-tabs`, `.nav-tab`, `#globalSearch`,
   `#localSearchInput`, `#searchBtn`, `#stopBtn`, `#logoSwap`, `#resourcesGrid`, `#catFilterWrap`,
-  `#sortFilterWrap`, `#refreshResourcesBtn`, `#viewGridBtn`, `#viewListBtn`, `#releasesContainer`,
-  `#releasesBody`, `#releaseAuthAction`, `#viewAllReleases`, `#releaseLogoutBtn`, `#quickAccessList`,
-  `#resultsBox`, `#resultsTitle`, `#progress`, `#resultsList`, `#lastSyncTime`, `#rows`, `#tableContainer`,
+  `#sortFilterWrap`, `#refreshResourcesBtn`, `#viewGridBtn`, `#viewListBtn`,
+  `#resultsBox`, `#resultsTitle`, `#progress`, `#resultsList`, `#rows`, `#tableContainer`,
   `#breadcrumb`, `#folderName`, `#folderCount`, `#fileCount`, `#typeFilterWrap`, `#viewList`, `#viewGrid`,
   `#browseAuthBtn`, `#authOverlay`, `#authModal`, `#authForm`, `#authUsername`, `#authPassword`,
-  `#authError`, `#authSubmitBtn`, `#closeAuthBtn`, `#osTabs`.
+  `#authError`, `#authSubmitBtn`, `#closeAuthBtn`.
+  **Exception (D10):** `#releasesContainer`, `#releasesBody`, `#releaseAuthAction`, `#viewAllReleases`,
+  `#releaseLogoutBtn`, `#quickAccessList`, `#lastSyncTime`, and `#osTabs` are deliberately **deleted** and
+  are no longer under this guarantee.
 - **I7** — Every `data-*` attribute consumed by JS must survive: `data-file`, `data-link`, `data-i18n`,
-  `data-i18n-ph`, `data-i18n-html`, `data-val`, `data-os`, `data-perf-val`, `data-theme`, `data-perf`,
+  `data-i18n-ph`, `data-i18n-html`, `data-val`, `data-perf-val`, `data-theme`, `data-perf`,
   `data-url` (even though dead, do not add new consumers).
+  **Exception (D10):** `data-os` is used only by the OS tabs, which D10 deletes, so it is removed with them.
 - **I8** — Every class used as a JS/CSS behavioral hook must survive: `.filter-dropdown-wrap`,
   `.filter-pill`, `.filter-value`, `.filter-option`, `.show`, `.grid-mode`, `.view-toggle`, `.vt-btn`,
   `.input-wrap`, `.ac-dropdown`, `.ac-list`, `.auth-overlay`, `.auth-modal`, `.locked-state`, `.empty-box`,
@@ -385,6 +473,17 @@ stops.
   area. If a token rename or value change would alter the Hero's computed appearance, the Hero's CSS rules
   must be pinned to explicit fallback values to prevent visual drift. The Hero's responsive breakpoints and
   keyboard shortcuts must remain byte-identical.
+  **EXCEPTION (Phase 9, human-approved):** Responsive *layout* rules at `≤1024px` are permitted to modify
+  `.hero-max` and `.hero-visual` to improve mobile stacking. Specifically, `.hero-visual` may leave absolute
+  positioning, enter normal flow, be reordered above `.hero-content`, and be centered. This exception is
+  scoped to layout-only declarations inside a `≤1024px` media query. It does **not** relax the freeze on Hero
+  markup, tokens, colors, typography, the search input, the keyboard shortcuts, or any breakpoint above
+  1024px, and it does not touch `.hero-bg`, `.logo-shader`, or the Hero pinning block.
+- **I22** — The Browse page (all selectors in `browse.css`, all markup in `browse.js`, and all of
+  `file-actions.js`) is FROZEN. No CSS, markup, token, or behavioral change is permitted. `browse.css`,
+  `browse.js`, and `file-actions.js` must remain byte-identical to their pre-redesign state throughout all
+  phases. The 6-child row contract, `data-file="true"` markers, three independent targets, folders-first sort,
+  responsive collapse, and all Browse behavior are preserved by not touching them.
 
 ## Out of Scope
 
@@ -404,6 +503,7 @@ stops.
   options, and the never-shown footer) are not to be fixed and not to be regressed further.
 - **`browse.html`** — dead and untouched (D7).
 - Home page Hero section (`.hero-max` and all descendants) — frozen per D8.
+- Browse page (all of `browse.css`, `browse.js`, `file-actions.js`) — frozen per D9.
 - **Pagination** — does not exist; not to be added.
 - **Selection / multi-select** — does not exist; not to be added.
 - **Infinite scroll, lazy loading** — do not exist; not to be added.
