@@ -66,7 +66,13 @@
     position: absolute;
     bottom: -240px;
     left: -60px;
-    width: 480px;
+    /* Phase 8 (J6 exception, maintainer-approved 2026-10-02): the fixed 480px
+       width at left:-60px extended past the right viewport edge below ~420px,
+       inflating scrollWidth through .hero-max's overflow:visible. Cap the
+       width to the hero's own width on narrow screens; the RTL mirror (which
+       anchors right:-60px) benefits identically. Paint was already clipped
+       to the hero bounds, so no visual change at any width. */
+    width: min(480px, 100%);
     height: 480px;
     background: radial-gradient(circle,
             rgba(255, 170, 129, 0.30) 0%,
@@ -767,6 +773,10 @@ body.rtl .logo-shader {
     align-items: flex-start;
     gap: 14px;
     padding: 20px;
+    /* Phase 8: grid items default to min-width:auto, so the card's min-content
+       (icon + meta + arrow + padding) could exceed the track at small widths
+       and overflow the viewport. Allow it to shrink into its track. */
+    min-width: 0;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--radius-cards);
@@ -778,12 +788,16 @@ body.rtl .logo-shader {
     cursor: pointer;
 }
 
-/* Optional coral corner bleed — Feature Card variant */
+/* Optional corner tint - Feature Card variant. Phase 8: the bleed used to sit
+   40px outside the card (top:-40 / inset-inline-end:-40); as an absolutely
+   positioned pseudo-element it inflated the page scrollWidth at EVERY width
+   and caused a horizontal scrollbar. Repositioned inside the card — same
+   hover tint, zero overflow. */
 .resource-card::after {
     content: "";
     position: absolute;
-    top: -40px;
-    inset-inline-end: -40px;
+    top: 0;
+    inset-inline-end: 0;
     width: 140px;
     height: 140px;
     border-radius: 50%;
@@ -848,6 +862,8 @@ body.rtl .logo-shader {
     letter-spacing: -0.01em;
     color: var(--text);
     line-height: 1.25;
+    /* Phase 8: long unbroken titles wrap instead of forcing min-content width */
+    overflow-wrap: anywhere;
 }
 
 .resource-meta p {
@@ -858,6 +874,8 @@ body.rtl .logo-shader {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    /* Phase 8: unbroken paths wrap rather than clip or inflate the card */
+    overflow-wrap: anywhere;
 }
 
 .resource-bottom {
@@ -1303,6 +1321,7 @@ body.rtl .logo-shader {
     padding: 0 14px;
     color: var(--text);
     font-size: 13px;
+    font-family: var(--font);
     outline: none;
     transition: all 0.2s ease;
 }
@@ -2159,4 +2178,21 @@ body.rtl .logo-shader {
     --glow: rgba(86, 131, 218, 0.10);
     --border-focus: #5683da;
     --input-bg: rgba(9, 10, 12, 0.55);
+}
+/* ─────────────────────────────────────────────
+   PHASE 8 (a11y-ux-debt) — small-viewport tightening
+   Single-column cards at ≤640px get slimmer padding and gaps so the
+   resources list scrolls less. Placed last so it wins the cascade over
+   the Phase-7 refinement block above (same specificity, later position).
+   A 2-column track was evaluated and rejected: at 360px it yields ~166px
+   cards, forcing heavy wrapping and clipped icon+meta rows.
+   ───────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .resources-grid {
+        gap: 10px;
+    }
+
+    .resource-card {
+        padding: 14px;
+    }
 }

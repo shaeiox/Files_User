@@ -86,6 +86,14 @@
     unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
 }
 
+@font-face {
+    font-family: 'Cinzel';
+    src: url('/assets/fonts/Cinzel-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
 :root {
     /* ── Huly core palette ── */
     --color-obsidian-canvas: #303236;
@@ -328,7 +336,16 @@
     /* body                          */
     --text-3: #514532;
     /* secondary                     */
-    --text-4: #9e8f78;
+    /* Task 2.2 (a11y-ux-debt): this step used to resolve to #9e8f78, which
+       measured 3.16:1 on --bg-card - below the 4.5:1 floor for body text. It
+       is aliased to the step above because:
+         - the token cannot be deleted: the frozen browse.css references it in
+           six selectors, so removing the declaration would break them;
+         - a four-step muted scale is not achievable here. The step above
+           already sits at 4.37:1 on --n-4, so any value dimmer than it cannot
+           clear 4.5:1. Aliasing cannot invert the scale by construction.
+       Hierarchy at the quiet end is carried by font size and weight. */
+    --text-4: var(--text-3);
     /* placeholder / disabled        */
     --text-accent: #8a5a00;
     /* inline links                  */
@@ -437,8 +454,16 @@
     /* — text roles — */
     --text: #e3e2e6;
     --text-2: #d5c4ab;
-    --text-3: #9e8f78;
-    --text-4: #514532;
+    /* Task 2.3 (a11y-ux-debt): #9e8f78 measured 5.44:1 on --bg-card but only
+       4.37:1 on --n-4 and 3.89:1 on --bg-elevated, both below the floor.
+       #a99d8a clears every surface: 6.44 on --bg-card, 5.17 on --n-4,
+       4.60 on --bg-elevated. */
+    --text-3: #a99d8a;
+    /* Task 2.2 (a11y-ux-debt): aliased to the step above. This used to be
+       #514532, which measured 1.84:1 on --bg-card. The token is kept (the
+       frozen browse.css references it six times) but no longer resolves to a
+       sub-AA value. */
+    --text-4: var(--text-3);
     --text-accent: #ffdca1;
     --text-on-accent: #412d00;
 

@@ -41,14 +41,14 @@ const Autocomplete = (function () {
         }
 
         const listHtml = matches.map((item, index) => {
-            const isActive = index === activeIndex ? 'active' : '';
+            const isActive = index === activeIndex;
             const href = itemHref(item);
             const iconSvg = item.type === 'directory'
                 ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"/></svg>`
                 : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>`;
 
             return `
-        <li class="ac-item ${isActive}" data-index="${index}" data-href="${href}" data-type="${item.type}">
+        <li class="ac-item ${isActive ? 'active' : ''}" id="ac-option-${index}" role="option" aria-selected="${isActive}" data-index="${index}" data-href="${href}" data-type="${item.type}">
           <div class="ac-item-left">
             <div class="ac-icon ${item.type === 'directory' ? 'ac-icon-dir' : 'ac-icon-file'}">
               ${iconSvg}
@@ -74,6 +74,8 @@ const Autocomplete = (function () {
 
         dropdownEl.innerHTML = `<ul class="ac-list">${listHtml}</ul>${footerHtml}`;
         dropdownEl.classList.add('show');
+        if (inputEl) inputEl.setAttribute('aria-expanded', 'true');
+        syncActiveDescendant();
 
         dropdownEl.querySelectorAll('.ac-item').forEach(el => {
             el.addEventListener('click', (e) => {
@@ -87,17 +89,30 @@ const Autocomplete = (function () {
         });
     }
 
+    function syncActiveDescendant() {
+        if (!inputEl) return;
+        const items = dropdownEl ? dropdownEl.querySelectorAll('.ac-item') : [];
+        if (activeIndex >= 0 && items[activeIndex]) {
+            inputEl.setAttribute('aria-activedescendant', items[activeIndex].id);
+        } else {
+            inputEl.removeAttribute('aria-activedescendant');
+        }
+    }
+
     function updateActiveState() {
         if (!dropdownEl) return;
         const items = dropdownEl.querySelectorAll('.ac-item');
         items.forEach((item, idx) => {
             if (idx === activeIndex) {
                 item.classList.add('active');
+                item.setAttribute('aria-selected', 'true');
                 item.scrollIntoView({ block: 'nearest' });
             } else {
                 item.classList.remove('active');
+                item.setAttribute('aria-selected', 'false');
             }
         });
+        syncActiveDescendant();
     }
 
     function selectItem(href, type) {
@@ -139,7 +154,9 @@ const Autocomplete = (function () {
 
     function hide() {
         if (dropdownEl) dropdownEl.classList.remove('show');
+        if (inputEl) inputEl.setAttribute('aria-expanded', 'false');
         activeIndex = -1;
+        syncActiveDescendant();
     }
 
     function bindInput(input) {
@@ -153,6 +170,8 @@ const Autocomplete = (function () {
             dropdownEl.className = 'ac-dropdown';
             wrap.appendChild(dropdownEl);
         }
+        dropdownEl.id = 'acDropdown';
+        dropdownEl.setAttribute('role', 'listbox');
 
         input.addEventListener('input', (e) => {
             clearTimeout(debounceTimer);

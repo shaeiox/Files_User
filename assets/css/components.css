@@ -236,9 +236,9 @@
    positioned sun/moon SVGs are clipped by it.
    ───────────────────────────────────────────── */
 .theme-btn {
-    width: 32px;
-    min-width: 32px;
-    height: 32px;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -301,7 +301,9 @@
     font-size: var(--text-body-md);
     font-weight: 500;
     line-height: 1;
-    cursor: default;
+    /* Task 1.4: this control opens a menu on hover/focus, so a default
+       (non-interactive) cursor misrepresents it. */
+    cursor: pointer;
     white-space: nowrap;
     transition: border-color var(--dur-1) ease, background var(--dur-1) ease, color var(--dur-1) ease;
 }
@@ -311,7 +313,8 @@
     flex-shrink: 0;
 }
 
-.lang-dropdown-wrap:hover .lang-pill {
+.lang-dropdown-wrap:hover .lang-pill,
+.lang-dropdown-wrap:focus-within .lang-pill {
     border-color: var(--border-hover);
     background: rgba(255, 255, 255, 0.04);
     color: var(--text);
@@ -324,8 +327,21 @@
     height: 32px;
 }
 
-/* MECHANISM FROZEN (I8): this menu opens via CSS :hover ONLY. There is no
-   `.show` path and no script toggles it. Do not add one. */
+/* Task 1.3 - hover bridge. The menu is offset 8px below the wrapper, so that
+   gap belongs to neither element and :hover is lost mid-traversal, snapping
+   the menu shut under the pointer. This transparent bridge covers the gap so
+   the interactive area stays continuous while the visual gap is preserved. */
+.lang-dropdown-wrap::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+    height: 8px;
+}
+
+/* MECHANISM FROZEN (I8): this menu opens via CSS :hover/:focus-within ONLY.
+   There is no `.show` path and no script toggles its visibility. A script may
+   only *report* that state through aria-expanded (task 1.2). */
 .lang-dropdown-menu {
     position: absolute;
     top: calc(100% + 8px);
@@ -348,10 +364,37 @@
     gap: 2px;
 }
 
-.lang-dropdown-wrap:hover .lang-dropdown-menu {
+/* Task 1.1 - the keyboard path. Without :focus-within here the menu is
+   reachable by pointer only, so a keyboard user cannot change language. */
+.lang-dropdown-wrap:hover .lang-dropdown-menu,
+.lang-dropdown-wrap:focus-within .lang-dropdown-menu {
     opacity: 1;
     visibility: visible;
     transform: translateY(0) scale(1);
+}
+
+/* ─────────────────────────────────────────────
+   TASK 1.7 - TOUCH TARGETS
+   Placed after every navbar base rule so it wins the cascade without
+   needing !important. The primary controls were 32-34px tall, under the
+   44px recommendation. The bar is --nav-h (56px) and centres its
+   children, so a 44px hit area fits without touching the frozen sticky
+   geometry (I1: position / top / z-index unchanged) or the height token.
+   ───────────────────────────────────────────── */
+.nav-tab,
+.lang-pill,
+.lang-dropdown-wrap,
+.perf-dropdown-wrap,
+.theme-btn {
+    min-height: 44px;
+}
+
+.nav-tab,
+.lang-pill,
+.lang-dropdown-wrap,
+.perf-dropdown-wrap,
+.theme-btn {
+    height: 44px;
 }
 
 /* Phase 7 (I13): .lang-dropdown-menu now uses inset-inline-end, so the
@@ -1015,9 +1058,79 @@ kbd {
 /* ─────────────────────────────────────────────
    RESPONSIVE NAV
    ───────────────────────────────────────────── */
+/* Phase 6 (a11y-ux-debt) — mobile navigation disclosure. Hidden at and
+   above 900px, where .nav-tabs is always visible; shown below 900px as a
+   native button toggling .nav-tabs.is-open. The control stays in the
+   .nav-actions flow — it never detaches or overlays routed content (I1:
+   the .nav rule above is untouched). */
+.nav-disclosure {
+    display: none;
+}
+
 @media (max-width: 900px) {
     .nav-tabs {
         display: none;
+    }
+
+    .nav-disclosure {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        min-width: 44px;
+        height: 44px;
+        padding: 0;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text-2);
+        cursor: pointer;
+        transition: all var(--dur-1) ease;
+    }
+
+    .nav-disclosure:hover {
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        border-color: var(--border-hover);
+    }
+
+    /* Revealed group: vertical stack dropped below the pill, anchored to
+       .nav (the positioned sticky ancestor), spanning exactly the bar's
+       width so it always fits the viewport. Its own opaque surface keeps
+       every link clear of the content beneath. */
+    .nav-tabs.is-open {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        top: calc(100% + 8px);
+        left: 0;
+        right: 0;
+        transform: none;
+        padding: 8px;
+        border-radius: var(--radius-xl);
+        background: var(--surface-glass);
+        border: 1px solid var(--border);
+        box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.6),
+            0 0 1px 1px rgba(255, 255, 255, 0.06),
+            inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+
+    /* Light-theme shadow, mirroring the light .nav-bar treatment below. */
+    [data-theme="light"] .nav-tabs.is-open {
+        box-shadow: 0 8px 24px -8px rgba(28, 28, 30, 0.12),
+            0 0 1px 1px rgba(28, 28, 30, 0.04),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    /* Phase 8: at rest the menu is pinned to BOTH inline edges of its wrap,
+       so its min-width (148px) anchors at the wrap's START edge and the
+       hidden menu juts past the right viewport edge, inflating scrollWidth.
+       Anchor only the inline-end edge so the menu grows inward. */
+    .lang-dropdown-menu {
+        inset-inline-start: auto;
     }
 }
 
@@ -1027,6 +1140,22 @@ kbd {
     }
 
     .search-keys {
+        display: none;
+    }
+
+    /* Phase 8: tighter action spacing on narrow bars. */
+    .nav-actions {
+        gap: 4px;
+    }
+}
+
+/* Phase 8: below ~420px the bar's content (logo 134 + actions 251 + gaps +
+   padding) exceeds the page width and pushes the theme and disclosure
+   buttons off-viewport — which also made the Phase 6 disclosure control
+   unreachable at 360px. Dropping the wordmark reclaims ~92px; the logo
+   image and link remain. */
+@media (max-width: 480px) {
+    .nav-logo-text {
         display: none;
     }
 }
@@ -1044,6 +1173,7 @@ kbd {
 
 [data-theme="light"] .nav-tab:hover,
 [data-theme="light"] .theme-btn:hover,
+[data-theme="light"] .nav-disclosure:hover,
 [data-theme="light"] .lang-dropdown-wrap:hover .lang-pill,
 [data-theme="light"] .lang-option:hover,
 [data-theme="light"] .perf-dropdown-wrap:hover .perf-pill,

@@ -334,7 +334,18 @@ function applyLang(lang) {
     // 3. Input Placeholders Translation
     document.querySelectorAll("[data-i18n-ph]").forEach(el => {
         const k = el.getAttribute("data-i18n-ph");
+        const isPhElem = el.tagName === "INPUT" || el.tagName === "TEXTAREA";
+        if (!isPhElem) {
+            console.error(`[i18n] data-i18n-ph="${k}" applied to a non-input element (<${el.tagName.toLowerCase()}>); placeholder is unsupported and this hook has no effect. Use the appropriate hook instead.`, el);
+            return;
+        }
         if (d[k] != null) el.placeholder = d[k];
+    });
+
+    // 3a. Accessible-Name Translation (aria-label)
+    document.querySelectorAll("[data-i18n-aria]").forEach(el => {
+        const k = el.getAttribute("data-i18n-aria");
+        if (d[k] != null) el.setAttribute("aria-label", d[k]);
     });
 
     // 4. HTML Content Translation (Preserves tags like <span>)
@@ -366,6 +377,33 @@ function applyLang(lang) {
 
 function setupLanguageDropdown() {
     applyLang(getLang());
+
+    /* Task 1.2 (a11y-ux-debt) - report the language menu's expanded state.
+       CSS cannot write an attribute, so aria-expanded is hardcoded "false" in
+       index.html and never updated, leaving assistive tech told "collapsed"
+       even while the menu is open.
+       This does NOT toggle the menu: visibility stays pure CSS (:hover /
+       :focus-within), so the I8 freeze is preserved. This only mirrors that
+       CSS state into the attribute. */
+    const syncExpanded = (open) => {
+        const btn = document.getElementById("langBtn");
+        if (btn) btn.setAttribute("aria-expanded", open ? "true" : "false");
+    };
+
+    const wrap = document.querySelector(".lang-dropdown-wrap");
+    if (wrap) {
+        // Focus moves into the menu while the user tabs through the options,
+        // so focusin/focusout on the wrapper tracks the whole open session.
+        wrap.addEventListener("focusin", () => syncExpanded(true));
+        wrap.addEventListener("focusout", (e) => {
+            if (!wrap.contains(e.relatedTarget)) syncExpanded(false);
+        });
+        wrap.addEventListener("pointerenter", () => syncExpanded(true));
+        wrap.addEventListener("pointerleave", () => {
+            if (!wrap.contains(document.activeElement)) syncExpanded(false);
+        });
+    }
+    syncExpanded(false);
 
     document.addEventListener("click", (e) => {
         const langOption = e.target.closest(".lang-option");

@@ -345,7 +345,8 @@
 
 /* Trigger Button (Pill) */
 .perf-pill {
-    height: 32px;
+    height: 44px;
+    min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -515,7 +516,7 @@
     border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     color: var(--text, #fff);
-    font-family: var(--font, system-ui);
+    font-family: var(--font);
     font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
@@ -559,7 +560,7 @@
     background: var(--bg-card, #161922);
     border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-    font-family: var(--mono, monospace);
+    font-family: var(--mono);
     font-size: 11px;
     color: var(--text, #e2e8f0);
     opacity: 0;
@@ -654,7 +655,7 @@
     border-radius: 5px;
     background: var(--bg-hover, rgba(255, 255, 255, 0.04));
     color: var(--text-3, #94a3b8);
-    font-family: var(--mono, monospace);
+    font-family: var(--mono);
     font-size: 9px;
     font-weight: 700;
     cursor: pointer;
@@ -770,4 +771,20 @@
 [data-perf="potato"] .footer {
     background: var(--bg-card);
     border-top: 1px solid var(--border);
+}
+
+/* ─────────────────────────────────────────────
+   PHASE 8 (a11y-ux-debt) — keep the perf menu inside small viewports
+   The menu is anchored to the wrap's inline-END edge with a 170px
+   min-width; below ~420px the wrap sits so close to the start edge that
+   the hidden menu juts past it (L=-11px at 360px), inflating scrollWidth.
+   Anchor to the inline-START edge below 640px so it grows inward; the
+   logical property mirrors correctly in RTL. Placed last so it wins the
+   cascade over the physical right/left rules above.
+   ───────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .perf-dropdown-menu {
+        inset-inline-end: auto;
+        inset-inline-start: 0;
+    }
 }

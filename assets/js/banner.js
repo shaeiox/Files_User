@@ -101,7 +101,7 @@ const CavBanner = (function () {
             0 0 0 1px rgba(0, 0, 0, 0.3),
             inset 0 1px 0 rgba(255, 255, 255, 0.04);
         color: rgba(255, 255, 255, 0.92);
-        font-family: 'Inter', -apple-system, system-ui, sans-serif;
+        font-family: var(--font);
         font-size: 0.88rem;
         line-height: 1.5;
         overflow: hidden;

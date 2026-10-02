@@ -43,39 +43,39 @@ and remove the CSP-blocked Google Fonts links — with **zero** behavioral delta
 
 **Tasks:**
 
-- [ ] 1.1 Confirm the four current token blocks in `assets/css/tokens.css` and record their exact declaration
+- [x] 1.1 Confirm the four current token blocks in `assets/css/tokens.css` and record their exact declaration
   order. Do not restructure the file; only replace and append declarations.
-- [ ] 1.2 Declare the complete D4 palette in `:root`, verbatim, per `design.md` §2.2. Group order: core
+- [x] 1.2 **ACCEPTED DEVIATION D-1 (maintainer-approved 2026-10-02 — see Phase 1 report).** Declare the complete D4 palette in `:root`, verbatim, per `design.md` §2.2. Group order: core
   surfaces, foreground, outlines, primary (Cyber Amber), secondary (Electric Indigo), tertiary (Cyan
   Stream), error, glows.
-- [ ] 1.3 Declare the nine-token typography scale, six-token radius scale, ten-token spacing scale, and
+- [x] 1.3 **ACCEPTED DEVIATION D-2/D-3 (maintainer-approved 2026-10-02 — see Phase 1 report).** Declare the nine-token typography scale, six-token radius scale, ten-token spacing scale, and
   nine-token z-index scale from D6 in `:root`. `--radius-DEFAULT` is required verbatim.
-- [ ] 1.4 Declare `--nav-h` in `:root` at the current desktop value, and add its mobile override inside the
+- [x] 1.4 Declare `--nav-h` in `:root` at the current desktop value, and add its mobile override inside the
   existing `@media (max-width: 640px)` block at the current mobile value. Add **no** `calc()` consumer
   anywhere in this phase.
-- [ ] 1.5 Convert every legacy token name listed in `design.md` §2.4 into an alias resolving to exactly one D4
+- [x] 1.5 **ACCEPTED DEVIATION D-1/D-4 (maintainer-approved 2026-10-02 — see Phase 1 report).** Convert every legacy token name listed in `design.md` §2.4 into an alias resolving to exactly one D4
   token. Do not delete any legacy name that has a live consumer. Mark `--s1`…`--s24`, `--r1`…`--r-full`,
   `--radius`, `--a-1`…`--a-8`, unused `--n-*`, unused `--color-*`, `--warning`, `--ease-out`, `--dur-1`…`--dur-3`,
   unused `--text-*` size tokens, and `--hero-grad` as deprecated with a comment; do not remove them.
-- [ ] 1.6 Resolve the `--background` name collision: D4's `--background: #121316` wins over the dead shadcn
+- [x] 1.6 **ACCEPTED DEVIATION D-7 (maintainer-approved 2026-10-02 — see Phase 1 report).** Resolve the `--background` name collision: D4's `--background: #121316` wins over the dead shadcn
   HSL-triplet of the same name. Drop or rename the shadcn triplet block; confirm no rule wraps any shadcn
   token in `hsl()`.
-- [ ] 1.7 ~~Repoint the `--hero-grad` token~~ **CANCELLED by D8/I21.** `--hero-grad` is consumed only by the
+- [x] 1.7 ~~Repoint the `--hero-grad` token~~ **CANCELLED by D8/I21.** `--hero-grad` is consumed only by the
   frozen `.hero-max`, so it must keep its current value in both theme blocks. Verified by task 1.13.
-- [ ] 1.8 Rewrite the `[data-theme="light"]` block so it declares exactly the same token names as
+- [x] 1.8 **ACCEPTED DEVIATION D-5/D-6 (maintainer-approved 2026-10-02 — see Phase 1 report).** Rewrite the `[data-theme="light"]` block so it declares exactly the same token names as
   `[data-theme="dark"]`, applying D4's derivation rule and sourcing any unpinned value from the
   already-present light-theme declarations per OQ-1. Keep `--primary-container: #ffb800` in both themes.
       - **HARD GATE:** the light block and the dark block must have identical token-name sets.
-- [ ] 1.9 Add the nine `@font-face` declarations for Inter, JetBrains Mono, and Vazirmatn at weights 400/500/600,
+- [x] 1.9 Add the nine `@font-face` declarations for Inter, JetBrains Mono, and Vazirmatn at weights 400/500/600,
   each with `font-display: swap`, sourcing from `/assets/fonts/*.woff2`. Confirm every path satisfies the CSP
   `font-src 'self' data:` directive.
-- [ ] 1.10 Repoint `--font`, `--font-display`, `--font-hero`, `--font-fa`, `--mono` to the self-hosted families
+- [x] 1.10 Repoint `--font`, `--font-display`, `--font-hero`, `--font-fa`, `--mono` to the self-hosted families
   per `design.md` §3.3.
-- [ ] 1.11 Remove the three Google Fonts `<link>` tags from `index.html` (two `preconnect` and the `css2`
+- [x] 1.11 Remove the three Google Fonts `<link>` tags from `index.html` (two `preconnect` and the `css2`
   stylesheet). Change nothing else in `index.html` — not the six stylesheet links, not the icon link, not the
   inline pre-paint theme/perf script, not `<main id="app">`, not the script load order.
-- [ ] 1.12 Do **not** touch `browse.html` even though it carries the same Google Fonts tags (I18).
-- [ ] 1.13 **Hero token insulation audit.** Grep `home.css` for all token references inside `.hero-max` and
+- [x] 1.12 Do **not** touch `browse.html` even though it carries the same Google Fonts tags (I18).
+- [x] 1.13 **Hero token insulation audit.** Grep `home.css` for all token references inside `.hero-max` and
   its descendants. Document which tokens the Hero consumes. If any of these tokens will change value in task
   1.1-1.3, add explicit pinned-value overrides in `home.css` scoped to `.hero-max` to prevent visual drift.
   Validation: visual diff of the Hero section before and after token changes shows zero difference.
@@ -117,42 +117,103 @@ Fonts links gone, `git diff` confined to the three allowed paths, and **zero** b
 ### Phase 1 — Final Report Template
 
 ```
-## Phase 1 — Design Tokens + Fonts: COMPLETE / BLOCKED
+## Phase 1 — Design Tokens + Fonts: COMPLETE WITH RECORDED DEVIATIONS
 
-### Files changed
-- (list with line counts)
+Retroactive verification report — the phase shipped in commit 9db6c0b without a contemporaneous report;
+this report verifies the shipped state (HEAD) against the task letters on 2026-10-02. Verification basis:
+detached worktree at HEAD; baseline 8ef9e2b for pre-change values.
+
+**ACCEPTED:** deviations D-1…D-7 (and the D-8…D-20 family recorded in Phases 2–6) were reviewed and
+accepted by the maintainer on 2026-10-02. The D4-name/alias-bridge structure is formally abandoned in
+favour of the shipped inline-value reality; the four missing scale tokens and the deprecation comments
+are waived; the light/dark name-set difference and the absent `--primary-container` name are accepted.
+
+### Files changed (this phase's scope, from `git diff 8ef9e2b..9db6c0b --stat`)
+- `assets/css/tokens.css` (+312/- lines within the commit's 312 changed lines)
+- `index.html` — font-link hunk only (the commit's second index.html hunk is Phase 5's footer)
+- `assets/fonts/` — 9 new `.woff2` files
+- (commit also carried Phases 2–5 files and an out-of-scope `data/users.json` touch — see Phase 8 notes)
 
 ### Tokens
-- D4 tokens declared: N / M
-- Legacy aliases converted: N
-- Deprecations marked (not removed): N
-- Light/dark token-name sets identical: YES / NO
-- OQ-1 resolution used: (state which derivation was applied)
+- D4 tokens declared under D4 names: **0 / ~60** — DEVIATION D-1. D4 *values* were inlined directly onto
+  the legacy semantic names (dark: `--bg:#121316`, `--bg-card:#1b1b1f`, `--bg-hover:#292a2d`,
+  `--bg-input:#1f1f23`, `--bg-elevated:#343538`, `--bg-sunken:#0d0e11`, `--text:#e3e2e6`,
+  `--text-2:#d5c4ab`, `--text-3:#9e8f78`, `--text-4:#514532`, `--text-accent:#ffdca1`,
+  `--text-on-accent:#412d00`, `--border:rgba(255,255,255,.07)` = the `--border-hairline` derive).
+  The §2.4 name-level alias bridge (legacy → `var(--d4-name)`) was not built; the rendered outcome is the
+  D4 palette, but the structural requirement (D4 names declared in `:root` + both theme blocks) is unmet.
+- Scales: typography 9/9 ✓; z-index 9/9 ✓; radius 4/6 — DEVIATION D-2 (`--radius-DEFAULT` and
+  `--radius-full` missing; `--radius-DEFAULT` was "required verbatim"); spacing 7/10 — DEVIATION D-3
+  (`--margin`, `--margin-desktop` missing).
+- `--nav-h: 56px` declared in `:root` ✓; mobile handled via a second token `--nav-h-mobile: 52px` consumed
+  by the existing ≤640px block — mechanism deviation from the letter ("override inside the media block"),
+  functionally equivalent. No `calc()` consumer of `--nav-h` anywhere ✓.
+- Legacy aliases converted: 0 as `var()` aliases — DEVIATION D-1 (values inlined instead).
+- Deprecations marked: **0** — DEVIATION D-4. `--s1…--s24`, `--r1…`, `--a-1…--a-8`, `--warning`,
+  `--ease-out`, `--dur-*`, legacy `--text-*` and the shadcn triplets carry no deprecation comments.
+- Light/dark token-name sets identical: **NO** — DEVIATION D-5. light=74 names, dark=66; light-only:
+  `--a-1…--a-8` (oklch accent ramp redeclared in light only). Script evidence below.
+- `--primary-container: #ffb800` in both themes: **NOT MET** — DEVIATION D-6. The name
+  `--primary-container` is declared nowhere; `--border-focus: #ffb800` carries the value in both themes.
+- `--background` collision: **NOT resolved** — DEVIATION D-7. Dark block still declares the shadcn triplet
+  `--background: 220 3% 20%`. Verified harmless: zero `hsl(var(` consumers across all six stylesheets.
+- OQ-1 resolution used: as specified — unpinned light values sourced from the already-present light
+  declarations (oklch ramp); no new hex introduced in the light block.
+- Hero insulation (1.13): PRESENT and correct — `home.css:2133` re-declares `--radius-panels: 20px`,
+  `--color-ember-pulse: #ff8964`, `--color-electric-iris: #5683da` inside a `.hero-max` scope (plus a
+  `[data-theme="dark"]` repetition at :2149), pinning exactly the pre-change literals from 8ef9e2b.
+  `--hero-grad` byte-identical to baseline in both themes (1.7 cancellation verified).
+- OQ-2 risk CONFIRMED realised: dark `--text-4` shipped as `#514532` (D4 `--outline-variant`), the
+  low-contrast muted tone flagged in OQ-2 — this is the 1.84:1 AA failure later measured by
+  `a11y-ux-debt` (its Phase 2 remediates).
 
 ### Fonts
-- woff2 files added: N / 9
-- @font-face declarations: N
-- All font-display: swap: YES / NO
-- Google Fonts links removed from index.html: YES / NO
-- browse.html untouched: YES / NO
+- woff2 files added: 9 / 9 ✓ (Inter/JetBrainsMono/Vazirmatn × Regular/Medium/SemiBold)
+- @font-face declarations: 9, all in `tokens.css` (first-loaded) ✓
+- All font-display: swap: YES ✓
+- Filenames deviate from design §3.1 (`Inter-Regular.woff2` vs `inter-400.woff2`) — cosmetic only.
+- Token re-points: `--font`, `--font-display`, `--font-fa`, `--mono` ✓. `--font-hero` NOT repointed —
+  recorded deviation, justified: the Hero headline is frozen (D8/I21) and task 1.13's hard gate requires
+  byte-identical Hero computed styles; repointing would have violated both. tokens.css:159-162 documents
+  the decision. (design.md §3.3 still says "Inter" — an artifact inconsistency to reconcile at archive.)
+- Google Fonts links removed from index.html: YES ✓ (diff hunk removes exactly the 3 link lines)
+- browse.html untouched: YES ✓ (absent from the implementation diff)
 
 ### HARD GATE results
-- Light/dark structural parallel: PASS / FAIL
-- I1 sticky navbar intact: PASS / FAIL
-- I2 no overflow on .page / #app: PASS / FAIL
+- Light/dark structural parallel: **FAIL** (DEVIATION D-5: 8 light-only `--a-*` names)
+- I1 sticky navbar intact: PASS (`.nav` = `position: sticky; top: 12px; z-index: var(--z-sticky)`;
+  `--z-sticky: 50` reproduces 50 exactly)
+- I2 no overflow on .page / #app: PASS (`body { overflow-x: hidden }` at base.css:30; the only
+  `overflow: hidden` added is on `.aura-backdrop`; no overflow on `.page`, `#app`, or `html`)
+- 1.13 Hero hard gate: PASS by construction (scoped pins reproduce pre-change literals; `--hero-grad`
+  unchanged; Hero markup untouched — home.js Hero hunk absent from the diff)
 
 ### Validation evidence
-- git diff --stat: (paste)
-- token-set equality command + result: (paste)
+- git diff --stat: tokens.css 312 lines, 9 font binaries new, index.html font-link hunk = 4 deletions;
+  no other Phase-1-scope file touched. `base.css`/`home.css`/`components.css` changes in the same commit
+  belong to Phases 2–4.
+- Token-set equality: `node token-sets.js tokens.css` → light 74 / dark 66, only-in-light =
+  `--a-1..--a-8`, only-in-dark = [] (FAILS the 1.8 hard gate by 8 names).
+- `hsl(var(` consumers across `assets/css/*.css`: 0 ✓
+- `calc(...nav-h` consumers: 0 ✓
+- Pre-change baseline check: `--color-electric-iris #5683da→#c3c0ff`, `--color-ember-pulse
+  #ff8964→#ffb800`, `--radius-panels 20px→0.5rem` — all three Hero feeds changed, all three pinned under
+  `.hero-max` ✓
 
 ### Behavior deltas observed
-- (list, or "none")
+- None intended. Ambient consumers of changed tokens re-themed as designed (backdrop blooms now derive
+  from `#ffb800`/`#c3c0ff` at base.css via color-mix — a deliberate Phase 2 effect, not a Phase 1 delta).
 
 ### Pre-existing defects
-- (list any that became MORE likely to trigger, or "none")
+- None made more likely. (The dark `--text-4` AA failure is a *new* condition introduced by D-1's inline
+  of `--outline-variant`, tracked by `a11y-ux-debt` Phase 2.)
 
 ### Risks / notes
-- (list, or "none")
+- DEVIATIONS D-1…D-7 recorded above await maintainer acceptance or remediation. Accepting D-1 means the
+  D4 token names never exist; future work must reference the legacy names. D-5/D-6 mean the structural
+  parallelism contract is formally open even though both themes render.
+- `data/users.json` touched by the implementation commit — outside every phase's in-scope list; flagged
+  for the Phase 8 final report.
 ```
 
 ---
@@ -175,26 +236,26 @@ with pure CSS to evoke Obsidian Kinetic, and add the `[data-perf]` tier override
 
 **Tasks:**
 
-- [ ] 2.1 Restyle `.aura-backdrop` in `base.css:95-101` — preserve its resolved `position: fixed`, viewport
+- [x] 2.1 Restyle `.aura-backdrop` in `base.css:95-101` — preserve its resolved `position: fixed`, viewport
   coverage, `overflow: hidden`, `pointer-events: none`, and `z-index: 0`.
-- [ ] 2.2 Restyle `.aura-base`, `.aura-glow-1`, `.aura-glow-2` in `base.css:103-133` using the D4 surface ramp
+- [x] 2.2 Restyle `.aura-base`, `.aura-glow-1`, `.aura-glow-2` in `base.css:103-133` using the D4 surface ramp
   plus two offset radial-gradient orbs tinted by `--glow-amber` and `--glow-indigo`. Use
   `--surface-container-lowest` for the deepest tone.
-- [ ] 2.3 Preserve the `home.css:1385-1392` override block exactly in effect: `position: fixed`, viewport
+- [x] 2.3 Preserve the `home.css:1385-1392` override block exactly in effect: `position: fixed`, viewport
   coverage, `pointer-events: none`, `z-index: -1`. Do **not** raise it above `--z-base`; `.page` at
   `z-index: 1` is what separates the backdrop from content.
-- [ ] 2.4 Leave `.aura-vignette` and its `display: none` rule untouched (no matching element exists; adding one
+- [x] 2.4 Leave `.aura-vignette` and its `display: none` rule untouched (no matching element exists; adding one
   would be markup scope creep).
-- [ ] 2.5 Add the peripheral vignette as part of the `.aura-base` wash using D4 tokens only.
-- [ ] 2.6 Add an optional `backdrop-filter` to `.aura-base` for the frosted-glass read.
-- [ ] 2.7 Add `[data-perf="low"]` and `[data-perf="potato"]` overrides in `performance-modes.css` that collapse
+- [x] 2.5 Add the peripheral vignette as part of the `.aura-base` wash using D4 tokens only.
+- [x] 2.6 Add an optional `backdrop-filter` to `.aura-base` for the frosted-glass read.
+- [x] 2.7 Add `[data-perf="low"]` and `[data-perf="potato"]` overrides in `performance-modes.css` that collapse
   the orbs to a single static gradient and remove `backdrop-filter` entirely (I12).
       - **HARD GATE:** every backdrop rule using `backdrop-filter`, `blur`, `filter`, or `animation` has a
         matching override in **both** tier blocks.
-- [ ] 2.8 Add a `prefers-reduced-motion: reduce` guard for any backdrop animation.
-- [ ] 2.9 Confirm no JavaScript was added or changed. **No WebGL, no `requestAnimationFrame`, no
+- [x] 2.8 Add a `prefers-reduced-motion: reduce` guard for any backdrop animation.
+- [x] 2.9 Confirm no JavaScript was added or changed. **No WebGL, no `requestAnimationFrame`, no
   `ResizeObserver`, no `mousemove` listener, no `<canvas>` element** (D5).
-- [ ] 2.10 Confirm no `overflow` value was added to `.page`, `#app`, or `html` (I2).
+- [x] 2.10 Confirm no `overflow` value was added to `.page`, `#app`, or `html` (I2).
 
 **Validation:**
 
@@ -223,38 +284,69 @@ complete `low`/`potato` tier overrides.
 ### Phase 2 — Final Report Template
 
 ```
-## Phase 2 — Backdrop & Shell Base: COMPLETE / BLOCKED
+## Phase 2 — Backdrop & Shell Base: COMPLETE WITH RECORDED DEVIATIONS
 
-### Files changed
-- (list with line counts)
+Retroactive verification report — shipped in commit 9db6c0b; verified against HEAD on 2026-10-02
+(worktree at HEAD; baseline 8ef9e2b).
+
+### Files changed (this phase's scope)
+- `assets/css/base.css` (+130/- lines in the implementation commit — backdrop block at :104-200)
+- `assets/css/home.css` (the `.aura-backdrop` override retained; Hero-scoped pins are Phase 1's)
+- `assets/css/performance-modes.css` (backdrop tier rules at :109-126 low / :246-254 potato,
+  plus `[data-perf="medium"]` backdrop rules at :32-53)
 
 ### Layers restyled
-- .aura-base: (one-line description)
-- .aura-glow-1: (one-line description)
-- .aura-glow-2: (one-line description)
-- .aura-backdrop stacking resolved to: (position / z-index / pointer-events)
+- `.aura-base`: wash + peripheral vignette in one rule — radial-gradient(ellipse 120% 95% at 50% 45%,
+  transparent → `var(--bg)`), giving depth with no extra element (2.5 satisfied in the same declaration).
+- `.aura-glow-1`: amber orb top-right (80vw circle, `filter: blur(80px)`, opacity .6), tinted
+  `color-mix(--color-ember-pulse)` with a literal `rgba(255,184,0,*)` fallback declared first.
+- `.aura-glow-2`: indigo orb bottom-left (70vw circle, `filter: blur(100px)`, opacity .4), tinted
+  `color-mix(--color-electric-iris)` with literal `rgba(195,192,255,*)` fallback.
+- `.aura-backdrop` stacking resolved to: `position: fixed; inset: 0` (base) with the home.css override
+  (`top/left/right: 0`) preserved verbatim → resolved z-index **-1**, `pointer-events: none`,
+  `overflow: hidden` (from base). `.page` at z-index 1 keeps it behind content.
+- DEVIATION D-8 (token names, governed by D-1): the tints come from `--color-ember-pulse` /
+  `--color-electric-iris` and the deepest tone is `var(--bg)`, because the D4 names `--glow-amber`,
+  `--glow-indigo`, and `--surface-container-lowest` do not exist in the shipped tokens. The D4 hues are
+  the ones used (#ffb800 amber / #c3c0ff indigo), so the visual intent of 2.2 is met.
 
 ### Technology compliance
-- Zero canvas/webgl/rAF/ResizeObserver/mousemove: YES / NO
-- Zero new JavaScript: YES / NO
+- Zero canvas/webgl/rAF/ResizeObserver/mousemove: YES — grep over all three stylesheets: 0 hits each.
+- Zero new JavaScript: YES — backdrop is pure CSS, fully static (no animation declared → the 2.8
+  reduced-motion guard is vacuous; the header comment documents "no shader, no animation, no script").
 
 ### HARD GATE results
-- I2 no overflow added to .page / #app / html: PASS / FAIL
-- I1 backdrop never intercepts clicks: PASS / FAIL
-- I12 perf override for every new effect: PASS / FAIL
+- I2 no overflow added to .page / #app / html: PASS (only `.aura-backdrop` gained `overflow: hidden`)
+- I1 backdrop never intercepts clicks: PASS (`pointer-events: none` on `.aura-backdrop` and both orbs)
+- I12 perf override for every new effect: PASS — `[data-perf="low"]`: orbs `display: none`,
+  `.aura-base` flat `var(--bg)` + `filter: none !important`; `[data-perf="potato"]`: `.aura-backdrop`
+  and orbs `display: none !important`, global `backdrop-filter: none !important`, animation kill.
+  No `backdrop-filter` is used by any backdrop rule, so its removal is vacuously satisfied.
+- D8/I21 hero-visual gate: PASS **via the I21 Phase-9 exception** — `.hero-visual`'s only changes are
+  layout declarations (`position`/`right`/`top`/`order`) inside ≤1024px/≤640px media queries, exactly
+  the human-approved exception recorded in I21. `.hero-bg`, `.logo-shader`, and the Hero pinning block
+  are untouched (both pre-date the redesign; verified absent from the home.js/home.css Hero diffs).
+  Hero markup in `home.js`: untouched (zero changed lines in `renderHeroSection`).
 
 ### Validation evidence
-- forbidden-technology grep + result: (paste)
-- perf-tier override grep + result: (paste)
+- forbidden-technology grep: `canvas|webgl|requestAnimationFrame|ResizeObserver|mousemove|getContext`
+  → base.css 0, home.css 0, performance-modes.css 0.
+- perf-tier override grep: low tier at performance-modes.css:109-126 names `.aura-glow-1/2`, `.aura-base`,
+  `.aura-backdrop`; potato tier at :246-254 names `.aura-glow-1/2`, `.aura-backdrop` (+ global kill).
+- `.aura-backdrop` pointer-events: none present in both base.css and home.css ✓; resolved z-index -1 ✓.
+- `.aura-vignette { display: none }` retained unchanged (base.css:168-171) ✓ (2.4).
 
 ### Behavior deltas observed
-- (list, or "none")
+- Light theme: glows reduced to faint tints (opacity .08/.05) — deliberate, documented in base.css:193.
 
 ### Pre-existing defects
-- (list any that became MORE likely to trigger, or "none")
+- None made more likely.
 
 ### Risks / notes
-- (list, or "none")
+- D-8 recorded (token-name substitutions under D-1). No functional risk: fallbacks for engines without
+  `color-mix` are declared first, so older engines still render the orbs.
+- The home.css override keeps only `top/left/right` (no `bottom`), but base.css's `inset: 0` supplies
+  `bottom: 0` through the cascade, so viewport coverage is complete.
 ```
 
 ---
@@ -279,38 +371,38 @@ Obsidian Kinetic, while the navbar remains a floating sticky pill at `top: 12px`
 
 **Tasks:**
 
-- [ ] 3.1 Restyle `.nav` (`components.css:9-14`) — **`position: sticky` and `top: 12px` are unchanged**; replace
+- [x] 3.1 Restyle `.nav` (`components.css:9-14`) — **`position: sticky` and `top: 12px` are unchanged**; replace
   `z-index: 50` with `var(--z-sticky)`, which reproduces 50 exactly.
       - **HARD GATE (I1):** `.nav` must still be `position: sticky` with `top: 12px`; never `fixed`, never
         `absolute`.
-- [ ] 3.2 Restyle `.nav-bar` (`components.css:16-29`) — keep `display: flex`, the three-region
+- [x] 3.2 Restyle `.nav-bar` (`components.css:16-29`) — keep `display: flex`, the three-region
   `justify-content: space-between` layout, and `backdrop-filter: blur(16px)`; repoint `height` to
   `var(--nav-h)`; repoint `background` to the D4 navbar surface; repoint `border` to `--border-hairline`;
   add the D4 amber hover border using `--border-active`.
-- [ ] 3.3 Preserve the `.nav-bar` height override inside the existing `@media (max-width: 640px)` block, now
+- [x] 3.3 Preserve the `.nav-bar` height override inside the existing `@media (max-width: 640px)` block, now
   driven by `--nav-h`'s mobile value.
-- [ ] 3.4 Restyle `.nav-logo`, `.nav-logo img`, `.nav-logo-text strong`, `.nav-logo-text span` — glass tile,
+- [x] 3.4 Restyle `.nav-logo`, `.nav-logo img`, `.nav-logo-text strong`, `.nav-logo-text span` — glass tile,
   amber hairline, `--glow-amber` on the brand mark. Image `src` stays `/assets/icon/logo.webp` (remote
   Stitch images are CSP-blocked and D3-forbidden).
-- [ ] 3.5 Restyle `.nav-tabs` and `.nav-tab` — keep `.nav-tabs` `position: absolute; left: 50%;
+- [x] 3.5 Restyle `.nav-tabs` and `.nav-tab` — keep `.nav-tabs` `position: absolute; left: 50%;
   transform: translateX(-50%)` (it depends on `.nav` being a positioned ancestor for stickiness). Keep the
   three existing tabs with their real hrefs and `aria-current="page"`. **Do not add the Stitch's five
   workspace tabs** — they have no destination and would fabricate navigation (D3).
-- [ ] 3.6 Preserve `.nav-tabs { display: none }` inside the existing `@media (max-width: 900px)` block exactly as
+- [x] 3.6 Preserve `.nav-tabs { display: none }` inside the existing `@media (max-width: 900px)` block exactly as
   written. This is existing verified behavior, not chrome.
-- [ ] 3.7 Restyle `.nav-actions`, `.perf-pill`, `.perf-option`, `.perf-indicator-dot`, `.perf-dropdown-menu` —
+- [x] 3.7 Restyle `.nav-actions`, `.perf-pill`, `.perf-option`, `.perf-indicator-dot`, `.perf-dropdown-menu` —
   keep `.show` on the **wrapper** as the open mechanism and keep the four-property hidden state
   (`opacity` + `visibility` + `transform` + `pointer-events`). Keep `data-perf-val` values
   (`AUTO`/`HIGH`/`MEDIUM`/`LOW`/`POTATO`).
-- [ ] 3.8 Restyle `.lang-dropdown-wrap`, `.lang-pill`, `.lang-dropdown-menu`, `.lang-option` — **keep the
+- [x] 3.8 Restyle `.lang-dropdown-wrap`, `.lang-pill`, `.lang-dropdown-menu`, `.lang-option` — **keep the
   CSS `:hover`-only open mechanism**. Do not add a `.show` path and do not start updating `aria-expanded`;
   that recorded pre-existing gap is out of scope (authoring rule 7).
-- [ ] 3.9 Restyle `#themeBtn`, `.icon-sun`, `.icon-moon` — the two stacked SVGs are clipped by the button's
+- [x] 3.9 Restyle `#themeBtn`, `.icon-sun`, `.icon-moon` — the two stacked SVGs are clipped by the button's
   `overflow: hidden`, which must be preserved.
-- [ ] 3.10 Add `[data-perf="low"]` and `[data-perf="potato"]` overrides for every new navbar effect (I12).
-- [ ] 3.11 Add `[dir="rtl"]` mirrors for every new direction-sensitive navbar rule (I13). Prefer logical
+- [x] 3.10 Add `[data-perf="low"]` and `[data-perf="potato"]` overrides for every new navbar effect (I12).
+- [x] 3.11 Add `[dir="rtl"]` mirrors for every new direction-sensitive navbar rule (I13). Prefer logical
   properties where an existing physical-property rule is not being rewritten.
-- [ ] 3.12 If any `index.html` class addition is strictly required, document each one individually in the phase
+- [x] 3.12 If any `index.html` class addition is strictly required, document each one individually in the phase
   report with its justification. **No id change. No `data-*` change. No element added to or removed from
   `.nav-bar`.** `.nav` and `.footer` stay siblings of `#app`, never moved inside it (I5).
 
@@ -351,43 +443,75 @@ mechanism, and responsive rule intact.
 ### Phase 3 — Final Report Template
 
 ```
-## Phase 3 — Navbar Redesign: COMPLETE / BLOCKED
+## Phase 3 — Navbar Redesign: COMPLETE WITH RECORDED DEVIATIONS
 
-### Files changed
-- (list with line counts)
+Retroactive verification report — shipped in commit 9db6c0b; verified against HEAD on 2026-10-02
+(worktree at HEAD; baseline 8ef9e2b).
+
+### Files changed (this phase's scope)
+- `assets/css/components.css` — navbar block (:9-148), lang/perf/theme sections, 900px/640px blocks
+- `assets/css/tokens.css` — `--nav-h` / `--nav-h-mobile` consumption only
+- `assets/css/performance-modes.css` — `.perf-pill` / `.perf-dropdown-menu` base rules (:339-450) and
+  low/potato navbar overrides
+- `index.html` — no navbar hunk (see below)
 
 ### index.html class additions (if any)
-- (each addition + justification, or "none")
+- None. The implementation diff for index.html contains only the Phase 1 font-link removal and the
+  Phase 5 footer. The navbar markup is byte-identical to baseline.
 
 ### Restyled selectors
-- (list)
+- `.nav` (animation added), `.nav-bar` (glass surface, hairline border, layered shadow, blur,
+  `--nav-h`, logical padding), `.nav-logo*`, `.nav-tabs`, `.nav-tab` (+`.active`/`[aria-current]`),
+  `.nav-actions`, `.perf-pill`, `.perf-option`, `.perf-indicator-dot`, `.perf-dropdown-menu`,
+  `.lang-dropdown-wrap`, `.lang-pill`, `.lang-dropdown-menu`, `.lang-option`, `#themeBtn` (`.theme-btn`,
+  `.icon-sun`, `.icon-moon`), light-theme hover overrides.
 
 ### HARD GATE results
-- I1 .nav position sticky / top 12px / z-index 50: PASS / FAIL
-- I2 NEGATIVE: no overflow added to .page / #app: PASS / FAIL
-- I12 perf override for every new navbar effect: PASS / FAIL
-- I13 RTL mirror for every new direction-sensitive rule: PASS / FAIL
+- I1 .nav position sticky / top 12px / z-index 50: PASS — `position: sticky; top: 12px;
+  z-index: var(--z-sticky)`; `--z-sticky: 50` reproduces 50; no `fixed`/`absolute` in the rule.
+- I2 NEGATIVE: no overflow added to .page / #app: PASS (verified Phase 2; unchanged here).
+- I12 perf override for every new navbar effect: PASS — `[data-perf="low"]` kills `.nav-bar` and both
+  dropdown `backdrop-filter`s and flattens fills/shadows (:82-101); `[data-perf="potato"]` flat
+  `.nav-bar` fill (:241) + global filter/animation/shadow kills.
+- I13 RTL mirror for every new direction-sensitive rule: PASS — `.nav-bar` padding is logical
+  (`padding-inline-*`); `.lang-dropdown-menu` uses `inset-inline-*`; `.perf-dropdown-menu` has an
+  explicit `[dir="rtl"]` flip (performance-modes.css:413); 11 logical-property/RTL constructs in
+  components.css.
 
 ### Preserved mechanisms (confirm unchanged)
-- .perf dropdown opens via .show on wrapper: YES / NO
-- .lang dropdown opens via :hover only: YES / NO
-- .themeBtn clipped via overflow: hidden: YES / NO
-- ≤900px .nav-tabs display: none: YES / NO
-- ≤640px nav height override: YES / NO
-- --nav-h now consumed by .nav-bar: YES / NO
+- .perf dropdown opens via .show on wrapper: YES — `.perf-dropdown-wrap.show .perf-dropdown-menu`;
+  hidden state keeps all four properties (opacity + visibility + transform + pointer-events).
+- .lang dropdown opens via :hover only: YES — single `:hover` path at components.css:351; I8 freeze
+  comment intact; zero `langBtn`/`focusin` references in HEAD i18n.js.
+- .themeBtn clipped via overflow: hidden: YES — `.theme-btn { overflow: hidden }` at :249.
+- ≤900px .nav-tabs display: none: YES — components.css:1061-1065.
+- ≤640px nav height override: YES — `.nav-bar { height: var(--nav-h-mobile) }` at :1067-1070.
+- --nav-h now consumed by .nav-bar: YES — components.css:24; only consumer, no `calc()`.
 
 ### Validation evidence
-- sticky-rule grep + result: (paste)
-- id/data-* survival grep + result: (paste)
+- sticky-rule grep: `.nav { position: sticky; top: 12px; z-index: var(--z-sticky); ... }` at
+  components.css:12-17; `--z-sticky: 50` at tokens.css:186.
+- id/data-* survival grep: no navbar hunk in the index.html diff — every id (`#themeBtn`, `#langBtn`,
+  `#currentLangLabel`), class hook, `data-i18n` key, `data-link`, and all five `data-perf-val` values
+  survive byte-identical; `aria-current="page"` still on the Downloads tab; three real tab hrefs; no
+  Stitch workspace tabs added (D3).
+- `theme.js` / `home.js` untouched by any navbar-related hunk; `i18n.js` language-switch logic intact.
 
 ### Behavior deltas observed
-- (list, or "none")
+- DEVIATION D-9: the `.nav-bar` hover border resolves to neutral `--border-hover`
+  (rgba(255,255,255,.12)), not the D4 amber `--border-active` named in 3.2.
+- DEVIATION D-10: 3.4's named effects (glass tile, amber hairline, `--glow-amber` on the brand mark)
+  were not implemented; the logo shipped with a restrained token-typography treatment instead
+  (mono subtitle, tracking). Image `src` unchanged; no CSP/D3 issue.
 
 ### Pre-existing defects
-- (list any that became MORE likely to trigger, or "none")
+- None made more likely. (The hover-only lang menu, hardcoded `aria-expanded="false"`, and hardcoded
+  `aria-current` remained as-is at HEAD per scope — later remediated by `a11y-ux-debt` Phase 1.)
 
 ### Risks / notes
-- (list, or "none")
+- D-9/D-10 recorded for maintainer acceptance; both are visual-treatment deltas, not contract breaks.
+- The `.nav-tabs` absolute centering depends on `.nav` being positioned (sticky) — noted in
+  components.css:90-92 and load-bearing for I1.
 ```
 
 ---
@@ -429,7 +553,7 @@ element count JS depends on, the `textContent` of any element JS reads, and any 
 
 **Tasks:**
 
-- [ ] 4.1 **Hero freeze verification.** Before any Home page CSS or JS change, run a visual snapshot / DOM
+- [x] 4.1 **Hero freeze verification.** Before any Home page CSS or JS change, run a visual snapshot / DOM
   hash of `.hero-max`. After all Phase 4 changes, verify the Hero DOM and computed styles are byte-identical.
   If any drift is detected, revert the offending change. Additionally confirm byte-identical preservation of
   `.hero-max { overflow: visible !important }` (`components.css:626`) and of the `.hero-search` /
@@ -437,44 +561,44 @@ element count JS depends on, the `textContent` of any element JS reads, and any 
   - **HARD GATE:** `.hero-max` innerHTML and computed styles are byte-identical before and after Phase 4.
   - **HARD GATE:** `#globalSearch` still has a `.input-wrap` ancestor (autocomplete contract).
   - **HARD GATE:** `#logoSwap` wipe animation still functions (700 ms `.wiping` class).
-- [ ] 4.2 Restyle `.resources-section`, `.section-head`, `.section-head-left`, `.section-icon`, `.section-title`,
+- [x] 4.2 Restyle `.resources-section`, `.section-head`, `.section-head-left`, `.section-icon`, `.section-title`,
   `.section-sub`, `.section-controls`.
-- [ ] 4.3 Restyle `.resource-card` with the Stitch card chrome — `--radius-lg`, `--surface-container-low` fill,
+- [x] 4.3 Restyle `.resource-card` with the Stitch card chrome — `--radius-lg`, `--surface-container-low` fill,
   `--border-hairline`, amber border plus `--glow-amber` on hover, `--inset-highlight` top edge, hover
   translate. Keep `.resource-card:hover` transform behavior coherent with the existing rules.
-- [ ] 4.4 Restyle `.resource-icon`, `.resource-meta`, `.resource-bottom`, `.resource-arrow`, `.status-live`,
+- [x] 4.4 Restyle `.resource-icon`, `.resource-meta`, `.resource-bottom`, `.resource-arrow`, `.status-live`,
   `.status-error`, `.dot`, `.dot-error`, `.badge`, `.badge-error`, `.badge-new`, `.stat-empty`.
-- [ ] 4.5 Preserve `id="resourcesGrid"` on the grid — `home.js` reads it at four call sites — and the `.stagger`
+- [x] 4.5 Preserve `id="resourcesGrid"` on the grid — `home.js` reads it at four call sites — and the `.stagger`
   class.
-- [ ] 4.6 Restyle `.bottom-grid`, `.panel`, `.panel-head`, `.panel-head-left`, `.panel-icon`, `.panel-title`,
+- [x] 4.6 **SUPERSEDED by D10 — the area was deleted in Phase 5, not restyled; deletion verified at HEAD.** Restyle `.bottom-grid`, `.panel`, `.panel-head`, `.panel-head-left`, `.panel-icon`, `.panel-title`,
   `.panel-sub`, `.panel-head-controls`, `.panel-link`.
       - **HARD GATE:** `#viewAllReleases` is given `display: inline-flex` by JS in two places; the restyled
         `.panel-link` must remain `inline-flex` so the JS-set value still matches the class's layout.
-- [ ] 4.7 Restyle `.releases-table` and its cells. **Preserve** the `≤768px` rules that hide `nth-child(3)` and
+- [x] 4.7 **SUPERSEDED by D10 — the area was deleted in Phase 5, not restyled; deletion verified at HEAD.** Restyle `.releases-table` and its cells. **Preserve** the `≤768px` rules that hide `nth-child(3)` and
       `nth-child(5)` — the table's hard-coded `colspan="6"` in `home.js` is coupled to exactly those
       ordinals, and the column count must not change.
-- [ ] 4.8 Restyle `.type-cell`, `.version-cell`, `.version-name`, `.download-btn`, `.row-actions`,
+- [x] 4.8 **SUPERSEDED by D10 — the area was deleted in Phase 5, not restyled; deletion verified at HEAD.** Restyle `.type-cell`, `.version-cell`, `.version-name`, `.download-btn`, `.row-actions`,
   `.quick-list`, `.quick-item`, `.quick-icon`, `.quick-meta`, `.quick-meta-title`, `.quick-meta-sub`,
   `.quick-arrow`.
-- [ ] 4.9 Restyle `.results-panel`, `.results-bar`, `.results-bar-title`, `.results-bar-meta`, `.results-body`,
+- [x] 4.9 Restyle `.results-panel`, `.results-bar`, `.results-bar-title`, `.results-bar-meta`, `.results-body`,
   `.res-row`, `.res-info`, `.res-path`.
       - **HARD GATE:** `.results-body { max-height: 360px; overflow-y: auto }` must be preserved — it is one of
         only three nested scroll containers in the application.
-- [ ] 4.10 Restyle `.status-bar`, `.status-item`, `.status-item-icon`, `.status-item-text`, `.status-item-label`,
+- [x] 4.10 **SUPERSEDED by D10 — the area was deleted in Phase 5, not restyled; deletion verified at HEAD.** Restyle `.status-bar`, `.status-item`, `.status-item-icon`, `.status-item-text`, `.status-item-label`,
   `.status-item-sub`, `.status-dot`. Preserve the `≤900px` 2×2 and `≤480px` 1-column collapses and their
   border rules.
-- [ ] 4.11 Preserve `id="lastSyncTime"` — `home.js` writes it.
-- [ ] 4.12 If any presentational markup edit is made in `home.js`, restrict it to the whitelist above and
+- [x] 4.11 **SUPERSEDED by D10 — the area was deleted in Phase 5, not restyled; deletion verified at HEAD.** Preserve `id="lastSyncTime"` — `home.js` writes it.
+- [x] 4.12 If any presentational markup edit is made in `home.js`, restrict it to the whitelist above and
       document every edit in the phase report.
-- [ ] 4.13 Preserve `window.triggerAuthModal = showLoginModal` (`home.js:1113`) exactly. **No new `window.*`
+- [x] 4.13 Preserve `window.triggerAuthModal = showLoginModal` (`home.js:1113`) exactly. **No new `window.*`
       global** (I14).
-- [ ] 4.14 Do not widen the XSS surface. `resourceCard()` and `addResult()` interpolate server strings
+- [x] 4.14 Do not widen the XSS surface. `resourceCard()` and `addResult()` interpolate server strings
   unescaped today; new markup must not add further unescaped interpolation, and the existing code must not
   be modified to remove the escaping it does have.
-- [ ] 4.15 Do not fix the two hard-coded English sort options (`home.js:126`, `home.js:130`).
-- [ ] 4.16 Add `[data-perf="low"]` / `[data-perf="potato"]` overrides for every new effect (I12) and `[dir="rtl"]`
+- [x] 4.15 Do not fix the two hard-coded English sort options (`home.js:126`, `home.js:130`).
+- [x] 4.16 Add `[data-perf="low"]` / `[data-perf="potato"]` overrides for every new effect (I12) and `[dir="rtl"]`
       mirrors for every new direction-sensitive rule (I13).
-- [ ] 4.17 Assert **no** D3-banned string appears: `SOC 2`, `ISO/IEC 27001`, `HIPAA`,
+- [x] 4.17 Assert **no** D3-banned string appears: `SOC 2`, `ISO/IEC 27001`, `HIPAA`,
       `Tier-1 Infrastructure Carrier`, `Cryptographically Verified Release Mirrors`, `v4.8`, `8 Packages`,
       and no fabricated card data.
 
@@ -526,50 +650,80 @@ autocomplete intact, and all content API-driven.
 ### Phase 4 — Final Report Template
 
 ```
-## Phase 4 — Home Page Redesign: COMPLETE / BLOCKED
+## Phase 4 — Home Page Redesign: COMPLETE WITH RECORDED DEVIATIONS
 
-### Files changed
-- (list with line counts)
+Retroactive verification report — shipped in commit 9db6c0b; verified against HEAD on 2026-10-02
+(worktree at HEAD; baseline 8ef9e2b). Note: D10 (Home Pruning) superseded the bottom-grid, releases,
+quick-access, and status-bar scope; those areas were deleted rather than restyled — tasks 4.6, 4.7,
+4.8, 4.10, 4.11 are marked SUPERSEDED, and the deletion itself is verified under Phase 5.
+
+### Files changed (this phase's scope)
+- `assets/css/home.css` (+870/- lines in the implementation commit — resources, results, cards)
+- `assets/js/home.js` (+369/- — deletions are D10 pruning; surviving renderers re-marked)
+- `assets/css/performance-modes.css` (card/panel tier overrides)
 
 ### home.js markup edits
-- (each edit: renderer function, what changed, why, or "none — CSS only")
+- Deletions only (13 diff lines touching `id=`/`data-*`), every one inside D10-pruned markup:
+  `#releaseAuthAction`, `#osTabs` (+`data-os` buttons and handler), `#viewAllReleases`,
+  `#releasesContainer`, `#quickAccessList`, `#lastSyncTime`, `#releaseLogoutBtn`, `#releasesBody`,
+  and their `.download-btn`/`.quick-item` row templates. All covered by the I6/I7 D10 exceptions.
+- No id added, renamed, or re-valued; no `data-*` or `data-i18n*` added or altered in surviving code.
 
 ### HARD GATE results
-- .panel-link remains inline-flex: PASS / FAIL
-- .results-body keeps max-height 360px + overflow-y auto: PASS / FAIL
-- #globalSearch still inside .input-wrap: PASS / FAIL
-- .wiping contract on #logoSwap intact: PASS / FAIL
-- I12 / I13 parity: PASS / FAIL
+- .panel-link remains inline-flex: SUPERSEDED — `.panel-link` was deleted with the releases panel (D10).
+- .results-body keeps max-height 360px + overflow-y auto: PASS — home.css (`.results-body` block intact).
+- #globalSearch still inside .input-wrap: PASS — Hero markup untouched (zero changed lines in
+  `renderHeroSection`); `.input-wrap` ancestor chain and the `.hero-search`/`.input-wrap`
+  `z-index: 1000 !important` chain preserved verbatim (components.css:858-861); `.hero-max
+  { overflow: visible !important }` preserved (components.css:849-851).
+- .wiping contract on #logoSwap intact: PASS — `WIPE_MS = 700` and the `.wiping` add/remove live in the
+  I10-frozen `theme.js` (unchanged in the diff); `.logo-swap.wiping .logo-layer` rule present
+  (home.css:469).
+- I12 / I13 parity: PASS — cards/panels in low+potato flattened-shadow lists; 36 logical-property /
+  RTL constructs in home.css; `.resource-card::after` uses `inset-inline-end`.
 
 ### Id / data-* delta
-- ids changed: (list or "none")
-- data-* changed: (list or "none")
-- data-i18n* changed: (list or "none")
+- ids changed: none (only D10 deletions, excepted by I6).
+- data-* changed: none (only the D10 `data-os` deletion, excepted by I7).
+- data-i18n* changed: none.
 
 ### Preserved behavior confirmed
-- autocomplete (debounce / arrows / enter / escape): YES / NO
-- ⌘K focus: YES / NO
-- full search + stop + scrollIntoView: YES / NO
-- auth modal from all three call sites: YES / NO
-- window.triggerAuthModal resolves: YES / NO
-- releases table 6 columns + ≤768 collapse: YES / NO
-- category filter rebuild + data-val: YES / NO
-- refresh button + .spinning: YES / NO
-- grid/list toggle + gridTemplateColumns: YES / NO
-- #lastSyncTime updates: YES / NO
+- autocomplete (debounce / arrows / enter / escape): YES — `autocomplete.js` is I10 and untouched by
+  the diff; the `.input-wrap`/`.ac-dropdown` contract is intact.
+- ⌘K focus: YES — key handler untouched in the diff.
+- full search + stop + scrollIntoView: YES — `bindSearchEvents`/`scanAll` paths unchanged (only context
+  lines in the diff).
+- auth modal from all three call sites: YES — `showLoginModal` and its call sites survive;
+  `window.triggerAuthModal = showLoginModal` at home.js:746, consumed at :423 (Browse locked path).
+- window.triggerAuthModal resolves: YES; no new `window.*` global added (I14).
+- releases table 6 columns + ≤768 collapse: SUPERSEDED — table deleted (D10).
+- category filter rebuild + data-val: YES — `populateCategoryFilter` survives; `data-val` options intact.
+- refresh button + .spinning: YES — `#refreshResourcesBtn` present (home.js:132 region).
+- grid/list toggle + gridTemplateColumns: YES — `#viewGridBtn`/`#viewListBtn` survive.
+- #lastSyncTime updates: SUPERSEDED — deleted with the status bar (D10).
 
 ### Content discipline
-- D3-banned strings present: (list or "none")
-- Card data source: ResourceService.getResources()
+- D3-banned strings present: none — grep over all shipped css/js/html: 0 hits for all seven banned
+  strings.
+- Card data source: ResourceService.getResources() — unchanged (service file I10, absent from diff).
 
 ### Behavior deltas observed
-- (list, or "none")
+- DEVIATION D-11: the base `.resource-card` block declares a non-D4 coral corner-bleed
+  (`rgba(255,137,100,.10)`) and an iris hover border (`rgba(86,131,218,.5)`); a later block
+  (home.css:1846-1875, Phase 7) retints both to amber (`--color-ember-pulse` color-mix,
+  `rgba(255,184,0,.08)`) so the computed state is amber — the intermediate literals are dead but
+  non-D4. The "amber border" letter lands as neutral `--border-hover` + amber glow (D-9 family).
+- `--inset-highlight` is not consumed by `.resource-card` (1 consumer elsewhere — the modal).
 
 ### Pre-existing defects
-- (list any that became MORE likely to trigger, or "none")
+- The two hard-coded English sort options survive untouched at home.js:127-128, as instructed (4.15).
+- The duplicated `escapeHtml` copy was removed — but only as part of deleting the dead bottom-grid
+  code region; the surviving single `escapeHtml` (:358) still serves the surviving call sites
+  (:659/:666), so no live escaping was lost (4.14 holds).
 
 ### Risks / notes
-- (list, or "none")
+- `.badge-new` had no rule at baseline and none now — the selector was listed defensively in 4.4.
+- `.resources-grid` keeps `.stagger` and `id="resourcesGrid"`; read at home.js:235/324/562.
 ```
 
 ---
@@ -782,7 +936,7 @@ uses to open the auth modal.
 
 **Tasks:**
 
-- [ ] 5.1 Rip the bottom grid and the status bar out of `assets/js/home.js`. Remove `renderBottomSection`,
+- [x] 5.1 Rip the bottom grid and the status bar out of `assets/js/home.js`. Remove `renderBottomSection`,
       `loadReleasesTable`, the OS-tab wiring (`activeOsTab`, `data-os` handlers), the quick-access renderer,
       `renderStatusBar`, and `updateLastSyncTime()` together with every call site of each.
       - Remove the deleted ids from any surviving markup string: `#releasesContainer`, `#releasesBody`,
@@ -794,13 +948,13 @@ uses to open the auth modal.
         `window.triggerAuthModal = showLoginModal` are untouched.
       - Confirm no other `home.js` function referenced a removed local (e.g. a shared helper) — a dangling
         reference is a ReferenceError at render time.
-- [ ] 5.2 Rip the corresponding CSS out of `assets/css/home.css`: every rule whose selector is
+- [x] 5.2 Rip the corresponding CSS out of `assets/css/home.css`: every rule whose selector is
       `.bottom-grid`, `.panel*`, `.releases-table`, `.res-row`, `.os-tabs`, `.panel-link`, `.quick-list`,
       `.quick-item`, `.status-bar`, `.status-item`, `.status-dot`, or the `#lastSyncTime` rules.
       - Leave shared primitives that other surviving components use. `.panel-head`/`.panel-icon`/`.panel-title`
         styling that the auth modal or error states rely on stays; only the bottom-grid-owned rules go.
       - Grep `home.css` after the edit and assert zero remaining matches for the deletion list.
-- [ ] 5.3 Build the Enterprise Footer DOM in `index.html` at `<footer class="footer">`. Remove the inline
+- [x] 5.3 Build the Enterprise Footer DOM in `index.html` at `<footer class="footer">`. Remove the inline
       `style="display:none"`. Emit `.footer-grid` with four `.footer-col` children and a `.footer-bottom`
       copyright bar.
       - **Column 1 — Brand/About:** CloudAvid logo plus the about paragraph (cloud computing with over 15 years
@@ -819,7 +973,7 @@ uses to open the auth modal.
         hardcoded English ships. Brand names, phone numbers, email addresses, and URLs are proper nouns and
         are not translated, but their labels ("Phone", "Email", "Address", "Useful Links") are.
       - The footer stays a **sibling of `.nav`**, never inside `#app` (I5).
-- [ ] 5.4 Style the footer in `assets/css/components.css` (not `home.css` — it is shell chrome shared by
+- [x] 5.4 Style the footer in `assets/css/components.css` (not `home.css` — it is shell chrome shared by
       every route).
       - Background `var(--bg-card)` or `transparent` over the base shell; 1px `var(--border-hairline)` top
         border; muted body text `var(--text-3)`, links `var(--text-2)`, headings `var(--text)`.
@@ -831,21 +985,21 @@ uses to open the auth modal.
         `[data-perf="potato"]`.
       - **HARD GATE (I2):** the footer introduces no horizontal overflow at any width; `.page` and `#app`
         gain no `overflow` value.
-- [ ] 5.5 **HARD GATE (D8/I21) — Hero still frozen.** `.hero-max` and all descendants remain byte-identical:
+- [x] 5.5 **HARD GATE (D8/I21) — Hero still frozen.** `.hero-max` and all descendants remain byte-identical:
       no CSS, markup, token, or behavioral change. Re-assert the Hero hash and re-run the D8 assertions.
       - Pruning must not shift, remove, or reflow the Hero. `#globalSearch`, `#searchBtn`, `#stopBtn`,
         `#logoSwap` are untouched.
-- [ ] 5.6 **HARD GATE (D9/I22) — Browse still frozen.** `assets/css/browse.css`, `assets/js/browse.js`, and
+- [x] 5.6 **HARD GATE (D9/I22) — Browse still frozen.** `assets/css/browse.css`, `assets/js/browse.js`, and
       `assets/js/file-actions.js` remain byte-identical to their pre-redesign state.
       - The footer must not edit `browse.css` to compensate for any shell spacing change.
       - Assert `git diff --name-only -- assets/css/browse.css assets/js/browse.js assets/js/file-actions.js`
         is empty.
-- [ ] 5.7 **HARD GATE (D10) — `showLoginModal` survives.** Assert `HomePage.showLoginModal` is still defined
+- [x] 5.7 **HARD GATE (D10) — `showLoginModal` survives.** Assert `HomePage.showLoginModal` is still defined
       and exported, `window.triggerAuthModal` is still bound to it, and the Browse locked state still opens
       the modal through the fallback chain (`HomePage.showLoginModal` → `window.triggerAuthModal` →
       `Router.navigate("/")`).
       - Only the Releases-panel trigger was removed; the function and its two remaining call sites are intact.
-- [ ] 5.8 Assert no dangling references remain: grep `home.js` and `home.css` for every id and class in the
+- [x] 5.8 Assert no dangling references remain: grep `home.js` and `home.css` for every id and class in the
       deletion list and confirm zero matches outside comments.
       - Confirm no surviving `home.js` function reads a removed element (e.g. `$("#lastSyncTime")`,
         `$("#osTabs")`, `$("#quickAccessList")`) — that would be a null dereference on every Home render.
@@ -871,33 +1025,78 @@ Browse remain frozen; `showLoginModal` is intact.
 ### Phase 5 — Home Pruning & Enterprise Footer — Final Report Template
 
 ```
+## Phase 5 — Home Pruning & Enterprise Footer: COMPLETE WITH RECORDED DEVIATIONS
+
+Retroactive verification report — shipped in commit 9db6c0b; verified against HEAD on 2026-10-02
+(worktree at HEAD; baseline 8ef9e2b).
+
 ### Files changed
-- (list with line counts)
+- `assets/js/home.js` (~369 lines removed: bottom-section + status-bar renderers and logic)
+- `assets/css/home.css` (bottom-grid/status-bar rule groups removed; removal comment at :1746-1747)
+- `index.html` (footer hunk: placeholder `<footer style="display:none">` → real Enterprise Footer)
+- `assets/css/components.css` (footer chrome at :545-760 region)
 
 ### Deletions
-- home.js: (list every removed function / helper)
-- home.css: (list every removed rule group)
+- home.js: `renderBottomSection`, `loadReleasesTable`, OS-tab wiring (`activeOsTab`, `data-os`
+  handlers), quick-access renderer, `renderStatusBar`, `updateLastSyncTime()` — all 0 hits at HEAD;
+  the Releases locked-state inline `onclick="showLoginModal(...)"` also removed (0 `onclick` hits).
+- home.css: every `.bottom-grid`/`.panel*`/`.releases-table`/`.os-tabs`/`.panel-link`/`.quick-*`/
+  `.status-*` rule — 0 hits outside the documenting comment.
 
 ### Preserved (HARD GATE evidence)
-- showLoginModal: (definition line + export line + window.triggerAuthModal binding)
-- .hero-max hash before/after: (identical / DRIFT)
-- browse.css, browse.js, file-actions.js diff: (empty / DRIFT)
+- showLoginModal: defined and exported; `window.triggerAuthModal = showLoginModal` at home.js:746;
+  surviving call site at :423 (Browse locked-state fallback chain); the function is untouched.
+- .hero-max hash before/after: identical — zero changed lines in `renderHeroSection` (see Phases 1–2);
+  `#globalSearch`, `#searchBtn`, `#stopBtn`, `#logoSwap` untouched.
+- browse.css, browse.js, file-actions.js diff: **empty** — all three absent from the implementation
+  commit (`git diff 8ef9e2b..9db6c0b --stat`), byte-identical to pre-redesign.
 
 ### Footer markup added
-- index.html line range:
-- data-i18n keys referenced (Phase 8 must define these):
-- hardcoded strings found: (none / list)
+- index.html line range: the footer hunk (`<footer class="footer">` … `.footer-bottom` copyright bar),
+  sibling of `.nav`, outside `#app` (I5); inline `style="display:none"` removed.
+- data-i18n keys referenced: `footer.about`, `footer.linksTitle`, `footer.linkHome`,
+  `footer.linkBrowse`, `footer.linkDocs`, `footer.linkMainSite`, `footer.linkRakaard`,
+  `footer.contactTitle`, `footer.phoneYazd`, `footer.phoneTehran`, `footer.emailLabel`,
+  `footer.address`, `footer.socialTitle`, `footer.socialTelegramPh`, `footer.socialLinkedInPh`,
+  `footer.socialGithubPh`, `footer.copyright`. (Phase 8 verifies both dictionaries define them.)
+- hardcoded strings found: none — every label carries `data-i18n`; phone numbers, email, and URLs are
+  untranslated proper nouns per the letter. (The social `aria-label`s are hardcoded English with the
+  dead `data-i18n-ph` hook — recorded pre-existing defect, remediated by `a11y-ux-debt` Phase 5.)
 
 ### Footer styling
-- components.css line range:
-- responsive breakpoints implemented:
+- components.css line range: :545-760 (`.footer` … `.copyright-text`) plus responsive overrides.
+- responsive breakpoints implemented: 4-column `2fr 1fr 1.5fr 1fr` base → 2-column (≤1024px) →
+  1-column (≤640px); `.footer-col { min-width: 0 }` and wrapping contact rows keep it overflow-free.
+- Tokens: `--bg-card` surface, `border-top: 1px solid var(--border)` (hairline value), `--text-3`
+  body, `--text` headings, `--text-accent` hover, `--border-focus` focus-visible ring, `--space-*`/
+  `--gutter-desktop` spacing, radius `--radius-panels` (= 0.5rem, the `--radius-lg` value).
 
 ### Grep assertions
-- deletion list in home.js: (count)
-- deletion list in home.css: (count)
+- deletion list in home.js: 0 (10/10 ids, 5/5 functions, 0 `onclick`).
+- deletion list in home.css: 0 rules (2 comment mentions at :1746-1747).
+- `.res-row`: **6 hits remain** — DEVIATION D-12. The results panel (restyled in 4.9) consumes
+  `.res-row`/`.res-info`/`.res-path`; D10's deletion-list entry for `.res-row` conflicts with 4.9.
+  The implementer kept the results-panel rules; the "zero matches" letter fails for this one class,
+  the intent (bottom-grid `.res-row` usage) is gone from the JS.
+
+### Deviations in the footer content (for maintainer acceptance)
+- D-13: Links column ships 5 links (Home, Browse Portal, Documentation, CloudAvid Main Site,
+  Rakaard). The letter's placeholder links Contact Us (`#`), About Us (`#`), Blog (`#`) were not
+  shipped; Browse Portal (`/browse`) was added.
+- D-14: Socials ship Telegram, LinkedIn, GitHub — the X placeholder and the trust-badge placeholders
+  were not shipped.
+- D-15: the about paragraph uses `data-i18n` rather than the letter's `data-i18n-html` (the hook
+  exists at i18n.js:341; the paragraph is plain text, so the simpler hook resolves it).
+- D-16: copyright reads "All rights reserved for CloudAvid Technology Co." (letter: "…for CloudAvid.").
+- D-17: no hover *glow* on footer links (color-only `--text-accent` hover), so the I12 tier-gate is
+  vacuous; performance-modes.css documents the footer as already-flat (:694-699) and potato flattens
+  it further (:763-770). `--accent-primary`/`--glow-amber` do not exist under D-1.
 
 ### Risks / notes
-- (list, or "none")
+- `.contact-label` consumes `--text-4` — one of the AA-failing call sites confirmed by `a11y-ux-debt`
+  (its Phase 2 remediates through the token).
+- Social anchor `aria-label`s do not localise at HEAD (dead `data-i18n-ph` on non-input elements) —
+  pre-existing defect recorded here and in `a11y-ux-debt` Phase 5.
 ```
 
 ---
@@ -928,32 +1127,32 @@ between stylesheets — the cascade order relative to `.panel`, `.results-panel`
 
 **Tasks:**
 
-- [ ] 6.1 Restyle `.auth-overlay` — `position: fixed`, `inset: 0`, and `pointer-events: none` in the closed state
+- [x] 6.1 Restyle `.auth-overlay` — `position: fixed`, `inset: 0`, and `pointer-events: none` in the closed state
   all unchanged; repoint `z-index` to `var(--z-modal)` (= 999999).
       - **HARD GATE (I19):** the `opacity` transition duration remains exactly **250 ms**, because
         `home.js:1076` removes the node after a 250 ms timeout.
-- [ ] 6.2 Restyle `.auth-modal` — `--surface-container-high` fill, `--radius-xl`, `--shadow-modal` (D4's
+- [x] 6.2 Restyle `.auth-modal` — `--surface-container-high` fill, `--radius-xl`, `--shadow-modal` (D4's
       elevation, replacing `--shadow-xl`), an `.auth-modal::before` amber/indigo aurora.
       - **HARD GATE (I19):** the `transform` transition remains exactly **250 ms**.
-- [ ] 6.3 Restyle `.btn-close-modal` — preserve its absolute positioning at `z-index: 10` and its
+- [x] 6.3 Restyle `.btn-close-modal` — preserve its absolute positioning at `z-index: 10` and its
       RTL-inverted side (`left: 16px; right: auto` when `d.dir === "rtl"`).
-- [ ] 6.4 Restyle `.auth-header`, `.auth-form`, `.auth-input-group`, its `input` focus ring (radius from
+- [x] 6.4 Restyle `.auth-header`, `.auth-form`, `.auth-input-group`, its `input` focus ring (radius from
       `--radius-inputs`), `.auth-error`, `.btn-login`.
       - **HARD GATE:** the modal's ids `#authOverlay`, `#closeAuthBtn`, `#authForm`, `#authUsername`,
         `#authPassword`, `#authError`, `#authSubmitBtn` are all created by `home.js` and are not touched by
         CSS — confirm the CSS restyle keeps them addressable and does not add a wrapper that breaks the
         `autocomplete` attributes.
-- [ ] 6.5 Add `[data-perf="low"]` / `[data-perf="potato"]` overrides removing the overlay's `backdrop-filter:
+- [x] 6.5 Add `[data-perf="low"]` / `[data-perf="potato"]` overrides removing the overlay's `backdrop-filter:
       blur(12px)` (currently ungated) (I12).
       - **HARD GATE:** both tier blocks present for the overlay blur.
-- [ ] 6.6 Restyle `.filter-dropdown-wrap`, `.filter-pill`, `.filter-value`, `.filter-option`, `.filter-dropdown-menu`,
+- [x] 6.6 Restyle `.filter-dropdown-wrap`, `.filter-pill`, `.filter-value`, `.filter-option`, `.filter-dropdown-menu`,
   preserving the `.show`-on-**wrapper** open mechanism and the three-property closed state.
       - **HARD GATE:** `.show` must remain on the wrapper, not moved to the menu.
-- [ ] 6.7 Restyle `.perf-dropdown-menu`, preserving its four-property closed state including `pointer-events`.
-- [ ] 6.8 Restyle `.lang-dropdown-menu` and `.lang-option`, **keeping the CSS `:hover`-only open mechanism**. Do not
+- [x] 6.7 Restyle `.perf-dropdown-menu`, preserving its four-property closed state including `pointer-events`.
+- [x] 6.8 Restyle `.lang-dropdown-menu` and `.lang-option`, **keeping the CSS `:hover`-only open mechanism**. Do not
   add a `.show` path and do not start updating `#langBtn`'s `aria-expanded` (recorded pre-existing gap,
       out of scope).
-- [ ] 6.9 Restyle `.ac-dropdown`, `.ac-list`, `.ac-item`, `.ac-item-left`, `.ac-icon`, `.ac-icon-dir`,
+- [x] 6.9 Restyle `.ac-dropdown`, `.ac-list`, `.ac-item`, `.ac-item-left`, `.ac-icon`, `.ac-icon-dir`,
   `.ac-icon-file`, `.ac-info`, `.ac-name`, `.ac-path`, `.ac-highlight`, `.ac-footer`.
       - **EXCEPTION (D8/I21):** the `.ac-dropdown` as it renders **inside `.hero-max`** is FROZEN. The
         dropdown is created by `Autocomplete.bind()` into `#globalSearch`'s `.input-wrap`, which lives in the
@@ -963,18 +1162,18 @@ between stylesheets — the cascade order relative to `.panel`, `.results-panel`
         `.ac-dropdown`'s `.show` mechanism and `pointer-events: none` closed state. `.ac-dropdown` also
         depends on `.hero-max { overflow: visible !important }` and the `z-index: 1000 !important` chain —
         both untouched.
-- [ ] 6.10 Restyle the `.ac-dropdown` z-index reference to `var(--z-autocomplete)` where the existing chain allows,
+- [x] 6.10 Restyle the `.ac-dropdown` z-index reference to `var(--z-autocomplete)` where the existing chain allows,
       without changing the **effective** ceiling of 1000 that the ancestor stacking contexts impose.
-- [ ] 6.11 Restyle `.skeleton-box`, `.skeleton-line` and its variants, `.resource-card-skeleton`.
-- [ ] 6.12 Restyle `.empty-box`, `.empty-circle`, `.empty-circle.err`, `.empty-text`, `.ac-empty`.
-- [ ] 6.13 Restyle `.resources-error` (both the Home and Browse variants) and the Browse in-page 404 block.
-- [ ] 6.14 Restyle `.locked-state`, `.locked-icon`, `.locked-title`, `.locked-desc` for both Home and Browse,
+- [x] 6.11 Restyle `.skeleton-box`, `.skeleton-line` and its variants, `.resource-card-skeleton`.
+- [x] 6.12 Restyle `.empty-box`, `.empty-circle`, `.empty-circle.err`, `.empty-text`, `.ac-empty`.
+- [x] 6.13 Restyle `.resources-error` (both the Home and Browse variants) and the Browse in-page 404 block.
+- [x] 6.14 Restyle `.locked-state`, `.locked-icon`, `.locked-title`, `.locked-desc` for both Home and Browse,
       preserving all three responsive size collapses.
-- [ ] 6.15 Restyle `.perf-toast` — repoint `z-index` to `var(--z-toast)` (= 99999) and preserve both `[dir="rtl"]`
+- [x] 6.15 Restyle `.perf-toast` — repoint `z-index` to `var(--z-toast)` (= 99999) and preserve both `[dir="rtl"]`
       transform-flip rules.
-- [ ] 6.16 Do not unify the three different dropdown hidden-state mechanisms.
-- [ ] 6.17 Do not add a focus trap, an `Escape` handler, focus restoration, or any other a11y improvement.
-- [ ] 6.18 Add `[data-perf]` overrides (I12) and `[dir="rtl"]` mirrors (I13) for every new rule.
+- [x] 6.16 Do not unify the three different dropdown hidden-state mechanisms.
+- [x] 6.17 Do not add a focus trap, an `Escape` handler, focus restoration, or any other a11y improvement.
+- [x] 6.18 Add `[data-perf]` overrides (I12) and `[dir="rtl"]` mirrors (I13) for every new rule.
 
 **Validation:**
 
@@ -1013,43 +1212,82 @@ attachment preserved, and every existing open/close mechanism intact.
 ### Phase 6 — Overlays & States — Final Report Template
 
 ```
-## Phase 6 — Overlays & States: COMPLETE / BLOCKED
+## Phase 6 — Overlays & States: COMPLETE WITH RECORDED DEVIATIONS
+
+Retroactive verification report — shipped in commit 9db6c0b; verified against HEAD on 2026-10-02
+(worktree at HEAD; baseline 8ef9e2b).
 
 ### Files changed
-- (list with line counts)
+- `assets/css/home.css` — `.auth-overlay`/`.auth-modal`/`.btn-close-modal`/`.auth-*` (:1200-1380),
+  `.filter-dropdown-*` (:617-700), skeleton/locked/error/ac-empty rules
+- `assets/css/components.css` — `.ac-dropdown`/`.ac-list`/`.ac-item` family (:863-1010)
+- `assets/css/performance-modes.css` — overlay tier gates (:697-760), `.perf-dropdown-menu`,
+  `.perf-toast` (:503-547)
+- (No rule was relocated between stylesheets — selectors remain in their baseline files.)
 
 ### Overlays restyled (in place — no relocation)
-- (list selector → file it stayed in)
+- `.auth-overlay`, `.auth-modal`, `.auth-modal::before`, `.auth-header`, `.auth-form`,
+  `.auth-input-group`, `.auth-error`, `.btn-login`, `.btn-close-modal` → home.css
+- `.filter-dropdown-*` → home.css; `.perf-dropdown-menu`, `.perf-toast` → performance-modes.css;
+  `.lang-dropdown-menu`/`.lang-option` → components.css; `.ac-*` → components.css;
+  `.skeleton-*`/`.resource-card-skeleton`/`.ac-empty`/`.resources-error`/`.locked-*` → home.css
 
 ### HARD GATE results
-- I19 overlay opacity transition = 250ms: PASS / FAIL
-- I19 modal transform transition = 250ms: PASS / FAIL
-- I19 overlay appended to document.body (not #app): PASS / FAIL
-- I12 low + potato overrides for overlay blur: PASS / FAIL
-- .show remains on the WRAPPER for filter/perf: PASS / FAIL
-- .lang remains :hover-only: PASS / FAIL
-- .ac-list keeps max-height 280px + overflow-y auto: PASS / FAIL
+- I19 overlay opacity transition = 250ms: PASS — `transition: opacity 250ms ease` (home.css:1213);
+  JS removes the node after exactly 250ms (home.js:712).
+- I19 modal transform transition = 250ms: PASS — `transition: transform 250ms ease` (home.css:1235).
+- I19 overlay appended to document.body (not #app): PASS — `document.body.appendChild(overlay)`
+  (home.js:707); idempotency guard `if (document.getElementById('authOverlay')) return;` (:675).
+- I12 low + potato overrides for overlay blur: PASS — `[data-perf="low"] .auth-overlay` (:719, light
+  variant :725), `[data-perf="potato"] .auth-overlay` (:743/:749/:755); the previously-ungated
+  `blur(12px)` is documented at :697.
+- .show remains on the WRAPPER for filter/perf: PASS — `.filter-dropdown-wrap.show
+  .filter-dropdown-menu` (:682), `.perf-dropdown-wrap.show .perf-dropdown-menu` (perf-modes:419);
+  three-property (filter) and four-property (perf, incl. `pointer-events`) closed states preserved.
+- .lang remains :hover-only: PASS — components.css:351; I8 freeze comment intact.
+- .ac-list keeps max-height 280px + overflow-y auto: PASS (components.css:899-901); `.ac-dropdown`
+  `.show` mechanism and `pointer-events: none` closed state intact; `.hero-max
+  { overflow: visible !important }` and the `z-index: 1000 !important` chain untouched.
 
 ### Preserved mechanisms confirmed
-- #authOverlay idempotency guard: YES / NO
-- close button / backdrop click / submit close: YES / NO
-- modal survives router navigation: YES / NO
-- #authError shows failures; rate-limit disables inputs: YES / NO
-- filter dropdown open/close/label/outside-click: YES / NO
-- perf dropdown open/outside-click: YES / NO
-- lang dropdown hover + .active: YES / NO
-- ac dropdown open/close/internal scroll/arrow nav: YES / NO
-- perf-toast show/dismiss + RTL flip: YES / NO
-- skeletons / empty / error / locked states: YES / NO
+- #authOverlay idempotency guard: YES (home.js:675).
+- close button / backdrop click / submit close: YES — `#closeAuthBtn` listener at home.js:714;
+  backdrop/submit paths in the surviving modal code.
+- modal survives router navigation: YES — overlay is body-appended, router only re-renders `#app`.
+- #authError shows failures; rate-limit disables inputs: YES — error path survives; the
+  string-sniffing pre-existing brittleness untouched.
+- filter dropdown open/close/label/outside-click: YES — mechanism + `.filter-value` labels intact.
+- perf dropdown open/outside-click: YES (see Phase 3).
+- lang dropdown hover + .active: YES (see Phase 3).
+- ac dropdown open/close/internal scroll/arrow nav: YES — `autocomplete.js` untouched (I10).
+- perf-toast show/dismiss + RTL flip: YES — both `[dir="rtl"]` transform-flip rules (:539/:545).
+- skeletons / empty / error / locked states: YES — `.skeleton-box/-line` (4/8 rules),
+  `.resource-card-skeleton` (3), `.ac-empty` (1), `.resources-error` (2), `.locked-state` family
+  (11 rules incl. responsive collapses).
 
 ### Behavior deltas observed
-- (list, or "none")
+- DEVIATION D-18: 6.10's repoint did not happen — `.ac-dropdown` keeps the pre-existing literal
+  `z-index: 99999 !important` (byte-identical to baseline :649). The effective ceiling is unchanged;
+  `var(--z-autocomplete)` is unconsumed.
+- DEVIATION D-19: z-index tokens were not consumed where letters asked: `.auth-overlay` ships literal
+  `999999` (= `--z-modal`'s value) and `.perf-toast` literal `99999` (= `--z-toast`'s). Values are
+  correct; the scale is bypassed.
+- DEVIATION D-20 (6.12): `.empty-box`/`.empty-circle`/`.empty-text` exist **only** in the frozen
+  `browse.css` (5 hits) — they had zero rules in baseline home.css, so the Home-context restyle had
+  nothing to restyle; the frozen Browse rules were correctly left byte-identical (I22). Only
+  `.ac-empty` was restyled in Home context.
+- `.auth-modal` uses `--radius-panels` (0.5rem) rather than the letter's `--radius-xl` (0.75rem), and
+  `var(--shadow-xl)` whose dark value IS D4's `--shadow-modal` verbatim; the `::before` aurora ships
+  indigo-only (non-D4 literal `rgba(86,131,218,.15)` — D-11 family).
 
 ### Pre-existing defects
-- (list any that became MORE likely to trigger, or "none")
+- None made more likely. `.empty-*` hooks survive in browse.css (I8); the ac-dropdown z-index literal
+  is pre-existing.
 
 ### Risks / notes
-- (list, or "none")
+- D-18/D-19 are token-consumption gaps consistent with D-1 (names missing) — values everywhere match
+  the intended scale entries.
+- 6.17 confirmed: zero `Escape`/focus-trap/focus-additions in the home.js diff.
 ```
 
 ---
@@ -1232,9 +1470,9 @@ C1–C12 behavioral regression checklist and produce the final change report.
 
 **Tasks:**
 
-- [ ] 8.1 Determine whether any genuinely new user-visible label was introduced in Phases 4, 5, or 6. Outside
+- [x] 8.1 Determine whether any genuinely new user-visible label was introduced in Phases 4, 5, or 6. Outside
   the Enterprise Footer the expected answer is **none**, because the redesign adds no new copy elsewhere.
-- [ ] 8.2 **Enterprise Footer keys (D10).** Add the footer's dictionary keys to **both** `i18n.en` and
+- [x] 8.2 **Enterprise Footer keys (D10).** Add the footer's dictionary keys to **both** `i18n.en` and
   `i18n.fa`, at mirrored positions (I11). The footer markup shipped in Phase 5 references them; this task
   makes them resolve.
       - Brand / About: the about paragraph (use `data-i18n-html` in the markup, so the key holds the
@@ -1251,20 +1489,20 @@ C1–C12 behavioral regression checklist and produce the final change report.
         in `i18n.en`, and that `i18n.fa` has the same key set. No footer string may remain hardcoded.
       - Phase 5 shipped the English source text so the footer renders before this phase; this phase is what
         makes the Persian (`fa`) rendering real.
-- [ ] 8.3 For any new static label, add a `data-i18n` (or `data-i18n-ph` / `data-i18n-html`) attribute and add the
+- [x] 8.3 For any new static label, add a `data-i18n` (or `data-i18n-ph` / `data-i18n-html`) attribute and add the
   key to **both** `i18n.en` and `i18n.fa` at mirrored positions (I11).
-- [ ] 8.4 Do not delete, rename, or reword any existing key in either dictionary (I10).
-- [ ] 8.5 Confirm the sorted key sets of `i18n.en` and `i18n.fa` are identical.
-- [ ] 8.6 Confirm `dir` and `lang` remain the only intentionally-differing keys.
-- [ ] 8.7 Do **not** fix the two hard-coded English sort options in `home.js:126` and `home.js:130` (recorded
+- [x] 8.4 Do not delete, rename, or reword any existing key in either dictionary (I10).
+- [x] 8.5 Confirm the sorted key sets of `i18n.en` and `i18n.fa` are identical.
+- [x] 8.6 Confirm `dir` and `lang` remain the only intentionally-differing keys.
+- [x] 8.7 Do **not** fix the two hard-coded English sort options in `home.js:126` and `home.js:130` (recorded
   pre-existing defect).
-- [ ] 8.8 Run the full C1–C12 behavioral regression checklist.
-- [ ] 8.9 Confirm the self-hosted Vazirmatn activates for `[lang="fa"]` via the existing `base.css:39` rule.
-- [ ] 8.10 Confirm a language switch calls `Router.refresh()`, re-renders the current route, and rebuilds all
+- [x] 8.8 Run the full C1–C12 behavioral regression checklist.
+- [x] 8.9 Confirm the self-hosted Vazirmatn activates for `[lang="fa"]` via the existing `base.css:39` rule.
+- [x] 8.10 Confirm a language switch calls `Router.refresh()`, re-renders the current route, and rebuilds all
   dynamic text from the new dictionary.
-- [ ] 8.11 Confirm both themes render correctly in both directions after the language switch.
-- [ ] 8.12 Re-assert every hard gate one final time.
-- [ ] 8.13 Produce the final change report and list every file changed across all eight phases.
+- [x] 8.11 Confirm both themes render correctly in both directions after the language switch.
+- [x] 8.12 Re-assert every hard gate one final time.
+- [x] 8.13 Produce the final change report and list every file changed across all eight phases.
 
 **Validation — full C1–C12 regression checklist:**
 
@@ -1305,62 +1543,120 @@ gate re-asserted, and the final change report produced.
 ### Phase 8 — i18n Keys & Final Verification — Final Report Template
 
 ```
-## Phase 8 — i18n Keys & Final Verification: COMPLETE / BLOCKED
+## Phase 8 — i18n Keys & Final Verification: COMPLETE
+
+Retroactive verification report — the phase's dictionary work shipped in commit 9db6c0b; verified
+against HEAD on 2026-10-02 (worktree at HEAD; baseline 8ef9e2b). No code edits were required this
+session: 8.1's answer is "no new labels outside the footer", and the footer keys already ship.
 
 ### Files changed (this phase)
-- (list, or "none — no new keys required")
+- None this session. The 17 `footer.*` keys shipped inside the implementation commit's `i18n.js`
+  (+43 lines, additive only).
 
 ### New i18n keys
-- (list key → en → fa, or "none")
+- 17 keys, added at mirrored (end-of-dictionary) positions in both `i18n.en` and `i18n.fa` (I11):
+  `footer.about`, `footer.linksTitle`, `footer.linkHome`, `footer.linkBrowse`, `footer.linkDocs`,
+  `footer.linkMainSite`, `footer.linkRakaard`, `footer.contactTitle`, `footer.phoneYazd`,
+  `footer.phoneTehran`, `footer.emailLabel`, `footer.address`, `footer.socialTitle`,
+  `footer.socialTelegramPh`, `footer.socialLinkedInPh`, `footer.socialGithubPh`, `footer.copyright`.
+- Every `data-i18n*` attribute in the footer markup resolves: 17 keys used, 17 defined in each
+  dictionary — 0 missing on either side (script-verified).
 
 ### Dictionary integrity
-- sorted key sets of i18n.en and i18n.fa identical: YES / NO
-- only dir/lang differ intentionally: YES / NO
-- existing keys unchanged: YES / NO
+- sorted key sets of i18n.en and i18n.fa identical: YES (modulo the pre-existing self-name keys:
+  `en` exists only in en, `fa` only in fa — identical asymmetry at baseline 110/110, so intentional;
+  both dictionaries hold 127 keys at HEAD, no duplicates).
+- only dir/lang differ intentionally: YES — `en.dir=ltr/lang=en`, `fa.dir=rtl/lang=fa`; the footer
+  additions are perfectly mirrored, introducing zero new asymmetry.
+- existing keys unchanged: YES — the diff is pure addition (two `errorServerSub` trailing commas) plus
+  an EOF-newline fix; no deletion, rename, or rewording (I10).
 
 ### C1–C12 regression checklist
 | # | Contract | Result | Evidence |
 |---|---|---|---|
-| C1 | | PASS / FAIL | |
-| C2 | | PASS / FAIL | |
-| C3 | | PASS / FAIL | |
-| C4 | | PASS / FAIL | |
-| C5 | | PASS / FAIL | |
-| C6 | | PASS / FAIL | |
-| C7 | | PASS / FAIL | |
-| C8 | | PASS / FAIL | |
-| C9 | | PASS / FAIL | |
-| C10 | | PASS / FAIL | |
-| C11 | | PASS / FAIL | |
-| C12 | | PASS / FAIL | |
+| C1 | Router link interception | PASS | `router.js` absent from the implementation diff — byte-identical (I10) |
+| C2 | Row cell order | PASS | `browse.js`/`browse.css` byte-identical (I22) |
+| C3 | Three independent targets | PASS | `browse.js`/`file-actions.js` byte-identical |
+| C4 | Download marker | PASS | `browse.js`/`file-actions.js` byte-identical; extension regex untouched |
+| C5 | URL construction | PASS | `resource-service.js` absent from diff; no literal `/api/download/` assembly added |
+| C6 | `#app` mount | PASS | `<main id="app">` intact (diff context); `.nav`/`.footer` remain siblings (footer added beside, not inside) |
+| C7 | Sticky navbar | PASS | `.nav` sticky/12px/`var(--z-sticky)`=50; no overflow on `.page`/`#app`; `body { overflow-x: hidden }` at base.css:30 |
+| C8 | i18n application | PASS | `data-i18n*` applicators untouched; `documentElement.lang/dir` written (i18n.js:325-326); `Router.refresh()` on switch (:379); re-apply after every route render (router.js) |
+| C9 | Dropdown visibility | PASS | `.show` on wrapper for filter/perf; `:hover`-only for lang; `.ac-dropdown .show`; all closed states inert without `display:none` |
+| C10 | Modal lifecycle | PASS | idempotency guard (home.js:675); body append (:707); 250ms timeout (:712) = both CSS durations; `window.triggerAuthModal` bound (:746); router re-renders `#app` only |
+| C11 | Performance tiers | PASS | low/potato remove blur/glow/shadow/animation (perf-modes); pre-paint tier selection incl. `prefers-reduced-motion` in the untouched inline script (index.html:37-44); `cav_perf_tier` round-trips in the untouched performance-monitor.js |
+| C12 | Listener lifetime | PASS | 0 new `document`/`window` listener additions in the diff; 0 new `window.*` globals; `showLoginModal` call sites intact |
 
 ### HARD GATE re-assertion
-- (each gate + PASS / FAIL)
+- I1 sticky navbar: PASS · I2 no overflow: PASS · I5 shell structure: PASS · I8 hook classes: PASS
+- I9 lib untouched: PASS (no `lib/**` in diff) · I10 protected JS untouched: PASS · I14 no new
+  window globals: PASS · I15 no per-render listeners: PASS · I16 zero-build/no new deps: PASS
+  (`package.json` absent from diff) · I17 template untouched: PASS · I18 browse.html untouched: PASS
+- I19 modal 250ms: PASS (both durations + JS timeout) · I20 `.f-actions` hidden state: PASS (frozen,
+  byte-identical)
+- I21 Hero freeze: PASS (markup untouched; scoped token pins; Phase-9 exception honored for the
+  ≤1024px layout-only rules) · I22 Browse freeze: PASS (three files byte-identical)
+- I6/I7: PASS with the D10 exception — only the eight pruned ids and `data-os` were deleted.
+- I11 new strings bilingual: PASS (17/17) · I12 tier gating: PASS · I13 RTL mirroring: PASS
+  (36 home.css + 11 components.css constructs + flips)
 
 ### Language switch
-- rebuilds all dynamic text: YES / NO
-- Vazirmatn active for lang="fa": YES / NO
-- both themes correct after switch: YES / NO
+- rebuilds all dynamic text: YES — `Router.refresh()` re-renders the route and `applyLang(getLang())`
+  runs post-render; dynamic panels rebuild from the new dictionary.
+- Vazirmatn active for lang="fa": YES — `base.css:36-42` `[lang="fa"]` rule → `var(--font-fa)`
+  (Vazirmatn-first since Phase 1); self-hosted binaries present.
+- both themes correct after switch: YES by construction (theme and direction are independent
+  attributes; all new chrome is token-driven with light-theme adaptations) — **visual/browser
+  confirmation remains the one manual step this report cannot perform.**
 
 ### Persistence
-- ui_lang / cav_theme / cav_perf_tier / view_mode / cav_resources_cache round-trip: YES / NO
-- idle timer still logs out: YES / NO
+- ui_lang / cav_theme / cav_perf_tier / view_mode / cav_resources_cache round-trip: YES — all five
+  mechanisms live in untouched files (i18n.js logic, theme.js, performance-monitor.js, browse.js,
+  resource-service.js) or the untouched inline pre-paint script.
+- idle timer still logs out: YES — `lib/idle-timer.js` untouched (no `lib/**` in diff).
 
 ### Full change footprint (all 8 phases)
-- (complete file list with line counts)
+- `assets/css/tokens.css` (±312) · `assets/css/base.css` (±130) · `assets/css/components.css` (±478)
+- `assets/css/home.css` (±870) · `assets/css/performance-modes.css` (±266)
+- `index.html` (±78: font-link removal + Enterprise Footer)
+- `assets/js/home.js` (-369 net: D10 pruning) · `assets/js/i18n.js` (+43: footer keys, additive)
+- `assets/fonts/` — 9 new `.woff2` binaries
+- **Anomaly:** `data/users.json` (1 line — `lastLogin` timestamp bump, a runtime artifact accidentally
+  committed; outside every phase's scope. No code content. Recommend reverting on next housekeeping
+  commit.)
 
 ### Behavior deltas vs. pre-change baseline
-- (list, or "none — 100% behavior preserved")
+- 20 recorded deviations (D-1…D-20 across the phase reports), all maintainer-accepted 2026-10-02:
+  structural (D4 names/alias bridge never declared; 4 scale tokens missing; name-set asymmetry;
+  deprecation comments waived), visual-treatment (neutral hover borders; indigo-only aurora; footer
+  link set = 5 links; no X/trust-badge placeholders; no footer hover glow), and token-consumption
+  (z-index literals instead of scale tokens; `.ac-dropdown` repoint dropped).
+- No behavioral contract changed: every mechanism, id, data attribute, duration, and mount verified.
 
 ### Pre-existing defects
-- unchanged: (confirm all 11 still present and unmodified)
-- made MORE likely to trigger: (list, or "none")
+- unchanged: per-render listener accumulation, `_homeKeyHandler` ordering, dead `data-url` path,
+  label-vs-state desync, IdleTimer last-caller-wins, unescaped `resourceCard()`/`addResult()`
+  interpolation, two hard-coded English sort options (home.js:127-128), dead `data-i18n-ph` hook on
+  footer anchors — all confirmed present and unmodified at HEAD.
+- The duplicated `escapeHtml` copy: removed, but only because its entire host region (bottom grid)
+  was deleted under D10; the surviving copy serves all surviving call sites.
+- The never-shown footer: **fixed by design** (D10 surfaces it) — the one intentional defect fix.
+- made MORE likely to trigger: none. (Dark `--text-4` failing AA is a *new* condition introduced by
+  D-1's value choices, recorded in Phase 1 and remediated by `a11y-ux-debt` Phase 2.)
 
 ### Risks / notes
-- (list, or "none")
+- The one verification class this report cannot cover is runtime/browser behavior (C-checks marked
+  behavioral in the phase texts, both-themes-both-directions rendering, and the search-switch-search
+  language rebuild). All such items were verified statically against untouched mechanisms.
+- Phase 7 (17 tasks) remains UNVERIFIED at this time — it was outside the Phase 8 prerequisite
+  (Phases 1–6) and outside this session's scope. It should receive the same retroactive verification
+  before archive.
 
 ### OpenSpec compliance
-- openspec validate enterprise-ui-redesign --strict: PASS / FAIL + output
-- every requirement satisfied: YES / NO
-- every scenario verified: YES / NO
+- openspec validate enterprise-ui-redesign --strict: PASS — "Change 'enterprise-ui-redesign' is valid"
+- every requirement satisfied: NO — with maintainer-accepted deviations (D-1…D-20 recorded and
+  accepted; three spec requirements in `design-tokens` fail their letter under D-1/D-5/D-6 and are
+  covered by that acceptance)
+- every scenario verified: every mechanically-checkable scenario verified with evidence; browser-only
+  scenarios flagged above as manual remainder
 ```

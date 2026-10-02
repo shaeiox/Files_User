@@ -17,6 +17,45 @@ const Router = (function () {
         return null;
     }
 
+    // Task 1.6 (a11y-ux-debt) - mark at most one nav tab as the current page,
+    // derived from the active route. A tab matches when its declared
+    // destination equals the route root, so nested browse paths still match
+    // the Downloads tab. Routes with no tab (e.g. /browse) leave all unmarked,
+    // which is truthful: the shell simply has no tab for them.
+    function syncNavTab(path) {
+        const tabs = document.querySelectorAll("[data-nav-tab]");
+        if (!tabs.length) return;
+
+        tabs.forEach(tab => {
+            tab.classList.remove("active");
+            tab.removeAttribute("aria-current");
+        });
+
+        const routeRoot = "/" + String(path || "/").split("/")[1];
+        tabs.forEach(tab => {
+            if (tab.getAttribute("data-nav-tab") === routeRoot) {
+                tab.classList.add("active");
+                tab.setAttribute("aria-current", "page");
+            }
+        });
+    }
+
+    // Task 6.1/6.5 (a11y-ux-debt) - mobile navigation disclosure. Below
+    // 900px CSS hides .nav-tabs; this native button toggles .is-open and
+    // reports the group's real state via aria-expanded in both directions.
+    // No custom key handling: Enter/Space fire click on a native button,
+    // and activation never moves focus, so focus stays on the control.
+    function bindNavDisclosure() {
+        const btn = document.getElementById("navDisclosure");
+        const group = document.getElementById("navTabs");
+        if (!btn || !group) return;
+
+        btn.addEventListener("click", () => {
+            const isOpen = group.classList.toggle("is-open");
+            btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
+    }
+
     function navigate(path, pushState = true) {
         const route = resolveRoute(path);
 
@@ -94,6 +133,13 @@ const Router = (function () {
                 applyLang(getLang());
             }
 
+            // 3b. Task 1.6 (a11y-ux-debt) - keep the navbar's current-page
+            // indicator truthful. It used to be hardcoded to the Downloads tab
+            // in the static markup, so it claimed Downloads was the current
+            // page on /browse too. Clear every tab, then mark only a tab whose
+            // destination matches the active route.
+            syncNavTab(path);
+
             // 4. Transition In
             requestAnimationFrame(() => {
                 app.style.transition = "opacity 250ms ease, transform 250ms ease";
@@ -138,6 +184,7 @@ const Router = (function () {
     // Boot
     function init() {
         history.replaceState({ path: currentPath }, "", currentPath);
+        bindNavDisclosure();
         navigate(currentPath, false);
     }
 

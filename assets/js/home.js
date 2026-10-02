@@ -67,7 +67,7 @@ const HomePage = (function () {
           <div class="hero-search">
             <div class="input-wrap">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-              <input id="globalSearch" type="text" autocomplete="off" placeholder="${d.searchPh || 'Search for files, packages, templates...'}" aria-label="Search files" />
+              <input id="globalSearch" type="text" autocomplete="off" placeholder="${d.searchPh || 'Search for files, packages, templates...'}" aria-label="Search files" role="combobox" aria-expanded="false" aria-controls="acDropdown" />
               <div class="search-keys"><kbd>⌘</kbd><kbd>K</kbd></div>
             </div>
             <button class="btn btn-primary" id="searchBtn" type="button">${d.searchBtn || 'Search'}</button>
@@ -98,7 +98,7 @@ const HomePage = (function () {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
             </div>
             <div>
-              <div class="section-title">${d.infraTitle || "Infrastructure Resources"}</div>
+              <h2 class="section-title">${d.infraTitle || "Infrastructure Resources"}</h2>
               <div class="section-sub">${d.infraSub || "Browse and download all available infrastructure resources and packages."}</div>
             </div>
           </div>
@@ -135,11 +135,11 @@ const HomePage = (function () {
             </button>
 
             <!-- Grid/List View Toggle -->
-            <div class="view-toggle" role="tablist" aria-label="View mode">
-              <button class="vt-btn active" id="viewGridBtn" aria-label="Grid view" type="button">
+            <div class="view-toggle" role="group" aria-label="View mode">
+              <button class="vt-btn active" id="viewGridBtn" aria-label="Grid view" aria-pressed="true" type="button">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
               </button>
-              <button class="vt-btn" id="viewListBtn" aria-label="List view" type="button">
+              <button class="vt-btn" id="viewListBtn" aria-label="List view" aria-pressed="false" type="button">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
               </button>
             </div>
@@ -544,12 +544,16 @@ const HomePage = (function () {
       grid.style.gridTemplateColumns = "1fr";
       listBtn.classList.add("active");
       gridBtn.classList.remove("active");
+      listBtn.setAttribute("aria-pressed", "true");
+      gridBtn.setAttribute("aria-pressed", "false");
     });
 
     gridBtn.addEventListener("click", () => {
       grid.style.gridTemplateColumns = "";
       gridBtn.classList.add("active");
       listBtn.classList.remove("active");
+      gridBtn.setAttribute("aria-pressed", "true");
+      listBtn.setAttribute("aria-pressed", "false");
     });
   }
 
