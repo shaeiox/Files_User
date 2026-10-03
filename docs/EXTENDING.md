@@ -14,6 +14,25 @@ This document explains how to safely extend the `files-server-web` system using 
 
 All HTTP routing is in `lib/api-router.js` → `handleRequest()`. Routes are registered as `if (pathname === "/api/...")` blocks.
 
+**Route blocks are ordered and none of them fall through** — a new block placed before the
+SPA fallback will shadow static paths, and a block placed after an existing prefix match will
+never be reached. Placement is a correctness concern, not a style preference.
+
+### Classifying the Auth Requirement
+
+**Routes are public by default.** Protection is opt-in via `pathRequiresAuth()`, which gates
+only paths under `RELEASE_PVM` when `AUTH_ENABLED=true`. When adding an endpoint:
+
+1. Does it expose release content? If yes, confirm the protected-prefix matching in
+   `pathRequiresAuth()` covers your path shape — the check is **string-prefix based and runs
+   before any file resolution**, so path containment does not protect it.
+2. Does it expose anything else that should be confidential? If so, this is a **gap in the
+   current model**, not something to fix quietly — see
+   [ADR-004](decisions/ADR-004-path-scoped-auth.md).
+
+Note the fail-open behaviour: with `RELEASE_PVM` unset, `pathRequiresAuth()` returns `false`
+for everything.
+
 ### Pattern
 
 ```javascript
@@ -143,9 +162,27 @@ const MyModule = (function () {
 })();
 ```
 
+There is no bundler and no module system. Modules coordinate through globals, which means
+**nothing enforces the references between them** — a renamed global is a runtime
+`ReferenceError`, not a build error. See
+[ADR-006](decisions/ADR-006-vanilla-js-spa-no-build.md).
+
 ### Module Loading
 
-Scripts load in order via `<script>` tags in `index.html`. The router (`assets/js/router.js`) must load last.
+Scripts are declared in `index.html` in dependency order. Three constraints are load-bearing:
+
+1. **`assets/js/router.js` must load last** — it drives navigation and assumes every page
+   module is registered.
+2. **`assets/js/vendor/lenis.min.js` must precede `assets/js/smooth-scroll.js`** — reversing
+   them silently disables smooth scrolling, because `smooth-scroll.js` degrades gracefully
+   when `Lenis` is undefined rather than throwing.
+3. **Stylesheet `tokens.css` must be the first `<link>`** — there is no `@import` and no
+   bundler, so `<link>` order *is* the cascade order. If tokens load after consumers, the
+   entire semantic layer resolves to nothing.
+
+> `browse.html` is a separate, **unrouted** page with its own script and style set that does
+> not stay in sync. **Change `index.html`.** See
+> [ARCHITECTURE.md → Standalone HTML Pages](ARCHITECTURE.md#standalone-html-pages).
 
 ### Existing Modules
 
@@ -155,17 +192,44 @@ Scripts load in order via `<script>` tags in `index.html`. The router (`assets/j
 | `home.js` | HomePage component |
 | `file-actions.js` | File Actions module (dedicated per-item actions) |
 | `browse.js` | BrowsePage component |
-| `resource-service.js` | API client |
-| `i18n.js` | Internationalization |
-| `theme.js` | Theme toggle |
+| `services/resource-service.js` | API client |
+| `i18n.js` | Internationalization (`en`, `fa`); sets `lang` and `dir` |
+| `theme.js` | Theme toggle, `localStorage`-backed |
 | `autocomplete.js` | Search autocomplete |
 | `banner.js` | Banner component |
+| `smooth-scroll.js` | Lenis wrapper, gated by `data-perf` and reduced motion |
+| `services/performance-monitor.js` | Runtime tier detection → `data-perf` |
+| `vendor/lenis.min.js` | Vendored third-party library — do not edit |
 
 ### Adding a Frontend Component
 
-1. Create `assets/js/myComponent.js` using IIFE pattern
-2. Add `<script src="/assets/js/myComponent.js"></script>` in `index.html` before `router.js`
-3. Register with router if it's a page component
+1. Create `assets/js/myComponent.js` using the IIFE pattern, exposing a single global
+2. Add `<script src="/assets/js/myComponent.js" defer></script>` in `index.html` **before
+   `router.js`**. Forgetting this fails silently — the module is simply undefined.
+3. Register with the router if it is a page component
+4. If it adds styles, add the stylesheet in `index.html` **after `tokens.css`**
+5. Verify the change in both themes, both text directions, and at `data-perf="potato"` —
+   local development only ever shows the `high` tier. See
+   [STYLEGUIDE.md → Checklist](STYLEGUIDE.md#9-checklist-for-a-ui-change).
+6. Update the module table in `ARCHITECTURE.md` **and** the script load order in the same file
+
+### Adding a Stylesheet or Design Token
+
+- **Tokens go in `assets/css/tokens.css`**, in the foundation or semantic layer. Never
+  hardcode a colour, radius, or spacing value in a component rule — use `var(--token)`, and
+  reference semantic tokens rather than foundation ramps.
+- **New expensive visual effects need a `POTATO` override** in
+  `assets/css/performance-modes.css`. An effect without one defeats the entire mechanism on
+  exactly the devices it was built for.
+- **If you change a colour token, re-measure the contrast ratios** quoted in its comment in
+  `tokens.css`. Those comments document measured values for the token that is there now, not
+  for the one you are about to write.
+- Respect `prefers-reduced-motion` for any new animation.
+- Use **logical properties** (`margin-inline-start`, `inset-inline-start`) so RTL works
+  without a parallel override.
+
+See [STYLEGUIDE.md](STYLEGUIDE.md) and
+[ADR-008](decisions/ADR-008-css-custom-property-tokens.md).
 
 ### Browse Row Targets: Two Separate Categories
 
@@ -286,10 +350,17 @@ Runtime dependencies are declared in `package.json` → `dependencies`:
 {
   "dependencies": {
     "bcrypt": "^6.0.0",
-    "dotenv": "^16.4.7"
+    "dotenv": "^16.4.7",
+    "lenis": "^1.3.26"
   }
 }
 ```
+
+| Dependency | Used by the server? | Notes |
+|------------|---------------------|-------|
+| `bcrypt` | Yes | `lib/auth-service.js` → password hashing. Falls back to `crypto.scrypt()` if unavailable. |
+| `dotenv` | Yes | `lib/load-env.js` → `.env` parsing, with a built-in fallback parser if unavailable. |
+| `lenis` | **No** | **Declared but unused.** The served smooth-scroll library is the vendored `assets/js/vendor/lenis.min.js`. The npm version is the only signal of what the vendored copy should be. |
 
 ### Installation
 
@@ -299,9 +370,19 @@ npm install
 
 ### Notes
 
-- No build tooling or bundler is present
-- No development dependencies are declared
-- No lock file is present in the repository
+- **Adding a backend dependency is an architectural decision.** Read
+  [ADR-001](decisions/ADR-001-no-web-framework.md) first — the three-dependency list is
+  deliberate, not incidental. A new runtime dependency should come with an ADR explaining
+  what it replaces.
+- **Frontend libraries cannot be imported from npm.** There is no bundler
+  ([ADR-006](decisions/ADR-006-vanilla-js-spa-no-build.md)), so a browser-side library must
+  be vendored into `assets/js/vendor/` and loaded as a same-origin script. The CSP
+  (`script-src 'self' 'unsafe-inline'`, `font-src 'self' data:`) also forbids CDN hosts. A
+  vendored file is a manual-update obligation with no integrity check — see
+  [ADR-010](decisions/ADR-010-vendored-lenis-smooth-scroll.md).
+- No build tooling or bundler is present.
+- No development dependencies are declared.
+- `package-lock.json` is present.
 
 **Source:** `package.json` → `dependencies`
 
@@ -311,13 +392,20 @@ npm install
 
 | Change | Documentation to Review |
 |--------|------------------------|
-| Architecture/module boundary | [ARCHITECTURE.md](ARCHITECTURE.md) |
-| API route/response/auth behavior | [API.md](API.md) |
+| Architecture/module boundary | [ARCHITECTURE.md](ARCHITECTURE.md) + a **new ADR** |
+| API route/response/auth behavior | [API.md](API.md), [SECURITY.md](SECURITY.md) |
+| Filesystem access | [ADR-005](decisions/ADR-005-defense-in-depth-path-containment.md) — mandatory |
 | Request/data flow | [DATAFLOWS.md](DATAFLOWS.md) |
-| Security behavior | [SECURITY.md](SECURITY.md) |
+| Security behavior | [SECURITY.md](SECURITY.md), [ADR-003](decisions/ADR-003-hand-rolled-jwt.md), [ADR-012](decisions/ADR-012-in-memory-rate-limiting.md) |
 | Deployment/configuration | [DEPLOYMENT.md](DEPLOYMENT.md) + [ARCHITECTURE.md](ARCHITECTURE.md) |
+| Frontend module or script order | [ARCHITECTURE.md](ARCHITECTURE.md) (table **and** load order) |
+| CSS, design tokens, theming, RTL | [STYLEGUIDE.md](STYLEGUIDE.md) |
+| `data-perf` behaviour | [STYLEGUIDE.md](STYLEGUIDE.md), [ADR-009](decisions/ADR-009-runtime-performance-tiers.md) |
 | Development workflow/convention | [DEVELOPMENT.md](DEVELOPMENT.md) |
-| Extension point | [EXTENDING.md](EXTENDING.md) |
+| Extension point | [EXTENDING.md](EXTENDING.md) (this file) |
+
+**An architectural decision change requires a new ADR superseding the old one.** Never edit
+an accepted ADR in place — see [decisions/README.md](decisions/README.md).
 
 ---
 
@@ -334,30 +422,45 @@ Verify startup banner shows `FILES_ROOT is configured`.
 ### API/Manual Checks
 
 ```bash
-curl http://localhost:3000/api/health
-curl http://localhost:3000/api/categories
-curl http://localhost:3000/api/auth/status
+curl http://localhost:4000/api/health
+curl http://localhost:4000/api/categories
+curl http://localhost:4000/api/auth/status
 ```
 
 ### Filesystem/Content Checks
 
 ```bash
-curl http://localhost:3000/api/files/
-curl -I http://localhost:3000/api/download/path/to/file
+curl http://localhost:4000/api/files/
+curl -I http://localhost:4000/api/download/path/to/file
 ```
 
 ### Authentication Checks (when `AUTH_ENABLED=true`)
 
 ```bash
-curl -X POST http://localhost:3000/api/auth/login -d '{"username":"...","password":"..."}'
-curl -b "avid_session=..." http://localhost:3000/api/auth/status
+curl -X POST http://localhost:4000/api/auth/login -d '{"username":"...","password":"..."}'
+curl -b "avid_session=..." http://localhost:4000/api/auth/status
 ```
+
+> **Port:** `server.js` defaults to `4000`. Substitute your configured `PORT` if you have set
+> one.
 
 ### Frontend/Manual Checks
 
-- Load `http://localhost:3000/` in browser
+- Load `http://localhost:4000/` in browser
 - Verify SPA renders and API calls succeed
 - Test browse navigation and file downloads
+- **For any visual change:** verify in both themes, both directions (`dir="rtl"` and
+  default), and at `data-perf="potato"`. Local development only shows the `high` tier. Use
+  `document.documentElement.setAttribute('data-perf', 'potato')` to force a tier. Full
+  checklist: [STYLEGUIDE.md](STYLEGUIDE.md#9-checklist-for-a-ui-change).
+- **If you touched script or stylesheet loading:** confirm the page still works, and that
+  the console shows no `X is not defined` — load-order breakage is silent
+
+### Production Checks
+
+`npm start` alone does not exercise nginx. If the change touches anything nginx handles
+(proxying, TLS, static assets, deny rules, caching), verify against a real nginx — see
+[ADR-007](decisions/ADR-007-nginx-static-and-proxy.md).
 
 ### Documentation Consistency
 
@@ -373,8 +476,15 @@ curl -b "avid_session=..." http://localhost:3000/api/auth/status
 
 The following are **not** established extension mechanisms:
 
-- **No formal plugin system** — no plugin registry, hook system, or extension API was identified
-- **No build/plugin registry** — no build tooling or bundler is present
-- **No external extension API** — no mechanism for external code to register extensions at runtime
+- **No formal plugin system** — no plugin registry, hook system, or extension API
+- **No build step** — no bundler or transpiler, so no npm-importable frontend code path
+- **No external extension API** — no mechanism for external code to register extensions at
+  runtime
+- **No generic action/command framework** — `FileActions` is a flat definition list and
+  should stay one unless a requirement genuinely demands otherwise
+- **No role-based authorization** — `users.json` carries a `role` field but nothing enforces
+  it. Do not build on the assumption that roles are meaningful
+- **No test harness** — no test framework is configured; verification is manual
 
-Extensions require modifying existing source files or adding new files that follow established patterns.
+Extensions require modifying existing source files or adding new files that follow
+established patterns.

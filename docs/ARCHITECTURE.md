@@ -74,12 +74,17 @@ HTTP Request
 | `home.js` | HomePage component, resource cards, search | `assets/js/home.js` |
 | `file-actions.js` | File Actions module (dedicated per-item actions: Download for files) | `assets/js/file-actions.js` |
 | `browse.js` | BrowsePage component, file table | `assets/js/browse.js` |
-| `resource-service.js` | API client, caching, auth status | `assets/js/resource-service.js` |
-| `i18n.js` | Internationalization (en/fa) | `assets/js/i18n.js` |
-| `theme.js` | Dark/light theme toggle | `assets/js/theme.js` |
+| `resource-service.js` | API client, caching, auth status | `assets/js/services/resource-service.js` |
+| `i18n.js` | Internationalization (`en`, `fa`); sets `<html lang>` and `dir` | `assets/js/i18n.js` |
+| `theme.js` | Dark/light theme toggle, persisted to `localStorage` | `assets/js/theme.js` |
 | `autocomplete.js` | Search autocomplete | `assets/js/autocomplete.js` |
 | `banner.js` | Banner component | `assets/js/banner.js` |
-| `performance-monitor.js` | Performance monitoring | `assets/js/services/performance-monitor.js` |
+| `smooth-scroll.js` | Lenis wrapper; gated by `prefers-reduced-motion` and `data-perf` | `assets/js/smooth-scroll.js` |
+| `performance-monitor.js` | Runtime performance-tier detection; publishes `data-perf` | `assets/js/services/performance-monitor.js` |
+| `vendor/lenis.min.js` | Vendored third-party smooth-scroll library | `assets/js/vendor/lenis.min.js` |
+
+All modules are IIFEs exposing a single global. There is no build step and no bundler —
+see [ADR-006](decisions/ADR-006-vanilla-js-spa-no-build.md).
 
 ### Frontend Script Loading Order
 
@@ -87,18 +92,110 @@ Confirmed from `<script>` tags in `index.html`:
 
 ```
 index.html
-├── assets/js/banner.js
-├── assets/js/services/resource-service.js
-├── assets/js/services/performance-monitor.js
-├── assets/js/theme.js
-├── assets/js/i18n.js
-├── assets/js/autocomplete.js
-├── assets/js/home.js
-├── assets/js/file-actions.js
-├── assets/js/browse.js
-├── lib/idle-timer.js
-└── assets/js/router.js
+├── assets/js/banner.js                        (no defer — runs immediately)
+├── assets/js/services/resource-service.js     defer
+├── assets/js/services/performance-monitor.js  defer
+├── assets/js/theme.js                         defer
+├── assets/js/i18n.js                          defer
+├── assets/js/autocomplete.js                  defer
+├── assets/js/home.js                          defer
+├── assets/js/file-actions.js                  defer
+├── assets/js/browse.js                        defer
+├── assets/js/vendor/lenis.min.js              defer   ← must precede smooth-scroll.js
+├── assets/js/smooth-scroll.js                 defer
+├── lib/idle-timer.js                          (no defer)
+└── assets/js/router.js                        defer   ← must be last
 ```
+
+**Two ordering constraints are load-bearing:**
+
+1. **`router.js` must load last.** It drives navigation and assumes every page module is
+   already registered.
+2. **`vendor/lenis.min.js` must precede `smooth-scroll.js`.** Reversing them silently
+   disables smooth scrolling — `smooth-scroll.js` gates on `typeof Lenis !== 'undefined'`
+   and degrades to native scrolling rather than throwing. There is no error to notice.
+
+`defer` preserves execution order while allowing parallel download. `banner.js` and
+`lib/idle-timer.js` intentionally load without it.
+
+### Frontend Stylesheet Loading Order
+
+```
+index.html
+├── assets/css/tokens.css             ← must be first
+├── assets/css/base.css
+├── assets/css/components.css
+├── assets/css/home.css
+├── assets/css/browse.css
+├── assets/css/performance-modes.css
+└── assets/css/lenis.css
+```
+
+There is no build step, so layering is achieved **solely by `<link>` order**. `tokens.css`
+defines every design token; if it loads after a consumer stylesheet, the whole semantic
+layer resolves to nothing and the page renders unstyled or broken.
+
+`browse.html` loads a reduced set (`tokens`, `base`, `components`, `home`, `browse`,
+`lenis`) and omits `performance-modes.css`. See
+[Standalone HTML Pages](#standalone-html-pages) below.
+
+See [STYLEGUIDE.md](STYLEGUIDE.md) for the token contract and [ADR-008](decisions/ADR-008-css-custom-property-tokens.md)
+for the rationale.
+
+## Runtime Performance Tiers
+
+`assets/js/services/performance-monitor.js` classifies device capability and measured frame
+rate, then publishes the result as a `data-perf` attribute on `<html>`. Tiers are
+`high` / `medium` / `low` / `potato`.
+
+**Three independent systems read this attribute:**
+
+| Consumer | Effect |
+|----------|--------|
+| `assets/css/performance-modes.css` | Progressively strips blur, aura glows, logo shader, hero clouds, shadows, transitions |
+| `assets/js/smooth-scroll.js` | Disables Lenis entirely at `potato` |
+| Manual override UI | Lets the user pin a tier via `data-perf-val` |
+
+The tier can change **after** load — `smooth-scroll.js` therefore observes the attribute
+with a `MutationObserver` and also listens for `prefers-reduced-motion` changes, starting
+and stopping Lenis accordingly.
+
+Classification inputs: measured FPS, `navigator.connection.effectiveType`, hardware
+concurrency, touch capability and screen size, and battery status. Adaptive tier changes use
+hysteresis (3 consecutive low-FPS samples to downgrade, 5 to upgrade).
+
+See [ADR-009](decisions/ADR-009-runtime-performance-tiers.md).
+
+## Standalone HTML Pages
+
+Three HTML files exist in the repository root:
+
+| File | How it is served |
+|------|------------------|
+| `index.html` | `GET /`, `GET /index.html`, and **all** `GET /browse/*` paths, via `lib/static-handler.js` → `serveSPA()` |
+| `404.html` | `GET /404`, `GET /404.html`, via `serve404()` |
+| `browse.html` | **Not routed.** |
+
+**`browse.html` is effectively dead.** `lib/api-router.js` serves `index.html` for every
+`/browse/*` request, and there is no `browse.html` reference anywhere in `lib/` or
+`server.js`. Under the shipped `nginx.conf` the file is reachable only as a literal static
+request to `/browse.html` (which falls through to `location /` → `try_files`), and nothing
+links to it. It appears to be a leftover standalone browse page that predates the router.
+
+It carries its own `<script>` and `<link>` set and does **not** stay in sync with
+`index.html`. **When changing frontend loading order or stylesheets, change `index.html`;
+do not treat `browse.html` as a second entry point.** It should either be deleted or wired
+up deliberately — but that is a behavioural decision, not a documentation fix.
+
+### Frontend Cross-Cutting Conventions
+
+| Concern | Mechanism |
+|---------|-----------|
+| Theme | `data-theme` attribute on `<html>`, `localStorage`-backed, applied pre-paint by an inline script in `index.html` |
+| Direction | `dir` attribute on `<html>`, set by `assets/js/i18n.js` → `document.documentElement.dir`; initial value `ltr` hardcoded in `index.html` |
+| Language | `lang` attribute on `<html>`; dictionaries `en` and `fa` in `assets/js/i18n.js` |
+| Fonts | Self-hosted WOFF2 in `assets/fonts/`, `@font-face` in `tokens.css`, `font-display: swap` — see [ADR-011](decisions/ADR-011-self-hosted-fonts.md) |
+| Content-Security-Policy | `script-src 'self' 'unsafe-inline'`; `font-src 'self' data:` — this is why fonts are self-hosted and Lenis is vendored |
 
 ### Browse Row Targets and File Actions
 
@@ -170,9 +267,16 @@ Complete inventory verified from `process.env` reads and JSDoc `@env` declaratio
 | `AUTH_USERS_FILE` | No | `./data/users.json` | `lib/auth-service.js` → `getUsersFilePath()` | Path to users database |
 | `AUTH_MAX_FAILED_ATTEMPTS` | No | `5` | `lib/auth-service.js` → `getBruteForceConfig()` | Brute-force threshold |
 | `AUTH_LOCKOUT_MINUTES` | No | `15` | `lib/auth-service.js` → `getBruteForceConfig()` | Lockout duration |
-| `PORT` | No | `3000` | `server.js` | HTTP server port |
+| `PORT` | No | `4000` | `server.js` → `process.env.PORT \|\| 4000` | HTTP server port |
 
-**Note:** Defaults marked above are confirmed from source code constants in `lib/auth-service.js` (`DEFAULT_SESSION_MINUTES`, `DEFAULT_MAX_ATTEMPTS`, `DEFAULT_LOCKOUT_MINUTES`) and `server.js` (`process.env.PORT || 3000`).
+**Note:** Defaults marked above are confirmed from source code constants in `lib/auth-service.js` (`DEFAULT_SESSION_MINUTES`, `DEFAULT_MAX_ATTEMPTS`, `DEFAULT_LOCKOUT_MINUTES`) and `server.js` (`process.env.PORT || 4000`).
+
+> **Port mismatch — verified discrepancy.** `server.js` defaults to `4000`, but the shipped `nginx.conf` proxies to `127.0.0.1:3000` (`location /api/` → `proxy_pass http://127.0.0.1:3000`). With no `PORT` set, the Node process listens on 4000 and nginx's proxy target is wrong. Either set `PORT=3000` in the environment or update `proxy_pass`. This is **not** a documentation nit — it is a deployment break. See [DEPLOYMENT.md → API Proxying](DEPLOYMENT.md#api-proxying).
+
+`server.js` also binds `HOST = "0.0.0.0"` (hardcoded, not configurable), so the process
+listens on all interfaces. Behind nginx that is fine, but if the port is ever exposed
+directly, `x-forwarded-for` becomes client-controlled and the per-IP rate limiter is
+bypassable — see [ADR-012](decisions/ADR-012-in-memory-rate-limiting.md).
 
 ## Extension Points
 
@@ -195,25 +299,74 @@ Complete inventory verified from `process.env` reads and JSDoc `@env` declaratio
 - Frontend component structure from `<script>` tags and IIFE exports
 - nginx configuration from `nginx.conf`
 - Error handling pattern from `serviceError()` usage
+- `data/users.json` schema (see below)
+- Frontend stylesheet and script load order from `index.html` and `browse.html`
+
+### `data/users.json` Schema
+
+**Resolved** — previously listed as an unresolved implementation detail. Confirmed from
+`lib/auth-service.js` → `loadUsers()`, `findUser()`, `saveUsers()` and cross-checked
+against the runtime file:
+
+```json
+{
+  "users": [
+    {
+      "id":        "string",
+      "username":  "string",
+      "passwordHash": "string",
+      "role":      "string",
+      "createdAt": "string",
+      "lastLogin": "string"
+    }
+  ]
+}
+```
+
+| Field | Notes |
+|-------|-------|
+| `users` | Top-level array. `loadUsers()` expects exactly this shape. |
+| `username` | Matched **case-insensitively** by `findUser()`; lockout keys are lowercased |
+| `passwordHash` | bcrypt (`$2…`) or scrypt (`scrypt$…`). Auto-detected by prefix. Generate with `node lib/hash-password.js <password>` |
+| `role` | **Present but unenforced.** No authorization logic reads it — see [ADR-004](decisions/ADR-004-path-scoped-auth.md) |
+| `lastLogin` | Written on successful login |
+| `createdAt` | Set at creation |
+
+Note `lib/hash-password.js` requires a minimum of **6 characters** and exits non-zero
+below that.
 
 ### Assumptions (not fully verified)
 
-- Production deployment uses the exact `nginx.conf` in the repo (may be customized per environment)
+- Production deployment uses the exact `nginx.conf` in the repo (it ships
+  `server_name files.cloudavid.com` and concrete SSL certificate paths, so it is a template)
 - No database or external service dependencies beyond filesystem
+- `.env` in the working tree is representative of production shape (its `PORT=4000` and
+  `FILES_ROOT` point at a developer machine)
 
-### Unresolved Implementation Details
+### Unresolved
 
-- `data/users.json` exact schema — not directly verified from source; treat as an unresolved implementation detail
+- **Process supervision** — no systemd unit, PM2 config, or Dockerfile exists. Deployment
+  must supply it.
+- **`browse.html` intent** — whether it should be deleted or wired up is a product
+  decision, not a technical one.
+- **`lenis` in `package.json` is unused.** The served file is the vendored
+  `assets/js/vendor/lenis.min.js`; no server code requires the npm package. The npm version
+  is the only signal of what the vendored copy should be — see
+  [ADR-010](decisions/ADR-010-vendored-lenis-smooth-scroll.md).
 
 ## Maintenance Mapping
 
 | Change Type | Documents to Update |
 |-------------|-------------------|
-| New API endpoint | `API.md`, `ARCHITECTURE.md` |
-| New module or dependency | `ARCHITECTURE.md` |
-| Auth/Security change | `SECURITY.md`, `DATAFLOWS.md` |
+| New API endpoint | `API.md`, `ARCHITECTURE.md`, `SECURITY.md` (classify auth — see [ADR-004](decisions/ADR-004-path-scoped-auth.md)) |
+| New module or dependency | `ARCHITECTURE.md`, `EXTENDING.md` |
+| Auth/Security change | `SECURITY.md`, `DATAFLOWS.md`, and the relevant ADR |
 | New env var | `ARCHITECTURE.md` (complete inventory), `DEPLOYMENT.md` (if production-relevant) |
-| Deployment change | `DEPLOYMENT.md` |
-| New frontend component | `ARCHITECTURE.md`, `DATAFLOWS.md` |
+| Deployment change | `DEPLOYMENT.md`, [ADR-007](decisions/ADR-007-nginx-static-and-proxy.md) |
+| New frontend component | `ARCHITECTURE.md` (module table **and** script load order), `DATAFLOWS.md` |
+| New CSS file or stylesheet | `ARCHITECTURE.md` (load order), `STYLEGUIDE.md` |
+| New or changed design token | `STYLEGUIDE.md` — re-measure contrast if a colour changed |
+| Change to `data-perf` behaviour | `STYLEGUIDE.md`, [ADR-009](decisions/ADR-009-runtime-performance-tiers.md) |
 | Error handling change | `DEVELOPMENT.md` |
 | New extension pattern | `EXTENDING.md` |
+| Architectural decision change | **New ADR** superseding the old one — never edit an accepted ADR in place. See [decisions/README.md](decisions/README.md) |

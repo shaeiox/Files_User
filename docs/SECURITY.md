@@ -1,5 +1,122 @@
 # Security
 
+## Known Security Debt
+
+Read this before deploying anywhere new. Items below are **verified present in the
+repository as of 2026-10-03**, not hypotheticals.
+
+### 1. `.env` is tracked in git with a live signing secret (HIGH)
+
+**What was found**
+
+- `.gitignore` contains the entry `#.env` — **commented out** (verified byte-level: the file
+  is two lines, `node_modules/` and `#.env`). The intent to ignore `.env` is present but
+  inert.
+- `.env` is therefore **tracked**: `git ls-files --error-unmatch .env` succeeds.
+- It contains a populated `AUTH_JWT_SECRET` (96 hex characters), plus `FILES_ROOT`,
+  `RELEASE_PVM`, and `AUTH_ENABLED=true`.
+- The file has been committed repeatedly — it appears in the history of at least five
+  commits.
+
+**Why this is severe, not cosmetic**
+
+`AUTH_JWT_SECRET` is the **entire trust anchor** for authentication. Per
+[ADR-003](decisions/ADR-003-hand-rolled-jwt.md), sessions are stateless HS256 JWTs signed
+with this one symmetric key. Anyone holding it can mint an arbitrary valid session token
+for any user, with any expiry, and read every route that `pathRequiresAuth()` protects —
+including confidential `RELEASE_PVM` releases. There is no second factor behind it, no key
+ID, no rotation, and no per-user revocation (see [ADR-003](decisions/ADR-003-hand-rolled-jwt.md)
+consequences).
+
+A path traversal bug elsewhere would be one control. This is a pre-authentication bypass
+that requires no vulnerability at all.
+
+**Remediation — order matters**
+
+1. **Rotate the secret first.** Generate a new one and update `AUTH_JWT_SECRET`:
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+   ```
+   This invalidates every existing session immediately. Do this **before** touching git
+   history, so there is no window where the old secret is live *and* public.
+2. **Untrack the file and restore the ignore rule:**
+   ```bash
+   # .gitignore: replace the commented line with a real one
+   printf 'node_modules/\n.env\n' > .gitignore
+   git rm --cached .env
+   git commit -m "chore: untrack .env, restore gitignore rule"
+   ```
+3. **Add `.env.example`** with the variable names and no values, so onboarding does not
+   require reconstructing it from `readme.md`.
+4. **Purge the secret from history** if the repository has ever been pushed anywhere other
+   than a trusted local remote. `git filter-repo --invert-paths --path .env` is the usual
+   tool. This rewrites history and requires a force-push plus every collaborator re-cloning
+   — which is why it is a separate, deliberate step rather than something to do casually.
+   **If the repository has never left your machine, steps 1–3 are sufficient and step 4 can
+   be skipped.**
+
+**Not done here by design.** This is documented rather than fixed because rotating a signing
+secret and rewriting git history are irreversible, disruptive operations that need an
+explicit decision. Nothing in this change altered the secret, `.gitignore`, or git history.
+
+**Until step 1 is done, treat every historical commit's secret as compromised.**
+
+### 2. Rate limiter is bypassable if the port is exposed directly (MEDIUM)
+
+`server.js` hardcodes `HOST = "0.0.0.0"` and `lib/rate-limiter.js` keys on
+`x-forwarded-for` **first**:
+
+```javascript
+const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+```
+
+This is correct while nginx fronts the process, because nginx sets that header. It becomes
+a full bypass if the Node port is reachable directly: a client can send a fresh
+`x-forwarded-for` per request and defeat both the per-IP rate limit and nothing else.
+
+**Mitigation:** ensure `PORT` is bound to loopback or firewalled, and that only nginx can
+reach it. Verify this on every deployment — it is not currently enforced by anything in the
+repository. See [ADR-012](decisions/ADR-012-in-memory-rate-limiting.md).
+
+### 3. `RELEASE_PVM` unset silently makes releases public (MEDIUM)
+
+`pathRequiresAuth()` returns `false` unconditionally when `RELEASE_PVM` is not configured.
+There is **no fail-closed behaviour**: forgetting to set it removes release protection with
+no error. The startup banner does not currently mention it.
+
+**Mitigation:** verify `RELEASE_PVM` is set in the startup banner on every deploy. See
+[ADR-004](decisions/ADR-004-path-scoped-auth.md).
+
+### 4. `role` field exists but is unenforced (LOW, documented)
+
+`data/users.json` carries a `role` field. No authorization logic reads it. Anyone who
+authenticates has whatever access `pathRequiresAuth()` grants. Do not build on the
+assumption that roles are meaningful.
+
+### 5. Usernames logged in plaintext (LOW)
+
+`lib/logger.js` → `logAccess()` emits usernames in access logs (`login:{username}`,
+`fail:{username}`). No redaction. Acceptable for stdout-only logging; a problem if logs are
+shipped to a third-party aggregator.
+
+---
+
+## Security Model
+
+The remainder of this document describes the **implemented** security model. For the
+reasoning behind each control, see [decisions/](decisions/README.md).
+
+| Control | ADR |
+|---------|-----|
+| No framework — hand-written request pipeline | [ADR-001](decisions/ADR-001-no-web-framework.md) |
+| Hand-rolled HS256 JWT | [ADR-003](decisions/ADR-003-hand-rolled-jwt.md) |
+| Path-scoped auth (`RELEASE_PVM` only) | [ADR-004](decisions/ADR-004-path-scoped-auth.md) |
+| Three-layer path containment | [ADR-005](decisions/ADR-005-defense-in-depth-path-containment.md) |
+| nginx as second containment layer | [ADR-007](decisions/ADR-007-nginx-static-and-proxy.md) |
+| In-memory rate limit / lockout | [ADR-012](decisions/ADR-012-in-memory-rate-limiting.md) |
+
+---
+
 ## Authentication
 
 ### Enable/Disable
@@ -219,6 +336,18 @@ Applied to: SPA serving, 404 pages, static files, downloads.
 
 **Source:** `lib/load-env.js` → `loadEnv()`, `parseEnvText()`
 
+### Handling rules
+
+- **`.env` must never be committed.** It currently is — see
+  [Known Security Debt §1](#1-env-is-tracked-in-git-with-a-live-auth_jwt_secret--high).
+- Generate secrets with `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`.
+  48 bytes gives 96 hex characters, comfortably over the 32-character minimum.
+- Password hashes for `data/users.json` are generated with
+  `node lib/hash-password.js <password>` — minimum 6 characters.
+- `loadEnv()` uses an **env-first policy**: a value already present in `process.env` is never
+  overwritten by `.env`. This means a stale shell export silently wins over your `.env`
+  file. If a variable appears to be ignored, check the ambient environment first.
+
 ---
 
 ## Logging/Security Observability
@@ -234,6 +363,26 @@ Applied to: SPA serving, 404 pages, static files, downloads.
 
 ---
 
-## Unresolved Items
+## Resolved Items
 
-- `data/users.json` exact schema — **not directly verified from source.** The schema is inferred from `loadUsers()` which expects `{ users: Array }` with user objects containing `id`, `username`, `passwordHash`, `role`, and `lastLogin` fields. However, this is not confirmed from an actual data file or generation logic in the repository.
+- **`data/users.json` schema** — was previously recorded as an unresolved implementation
+  detail. **Resolved** from `loadUsers()`, `findUser()`, `saveUsers()` and confirmed
+  against the runtime file. Full schema and per-field notes in
+  [ARCHITECTURE.md](ARCHITECTURE.md#datausersjson-schema).
+
+---
+
+## Accepted Risks
+
+These are deliberate, documented trade-offs rather than defects. Each is argued in its ADR.
+
+| Risk | Why accepted | ADR |
+|------|--------------|-----|
+| No server-side session revocation | Stateless JWTs keep the portal single-process with no session store. Rotating the secret is the only (all-or-nothing) revocation path. | [ADR-003](decisions/ADR-003-hand-rolled-jwt.md) |
+| No `kid` / key ring | Single symmetric secret is sufficient for one server. A `kid` + key ring is the natural first upgrade if rotation becomes frequent. | [ADR-003](decisions/ADR-003-hand-rolled-jwt.md) |
+| In-memory rate limit and lockout state | Correct **only** while there is a single Node process. Loses state on restart, which is also a lockout bypass. Must be revisited before scaling out. | [ADR-012](decisions/ADR-012-in-memory-rate-limiting.md) |
+| Per-username lockout enables user lockout DoS | A deliberate trade: per-IP-only fails against IP rotation. Combined per-IP **and** per-username thresholds would be the mitigation. | [ADR-012](decisions/ADR-012-in-memory-rate-limiting.md) |
+| Three filesystem `stat`/`realpath` calls per request | Containment latency is not on a fast path. This is the cost of the symlink-escape defence. | [ADR-005](decisions/ADR-005-defense-in-depth-path-containment.md) |
+| Coarse path deny-lists in `api-router.js` and nginx | Defence in depth only. `resolveInsideRoot()` is the real control; the deny-lists are prefix matches and would not stop a determined bypass on their own. | [ADR-005](decisions/ADR-005-defense-in-depth-path-containment.md) |
+| `script-src` and `style-src` allow `'unsafe-inline'` | Required by the inline pre-paint theme script in `index.html` and by inline styles. Tightening this needs a nonce strategy — see the ADR-006 caveats. | [ADR-006](decisions/ADR-006-vanilla-js-spa-no-build.md) |
+| Vendored `lenis.min.js` is not integrity-checked | A third-party blob committed to the repo and updated manually. Reconciling it with the `lenis` npm version is the only freshness signal. | [ADR-010](decisions/ADR-010-vendored-lenis-smooth-scroll.md) |

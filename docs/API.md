@@ -4,22 +4,43 @@ REST endpoint reference for the `files-server-web` server. All endpoints are han
 
 ## Authentication
 
+**Every endpoint below is public unless marked Conditional.** Protection is opt-in via
+`pathRequiresAuth()` in `lib/auth-service.js`, which gates only paths under `RELEASE_PVM`.
+See [ADR-004](decisions/ADR-004-path-scoped-auth.md) for the model and its fail-open
+behaviour when `RELEASE_PVM` is unset.
+
 | Endpoint | Auth Required |
 |----------|---------------|
 | `GET /__health` | No |
 | `GET /api/health` | No |
 | `GET /api/auth/status` | No |
-| `POST /api/auth/login` | No |
+| `POST /api/auth/login` | No (but requires `AUTH_ENABLED=true`) |
 | `POST /api/auth/logout` | No |
 | `GET /api/categories` | No |
 | `GET /api/releases` | Conditional |
 | `GET /api/search` | No |
-| `GET /api/files/*` | No |
+| `GET /api/files/*` | Conditional |
 | `GET /api/download/*` | Conditional |
 | `GET /`, `/index.html`, `/browse/*` | No (SPA) |
 | `GET /404`, `/404.html` | No |
 
-**Conditional auth:** When `AUTH_ENABLED=true` and the path targets the `RELEASE_PVM` directory tree, `lib/auth-service.js` → `pathRequiresAuth()` returns true and the request requires a valid session.
+**Conditional auth:** When `AUTH_ENABLED=true`, `RELEASE_PVM` and `FILES_ROOT` are both set,
+and the requested path falls under the `RELEASE_PVM` subtree, `pathRequiresAuth()` returns
+true and the request requires a valid session. The check is **string-prefix based and runs
+before any filesystem resolution** — path containment does not protect it.
+
+**When adding an endpoint, classify its auth requirement explicitly.** Anything not listed as
+Conditional is reachable without a session.
+
+## Response Conventions
+
+| Convention | Detail |
+|------------|--------|
+| Success | JSON via `sendJSON(res, status, data)` — `200` unless noted |
+| Error | JSON via `sendServiceError(res, err)`, status from `err.httpStatus` |
+| Error body | `{ "error": "<human-readable>", "code": "<MACHINE_READABLE>" }` |
+| Rate limited | `429` `{ "error": "Too many requests.", "code": "RATE_LIMITED" }` |
+| Headers | `securityHeaders()` applied to SPA, 404, static, and download responses |
 
 ---
 
@@ -212,7 +233,7 @@ Also sets `Set-Cookie` header to clear the session cookie.
 
 ## `GET /api/files/*`
 
-**Auth:** None
+**Auth:** Conditional (when `AUTH_ENABLED=true` and the path targets `RELEASE_PVM`)
 
 **Path Parameters:**
 | Parameter | Description |
@@ -282,6 +303,11 @@ Headers:
 
 **Response:** `200 OK` with `index.html` content (SPA shell)
 
+**Note:** `browse.html` is **not** served by any route. All `/browse/*` requests resolve to
+`index.html`; the SPA router then renders `BrowsePage` client-side. The standalone
+`browse.html` file in the repository root is unrouted — see
+[ARCHITECTURE.md → Standalone HTML Pages](ARCHITECTURE.md#standalone-html-pages).
+
 **Source:** `lib/api-router.js` → `if (pathname === "/" || pathname === "/index.html" || pathname.startsWith("/browse"))` → `lib/static-handler.js` → `serveSPA()`
 
 ---
@@ -296,6 +322,26 @@ Headers:
 
 ---
 
+## Blocked Paths
+
+Requests matching these are rejected with `403 Forbidden` **before routing**, independently
+of any handler:
+
+| Pattern | Rationale |
+|---------|-----------|
+| `/.env` | Holds `AUTH_JWT_SECRET` — currently tracked in git, see [SECURITY.md §1](SECURITY.md#1-env-is-tracked-in-git-with-a-live-signing-secret-high) |
+| `/lib/*` | Server source code |
+| `/data/*` | `users.json` — password hashes |
+| `/node_modules/*` | Dependencies |
+
+This is a coarse prefix deny-list — defence in depth only. The real filesystem control is
+`resolveInsideRoot()`; see
+[ADR-005](decisions/ADR-005-defense-in-depth-path-containment.md).
+
+**Source:** `lib/api-router.js` → `if (pathname === "/.env" || pathname.match(/^\/(lib|data|node_modules)\//))`
+
+---
+
 ## Error Response Format
 
 All error responses use the `serviceError()` pattern from `lib/files-service.js`:
@@ -305,5 +351,26 @@ All error responses use the `serviceError()` pattern from `lib/files-service.js`
 ```
 
 With HTTP status code set by `err.httpStatus`.
+
+### Verified Error Codes
+
+| Status | Code | Meaning |
+|--------|------|---------|
+| `400` | `INVALID_PATH` | Path contains `.`, `..`, or null bytes |
+| `400` | `MISSING_FIELDS` | Login body missing username or password |
+| `400` | `NOT_A_DIRECTORY` | Path is a file, not a directory |
+| `400` | `NOT_A_FILE` | Path is a directory, not a file |
+| `401` | `INVALID_CREDENTIALS` | Wrong username or password |
+| `403` | `AUTH_DISABLED` | Auth is off; login not possible |
+| `403` | `PATH_TRAVERSAL` | Resolved path is outside `FILES_ROOT` |
+| `403` | `SYMLINK_TRAVERSAL` | Symlink target is outside `FILES_ROOT` |
+| `404` | `NOT_FOUND` | Path does not exist |
+| `429` | `RATE_LIMITED` | Per-IP request cap exceeded |
+| `429` | `LOCKED_OUT` | Brute-force lockout active |
+| `503` | `FILES_ROOT_MISSING` | `FILES_ROOT` not set |
+| `503` | `FILES_ROOT_NOT_FOUND` | `FILES_ROOT` does not exist |
+| `503` | `FILES_ROOT_NOT_DIRECTORY` | `FILES_ROOT` is not a directory |
+| `503` | `FILES_ROOT_EMPTY` | `FILES_ROOT` is empty |
+| `503` | `FILES_ROOT_NO_CATEGORIES` | No browsable subdirectories |
 
 **Source:** `lib/http-utils.js` → `sendServiceError()`

@@ -244,7 +244,13 @@ Service operation fails
 
 ```
 Browser loads index.html
-  → scripts load in order (see ARCHITECTURE.md)
+  → inline pre-paint script sets data-theme from localStorage / prefers-color-scheme
+  → assets/js/theme.js, i18n.js initialize
+  → scripts load in dependency order (see ARCHITECTURE.md)
+      - router.js last; vendor/lenis.min.js immediately before smooth-scroll.js
+  → assets/js/services/performance-monitor.js starts frame-timing
+      → classifies device → sets data-perf on <html>
+      → assets/js/smooth-scroll.js MutationObserver starts/stops Lenis accordingly
   → router.js init()
     → navigate(currentPath, false)
       → resolveRoute(path) → "home" | "browse" | null
@@ -257,11 +263,51 @@ Browser loads index.html
         → ResourceService.login() — POST /api/auth/login
 ```
 
-**Source:** `assets/js/router.js` → `navigate()`, `assets/js/home.js` → `render()`, `assets/js/resource-service.js` → API methods
+**Source:** `assets/js/router.js` → `navigate()`, `assets/js/home.js` → `render()`, `assets/js/services/resource-service.js` → API methods, `assets/js/services/performance-monitor.js`, `assets/js/smooth-scroll.js`
 
 ---
 
 ## 9. Cross-Cutting Flows
+
+### Theme and Direction Initialization
+
+```
+index.html <head>
+  → inline script (before first paint)
+    → reads localStorage, else prefers-color-scheme
+    → document.documentElement.setAttribute('data-theme', theme)   ← prevents FOUC
+  → assets/js/theme.js
+    → resolves the theme, persists toggles back to localStorage
+  → assets/js/i18n.js
+    → document.documentElement.dir = d.dir   (ltr | rtl)
+    → document.documentElement.lang = d.lang
+    → CSS re-resolves the semantic token layer via [data-theme] and [dir="rtl"]
+```
+
+Note the inline script runs **before** `theme.js` and is what prevents a flash of the wrong
+theme. `theme.js` alone is not sufficient — it loads deferred, after first paint.
+
+**Source:** `index.html` → inline `<script>`, `assets/js/theme.js`, `assets/js/i18n.js`
+
+### Performance Tier Adaptation
+
+```
+assets/js/services/performance-monitor.js
+  → measures FPS, reads navigator.connection, hardwareConcurrency, battery
+  → classifies into TIERS = [HIGH, MEDIUM, LOW, POTATO], clamped to bounds
+  → document.documentElement.setAttribute('data-perf', tier.toLowerCase())
+  → CSS: performance-modes.css progressively strips effects by tier
+  → JS:  smooth-scroll.js observes the attribute (MutationObserver)
+        → POTATO → stop() → cancelAnimationFrame + lenis.destroy()
+        → otherwise → start()
+
+  → on continued load:
+    → 3 consecutive low-FPS samples  → step down one tier
+    → 5 consecutive high-FPS samples → step up one tier
+    → (asymmetric hysteresis prevents oscillation)
+```
+
+**Source:** `assets/js/services/performance-monitor.js`, `assets/css/performance-modes.css`, `assets/js/smooth-scroll.js`
 
 ### Logging
 
@@ -278,7 +324,7 @@ lib/logger.js logAccess(method, status, url, extra)
 ```
 lib/idle-timer.js IdleTimer.start(minutes, onTimeout)
   → monitors mousemove, keydown, scroll, touchstart, pointerdown
-  → checkExpiration() every 10 seconds
+  → checkExpiration() every 10 seconds (CHECK_INTERVAL_MS = 10000)
   → on timeout: calls onTimeout callback (typically ResourceService.logout())
 ```
 
@@ -288,9 +334,27 @@ lib/idle-timer.js IdleTimer.start(minutes, onTimeout)
 
 ```
 lib/rate-limiter.js checkLimit(req)
-  → keyed by x-forwarded-for or socket.remoteAddress
-  → 120 requests per 60-second window per IP
+  → keyed by x-forwarded-for || socket.remoteAddress   ← header trusted; see ADR-012
+  → 120 requests per 60-second window per key
   → returns false if exceeded → 429 response
+  → setInterval sweeps expired keys every 60 seconds
 ```
 
+State is **in-memory and per-process**: lost on restart, and not shared between workers.
+See [ADR-012](decisions/ADR-012-in-memory-rate-limiting.md).
+
 **Source:** `lib/rate-limiter.js` → `checkLimit()`, `lib/api-router.js` → `rateLimiter.checkLimit(req)`
+
+### Path Containment (per filesystem request)
+
+```
+Any request-derived path
+  → splitRel()        → reject "." / ".." / null bytes        → 400 INVALID_PATH
+  → path.resolve()    → path.relative() containment check    → 403 PATH_TRAVERSAL
+  → fs.realpathSync() → path.relative() containment re-check → 403 SYMLINK_TRAVERSAL
+```
+
+See [ADR-005](decisions/ADR-005-defense-in-depth-path-containment.md). This is the single
+most security-critical flow in the application.
+
+**Source:** `lib/files-service.js` → `resolveInsideRoot()`
