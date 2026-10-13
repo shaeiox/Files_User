@@ -117,6 +117,56 @@ const i18n = {
         sortOldest: "Oldest First",
         sortSize: "Largest First",
 
+        // ── Browse redesigned layout (browse-inspector-redesign) ──
+        breadcrumb: "Breadcrumb",
+        ctxSigned: "Signed by CloudAvid Core",
+        filters: "Filters",
+        viewMode: "View mode",
+        viewList: "List view",
+        viewGrid: "Grid view",
+        select: "Select",
+        selectAll: "Select all",
+        folderSizeUnknown: "—",
+
+        // ── Bulk selection & actions ──
+        bulkSelected: "%n selected",
+        bulkSize: "%s selected",
+        bulkNoSize: "files only",
+        bulkDownload: "Download Selected",
+        bulkZip: "Download ZIP",
+        bulkZipTitle: "Download as ZIP",
+        bulkCopy: "Copy File List",
+        bulkStarting: "Starting %s of %t…",
+        bulkStarted: "%n started",
+        bulkFailed: "Failed",
+        bulkFailedCount: "%n failed",
+        bulkFoldersSkipped: "%n folders skipped",
+        bulkNothingToDownload: "Nothing to download",
+        bulkNoFiles: "Select files first",
+        bulkZipStarted: "ZIP started (%n)",
+        bulkCopied: "Copied",
+
+        // ── Metadata card ──
+        bytes: "bytes",
+        sha256: "SHA-256 Checksum",
+        verify: "Verify SHA-256",
+        reverify: "Verify again",
+        verifying: "Verifying…",
+        shaNotComputed: "Not verified yet.",
+        shaTooLarge: "This file is too large to verify.",
+        shaForbidden: "You do not have access to this file.",
+        shaUnavailable: "The file is no longer available.",
+        shaFailed: "The checksum could not be computed.",
+        digestTitle: "Full checksum",
+        cmdFetch: "Command Line Fetch",
+        copy: "Copy",
+        copyDigest: "Copy checksum",
+        copied: "Copied",
+        copyFailed: "Copy failed",
+        inspClose: "Close details",
+        inspTabs: "Selected items",
+        path: "Path",
+
         // ── NEW: Auth & 404 Messages ──
         authRequired: "Authentication Required",
         authRequiredDesc: "Access to the PVM release infrastructure requires clearance.",
@@ -267,6 +317,56 @@ const i18n = {
         sortOldest: "قدیمی‌ترین",
         sortSize: "بیشترین حجم",
 
+        // ── Browse redesigned layout (browse-inspector-redesign) ──
+        breadcrumb: "مسیر",
+        ctxSigned: "امضا شده توسط CloudAvid Core",
+        filters: "فیلترها",
+        viewMode: "حالت نمایش",
+        viewList: "نمایش فهرست",
+        viewGrid: "نمایش شبکه‌ای",
+        select: "انتخاب",
+        selectAll: "انتخاب همه",
+        folderSizeUnknown: "—",
+
+        // ── Bulk selection & actions ──
+        bulkSelected: "%n مورد انتخاب شده",
+        bulkSize: "%s انتخاب شده",
+        bulkNoSize: "فقط فایل",
+        bulkDownload: "دانلود انتخاب‌شده‌ها",
+        bulkZip: "دانلود ZIP",
+        bulkZipTitle: "دانلود به‌صورت ZIP",
+        bulkCopy: "کپی فهرست فایل‌ها",
+        bulkStarting: "شروع %s از %t…",
+        bulkStarted: "%n آغاز شد",
+        bulkFailed: "ناموفق",
+        bulkFailedCount: "%n ناموفق",
+        bulkFoldersSkipped: "%n پوشه نادیده گرفته شد",
+        bulkNothingToDownload: "موردی برای دانلود نیست",
+        bulkNoFiles: "ابتدا فایل انتخاب کنید",
+        bulkZipStarted: "آرشیو ZIP آغاز شد (%n)",
+        bulkCopied: "کپی شد",
+
+        // ── Metadata card ──
+        bytes: "بایت",
+        sha256: "جمع‌سنجی SHA-256",
+        verify: "بررسی SHA-256",
+        reverify: "بررسی دوباره",
+        verifying: "در حال بررسی…",
+        shaNotComputed: "هنوز بررسی نشده است.",
+        shaTooLarge: "حجم این فایل برای بررسی بیش از حد است.",
+        shaForbidden: "به این فایل دسترسی ندارید.",
+        shaUnavailable: "این فایل دیگر در دسترس نیست.",
+        shaFailed: "محاسبه‌ی جمع‌سنجی ممکن نشد.",
+        digestTitle: "جمع‌سنجی کامل",
+        cmdFetch: "دریافت با خط فرمان",
+        copy: "کپی",
+        copyDigest: "کپی جمع‌سنجی",
+        copied: "کپی شد",
+        copyFailed: "کپی ناموفق بود",
+        inspClose: "بستن جزئیات",
+        inspTabs: "موارد انتخاب‌شده",
+        path: "مسیر",
+
         // ── NEW: Auth & 404 Messages ──
         authRequired: "نیاز به احراز هویت",
         authRequiredDesc: "دسترسی به زیرساخت ریلیزها مستلزم تایید هویت است.",
@@ -358,6 +458,16 @@ function applyLang(lang) {
     const currentLangLabel = document.getElementById("currentLangLabel");
     if (currentLangLabel) {
         currentLangLabel.textContent = targetLang === "fa" ? "FA" : "EN";
+    }
+
+    // 5a. Notify components that render their own markup.
+    // `data-i18n` only covers static markup in index.html. Modules that build DOM at
+    // render time (the Browse bulk bar and metadata card) hold no data-i18n nodes, so
+    // they re-render themselves on this event instead of keeping stale-language text.
+    try {
+        document.dispatchEvent(new CustomEvent("i18n:changed", { detail: { lang: targetLang } }));
+    } catch (e) {
+        /* older engines without CustomEvent — components simply keep current text */
     }
 
     // 6. Highlight Active Language in Dropdown
