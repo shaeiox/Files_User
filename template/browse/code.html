@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="web_standard" name="shell-type">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet">
+  <style>
+    @layer base {
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        overscroll-behavior: none;
+      }
+
+      main>:first-child {
+        margin-top: 0 !important;
+      }
+
+      main>:last-child {
+        margin-bottom: 0 !important;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script
+    id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container": "#1f1f23", "on-secondary-container": "#b3b1ff", "secondary-fixed": "#e2dfff", "primary": "#ffdca1", "secondary-container": "#3626ce", "surface-dim": "#121316", "inverse-primary": "#7c5800", "tertiary-fixed-dim": "#4cd7f6", "on-error-container": "#ffdad6", "surface-variant": "#343538", "on-tertiary-fixed": "#001f26", "primary-container": "#ffb800", "on-primary": "#412d00", "on-primary-fixed-variant": "#5e4200", "on-background": "#e3e2e6", "on-error": "#690005", "inverse-on-surface": "#2f3034", "background": "#121316", "tertiary": "#a5ebff", "secondary-fixed-dim": "#c3c0ff", "on-primary-fixed": "#271900", "on-surface": "#e3e2e6", "on-primary-container": "#6b4c00", "primary-fixed-dim": "#ffba20", "surface-bright": "#38393d", "surface-container-highest": "#343538", "surface-tint": "#ffba20", "secondary": "#c3c0ff", "on-tertiary": "#003640", "on-surface-variant": "#d5c4ab", "on-secondary-fixed-variant": "#3323cc", "primary-fixed": "#ffdea8", "on-secondary": "#1d00a5", "error-container": "#93000a", "on-tertiary-fixed-variant": "#004e5c", "surface": "#121316", "tertiary-container": "#49d5f4", "outline": "#9e8f78", "tertiary-fixed": "#acedff", "surface-container-low": "#1b1b1f", "error": "#ffb4ab", "outline-variant": "#514532", "surface-container-lowest": "#0d0e11", "surface-container-high": "#292a2d", "on-tertiary-container": "#005969", "on-secondary-fixed": "#0f0069", "inverse-surface": "#e3e2e6" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "margin-desktop": "2rem", "space-xl": "1.5rem", "space-xs": "0.25rem", "gutter": "1rem", "space-md": "0.75rem", "gutter-desktop": "1.5rem", "margin": "1rem", "space-sm": "0.5rem", "space-lg": "1rem" }, "fontFamily": { "body-md": ["Inter"], "label-mono-sm": ["JetBrains Mono"], "headline-xl-mobile": ["Inter"], "label-kpi": ["JetBrains Mono"], "headline-lg": ["Inter"], "headline-sm": ["Inter"], "label-code": ["JetBrains Mono"], "body-lg": ["Inter"], "headline-xl": ["Inter"] }, "fontSize": { "body-md": ["0.8125rem", { "lineHeight": "1.25rem", "letterSpacing": "0em", "fontWeight": "400" }], "label-mono-sm": ["0.6875rem", { "lineHeight": "0.875rem", "letterSpacing": "0.02em", "fontWeight": "400" }], "headline-xl-mobile": ["1.75rem", { "lineHeight": "2.25rem", "letterSpacing": "-0.02em", "fontWeight": "600" }], "label-kpi": ["1.25rem", { "lineHeight": "1.5rem", "letterSpacing": "-0.03em", "fontWeight": "600" }], "headline-lg": ["1.5rem", { "lineHeight": "2rem", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-sm": ["1.125rem", { "lineHeight": "1.5rem", "letterSpacing": "-0.01em", "fontWeight": "500" }], "label-code": ["0.75rem", { "lineHeight": "1rem", "letterSpacing": "-0.01em", "fontWeight": "500" }], "body-lg": ["0.9375rem", { "lineHeight": "1.5rem", "letterSpacing": "0em", "fontWeight": "400" }], "headline-xl": ["2.25rem", { "lineHeight": "2.75rem", "letterSpacing": "-0.03em", "fontWeight": "600" }] } } } }</script>
+</head>
+
+<body
+  class="bg-surface font-body-md text-on-surface min-h-screen flex flex-col selection:bg-primary-container selection:text-on-primary-container">
+  <main class="w-full bg-surface flex-1">
+    <div class="max-w-[1600px] mx-auto px-6 py-4">
+      <div class="flex flex-col w-full gap-5 pb-16">
+        <!-- Top Navigation & Package Metadata Context Card -->
+        <div class="w-full bg-surface-container-low rounded-xl p-5 shadow-lg flex flex-col gap-4">
+          <!-- Breadcrumb & Direct Terminal Affordance -->
+          <div
+            class="flex flex-wrap items-center justify-between gap-3 text-on-surface-variant font-label-mono-sm text-label-mono-sm">
+            <div class="flex items-center flex-wrap gap-2">
+              <a class="flex items-center gap-1 hover:text-primary transition-colors" href="#">
+                <span class="material-symbols-outlined text-[16px]">folder_special</span>
+                <span class="">Home</span>
+              </a>
+              <span class="text-outline-variant">/</span>
+              <a class="hover:text-primary transition-colors" href="#">v2rayN-windows-64-desktop</a>
+              <span class="text-outline-variant">/</span>
+              <span
+                class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container-highest text-primary font-semibold">
+                <span class="material-symbols-outlined text-[15px] text-primary-container">folder_open</span>
+                v2rayN-windows-64
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+
+            </div>
+          </div>
+          <!-- Package Title & Action Header -->
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-2">
+            <div class="flex flex-col gap-2">
+              <div class="flex flex-wrap items-center gap-3">
+                <h1 class="font-headline-xl text-headline-xl font-bold text-on-surface tracking-tight">v2rayN-windows-64
+                </h1>
+                <span
+                  class="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-high text-tertiary font-label-mono-sm text-label-mono-sm">
+                  <span class="material-symbols-outlined text-[13px] text-tertiary">verified</span>
+                  Signed by CloudAvid Core
+                </span>
+              </div>
+              <div
+                class="flex flex-wrap items-center gap-3 text-on-surface-variant font-label-mono-sm text-label-mono-sm">
+                <span class="flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[15px] text-primary">folder</span>
+                  5 Directories
+                </span>
+                <span class="text-outline-variant">•</span>
+                <span class="flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[15px] text-secondary">description</span>
+                  9 Files
+                </span>
+                <span class="text-outline-variant">•</span>
+                <span class="flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[15px] text-tertiary">inventory_2</span>
+                  148.2 MB Total Archive
+                </span>
+                <span class="text-outline-variant">•</span>
+                <div
+                  class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-highest/60 text-on-surface font-label-code text-label-code">
+                  <span class="text-outline">SHA256:</span>
+                  <span class="">8f3c7e4...9a12</span>
+                  <button class="hover:text-primary transition-colors ml-1" title="Copy Archive Checksum">
+                    <span class="material-symbols-outlined text-[13px]">content_copy</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- Main Actions -->
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+              <button
+                class="flex items-center gap-2 px-3 py-2 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-code text-label-code transition-all shadow-sm">
+                <span class="material-symbols-outlined text-[16px] text-secondary">security</span>
+                <span class="">Verify SHA-256</span>
+              </button>
+              <button
+                class="flex items-center gap-2 px-4 py-2 rounded bg-primary-container hover:bg-primary-fixed-dim text-on-primary font-headline-sm text-headline-sm font-semibold transition-all shadow-md">
+                <span class="material-symbols-outlined text-[18px]">download_for_offline</span>
+                <span class="">Download Archive (.zip)</span>
+                <span
+                  class="font-label-mono-sm text-label-mono-sm px-1.5 py-0.5 rounded bg-on-primary-container/20 text-on-primary">148
+                  MB</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Search, Filter & View Controls -->
+        <div
+          class="w-full bg-surface-container-lowest p-3 rounded-xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-md">
+          <!-- Fuzzy Search Bar -->
+          <div class="flex-1 relative flex items-center">
+            <span class="material-symbols-outlined absolute left-3 text-[18px] text-outline">search</span>
+            <input
+              class="w-full pl-9 pr-14 py-2 bg-surface-container-low focus:bg-surface-container text-on-surface font-body-md text-body-md rounded focus:outline-none placeholder:text-outline transition-all"
+              id="file-search-input" placeholder="Filter files &amp; folders... (Press / to search)" type="text">
+            <div
+              class="absolute right-2.5 flex items-center gap-1 font-label-mono-sm text-label-mono-sm px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant">
+              <span class="">/</span>
+            </div>
+          </div>
+          <!-- Filter Categories -->
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+            <button
+              class="px-3 py-1.5 rounded-full bg-primary-container text-on-primary font-label-mono-sm text-label-mono-sm font-medium shrink-0">
+              All (14)
+            </button>
+            <button
+              class="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-mono-sm text-label-mono-sm shrink-0 transition-all">
+              Directories (5)
+            </button>
+            <button
+              class="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-mono-sm text-label-mono-sm shrink-0 transition-all">
+              Executables .exe (2)
+            </button>
+            <button
+              class="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-mono-sm text-label-mono-sm shrink-0 transition-all">
+              Dynamic Libs .dll (4)
+            </button>
+            <button
+              class="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-mono-sm text-label-mono-sm shrink-0 transition-all">
+              Assets (3)
+            </button>
+          </div>
+          <!-- View Switchers & Sorting -->
+          <div class="flex items-center gap-2 shrink-0">
+            <div
+              class="flex items-center bg-surface-container-low px-2 py-1.5 rounded text-on-surface-variant font-label-code text-label-code">
+              <span class="text-outline mr-1.5">Sort:</span>
+              <span class="text-on-surface font-medium">Name (A-Z)</span>
+              <span class="material-symbols-outlined text-[14px] ml-1">expand_more</span>
+            </div>
+            <div class="flex items-center bg-surface-container-low p-1 rounded">
+              <button class="p-1 rounded bg-surface-container-highest text-primary" title="Detailed List View">
+                <span class="material-symbols-outlined text-[18px]">format_list_bulleted</span>
+              </button>
+              <button class="p-1 rounded text-on-surface-variant hover:text-on-surface transition-all"
+                title="Compact Grid">
+                <span class="material-symbols-outlined text-[18px]">grid_view</span>
+              </button>
+              <button class="p-1 rounded text-on-surface-variant hover:text-on-surface transition-all"
+                title="Split Tree View">
+                <span class="material-symbols-outlined text-[18px]">account_tree</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Multi-Column Layout: Table (Left 68%) + Live Active File Inspector (Right 32%) -->
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+          <!-- Left Column: Data Table Container -->
+          <div class="xl:col-span-8 flex flex-col bg-surface-container-lowest rounded-xl overflow-hidden shadow-xl">
+            <!-- Table Header Bar -->
+            <div
+              class="grid grid-cols-12 items-center px-4 py-3 bg-surface-container-low text-on-surface-variant font-label-mono-sm text-label-mono-sm uppercase tracking-wider select-none">
+              <div class="col-span-1 flex items-center gap-2">
+                <input
+                  class="rounded bg-surface-container-high text-primary-container focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                  type="checkbox">
+              </div>
+              <div class="col-span-5 flex items-center gap-1 cursor-pointer hover:text-on-surface">
+                <span class="">Name</span>
+                <span class="material-symbols-outlined text-[14px]">arrow_downward</span>
+              </div>
+              <div class="col-span-2 hidden sm:block">Kind / Type</div>
+              <div class="col-span-2 text-right">Size</div>
+              <div class="col-span-2 text-right pr-2">Security / Actions</div>
+            </div>
+            <!-- File Rows Container -->
+            <div class="divide-y divide-transparent font-body-md text-body-md flex flex-col" id="file-list-body">
+              <!-- FOLDERS SECTION -->
+              <!-- 1. bin -->
+              <div
+                class="grid grid-cols-12 items-center px-4 py-2.5 hover:bg-surface-container-low/60 transition-colors group cursor-pointer">
+                <div class="col-span-1 flex items-center">
+                  <input class="rounded bg-surface-container-high text-primary-container focus:ring-0 cursor-pointer"
+                    type="checkbox">
+                </div>
+                <div class="col-span-5 flex items-center gap-2.5 min-w-0 pr-2">
+                  <span class="material-symbols-outlined text-[20px] text-primary shrink-0">folder</span>
+                  <span
+                    class="font-medium text-on-surface truncate group-hover:text-primary transition-colors">bin</span>
+                  <span
+                    class="font-label-mono-sm text-label-mono-sm px-1.5 py-0.2 rounded bg-surface-container text-outline">5
+                    items</span>
+                </div>
+                <div class="col-span-2 hidden sm:flex items-center">
+                  <span
+                    class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-mono-sm text-label-mono-sm">FOLDER</span>
+                </div>
+                <div class="col-span-2 text-right text-outline font-label-mono-sm text-label-mono-sm">
+                  —
+                </div>
+                <div class="col-span-2 flex items-center justify-end gap-1">
+                  <button
+                    class="px-2 py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-code text-label-code transition-all opacity-80 group-hover:opacity-100">
+                    Open
+                  </button>
+                </div>
+              </div>
+              <!-- 2. binConfigs -->
+              <div
+                class="grid grid-cols-12 items-center px-4 py-2.5 hover:bg-surface-container-low/60 transition-colors group cursor-pointer">
+                <div class="col-span-1 flex items-center">
+                  <input class="rounded bg-surface-container-high text-primary-container focus:ring-0 cursor-pointer"
+                    type="checkbox">
+                </div>
+                <div class="col-span-5 flex items-center gap-2.5 min-w-0 pr-2">
+                  <span class="material-symbols-outlined text-[20px] text-primary shrink-0">folder</span>
+                  <span
+                    class="font-medium text-on-surface truncate group-hover:text-primary transition-colors">binConfigs</span>
+                  <span
+                    class="font-label-mono-sm text-label-mono-sm px-1.5 py-0.2 rounded bg-surface-container text-outline">3
+                    items</span>
+                </div>
+                <div class="col-span-2 hidden sm:flex items-center">
+                  <span
+                    class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-mono-sm text-label-mono-sm">FOLDER</span>
+                </div>
+                <div class="col-span-2 text-right text-outline font-label-mono-sm text-label-mono-sm">
+                  —
+                </div>
+                <div class="col-span-2 flex items-center justify-end gap-1">
+                  <button
+                    class="px-2 py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-code text-label-code transition-all opacity-80 group-hover:opacity-100">
+                    Open
+                  </button>
+                </div>
+              </div>
+              <!-- 3. guiConfigs -->
+              <div
+                class="grid grid-cols-12 items-center px-4 py-2.5 hover:bg-surface-container-low/60 transition-colors group cursor-pointer">
+                <div class="col-span-1 flex items-center">
+                  <input class="rounded bg-surface-container-high text-primary-container focus:ring-0 cursor-pointer"
+                    type="checkbox">
+                </div>
+                <div class="col-span-5 flex items-center gap-2.5 min-w-0 pr-2">
+                  <span class="material-symbols-outlined text-[20px] text-primary shrink-0">folder</span>
+                  <span
+                    class="font-medium text-on-surface truncate group-hover:text-primary transition-colors">guiConfigs</span>
+                  <span
+                    class="font-label-mono-sm text-label-mono-sm px-1.5 py-0.2 rounded bg-surface-container text-outline">8
+                    items</span>
+                </div>
+                <div class="col-span-2 hidden sm:flex items-center">
+                  <span
+                    class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-mono-sm text-label-mono-sm">FOLDER</span>
+                </div>
+                <div class="col-span-2 text-right text-outline font-label-mono-sm text-label-mono-sm">
+                  —
+                </div>
+                <div class="col-span-2 flex items-center justify-end gap-1">
+                  <button
+                    class="px-2 py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-code text-label-code transition-all opacity-80 group-hover:opacity-100">
+                    Open
+                  </button>
+                </div>
+              </div>
+              <!-- 4. guiLogs -->
+              <div
+                class="grid grid-cols-12 items-center px-4 py-2.5 hover:bg-surface-container-low/60 transition-colors group cursor-pointer">
+                <div class="col-span-1 flex items-center">
+                  <input class="rounded bg-surface-container-high text-primary-container focus:ring-0 cursor-pointer"
+                    type="checkbox">
+                </div>
+                <div class="col-span-5 flex items-center gap-2.5 min-w-0 pr-2">
+                  <span class="material-symbols-outlined text-[20px] text-primary shrink-0">folder</span>
+                  <span
+                    class="font-medium text-on-surface truncate group-hover:text-primary transition-colors">guiLogs</span>
+                  <span
+                    class="font-label-mono-sm text-label-mono-sm px-1.5 py-0.2 rounded bg-surface-container text-outline">2
+                    items</span>
+                </div>
+                <div class="col-span-2 hidden sm:flex items-center">
+                  <span
+                    class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-mono-sm text-label-mono-sm">FOLDER</span>
+                </div>
+                <div class="col-span-2 text-right text-outline font-label-mono-sm text-label-mono-sm">
+                  —
+                </div>
+                <div class="col-span-2 flex items-center justify-end gap-1">
+                  <button
+                    class="px-2 py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-code text-label-code transition-all opacity-80 group-hover:opacity-100">
+                    Open
+                  </button>
+                </div>
+              </div>
+              <!-- 5. guiTemps -->
+              <div
+                class="grid grid-cols-12 items-center px-4 py-2.5 hover:bg-surface-container-low/60 transition-colors group cursor-pointer">
+                <div class="col-span-1 flex items-center">
+                  <input class="rounded bg-surface-container-high text-primary-container focus:ring-0 cursor-pointer"
+                    type="checkbox">
+                </div>
+                <div class="col-span-5 flex items-center gap-2.5 min-w-0 pr-2">
+                  <span class="material-symbols-outlined text-[20px] text-primary shrink-0">folder</span>
+                  <span
+                    class="font-medium text-on-surface truncate group-hover:text-primary transition-colors">guiTemps</span>
+                  <span
+                    class="font-label-mono-sm text-label-mono-sm px-1.5 py-0.2 rounded bg-surface-container text-outline">1
+                    item</span>
+                </div>
+                <div class="col-span-2 hidden sm:flex items-center">
+                  <span
+                    class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-mono-sm text-label-mono-sm">FOLDER</span>
+                </div>
+                <div class="col-span-2 text-right text-outline font-label-mono-sm text-label-mono-sm">
+                  —
+                </div>
+                <div class="col-span-2 flex items-center justify-end gap-1">
+                  <button
+                    class="px-2 py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-code text-label-code transition-all opacity-80 group-hover:opacity-100">
+                    Open
+                  </button>
+                </div>
+              </div>
+              <!-- FILES SECTION -->
+              <!-- 6. v2rayN.exe (PRIMARY SELECTED STATE) -->
+              <div
+                class="grid grid-cols-12 items-center px-4 py-3 bg-surface-container-high/70 hover:bg-surface-container-high transition-colors group cursor-pointer shadow-[inset_3px_0_0_0_#ffb800]">
+                <div class="col-span-1 flex items-center">
+                  <input checked=""
+                    class="rounded bg-primary-container text-on-primary-container focus:ring-0 cursor-pointer"
+                    type="checkbox">
+                </div>
+                <div class="col-span-5 flex items-center gap-2.5 min-w-0 pr-2">
+                  <span
+                    class="material-symbols-outlined text-[20px] text-primary-container shrink-0">sports_esports</span>
+                  <div class="flex flex-col min-w-0">
+                    <div class="flex items-center gap-2">
+                      <span class="font-semibold text-primary truncate">v2rayN.exe</span>
+                      <span
+                        class="px-1.5 py-0.2 rounded bg-primary-container/20 text-primary-container font-label-mono-sm text-label-mono-sm">PRIMARY</span>
+                    </div>
+                    <span class="text-outline font-label-mono-sm text-label-mono-sm">Aug 29, 2026 • SHA256:
+                      8f3c7e</span>
+                  </div>
+                </div>
+                <div class="col-span-2 hidden sm:flex items-center">
+                  <span
+                    class="px-2 py-0.5 rounded bg-surface-container-highest text-on-surface font-label-mono-sm text-label-mono-sm">APPLICATION</span>
+                </div>
+                <div class="col-span-2 text-right font-label-mono-sm text-label-mono-sm font-semibold text-on-surface">
+                  101.5 MB
+                </div>
+                <div class="col-span-2 flex items-center justify-end gap-1.5">
+                  <span
+                    class="hidden md:inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container text-tertiary font-label-mono-sm text-label-mono-sm">
+                    <span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                    72/72 Clean
+                  </span>
+                  <button
+                    class="p-1 rounded bg-primary-container text-on-primary hover:bg-primary-fixed-dim transition-all"
+                    title="Direct Download">
+                    <span class="material-symbols-outlined text-[16px]">download</span>
+                  </button>
+                </div>
+              </div>
+              <!-- 7. AmazTool.exe -->
+              <div
+                class="grid grid-cols-12 items-center px-4 py-2.5 hover:bg-surface-container-low/60 transition-colors group cursor-pointer">
+                <div class="col-span-1 flex items-center">
+                  <input class="rounded bg-surface-container-high text-primary-container focus:ring-0 cursor-pointer"
+                    type="checkbox">
+                </div>
+                <div class="col-span-5 flex items-center gap-2.5 min-w-0 pr-2">
+                  <span class="material-symbols-outlined text-[20px] text-on-surface-variant shrink-0">terminal</span>
+                  <div class="flex flex-col min-w-0">
+                    <span
+                      class="font-medium text-on-surface truncate group-hover:text-primary transition-colors">AmazTool.exe</span>
+                    <span class="text-outline font-label-mono-sm text-label-mono-sm">Aug 29, 2026</span>
+                  </div>
+                </div>
+                <div class="col-span-2 hidden sm:flex items-center">
+                  <span
+                    class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-mono-sm text-label-mono-sm">APPLICATION</span>
+                </div>
+                <div class="col-span-2 text-right font-label-mono-sm text-label-mono-sm text-on-surface-variant">
+                  12.0 MB
+                </div>
+                <div class="col-span-2 flex items-center justify-end gap-1">
+                  <button
+                    class="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-all"
+                    title="Download File">
+                    <span class="material-symbols-outlined text-[16px]">download</span>
+                  </button>
+                  <button
+                    class="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-all"
+                    title="More Options">
+                    <span class="material-symbols-outlined text-[16px]">more_vert</span>
+                  </button>
+                </div>
+              </div>
+              <!-- 8. AmazTool.exe.tmp -->
+              <div
+                class="grid grid-cols-12 items-center px-4 py-2.5 hover:bg-surface-container-low/60 transition-colors group cursor-pointer">
+                <div class="col-span-1 flex items-center">
+                  <input class="rounded bg-surface-container-high text-primary-container focus:ring-0 cursor-pointer"
+                    type="checkbox">
+                </div>
+                <div class="col-span-5 flex items-center gap-2.5 min-w-0 pr-2">
+                  <span class="material-symbols-outlined text-[20px] text-outline shrink-0">draft</span>
+                  <div class="flex flex-col min-w-0">
+                    <span
+                      class="font-medium text-on-surface truncate group-hover:text-primary transition-colors">AmazTool.exe.tmp</span>
+                    <span class="text-outline font-label-mono-sm text-label-mono-sm">May 21, 2026</span>
+                  </div>
+                </div>
+                <div class="col-span-2 hidden sm:flex items-center">
+                  <span
+                    class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-mono-sm text-label-mono-sm">TMP
+                    FILE</span>
+                </div>
+                <div class="col-span-2 text-right font-label-mono-sm text-label-mono-sm text-on-surface-variant">
+                  11.9 MB
+                </div>
+                <div class="col-span-2 flex items-center justify-end gap-1">
+                  <button
+                    class="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-all"
+                    title="Download File">
+                    <span class="material-symbols-outlined text-[16px]">download</span>
+                  </button>
+                </div>
+              </div>
+              <!-- 9. libSkiaSharp.dll -->
+              <div
+                class="grid grid-cols-12 items-center px-4 py-2.5 hover:bg-surface-container-low/60 transition-colors group cursor-pointer">
+                <div class="col-span-1 flex items-center">
+                  <input class="rounded bg-surface-container-high text-primary-container focus:ring-0 cursor-pointer"
+                    type="checkbox">
+                </div>
+                <div class="col-span-5 flex items-center gap-2.5 min-w-0 pr-2">
+                  <span class="material-symbols-outlined text-[20px] text-secondary shrink-0">data_object</span>
+                  <div class="flex flex-col min-w-0">
+                    <span
+                      class="font-medium text-on-surface truncate group-hover:text-primary transition-colors">libSkiaSharp.dll</span>
+                    <span class="text-outline font-label-mono-sm text-label-mono-sm">Aug 29, 2026</span>
+                  </div>
+                </div>
+                <div class="col-span-2 hidden sm:flex items-center">
+                  <span
+                    class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-mono-sm text-label-mono-sm">DYNAMIC
+                    LIB</span>
+                </div>
+                <div class="col-span-2 text-right font-label-mono-sm text-label-mono-sm text-on-surface-variant">
+                  11.1 MB
+                </div>
+                <div class="col-span-2 flex items-center justify-end gap-1">
+                  <button
+                    class="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-all"
+                    title="Download File">
+                    <span class="material-symbols-outlined text-[16px]">download</span>
+                  </button>
+                </div>
+              </div>
+              <!-- 10. av_libglesv2.dll -->
+              <div
+                class="grid grid-cols-12 items-center px-4 py-2.5 hover:bg-surface-container-low/60 transition-colors group cursor-pointer">
+                <div class="col-span-1 flex items-center">
+                  <input class="rounded bg-surface-container-high text-primary-container focus:ring-0 cursor-pointer"
+                    type="checkbox">
+                </div>
+                <div class="col-span-5 flex items-center gap-2.5 min-w-0 pr-2">
+                  <span class="material-symbols-outlined text-[20px] text-secondary shrink-0">data_object</span>
+                  <div class="flex flex-col min-w-0">
+                    <span
+                      class="font-medium text-on-surface truncate group-hover:text-primary transition-colors">av_libglesv2.dll</span>
+                    <span class="text-outline font-label-mono-sm text-label-mono-sm">Aug 29, 2026</span>
+                  </div>
+                </div>
+                <div class="col-span-2 hidden sm:flex items-center">
+                  <span
+                    class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-mono-sm text-label-mono-sm">DYNAMIC
+                    LIB</span>
+                </div>
+                <div class="col-span-2 text-right font-label-mono-sm text-label-mono-sm text-on-surface-variant">
+                  5.1 MB
+                </div>
+                <div class="col-span-2 flex items-center justify-end gap-1">
+                  <button
+                    class="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-all"
+                    title="Download File">
+                    <span class="material-symbols-outlined text-[16px]">download</span>
+                  </button>
+                </div>
+              </div>
+              <!-- 11. libHarfBuzzSharp.dll -->
+              <div
+                class="grid grid-cols-12 items-center px-4 py-2.5 hover:bg-surface-container-low/60 transition-colors group cursor-pointer">
+                <div class="col-span-1 flex items-center">
+                  <input class="rounded bg-surface-container-high text-primary-container focus:ring-0 cursor-pointer"
+                    type="checkbox">
+                </div>
+                <div class="col-span-5 flex items-center gap-2.5 min-w-0 pr-2">
+                  <span class="material-symbols-outlined text-[20px] text-secondary shrink-0">data_object</span>
+                  <div class="flex flex-col min-w-0">
+                    <span
+                      class="font-medium text-on-surface truncate group-hover:text-primary transition-colors">libHarfBuzzSharp.dll</span>
+                    <span class="text-outline font-label-mono-sm text-label-mono-sm">Aug 29, 2026</span>
+                  </div>
+                </div>
+                <div class="col-span-2 hidden sm:flex items-center">
+                  <span
+                    class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-mono-sm text-label-mono-sm">DYNAMIC
+                    LIB</span>
+                </div>
+                <div class="col-span-2 text-right font-label-mono-sm text-label-mono-sm text-on-surface-variant">
+                  1.7 MB
+                </div>
+                <div class="col-span-2 flex items-center justify-end gap-1">
+                  <button
+                    class="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-all"
+                    title="Download File">
+                    <span class="material-symbols-outlined text-[16px]">download</span>
+                  </button>
+                </div>
+              </div>
+              <!-- 12. e_sqlite3.dll -->
+              <div
+                class="grid grid-cols-12 items-center px-4 py-2.5 hover:bg-surface-container-low/60 transition-colors group cursor-pointer">
+                <div class="col-span-1 flex items-center">
+                  <input class="rounded bg-surface-container-high text-primary-container focus:ring-0 cursor-pointer"
+                    type="checkbox">
+                </div>
+                <div class="col-span-5 flex items-center gap-2.5 min-w-0 pr-2">
+                  <span class="material-symbols-outlined text-[20px] text-secondary shrink-0">data_object</span>
+                  <div class="flex flex-col min-w-0">
+                    <span
+                      class="font-medium text-on-surface truncate group-hover:text-primary transition-colors">e_sqlite3.dll</span>
+                    <span class="text-outline font-label-mono-sm text-label-mono-sm">Aug 29, 2026</span>
+                  </div>
+                </div>
+                <div class="col-span-2 hidden sm:flex items-center">
+                  <span
+                    class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-mono-sm text-label-mono-sm">DYNAMIC
+                    LIB</span>
+                </div>
+                <div class="col-span-2 text-right font-label-mono-sm text-label-mono-sm text-on-surface-variant">
+                  1.5 MB
+                </div>
+                <div class="col-span-2 flex items-center justify-end gap-1">
+                  <button
+                    class="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-all"
+                    title="Download File">
+                    <span class="material-symbols-outlined text-[16px]">download</span>
+                  </button>
+                </div>
+              </div>
+              <!-- 13. v2rayN.icns -->
+              <div
+                class="grid grid-cols-12 items-center px-4 py-2.5 hover:bg-surface-container-low/60 transition-colors group cursor-pointer">
+                <div class="col-span-1 flex items-center">
+                  <input class="rounded bg-surface-container-high text-primary-container focus:ring-0 cursor-pointer"
+                    type="checkbox">
+                </div>
+                <div class="col-span-5 flex items-center gap-2.5 min-w-0 pr-2">
+                  <span class="material-symbols-outlined text-[20px] text-tertiary shrink-0">image</span>
+                  <div class="flex flex-col min-w-0">
+                    <span
+                      class="font-medium text-on-surface truncate group-hover:text-primary transition-colors">v2rayN.icns</span>
+                    <span class="text-outline font-label-mono-sm text-label-mono-sm">Aug 29, 2026</span>
+                  </div>
+                </div>
+                <div class="col-span-2 hidden sm:flex items-center">
+                  <span
+                    class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-mono-sm text-label-mono-sm">MACOS
+                    ICON</span>
+                </div>
+                <div class="col-span-2 text-right font-label-mono-sm text-label-mono-sm text-on-surface-variant">
+                  23.2 KB
+                </div>
+                <div class="col-span-2 flex items-center justify-end gap-1">
+                  <button
+                    class="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-all"
+                    title="Download File">
+                    <span class="material-symbols-outlined text-[16px]">download</span>
+                  </button>
+                </div>
+              </div>
+              <!-- 14. v2rayN.png -->
+              <div
+                class="grid grid-cols-12 items-center px-4 py-2.5 hover:bg-surface-container-low/60 transition-colors group cursor-pointer">
+                <div class="col-span-1 flex items-center">
+                  <input class="rounded bg-surface-container-high text-primary-container focus:ring-0 cursor-pointer"
+                    type="checkbox">
+                </div>
+                <div class="col-span-5 flex items-center gap-2.5 min-w-0 pr-2">
+                  <span class="material-symbols-outlined text-[20px] text-tertiary shrink-0">image</span>
+                  <div class="flex flex-col min-w-0">
+                    <span
+                      class="font-medium text-on-surface truncate group-hover:text-primary transition-colors">v2rayN.png</span>
+                    <span class="text-outline font-label-mono-sm text-label-mono-sm">Aug 29, 2026</span>
+                  </div>
+                </div>
+                <div class="col-span-2 hidden sm:flex items-center">
+                  <span
+                    class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-mono-sm text-label-mono-sm">PNG
+                    IMAGE</span>
+                </div>
+                <div class="col-span-2 text-right font-label-mono-sm text-label-mono-sm text-on-surface-variant">
+                  8.6 KB
+                </div>
+                <div class="col-span-2 flex items-center justify-end gap-1">
+                  <button
+                    class="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-all"
+                    title="Download File">
+                    <span class="material-symbols-outlined text-[16px]">download</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- Quick Summary Footer in Table -->
+            <div
+              class="px-4 py-3 bg-surface-container-low flex flex-wrap items-center justify-between gap-2 text-on-surface-variant font-label-mono-sm text-label-mono-sm">
+              <div class="flex items-center gap-2">
+                <span class="text-primary font-semibold">1 item selected</span>
+                <span class="text-outline-variant">•</span>
+                <span class="">101.5 MB selected</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <button class="hover:text-on-surface transition-colors flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">download</span>
+                  <span class="">Download Selected</span>
+                </button>
+                <span class="text-outline-variant">•</span>
+                <button class="hover:text-on-surface transition-colors flex items-center gap-1"><span
+                    class="material-symbols-outlined text-[14px]">content_copy</span><span class="">Copy File
+                    List</span></button>
+              </div>
+            </div>
+          </div>
+          <!-- Right Column: Superhuman Active File Inspector Drawer (32%) -->
+          <div class="xl:col-span-4 flex flex-col gap-4">
+            <!-- File Metadata Card -->
+            <div class="w-full bg-surface-container-low rounded-xl p-5 shadow-xl flex flex-col gap-4">
+              <!-- Inspector Header -->
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary-container shadow-inner">
+                    <span class="material-symbols-outlined text-[28px]">sports_esports</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <div class="flex items-center gap-2">
+                      <span class="font-headline-sm text-headline-sm font-bold text-on-surface">v2rayN.exe</span>
+                      <span class="material-symbols-outlined text-[16px] text-tertiary"
+                        title="Cryptographically Verified">verified</span>
+                    </div>
+                    <span class="font-label-mono-sm text-label-mono-sm text-on-surface-variant">PE32+ Executable
+                      (x86-64)</span>
+                  </div>
+                </div>
+                <button
+                  class="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-all">
+                  <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+              </div>
+              <!-- Fast Download Primary CTA -->
+              <div class="flex flex-col gap-2">
+                <button
+                  class="w-full py-2.5 px-4 rounded bg-primary-container hover:bg-primary-fixed-dim text-on-primary font-headline-sm text-headline-sm font-semibold flex items-center justify-center gap-2 transition-all shadow-md">
+                  <span class="material-symbols-outlined text-[20px]">download</span>
+                  <span class="">Download v2rayN.exe</span>
+                  <span
+                    class="font-label-mono-sm text-label-mono-sm px-1.5 py-0.5 rounded bg-on-primary-container/20 text-on-primary font-normal">101.5
+                    MB</span>
+                </button>
+
+              </div>
+              <!-- Security / VirusTotal Status Banner -->
+              <div class="w-full p-3 rounded-lg bg-surface-container flex flex-col gap-2">
+
+                <div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+                  <div class="bg-tertiary h-full w-full"></div>
+                </div>
+
+              </div>
+              <!-- Detailed Specifications Grid -->
+              <div class="flex flex-col gap-2.5 text-body-md text-body-md">
+                <div class="flex items-center justify-between py-1.5 border-b border-surface-container-high/40">
+                  <span class="text-on-surface-variant font-label-mono-sm text-label-mono-sm">File Size</span>
+                  <span class="font-label-mono-sm text-label-mono-sm text-on-surface">101.5 MB (106,430,464
+                    bytes)</span>
+                </div>
+                <div class="flex items-center justify-between py-1.5 border-b border-surface-container-high/40">
+                  <span class="text-on-surface-variant font-label-mono-sm text-label-mono-sm">Digital Signature</span>
+                  <span class="font-label-mono-sm text-label-mono-sm text-secondary font-medium">Valid (CloudAvid
+                    OSS)</span>
+                </div>
+              </div>
+              <!-- Cryptographic Ledger & Checksum -->
+              <div class="flex flex-col gap-1.5">
+                <div class="flex items-center justify-between">
+                  <span class="font-label-mono-sm text-label-mono-sm text-on-surface-variant uppercase">SHA-256
+                    Checksum</span>
+                  <button class="text-primary hover:underline font-label-code text-label-code flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">content_copy</span>
+                    <span class="">Copy</span>
+                  </button>
+                </div>
+                <div
+                  class="p-2.5 rounded bg-surface-container-lowest font-label-code text-label-code text-on-surface break-all select-all">
+                  8f3c7e492b6a034fe29910dbe451829034ff143ca2058e3b8a109923bf62d981
+                </div>
+              </div>
+              <!-- Instant CLI Curl Snippet -->
+              <div class="flex flex-col gap-1.5">
+                <div class="flex items-center justify-between">
+                  <span class="font-label-mono-sm text-label-mono-sm text-on-surface-variant uppercase">Command Line
+                    Fetch</span>
+                  <button class="text-primary hover:underline font-label-code text-label-code flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">content_copy</span>
+                    <span class="">Copy cURL</span>
+                  </button>
+                </div>
+                <div
+                  class="p-2.5 rounded bg-surface-container-lowest font-label-code text-label-code text-tertiary flex items-center justify-between overflow-x-auto">
+                  <code
+                    class="truncate">curl -fSL https://dl.cloudavid.net/v2rayN-windows-64/v2rayN.exe -o v2rayN.exe</code>
+                </div>
+              </div>
+            </div>
+            <!-- Hex Preview / Metadata Card -->
+
+          </div>
+        </div>
+        <!-- Keyboard Shortcuts Dock (Superhuman Signature) -->
+        <div
+          class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 px-4 py-2 rounded-full bg-surface-container-high/90 backdrop-blur-md shadow-2xl flex items-center gap-4 text-on-surface font-label-mono-sm text-label-mono-sm">
+          <div class="flex items-center gap-1.5">
+            <kbd class="px-1.5 py-0.5 rounded bg-surface-container-highest text-primary">↑</kbd>
+            <kbd class="px-1.5 py-0.5 rounded bg-surface-container-highest text-primary">↓</kbd>
+            <span class="text-on-surface-variant">Navigate</span>
+          </div>
+          <span class="text-outline-variant">•</span>
+
+          <span class="text-outline-variant">•</span>
+          <div class="flex items-center gap-1.5">
+            <kbd class="px-1.5 py-0.5 rounded bg-surface-container-highest text-primary">↵ Enter</kbd>
+            <span class="text-on-surface-variant">Download</span>
+          </div>
+          <span class="text-outline-variant">•</span>
+          <div class="flex items-center gap-1.5">
+            <kbd class="px-1.5 py-0.5 rounded bg-surface-container-highest text-primary">⌘ C</kbd>
+            <span class="text-on-surface-variant">Copy Hash</span>
+          </div>
+          <span class="text-outline-variant">•</span>
+          <div class="flex items-center gap-1.5">
+            <kbd class="px-1.5 py-0.5 rounded bg-surface-container-highest text-primary">/</kbd>
+            <span class="text-on-surface-variant">Filter</span>
+          </div>
+        </div>
+      </div>
+      <script>
+        // Simple micro-interactions for key shortcut focus & copy notifications
+        document.addEventListener('keydown', (e) => {
+          if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+            e.preventDefault();
+            const searchInput = document.getElementById('file-search-input');
+            if (searchInput) searchInput.focus();
+          }
+        });
+      </script>
+    </div>
+  </main>
+
+
+
+</body>
+
+</html>

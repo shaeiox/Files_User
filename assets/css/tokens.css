@@ -351,6 +351,13 @@
     /* inline links                  */
     --text-on-accent: #ffffff;
 
+    /* ─── Browse redesign: info / cyan accent ───────────────────────────────
+       Added by browse-inspector-redesign. The only colour the ported Material-3
+       scale has no project equivalent for. Deepened for light mode so it clears
+       the 4.5:1 body-text floor on --bg-card; the dark value is the exact
+       mockup tertiary (#a5ebff). See the mapping table at the end of this file. */
+    --info: #0d6b7a;
+
     /* ─── glass / overlay surfaces ──────────────────────────────────────── */
     --surface-glass: rgba(255, 255, 255, 0.75);
     --nav-bg: rgba(255, 255, 255, 0.85);
@@ -467,6 +474,9 @@
     --text-accent: #ffdca1;
     --text-on-accent: #412d00;
 
+    /* — Browse redesign: info / cyan accent — see the mapping table at EOF — */
+    --info: #a5ebff;
+
     /* — glass & overlays — */
     --surface-glass: rgba(31, 31, 35, 0.75);
     --nav-bg: rgba(27, 27, 31, 0.85);
@@ -501,3 +511,66 @@
     --e-border: rgba(255, 180, 171, 0.25);
     --e-text: #ffb4ab;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   MATERIAL-3 → PROJECT TOKEN MAP
+   Added by browse-inspector-redesign (task 1.1/1.2).
+
+   The Browse redesign was drafted against a Material-3 palette, which cannot ship
+   verbatim: the mockup loads Tailwind, Google Fonts, and Material Symbols, every
+   one a remote origin blocked by `script-src 'self'` / `font-src 'self' data:`
+   (lib/http-utils.js). This table is the authoritative translation.
+
+   Only the 16 colours actually referenced by the mockup's markup are listed. The
+   remaining entries in the mockup's Tailwind config are generator boilerplate
+   (unused role pairs such as `on-secondary-container`) and are deliberately not
+   ported — they would be dead tokens.
+
+   Every value below was checked against the dark theme block above. The six
+   surface tiers and every on-surface/primary role match the mockup's hex exactly;
+   only `tertiary` had no equivalent, and it is the single token this file adds.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/*   M3 colour              mockup hex   project token (dark)              note
+   ───────────────────────────────────────────────────────────────────────────────
+   surface                  #121316      --bg                               exact
+   background               #121316      --bg                               exact
+   surface-container        #1f1f23      --bg-input                         exact
+   surface-container-low    #1b1b1f      --bg-card                          exact
+   surface-container-lowest #0d0e11      --bg-sunken                        exact
+   surface-container-high   #292a2d      --bg-hover                         exact
+   surface-container-highest#343538      --bg-elevated                      exact
+   surface-variant          #343538      --bg-elevated                      exact
+   on-surface               #e3e2e6      --text                             exact
+   on-background            #e3e2e6      --text                             exact
+   on-surface-variant       #d5c4ab      --text-2                           exact
+   on-primary               #412d00      --text-on-accent                   exact
+   primary                  #ffdca1      --text-accent                      exact
+   primary-container        #ffb800      --color-ember-pulse                exact
+   secondary                #c3c0ff      --color-electric-iris              exact
+   error                    #ffb4ab      --e-text                           exact
+   tertiary                 #a5ebff      --info                             NEW TOKEN
+   ───────────────────────────────────────────────────────────────────────────────
+   The following four do NOT match by hex, on purpose:
+
+   outline          #9e8f78  →  --text-3   a11y-ux-debt task 2.3 re-pointed this
+                                        step to #a99d8a for contrast. The mockup
+                                        value measured 3.89:1 on --bg-elevated.
+   outline-variant  #514532  →  --text-4   a11y-ux-debt task 2.2 aliased this up
+                                        to --text-3; #514532 measured 1.84:1.
+   on-primary-container #6b4c00 → --text-2 used for the one translucent amber chip
+   surface-bright   #38393d  →  --bg-elevated no exact pair; nearest tier is fine.
+
+   Typography is a 1:1 match and needs no port. The mockup's Tailwind type scale
+   was derived from this file:
+     headline-xl → --text-headline-xl    body-lg      → --text-body-lg
+     headline-lg → --text-headline-lg    body-md      → --text-body-md
+     headline-sm → --text-headline-sm    label-code   → --text-label-code
+     label-mono-sm→ --text-label-mono-sm label-kpi    → --text-label-kpi
+
+   Radius maps onto the existing scale. Note the mockup's `full: 0.75rem` is a
+   generator bug — full-round is --radius-tags / --r-full (9999px), not a size.
+     sm      → --radius-sm       md      → --radius-md
+     lg      → --radius-lg       xl      → --radius-xl
+     DEFAULT → --radius-md       full    → --radius-tags
+*/

@@ -688,6 +688,35 @@
         scroll-behavior: auto !important;
     }
 }
+/* ───────────────────────────────────────────────────────────────
+   9. BROWSE METADATA CARD (browse-inspector-redesign)
+   ───────────────────────────────────────────────────────────────
+   The card opens with a transform/opacity transition. It is cheap
+   (compositor-only, no layout), so `medium` keeps a shortened version
+   while `low` and `potato` drop it entirely and show the card settled.
+   Content and controls stay fully available at every tier.
+   ─────────────────────────────────────────────────────────────── */
+[data-perf="medium"] .browse-inspector.is-open {
+    transition-duration: 90ms;
+}
+
+[data-perf="low"] .browse-inspector,
+[data-perf="potato"] .browse-inspector {
+    transition: none;
+}
+
+/* The table-collapse track animation runs on the two-column body. Suppress it at the
+   tiers that drop the card animation, so the table snaps open/closed instead. */
+[data-perf="low"] .browse-body,
+[data-perf="potato"] .browse-body {
+    transition: none;
+}
+
+[data-perf="low"] .browse-inspector:not(.is-open),
+[data-perf="potato"] .browse-inspector:not(.is-open) {
+    transform: none;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    PHASE 7 - PERFORMANCE / RTL / RESPONSIVE AUDIT (D10-aware)
 

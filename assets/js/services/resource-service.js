@@ -28,6 +28,27 @@ const ResourceService = (function () {
         return "/api/download/" + encodeRelPath(relPath);
     }
 
+    /**
+     * @brief   Builds the ZIP-download URL for a selection inside one browsed directory.
+     * @details Stays here so this module remains the only place target URLs are
+     *          constructed. `dirRel` is the directory being browsed; `relPaths` are the
+     *          selected item paths relative to FILES_ROOT.
+     */
+    function zipDownloadHref(dirRel, relPaths) {
+        const dir = encodeRelPath(dirRel);
+        const items = (relPaths || []).map(encodeRelPath).filter(Boolean).join(",");
+        return "/api/download-zip?dir=" + encodeURIComponent(dir) + "&items=" + encodeURIComponent(items);
+    }
+
+    /**
+     * @brief   Builds the SHA-256 verification URL for one file.
+     * @details Stays here so this module remains the only place target URLs are
+     *          constructed, alongside browseHref / downloadHref / zipDownloadHref.
+     */
+    function hashHref(relPath) {
+        return "/api/hash/" + encodeRelPath(relPath);
+    }
+
     function inferIcon(name) {
         const n = String(name || "").toLowerCase();
         if (/(iso|image|disc|dvd|cd)/.test(n)) return "disc";
@@ -99,6 +120,11 @@ const ResourceService = (function () {
     }
 
     async function parseError(res) {
+        // The returned Error carries .status and .code so callers can branch on
+        // them (BrowsePage renders in-place 401/404 states from those fields).
+        // Callers must rethrow THIS object — wrapping it in `new Error(...)`
+        // discards both properties and silently downgrades every error to the
+        // generic path.
         const err = new Error();
         err.status = res.status;
         try {
@@ -121,7 +147,7 @@ const ResourceService = (function () {
 
         const res = await fetch("/api/categories", { cache: "no-store" });
         if (!res.ok) {
-            throw new Error(await parseError(res));
+            throw await parseError(res);
         }
         const payload = await res.json();
         if (!Array.isArray(payload)) {
@@ -152,7 +178,7 @@ const ResourceService = (function () {
 
     async function listFiles(relPath) {
         const res = await fetch("/api/files/" + encodeRelPath(relPath), { cache: "no-store" });
-        if (!res.ok) throw new Error(await parseError(res));
+        if (!res.ok) throw await parseError(res);
         const data = await res.json();
         if (!Array.isArray(data)) throw new Error("Invalid file list");
         return data.filter((e) => e && e.name && !isHidden(e.name));
@@ -163,7 +189,7 @@ const ResourceService = (function () {
         params.set("q", query || "");
         if (options.limit) params.set("limit", String(options.limit));
         const res = await fetch("/api/search?" + params.toString(), { cache: "no-store" });
-        if (!res.ok) throw new Error(await parseError(res));
+        if (!res.ok) throw await parseError(res);
         return res.json();
     }
 
@@ -179,7 +205,7 @@ const ResourceService = (function () {
         if (os) params.set("os", String(os));
 
         const res = await fetch("/api/releases?" + params.toString(), { cache: "no-store" });
-        if (!res.ok) throw new Error(await parseError(res));
+        if (!res.ok) throw await parseError(res);
         const data = await res.json();
 
         if (data && Array.isArray(data.items)) {
@@ -221,6 +247,8 @@ const ResourceService = (function () {
         getReleases,
         browseHref,
         downloadHref,
+        zipDownloadHref,
+        hashHref,
         encodeRelPath,
         inferIcon,
         checkAuthStatus,
