@@ -329,6 +329,14 @@ CSS change is permitted in this area.
 
 ### D9 — Browse Page Frozen
 
+> **SUPERSEDED (2026-10-13) by `browse-inspector-redesign`.**
+> The freeze recorded below is no longer in effect. The Browse page has been redesigned against
+> `template/browse/code.html`, and `assets/css/browse.css` and `assets/js/browse.js` have been
+> modified. `assets/js/file-actions.js` was left byte-identical, so the `file-actions` capability's
+> ownership boundary still holds as specified. See
+> `openspec/changes/browse-inspector-redesign/specs/browse-page/spec.md`, which retires this
+> requirement explicitly and states what replaces it.
+
 The entire Browse page is **out of scope** for this redesign. No visual, structural, markup, or CSS change is
 permitted in any Browse-related area.
 
@@ -479,11 +487,13 @@ stops.
   scoped to layout-only declarations inside a `≤1024px` media query. It does **not** relax the freeze on Hero
   markup, tokens, colors, typography, the search input, the keyboard shortcuts, or any breakpoint above
   1024px, and it does not touch `.hero-bg`, `.logo-shader`, or the Hero pinning block.
-- **I22** — The Browse page (all selectors in `browse.css`, all markup in `browse.js`, and all of
+- **I22** — ~~The Browse page (all selectors in `browse.css`, all markup in `browse.js`, and all of
   `file-actions.js`) is FROZEN. No CSS, markup, token, or behavioral change is permitted. `browse.css`,
   `browse.js`, and `file-actions.js` must remain byte-identical to their pre-redesign state throughout all
-  phases. The 6-child row contract, `data-file="true"` markers, three independent targets, folders-first sort,
-  responsive collapse, and all Browse behavior are preserved by not touching them.
+  phases.~~ **SUPERSEDED by `browse-inspector-redesign`:** `browse.css` and `browse.js` were changed;
+  `file-actions.js` was not. The 6-child row contract, `data-file="true"` markers, the three independent
+  item targets, folders-first sort, and responsive collapse are all preserved by the new change, which
+  extends the row to seven cells by prepending a select cell while keeping the six original cells in order.
 
 ## Out of Scope
 
