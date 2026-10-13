@@ -10,17 +10,30 @@
  *
  * Key Responsibilities:
  *   - Fetches directory contents via `ResourceService`.
- *   - Manages an in-memory Data Pipeline: Search -> Filter -> Sort -> Render.
+ *   - Manages an in-memory Data Pipeline: Search -> Extension -> Type -> Sort -> Render.
  *   - Handles in-page 404 error states without redirecting to a hard 404 page.
  *   - Renders Breadcrumbs for hierarchical navigation.
  *   - Supports Grid and List views with `localStorage` persistence.
+ *   - Renders the context header, toolbar, file table, and inspector column.
+ *
+ * Row structure contract
+ * ---------------------
+ * Each data row emits exactly SEVEN cells so the header and every row share one
+ * track count: [1] select, [2] icon, [3] name, [4] type, [5] modified, [6] size,
+ * [7] FileActions. Cells 4-6 are the ones hidden responsively, so the
+ * `nth-child(4|5|6)` rules in browse.css address exactly those columns.
+ *
+ * The six pre-existing cells (icon, name, type, modified, size, FileActions) keep
+ * their original relative order and quantity per the `file-actions` capability;
+ * the select cell is a new leading cell and does not displace them.
  *
  * Dependencies:
  *   - ResourceService (resource-service.js)
+ *   - BrowseIcons (browse-icons.js)
  *   - getDict(), getLang() (from i18n/theme engine)
  *
  * @author      ShaiyaAzizi
- * @version     2.1.0
+ * @version     3.0.0
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 
@@ -46,6 +59,9 @@ const BrowsePage = (function () {
     /** @type {string} Current local search query (case-insensitive) */
     let searchQuery = "";
 
+    /** @type {string} Active extension chip ('' means no extension filter) */
+    let activeExt = "";
+
     /* ═══════════════════════════════════════════════════════════════════════════════
      * MAIN RENDERER
      * ═══════════════════════════════════════════════════════════════════════════════ */
@@ -66,101 +82,149 @@ const BrowsePage = (function () {
         activeType = "all";
         activeSort = "name-asc";
         searchQuery = "";
+        activeExt = "";
 
         document.title = d.browseTitle || "Downloads • CloudAvid";
 
-        // 2. Inject Page Shell (Headers, Controls, Table Shell)
+        // 2. Inject Page Shell (Context header, Toolbar, Table + Inspector)
         container.innerHTML = `
       <div class="browse-layout anim-fade-up">
 
-        <header class="browse-head">
-          <nav class="crumbs" id="breadcrumb" aria-label="Breadcrumb"></nav>
-          
+        <!-- CONTEXT HEADER -->
+        <header class="browse-ctx">
+          <nav class="crumbs" id="breadcrumb" aria-label="${d.breadcrumb || "Breadcrumb"}"></nav>
           <div class="browse-title-row">
             <div class="browse-title-left">
-              <h1 id="folderName">—</h1>
+              <div class="browse-name-line">
+                <h1 id="folderName">—</h1>
+                <span class="ctx-badge" id="ctxBadge">
+                  <span class="ctx-badge-dot" aria-hidden="true"></span>
+                  ${d.ctxSigned || "Signed by CloudAvid Core"}
+                </span>
+              </div>
               <div class="browse-stats">
                 <span class="stat-item">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"/></svg>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"/></svg>
                   <span class="stat-val" id="folderCount">0</span>
                   <span>${d.folders || "folders"}</span>
                 </span>
                 <span class="stat-dot">·</span>
                 <span class="stat-item">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>
                   <span class="stat-val" id="fileCount">0</span>
                   <span>${d.files || "files"}</span>
                 </span>
               </div>
             </div>
+          </div>
+        </header>
 
-            <div class="browse-controls" id="browseControls">
-              <!-- Local Search -->
-              <div class="input-wrap browse-search">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                <input id="localSearchInput" type="text" autocomplete="off" placeholder="${d.searchFolderPh || 'Search folder...'}" aria-label="Search in folder" />
+        <!-- TOOLBAR -->
+        <div class="browse-toolbar" id="browseControls">
+          <div class="input-wrap browse-search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input id="localSearchInput" type="text" autocomplete="off" placeholder="${d.searchFolderPh || 'Search folder...'}" aria-label="${d.searchFolderPh || 'Search in folder'}" />
+            <kbd class="search-kbd" aria-hidden="true">/</kbd>
+          </div>
+
+          <div class="browse-chips" id="extChips" role="group" aria-label="${d.filters || "Filters"}"></div>
+
+          <div class="browse-toolbar-right">
+            <div class="filter-dropdown-wrap" id="typeFilterWrap">
+              <button class="filter-pill" type="button" aria-haspopup="true">
+                <span class="filter-value" data-val="all">${d.allTypes || "All Types"}</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="filter-dropdown-menu">
+                <button class="filter-option active" data-val="all" type="button">${d.allTypes || "All Types"}</button>
+                <button class="filter-option" data-val="directory" type="button">${d.folders || "Folders"}</button>
+                <button class="filter-option" data-val="file" type="button">${d.files || "Files"}</button>
               </div>
+            </div>
 
-              <!-- Type Filter Dropdown -->
-              <div class="filter-dropdown-wrap" id="typeFilterWrap">
-                <button class="filter-pill" type="button" aria-haspopup="true">
-                  <span class="filter-value" data-val="all">${d.allTypes || "All Types"}</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                </button>
-                <div class="filter-dropdown-menu">
-                  <button class="filter-option active" data-val="all" type="button">${d.allTypes || "All Types"}</button>
-                  <button class="filter-option" data-val="directory" type="button">${d.folders || "Folders"}</button>
-                  <button class="filter-option" data-val="file" type="button">${d.files || "Files"}</button>
-                </div>
-              </div>
-
-              <!-- Sort Dropdown -->
-              <div class="filter-dropdown-wrap" id="sortFilterWrap">
-                <button class="filter-pill" type="button" aria-haspopup="true">
-                  <span class="filter-value" data-val="name-asc">${d.sortName || "Name (A-Z)"}</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                </button>
-                <div class="filter-dropdown-menu">
+            <div class="filter-dropdown-wrap" id="sortFilterWrap">
+              <button class="filter-pill" type="button" aria-haspopup="true">
+                <span class="filter-value" data-val="name-asc">${d.sortName || "Name (A-Z)"}</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="filter-dropdown-menu">
                 <button class="filter-option active" data-val="name-asc" type="button">${d.sortName || "Name (A-Z)"}</button>
                 <button class="filter-option" data-val="name-desc" type="button">${d.sortNameDesc || "Name (Z-A)"}</button>
                 <button class="filter-option" data-val="date-desc" type="button">${d.sortLatest || "Newest First"}</button>
                 <button class="filter-option" data-val="date-asc" type="button">${d.sortOldest || "Oldest First"}</button>
                 <button class="filter-option" data-val="size-desc" type="button">${d.sortSize || "Largest First"}</button>
-                </div>
               </div>
+            </div>
 
-              <!-- View Toggles -->
-              <div class="view-toggle" role="tablist" aria-label="View mode">
-                <button class="vt-btn active" id="viewList" aria-label="List view" type="button">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            <div class="view-toggle" role="tablist" aria-label="${d.viewMode || "View mode"}">
+              <button class="vt-btn active" id="viewList" aria-label="${d.viewList || "List view"}" title="${d.viewList || "List view"}" type="button">
+                ${BrowseIcons.get("format_list_bulleted", 16)}
+              </button>
+              <button class="vt-btn" id="viewGrid" aria-label="${d.viewGrid || "Grid view"}" title="${d.viewGrid || "Grid view"}" type="button">
+                ${BrowseIcons.get("grid_view", 16)}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- BODY: table + inspector column -->
+        <div class="browse-body" id="browseBody">
+          <section class="file-tbl" id="tableContainer">
+            <div class="trow thead">
+              <div class="c-select"><input type="checkbox" id="selectAll" aria-label="${d.selectAll || "Select all"}" /></div>
+              <div class="c-icon"></div>
+              <div class="c-name">${d.name || "Name"}</div>
+              <div class="c-type">${d.type || "Type"}</div>
+              <div class="c-mod">${d.modified || "Modified"}</div>
+              <div class="c-size">${d.size || "Size"}</div>
+              <div class="c-act"></div>
+            </div>
+            <div id="rows"></div>
+            <div class="empty-box" id="empty" style="display:none"></div>
+
+            <!-- BULK BAR — selection summary + bulk actions. Hidden while nothing is
+                 selected, so bulk controls can never act on an empty selection. -->
+            <div class="browse-bulkbar" id="bulkBar" hidden>
+              <div class="bulk-info">
+                <span class="bulk-count" id="bulkCount">—</span>
+                <span class="bulk-dot">·</span>
+                <span class="bulk-size" id="bulkSize">—</span>
+                <span class="bulk-status" id="bulkStatus"></span>
+              </div>
+              <div class="bulk-actions">
+                <button class="bulk-btn bulk-btn-primary" id="bulkDownload" type="button" disabled>
+                  ${BrowseIcons.get("download", 14)}
+                  <span class="bulk-btn-text">${d.bulkDownload || "Download Selected"}</span>
                 </button>
-                <button class="vt-btn" id="viewGrid" aria-label="Grid view" type="button">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <button class="bulk-btn" id="bulkZip" type="button" disabled title="${d.bulkZipTitle || "Download as ZIP"}">
+                  ${BrowseIcons.get("data_object", 14)}
+                  <span class="bulk-btn-text">${d.bulkZip || "Download ZIP"}</span>
+                </button>
+                <button class="bulk-btn" id="bulkCopy" type="button" disabled>
+                  ${BrowseIcons.get("content_copy", 14)}
+                  <span class="bulk-btn-text">${d.bulkCopy || "Copy File List"}</span>
                 </button>
               </div>
             </div>
-          </div>
-        </header>
+          </section>
 
-        <section class="file-tbl" id="tableContainer">
-          <div class="trow thead">
-            <div></div>
-            <div>${d.name || "Name"}</div>
-            <div>${d.type || "Type"}</div>
-            <div>${d.modified || "Modified"}</div>
-            <div>${d.size || "Size"}</div>
-            <div></div>
-          </div>
-          <div id="rows"></div>
-          <div class="empty-box" id="empty" style="display:none"></div>
-        </section>
+          <aside class="browse-inspector" id="inspector" aria-live="polite"></aside>
+        </div>
 
       </div>
     `;
 
         // 3. Initialize components
         buildCrumbs();
+        // A new directory is a different item universe, so the previous selection
+        // is dropped on every navigation (BulkDownload owns the selection set).
+        if (typeof BulkDownload !== "undefined") {
+            BulkDownload.clear();
+            BulkDownload.setDirectory(currentPath.replace(/^\/browse\/?/, ""));
+        }
         bindEvents();
+        if (typeof BulkDownload !== "undefined") BulkDownload.mount();
+        if (typeof FileInspector !== "undefined") FileInspector.mount();
         renderSkeletons();
         fetchList();
     }
@@ -207,6 +271,7 @@ const BrowsePage = (function () {
                     modified: x.mtime || x.modified || x.time || 0
                 }));
 
+            renderChips(d);
             applyFiltersAndRender();
 
         } catch (err) {
@@ -216,22 +281,20 @@ const BrowsePage = (function () {
 
             if (!container) return;
             if (controls) controls.style.display = "none";
+            // Collapse the two-column body so an error state is not boxed beside an
+            // empty inspector column.
+            const body = document.getElementById("browseBody");
+            if (body) body.classList.add("is-error");
 
             if (err.status === 401 || err.code === "AUTH_REQUIRED") {
                 container.innerHTML = `
-                  <div class="locked-state" style="padding: 64px 24px; text-align: center; border: 1px solid var(--border); border-radius: var(--radius-panels); background: var(--bg-card);">
-                    <div class="locked-icon" style="margin: 0 auto 16px;">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  <div class="locked-state">
+                    <div class="locked-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                     </div>
-                    <div class="locked-title" style="font-size: 18px; font-weight: 600; margin-bottom: 6px;">
-                      ${d.authRequired || "Authentication Required"}
-                    </div>
-                    <div class="locked-desc" style="font-size: 13px; color: var(--text-4); max-width: 400px; margin: 0 auto 24px;">
-                      ${d.authRequiredDesc || "Access to this infrastructure path requires clearance."}
-                    </div>
-                    <button class="btn btn-primary" id="browseAuthBtn" style="margin: 0 auto;">
-                      ${d.btnAuth || "Authenticate to Access"}
-                    </button>
+                    <div class="locked-title">${d.authRequired || "Authentication Required"}</div>
+                    <div class="locked-desc">${d.authRequiredDesc || "Access to this infrastructure path requires clearance."}</div>
+                    <button class="btn btn-primary" id="browseAuthBtn">${d.btnAuth || "Authenticate to Access"}</button>
                   </div>
                 `;
 
@@ -252,25 +315,25 @@ const BrowsePage = (function () {
 
             if (err.status === 404 || err.code === "NOT_FOUND") {
                 container.innerHTML = `
-                  <div class="resources-error" style="flex-direction: column; padding: 64px 24px; text-align: center; border: 1px dashed var(--border); border-radius: var(--radius-panels); background: var(--bg-card);">
-                    <div style="font-size: 48px; font-weight: 900; color: var(--danger); font-family: var(--mono); margin-bottom: 8px;">404</div>
-                    <div style="font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 6px;">${d.error404Title || "Directory Not Found"}</div>
-                    <div style="font-size: 13px; color: var(--text-4); max-width: 400px; margin: 0 auto 24px;">
+                  <div class="resources-error is-notfound">
+                    <div class="err-code">404</div>
+                    <div class="err-title">${d.error404Title || "Directory Not Found"}</div>
+                    <div class="err-desc">
                       ${d.error404Desc || "The requested path does not exist on CloudAvid infrastructure."}
-                      <br><code class="mono" style="display:inline-block; margin-top:8px; color:var(--text-accent); padding:2px 6px; background:var(--glow); border-radius:4px;">${escapeHtml(relPath)}</code>
+                      <br><code class="mono">${escapeHtml(relPath)}</code>
                     </div>
-                    <a href="/" class="btn btn-primary" style="text-decoration:none; margin: 0 auto;">${d.btnBackPortal || "Back to Downloads"}</a>
+                    <a href="/" class="btn btn-primary">${d.btnBackPortal || "Back to Downloads"}</a>
                   </div>
                 `;
                 return;
             }
 
             container.innerHTML = `
-              <div class="resources-error" style="padding: 32px; border-radius: var(--radius-card);">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:left;">
-                    <span style="font-weight:600; color:var(--text);">${d.errorServerLoad || "Failed to load directory."}</span>
-                    <span style="font-size:12px; color:var(--text-4); margin-top:4px;">${escapeHtml(err.message || d.errorServerSub || "Network or server error.")}</span>
+              <div class="resources-error">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <div class="err-inline">
+                  <span class="err-inline-title">${d.errorServerLoad || "Failed to load directory."}</span>
+                  <span class="err-inline-sub">${escapeHtml(err.message || d.errorServerSub || "Network or server error.")}</span>
                 </div>
               </div>
             `;
@@ -278,8 +341,46 @@ const BrowsePage = (function () {
     }
 
     /* ═══════════════════════════════════════════════════════════════════════════════
-     * DATA PIPELINE (Filter -> Search -> Sort -> Render)
+     * DATA PIPELINE (Search -> Extension -> Type -> Sort -> Render)
      * ═══════════════════════════════════════════════════════════════════════════════ */
+
+    /**
+     * @brief   Extracts a lowercase extension from a filename, or '' when there is none.
+     */
+    function extOf(name) {
+        const n = String(name || "");
+        const i = n.lastIndexOf(".");
+        // A leading dot is a hidden file, not an extension; isHidden() already drops those.
+        return i > 0 ? n.slice(i).toLowerCase() : "";
+    }
+
+    /**
+     * @brief   Renders extension filter chips from the loaded listing, with real counts.
+     * @details Derived entirely from `allFiles`; no extra request. A directory with
+     *          no files produces no chips because no extension exists to filter.
+     */
+    function renderChips(d) {
+        const wrap = document.getElementById("extChips");
+        if (!wrap) return;
+
+        const counts = new Map();
+        allFiles.filter(f => f.type === "file").forEach(f => {
+            const e = extOf(f.name);
+            if (e) counts.set(e, (counts.get(e) || 0) + 1);
+        });
+
+        const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+
+        wrap.innerHTML = `
+      <button class="chip${activeExt === "" ? " active" : ""}" data-ext="" type="button">
+        ${d.allTypes || "All"} <span class="chip-n">(${allFiles.length})</span>
+      </button>
+      ${sorted.map(([e, n]) => `
+        <button class="chip${activeExt === e ? " active" : ""}" data-ext="${escapeHtml(e)}" type="button">
+          ${escapeHtml(e)} <span class="chip-n">(${n})</span>
+        </button>`).join("")}
+    `;
+    }
 
     /**
      * @brief   Applies current state constraints to the raw data and triggers render.
@@ -293,12 +394,17 @@ const BrowsePage = (function () {
             filtered = filtered.filter(f => f.name.toLowerCase().includes(searchQuery));
         }
 
-        // 2. Type Filter
+        // 2. Extension chip filter
+        if (activeExt) {
+            filtered = filtered.filter(f => f.type === "file" && extOf(f.name) === activeExt);
+        }
+
+        // 3. Type Filter
         if (activeType !== "all") {
             filtered = filtered.filter(f => f.type === activeType);
         }
 
-        // 3. Visual Stats Update (Counts absolute available files, ignoring search)
+        // 4. Visual Stats Update (Counts absolute available files, ignoring search)
         const dirsCount = allFiles.filter(f => f.type === "directory").length;
         const filesCount = allFiles.filter(f => f.type === "file").length;
         const fcEl = document.getElementById("folderCount");
@@ -306,7 +412,7 @@ const BrowsePage = (function () {
         if (fcEl) fcEl.textContent = dirsCount;
         if (flcEl) flcEl.textContent = filesCount;
 
-        // 4. Sorting Strategy
+        // 5. Sorting Strategy
         filtered.sort((a, b) => {
             const isDirA = a.type === "directory" ? 1 : 0;
             const isDirB = b.type === "directory" ? 1 : 0;
@@ -348,6 +454,8 @@ const BrowsePage = (function () {
 
         if (files.length === 0) {
             showEmpty(searchQuery ? (d.emptySearch || "No files matched.") : (d.empty || "This folder is empty."));
+            // No rows are rendered, so select-all has nothing to scope to.
+            if (typeof BulkDownload !== "undefined") BulkDownload.setRendered([]);
             return;
         }
 
@@ -363,6 +471,13 @@ const BrowsePage = (function () {
 
             const row = document.createElement("div");
             row.className = "trow anim-fade-up";
+            row.tabIndex = -1;
+            row.dataset.rel = f.relPath;
+            row.dataset.type = f.type;
+            // Carried on the row so BulkDownload can resolve an item's real size and
+            // type even if it is toggled before setRendered() has run for this pass.
+            row.dataset.name = f.name;
+            row.dataset.size = String(f.size);
             row.style.animationDelay = Math.min(idx * 15, 300) + "ms"; // Staggered entry
 
             const linkAttr = f.type === "directory" ? `href="${href}"` : `href="${href}" data-file="true"`;
@@ -372,8 +487,11 @@ const BrowsePage = (function () {
 
             const iconVerb = f.type === "directory" ? (d.btnOpen || 'Open') : (d.btnDownload || 'Download');
             const iconLabel = escapeHtml(iconVerb + " " + f.name);
+            const selLabel = escapeHtml((d.select || "Select") + " " + f.name);
 
+            // Cells: [1] select [2] icon [3] name [4] type [5] modified [6] size [7] actions
             row.innerHTML = `
+                <div class="c-select"><input type="checkbox" class="row-select" aria-label="${selLabel}" /></div>
                 <div class="f-icon ${iconStr}"><a class="f-icon-link" ${linkAttr} title="${iconLabel}" aria-label="${iconLabel}">${svgIcon(f.type)}</a></div>
                 <div class="f-name"><a class="f-link" ${linkAttr} title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</a></div>
                 <div><span class="badge ${badgeStr}">${badgeLabel}</span></div>
@@ -385,6 +503,10 @@ const BrowsePage = (function () {
         });
 
         rowsEl.appendChild(frag);
+
+        // Hand the rendered set to BulkDownload so select-all scopes to exactly
+        // these rows and checkbox state survives the next filter change.
+        if (typeof BulkDownload !== "undefined") BulkDownload.setRendered(files);
     }
 
     /* ═══════════════════════════════════════════════════════════════════════════════
@@ -439,7 +561,19 @@ const BrowsePage = (function () {
             filterWraps.forEach(w => w.classList.remove("show"));
         });
 
-        // 3. View Toggles Binding (Grid vs List)
+        // 3. Extension chips — delegated, because the chip row is re-rendered on every load
+        const chips = document.getElementById("extChips");
+        if (chips) {
+            chips.addEventListener("click", (e) => {
+                const btn = e.target.closest(".chip");
+                if (!btn) return;
+                activeExt = btn.getAttribute("data-ext") || "";
+                renderChips(typeof window.getDict === 'function' ? window.getDict() : getDict());
+                applyFiltersAndRender();
+            });
+        }
+
+        // 4. View Toggles Binding (Grid vs List)
         const listBtn = document.getElementById("viewList");
         const gridBtn = document.getElementById("viewGrid");
         const tableEl = document.getElementById("tableContainer");
@@ -464,6 +598,64 @@ const BrowsePage = (function () {
                 if (localStorage.getItem("view_mode") === "grid") gridBtn.click();
             } catch { }
         }
+
+        // 5. Keyboard: '/' focuses search, arrows move row focus, Enter activates.
+        //    Bound once per render; the handler is guarded by `isConnected` so a
+        //    re-render cannot leave a stale listener holding a detached node.
+        document.addEventListener("keydown", onKeydown);
+    }
+
+    /**
+     * @brief Keyboard affordances for the Browse page.
+     */
+    function onKeydown(e) {
+        const target = e.target;
+        const typing = target && (
+            target.tagName === "INPUT" || target.tagName === "TEXTAREA" ||
+            target.tagName === "SELECT" || target.isContentEditable
+        );
+
+        // "/" focuses search, and must stay inert while the user is typing.
+        if (e.key === "/" && !typing && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            const input = document.getElementById("localSearchInput");
+            if (input) {
+                e.preventDefault();
+                input.focus();
+                input.select();
+            }
+            return;
+        }
+
+        const rowsEl = document.getElementById("rows");
+        if (!rowsEl) return;
+        const rows = [...rowsEl.querySelectorAll(".trow")];
+        if (!rows.length) return;
+
+        // Arrow keys move focus between rendered rows.
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+            if (typing) return;
+            const cur = rows.indexOf(document.activeElement);
+            const next = e.key === "ArrowDown"
+                ? Math.min(cur + 1, rows.length - 1)
+                : (cur <= 0 ? 0 : cur - 1);
+            if (cur === -1 && e.key === "ArrowUp") return;
+            e.preventDefault();
+            rows[next].focus();
+            return;
+        }
+
+        // Enter activates the focused row's primary target. Clicking the existing
+        // icon anchor keeps navigation and the data-file download contract in one place.
+        if (e.key === "Enter" && !typing) {
+            const row = document.activeElement;
+            if (row && row.classList && row.classList.contains("trow")) {
+                const link = row.querySelector(".f-icon-link");
+                if (link) {
+                    e.preventDefault();
+                    link.click();
+                }
+            }
+        }
     }
 
     /* ═══════════════════════════════════════════════════════════════════════════════
@@ -482,7 +674,7 @@ const BrowsePage = (function () {
         const home = document.createElement("a");
         home.href = "/";
         home.className = "crumb";
-        home.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>${d.root || "Home"}</span>`;
+        home.innerHTML = `${BrowseIcons.get("folder_special", 14)}<span>${escapeHtml(d.root || "Home")}</span>`;
         el.appendChild(home);
 
         const parts = currentPath.replace(/^\/browse\/?/, "").split("/").filter(Boolean);
@@ -492,16 +684,16 @@ const BrowsePage = (function () {
             acc = acc ? acc + "/" + part : part;
             const sep = document.createElement("span");
             sep.className = "crumb-sep";
-            // RTL-aware chevron
-            sep.innerHTML = d.dir === "rtl"
-                ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`
-                : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+            sep.setAttribute("aria-hidden", "true");
+            // RTL-aware chevron — direction is set on the wrapper, not by swapping markup.
+            sep.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>`;
             el.appendChild(sep);
 
             if (i === parts.length - 1) {
                 const cur = document.createElement("span");
                 cur.className = "crumb crumb-active";
                 cur.textContent = decodeURIComponent(part);
+                cur.setAttribute("aria-current", "page");
                 el.appendChild(cur);
             } else {
                 const link = document.createElement("a");
@@ -548,24 +740,31 @@ const BrowsePage = (function () {
         } catch { return "—"; }
     }
 
+    /**
+     * @brief Renders the row identity icon via the shared Browse icon set.
+     * @details The markup contract (24×24, 2px stroke, aria-hidden) is unchanged;
+     *          only the source of the path data moved to browse-icons.js so the
+     *          page and its inspector/bulk panels share one icon set.
+     */
     function svgIcon(type) {
-        return type === "directory"
-            ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"/></svg>`
-            : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>`;
+        return BrowseIcons.get(type === "directory" ? "folder" : "file", 18);
     }
 
     function renderSkeletons() {
         const rowsEl = document.getElementById("rows");
         if (!rowsEl) return;
-        document.getElementById("folderCount").innerHTML = `<span class="skeleton-line" style="display:inline-block; width:16px; height:12px; margin:0"></span>`;
-        document.getElementById("fileCount").innerHTML = `<span class="skeleton-line" style="display:inline-block; width:16px; height:12px; margin:0"></span>`;
+        const fc = document.getElementById("folderCount");
+        const fl = document.getElementById("fileCount");
+        if (fc) fc.innerHTML = `<span class="skeleton-line" style="display:inline-block; width:16px; height:12px; margin:0"></span>`;
+        if (fl) fl.innerHTML = `<span class="skeleton-line" style="display:inline-block; width:16px; height:12px; margin:0"></span>`;
 
         let html = "";
         for (let i = 0; i < 6; i++) {
             const randomWidth = Math.floor(Math.random() * 40 + 30);
             html += `
             <div class="trow anim-fade-up" style="animation-delay: ${i * 30}ms; pointer-events: none;">
-                <div class="f-icon skeleton-box" style="width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0; margin-right: 8px;"></div>
+                <div class="c-select"></div>
+                <div class="f-icon skeleton-box"></div>
                 <div class="f-name"><div class="skeleton-line" style="width: ${randomWidth}%; height: 16px;"></div></div>
                 <div><div class="skeleton-line" style="width: 48px; height: 20px; border-radius: 10px;"></div></div>
                 <div class="f-sub"><div class="skeleton-line" style="width: 100px; height: 12px;"></div></div>
@@ -584,8 +783,8 @@ const BrowsePage = (function () {
         el.innerHTML = `
       <div class="empty-circle${isErr ? ' err' : ''}">
         ${isErr
-                ? `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
-                : `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"/><line x1="9" y1="14" x2="15" y2="14"/></svg>`}
+                ? `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
+                : `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"/><line x1="9" y1="14" x2="15" y2="14"/></svg>`}
       </div>
       <div class="empty-text">${escapeHtml(msg)}</div>`;
     }
