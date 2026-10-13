@@ -40,12 +40,13 @@ Four properties applied throughout:
   rendering on first load.
 - **Weights are declared individually** (400 / 500 / 600) rather than as a variable font,
   so a browser downloads only the weights actually used.
-- **`unicode-range` on all three Vazirmatn faces** —
-  `U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF`. This restricts the
-  Arabic-script download to Persian text and keeps it from being fetched for Latin-only
-  pages.
+- **No `unicode-range` on Vazirmatn** (removed 2026-10-13). The Arabic-only range forced
+  digits, spaces, punctuation and ZWNJ inside Persian text onto Inter or a system font.
+  Inter leads `--font`, so Latin-only text still never needs Vazirmatn.
 - **Explicit fallback stacks per role**, ordered so the script-appropriate family wins:
-  `--font: 'Inter', 'Vazirmatn', …`, `--font-fa: 'Vazirmatn', 'Inter', …`.
+  `--font: 'Inter', 'Vazirmatn', …`, `--font-fa: 'Vazirmatn', 'Inter', …`. Under
+  `:root[lang="fa"]` the `--font*` tokens repoint to `--font-fa`; mono stacks carry
+  Vazirmatn second so Persian inside mono elements never hits a system font.
 
 ## Alternatives Considered
 

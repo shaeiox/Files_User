@@ -216,7 +216,7 @@ html[lang="fa"] .hero-content h1,
 body.rtl .hero-content h1 {
     font-family: var(--font-fa);
     font-size: clamp(30px, 3.6vw, 46px);
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.45;
     letter-spacing: 0;
     text-wrap: wrap;

@@ -41,6 +41,13 @@ body.rtl {
     letter-spacing: 0;
 }
 
+/* Tracking pulls joined letters apart, and Vazirmatn ships only 400–600,
+   so 700+ would be faux-bolded — use the real 600 face instead. */
+:root:is([lang="fa"], [dir="rtl"]) * {
+    letter-spacing: 0 !important;
+    font-synthesis-weight: none;
+}
+
 [lang="fa"] ::selection,
 [dir="rtl"] ::selection {
     background: rgba(86, 131, 218, 0.32);
