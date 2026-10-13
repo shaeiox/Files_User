@@ -21,6 +21,8 @@ behaviour when `RELEASE_PVM` is unset.
 | `GET /api/search` | No |
 | `GET /api/files/*` | Conditional |
 | `GET /api/download/*` | Conditional |
+| `GET /api/hash/*` | Conditional |
+| `GET /api/download-zip` | Conditional |
 | `GET /`, `/index.html`, `/browse/*` | No (SPA) |
 | `GET /404`, `/404.html` | No |
 
@@ -294,6 +296,101 @@ Headers:
 - `404 NOT_FOUND` — file does not exist
 
 **Source:** `lib/api-router.js` → `if (pathname.startsWith("/api/download"))` → `lib/files-service.js` → `getDownloadTarget()` → `lib/static-handler.js` → `streamDownload()`
+
+---
+
+## `GET /api/hash/*`
+
+**Auth:** Conditional (when `AUTH_ENABLED=true` and path targets `RELEASE_PVM`)
+
+Computes a SHA-256 digest over the file's real bytes. **On demand only** — listing a directory
+never hashes anything, and selecting a file in the UI issues no request until the user activates
+**Verify SHA-256**.
+
+**Path Parameters:**
+| Parameter | Description |
+|-----------|-------------|
+| `*` | Relative path of file within `FILES_ROOT` (e.g., `/api/hash/el9/packages/file.zip`) |
+
+**Response:** `200 OK`
+```json
+{
+  "algorithm": "sha256",
+  "digest": "499bf8a7…",
+  "size": 106430464,
+  "relPath": "el9/packages/file.zip",
+  "fileName": "file.zip"
+}
+```
+
+The file is streamed through `crypto.createHash('sha256')` and is never read into memory, so peak
+memory is one read chunk regardless of file size.
+
+**Error Responses:**
+| Code | Status | Meaning |
+|------|--------|---------|
+| `INVALID_PATH` | 400 | empty or malformed path |
+| `NOT_A_FILE` | 400 | path is a directory |
+| `PATH_TRAVERSAL` / `SYMLINK_TRAVERSAL` | 403 | resolves outside `FILES_ROOT` |
+| `FORBIDDEN_ENTRY` | 403 | hidden-file policy |
+| `NOT_FOUND` / `NOT_HASHABLE` | 404 | file does not exist or became unreadable |
+| `FILE_TOO_LARGE` | 413 | file exceeds `HASH_MAX_BYTES` |
+
+**Config:** `HASH_MAX_BYTES` — maximum size to hash, in bytes. Default `536870912` (512 MiB).
+Raising it increases I/O per verification; this is the calibration knob for the host.
+
+**Source:** `lib/api-router.js` → `if (pathname.startsWith("/api/hash"))` → `lib/hash-service.js` → `hashFile()` → `lib/files-service.js` → `resolveReadableFile()`
+
+**Verification:** `node lib/hash-service.check.js` (correctness vs. an independent hash, binary and
+empty files, size cap, path policy, and flat memory on a 128 MiB file).
+
+---
+
+## `GET /api/download-zip`
+
+**Auth:** Conditional (when `AUTH_ENABLED=true` and the browsed directory or any requested entry
+targets `RELEASE_PVM`)
+
+Streams a classic ZIP archive of a multi-file selection. The archive is produced on the fly and is
+never materialised on disk.
+
+**Query Parameters:**
+| Parameter | Description |
+|-----------|-------------|
+| `dir` | Relative path of the directory being browsed (e.g. `el9/packages`) |
+| `items` | Comma-separated relative paths of the selected files |
+
+Items are percent-encoded per path segment by the client and decoded per item by the server. Commas
+are safe as a separator because `encodeURIComponent` encodes them as `%2C`.
+
+**Response:** `200 OK` with a streamed ZIP archive.
+
+Headers:
+- `Content-Type`: `application/zip`
+- `Content-Disposition`: `attachment; filename="<dir>-<n>-files.zip"`
+- No `Content-Length` — the size is not known up front, so the response is chunked.
+
+**Error Responses:**
+| Code | Status | Meaning |
+|------|--------|---------|
+| `NO_ENTRIES` | 400 | empty selection |
+| `INVALID_PATH` / `NOT_A_FILE` | 400 | malformed path, or a directory was requested |
+| `PATH_TRAVERSAL` / `SYMLINK_TRAVERSAL` | 403 | resolves outside `FILES_ROOT` |
+| `FORBIDDEN_ENTRY` | 403 | hidden-file policy |
+| `ENTRY_OUTSIDE_DIR` | 403 | an entry is not inside the browsed directory |
+| `NOT_FOUND` | 404 | an entry does not exist |
+| `DUPLICATE_ENTRY` | 409 | two selections map to one archive entry name |
+| `TOO_MANY_ENTRIES` | 413 | more than 65535 entries requested |
+| `ARCHIVE_TOO_LARGE` | 413 | total exceeds the 4 GiB classic-ZIP limit |
+
+Classic ZIP only — no ZIP64. Oversized selections are refused rather than truncated, so a corrupt
+archive is never produced.
+
+**Source:** `lib/api-router.js` → `if (pathname === "/api/download-zip")` → `lib/archive-service.js` → `createArchive()` → `lib/files-service.js` → `resolveReadableFile()` → `lib/static-handler.js` → `streamArchive()`
+
+**Verification:** `node lib/archive-service.check.js` (validates the output against both `unzip`
+and .NET `ZipArchive`, checks byte-identical extraction, duplicate entry names, both ceilings, and
+the path policy).
 
 ---
 
