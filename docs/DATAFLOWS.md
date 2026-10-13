@@ -105,6 +105,74 @@ GET /api/download/{relPath}
 
 ---
 
+## 4a. Bulk Selection and Download Flows
+
+The Browse page keeps a selection `Set` of `relPath` strings in `assets/js/bulk-download.js`. It is
+held outside the row markup on purpose: the list pipeline rewrites `#rows` on every search
+keystroke, so a selection stored in the DOM would be destroyed by typing. Navigation resets it
+because a new directory is a different item universe.
+
+```
+Row click / checkbox
+  → BulkDownload.toggle(relPath)
+    → row click bails on a[href], button, input, select  (existing targets keep working)
+    → selection Set updated; row, checkbox, bulk bar repainted
+```
+
+Header select-all iterates the **rendered** rows only, so a filtered-out row is never selected.
+
+### Multi-file download
+
+```
+Download Selected
+  → for each selected FILE (staggered ~350ms):
+      HEAD /api/download/{relPath}          ← zero body bytes; real HTTP status
+        200 → transient <a data-file> click  → browser downloads it → row marked "started"
+        !200 → row marked "failed"; the file is never started
+  → summary reports "N started · M failed · K folders skipped"
+```
+
+The browser owns an anchor-triggered transfer, so its completion is not observable from script.
+Each file is therefore HEAD-probed first, and reporting distinguishes **started** from **failed** —
+it never claims "completed".
+
+### ZIP download
+
+```
+GET /api/download-zip?dir={dir}&items={relPath,relPath,...}
+  → lib/api-router.js
+    → decodeURIComponent per item (client encodes each segment, then the query value)
+    → auth: pathRequiresAuth() evaluated against synthetic /api/files/<rel> for dir AND every
+            item, because this route carries its target in the query, not the pathname
+    → archiveService.createArchive(projectRoot, dirRel, relPaths)
+      → for each entry: filesService.resolveReadableFile()  ← same containment + hidden policy
+      → ENTRY_OUTSIDE_DIR if an entry is not under the browsed directory
+      → ceilings: ≤65535 entries, ≤4 GiB total  → 413 before any byte is written
+      → streams: local header → deflate/store data → data descriptor (CRC + sizes)
+      → central directory → end-of-central-directory
+  → static-handler.js streamArchive()  → chunked, no Content-Length
+```
+
+Entry names are relative to the browsed directory, which keeps two files that share a base name in
+different folders distinct inside the archive. Sizes and CRC-32 are deferred to a data descriptor
+because they are unknown until an entry finishes compressing.
+
+### Checksum verification
+
+```
+Verify SHA-256  (explicit user action only — never on listing, never on selection)
+  → GET /api/hash/{relPath}
+    → filesService.resolveReadableFile()   ← same containment + hidden policy
+    → HASH_MAX_BYTES ceiling → 413 FILE_TOO_LARGE
+    → crypto.createHash('sha256') fed by fs.createReadStream  (never buffered)
+  → card shows the digest, copyable and selectable
+```
+
+A malformed response (non-`sha256` algorithm, or a digest that is not 64 hex chars) is treated as a
+failure, so a bad response can never render as a successful verification.
+
+---
+
 ## 5. Search/Categories/Releases Flows
 
 ### Categories
