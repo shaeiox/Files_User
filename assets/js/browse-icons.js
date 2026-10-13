@@ -34,16 +34,8 @@ const BrowseIcons = (function () {
     /** @type {Object<string,string>} Icon name → inner SVG markup (no <svg> wrapper). */
     const PATHS = {
         /* ── items ─────────────────────────────────────────────────────────── */
-        folder: '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"/>',
-        file: '<path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/>',
-        folder_open: '<path d="M6 14l1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>',
         folder_special: '<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="m12 10.6.92 1.87 2.06.3-1.49 1.45.35 2.05L12 15.22l-1.84.97.35-2.05L8.98 12.7l2.06-.3z"/>',
-        description: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>',
-        terminal: '<path d="m4 17 6-6-6-6"/><path d="M12 19h8"/>',
-        draft: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
         data_object: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/>',
-        image: '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>',
-        sports_esports: '<path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/><path d="M6 11h4"/><path d="M8 9v4"/><path d="M15 12h.01"/><path d="M18 10h.01"/>',
 
         /* ── trust / verification (static labels only — never computed) ───── */
         verified: '<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/>',
@@ -82,18 +74,55 @@ const BrowseIcons = (function () {
         return Object.prototype.hasOwnProperty.call(PATHS, name);
     }
 
+    /* ── file-type icons ────────────────────────────────────────────────────
+       Phosphor duotone, vendored as one same-origin sprite (assets/icon/phosphor,
+       MIT) — one cached request, no CDN, satisfies CSP `default-src 'self'`. */
+    const SPRITE = '/assets/icon/phosphor/file-icons.svg';
+
+    /** @type {Array<[string, string, RegExp]>} kind → sprite symbol, matched on extension. */
+    const KINDS = [
+        ['archive', 'file-zip', /^(zip|tar|gz|tgz|xz|txz|bz2|tbz2|7z|rar|zst|lz4|cab)$/],
+        ['disk', 'disc', /^(iso|img|qcow2|vmdk|vdi|vhdx?|ova|ovf|raw)$/],
+        ['package', 'package', /^(rpm|deb|apk|msi|exe|pkg|dmg|appimage|snap|jar|whl)$/],
+        ['code', 'file-code', /^(js|mjs|ts|py|sh|bash|ps1|bat|json|ya?ml|xml|toml|ini|conf|cfg|env|html?|css|sql|go|rs|c|h|cpp|java)$/],
+        ['secure', 'file-lock', /^(sha\d*|sha\d+sum|md5|sig|asc|gpg|pgp|pem|crt|cer|key|pub|p12|pfx)$/],
+        ['pdf', 'file-pdf', /^pdf$/],
+        ['doc', 'file-doc', /^(docx?|odt|rtf)$/],
+        ['sheet', 'file-xls', /^(xlsx?|ods|csv|tsv)$/],
+        ['image', 'file-image', /^(png|jpe?g|gif|webp|svg|bmp|ico|avif|tiff?)$/],
+        ['video', 'file-video', /^(mp4|mkv|mov|avi|webm|wmv|m4v)$/],
+        ['audio', 'file-audio', /^(mp3|wav|flac|ogg|m4a|aac|opus)$/],
+        ['text', 'file-text', /^(txt|log|md|rst|nfo|readme)$/]
+    ];
+
     /**
-     * @brief Picks an item icon from a normalized Browse item's type and name.
+     * @brief Classifies a Browse item into a coarse kind ("folder", "archive", "disk", …, "file").
      * @param   {object} item  Browse-normalized item ({ type, name }).
-     * @param   {number} [size=18]
-     * @returns {string}
+     * @returns {{kind: string, symbol: string}}
      */
-    function forItem(item, size = 18) {
-        if (!item || item.type === "directory") return get("folder", size);
-        return get("file", size);
+    function kindOf(item) {
+        if (!item || item.type === "directory") return { kind: 'folder', symbol: 'folder' };
+        const m = /\.([a-z0-9]+)$/i.exec(item.name || '');
+        const ext = m ? m[1].toLowerCase() : '';
+        for (const [kind, symbol, re] of KINDS) if (re.test(ext)) return { kind, symbol };
+        return { kind: 'file', symbol: 'file' };
     }
 
-    return { get, has, forItem, names: () => Object.keys(PATHS) };
+    /**
+     * @brief Picks a file-type icon for a normalized Browse item.
+     * @param   {object} item  Browse-normalized item ({ type, name }).
+     * @param   {number} [size=18]
+     * @param   {boolean} [open=false]  Use the open-folder glyph for directories.
+     * @returns {string}  `<svg>` referencing the vendored sprite; `data-kind` drives tint.
+     */
+    function forItem(item, size = 18, open = false) {
+        const { kind, symbol } = kindOf(item);
+        const id = open && kind === 'folder' ? 'folder-open' : symbol;
+        return `<svg class="ficon" data-kind="${kind}" width="${size}" height="${size}" fill="currentColor" ` +
+            `aria-hidden="true" focusable="false"><use href="${SPRITE}#${id}"/></svg>`;
+    }
+
+    return { get, has, forItem, kindOf, names: () => Object.keys(PATHS) };
 })();
 
 if (typeof window !== "undefined") window.BrowseIcons = BrowseIcons;

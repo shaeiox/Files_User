@@ -812,9 +812,38 @@
 }
 
 .f-icon-file {
-    background: var(--bg-elevated);
-    border-color: var(--border);
-    color: var(--text-3);
+    background: color-mix(in srgb, var(--kind, var(--text-3)) 10%, var(--bg-elevated));
+    border-color: color-mix(in srgb, var(--kind, var(--border)) 28%, var(--border));
+    color: var(--kind, var(--text-3));
+}
+
+/* File-type tint (BrowseIcons.kindOf). Unlisted kinds (text, file) stay neutral. */
+[data-kind="archive"] { --kind: #f5b74e; }
+[data-kind="disk"]    { --kind: #8fb4ff; }
+[data-kind="package"] { --kind: #b49cff; }
+[data-kind="code"]    { --kind: #6fd3b5; }
+[data-kind="secure"]  { --kind: #86d98f; }
+[data-kind="pdf"]     { --kind: #ff8a7a; }
+[data-kind="doc"]     { --kind: #7fb0ff; }
+[data-kind="sheet"]   { --kind: #6fcf97; }
+[data-kind="image"]   { --kind: #f08bd0; }
+[data-kind="video"]   { --kind: #ff9f6e; }
+[data-kind="audio"]   { --kind: #e3a6ff; }
+
+[data-theme="light"] [data-kind="archive"] { --kind: #a86500; }
+[data-theme="light"] [data-kind="disk"]    { --kind: #2f5fbf; }
+[data-theme="light"] [data-kind="package"] { --kind: #6a4fc4; }
+[data-theme="light"] [data-kind="code"]    { --kind: #11795d; }
+[data-theme="light"] [data-kind="secure"]  { --kind: #2d7d3a; }
+[data-theme="light"] [data-kind="pdf"]     { --kind: #c0392b; }
+[data-theme="light"] [data-kind="doc"]     { --kind: #2b5fb3; }
+[data-theme="light"] [data-kind="sheet"]   { --kind: #1f7a45; }
+[data-theme="light"] [data-kind="image"]   { --kind: #a83a85; }
+[data-theme="light"] [data-kind="video"]   { --kind: #b9541c; }
+[data-theme="light"] [data-kind="audio"]   { --kind: #8a3fb0; }
+
+.insp-icon .ficon {
+    color: var(--kind, currentColor);
 }
 
 /* ── ROW NAME ──────────────────────────────────────────────────────────── */
@@ -1207,6 +1236,11 @@
     width: 40px;
     height: 40px;
     margin-bottom: 4px;
+}
+
+.file-tbl.grid-mode .f-icon .ficon {
+    width: 24px;
+    height: 24px;
 }
 
 .file-tbl.grid-mode .f-name {

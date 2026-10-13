@@ -190,7 +190,7 @@ const FileInspector = (function () {
         return `
       ${tabItems.length > 1 ? tabsHtml() : ""}
       <div class="insp-head">
-        <div class="insp-icon">${BrowseIcons.get(isFile ? "description" : "folder_open", 26)}</div>
+        <div class="insp-icon">${BrowseIcons.forItem(item, 26, true)}</div>
         <div class="insp-titles">
           <span class="insp-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</span>
           <span class="insp-kind">${escapeHtml(typeLabel(item))}</span>

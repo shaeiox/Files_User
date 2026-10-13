@@ -492,7 +492,7 @@ const BrowsePage = (function () {
             // Cells: [1] select [2] icon [3] name [4] type [5] modified [6] size [7] actions
             row.innerHTML = `
                 <div class="c-select"><input type="checkbox" class="row-select" aria-label="${selLabel}" /></div>
-                <div class="f-icon ${iconStr}"><a class="f-icon-link" ${linkAttr} title="${iconLabel}" aria-label="${iconLabel}">${svgIcon(f.type)}</a></div>
+                <div class="f-icon ${iconStr}" data-kind="${BrowseIcons.kindOf(f).kind}"><a class="f-icon-link" ${linkAttr} title="${iconLabel}" aria-label="${iconLabel}">${svgIcon(f)}</a></div>
                 <div class="f-name"><a class="f-link" ${linkAttr} title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</a></div>
                 <div><span class="badge ${badgeStr}">${badgeLabel}</span></div>
                 <div class="f-sub">${fmtDate(f.modified, lang)}</div>
@@ -746,8 +746,8 @@ const BrowsePage = (function () {
      *          only the source of the path data moved to browse-icons.js so the
      *          page and its inspector/bulk panels share one icon set.
      */
-    function svgIcon(type) {
-        return BrowseIcons.get(type === "directory" ? "folder" : "file", 18);
+    function svgIcon(item) {
+        return BrowseIcons.forItem(item, 20);
     }
 
     function renderSkeletons() {
