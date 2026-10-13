@@ -4,7 +4,8 @@
   "description": "CloudAvid File Portal — filesystem-driven download portal",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "check:releases": "node scripts/check-releases.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

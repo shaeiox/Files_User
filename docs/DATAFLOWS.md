@@ -206,6 +206,23 @@ GET /api/releases?limit={n}&os={os}
 
 **Source:** `lib/files-service.js` → `listLatestReleases()`, `compareVersions()`
 
+```
+GET /release9/latest | /release8/latest            (auth gate first: protected prefix)
+  → filesService.listLatestReleases(projectRoot, 1, "el9" | "el8")
+    → items empty → 404 NO_RELEASE (no bytes)
+  → filesService.getDownloadTarget(projectRoot, items[0].path)
+  → streamDownload(req, res, fileInfo)
+```
+
+Releases page (`/download/release`, navbar tab only): `ReleasePage` (`assets/js/releases.js`)
+calls `ResourceService.getReleases(50, os)` per el8/el9 tab, and builds each row's
+`curl -fLO '<origin><downloadHref(path)>'` command from `ResourceService.downloadHref`, so a
+file always yields the same command.
+Verify SHA-256 (on demand only, never on list or selection) fetches
+`ResourceService.hashHref(path)` → `GET /api/hash/*` and renders
+`echo '<digest>  <name>' | sha256sum -c -`, where `<name>` is the download URL's last segment
+(the file `curl -O` saves). A new selection or tab clears the digest.
+
 ### Search
 
 ```
