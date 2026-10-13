@@ -189,7 +189,7 @@ const Router = (function () {
 
     // Boot
     function init() {
-        history.replaceState({ path: currentPath }, "", currentPath);
+        history.replaceState({ path: currentPath }, "", currentPath + window.location.search + window.location.hash);
         bindNavDisclosure();
         navigate(currentPath, false);
     }
