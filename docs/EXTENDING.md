@@ -192,6 +192,7 @@ Scripts are declared in `index.html` in dependency order. Three constraints are 
 | `home.js` | HomePage component |
 | `file-actions.js` | File Actions module (dedicated per-item actions) |
 | `browse.js` | BrowsePage component |
+| `releases.js` | ReleasePage component (`/download/release`, el8/el9 tabs, CLI commands) |
 | `services/resource-service.js` | API client |
 | `i18n.js` | Internationalization (`en`, `fa`); sets `lang` and `dir` |
 | `theme.js` | Theme toggle, `localStorage`-backed |

@@ -18,12 +18,13 @@ behaviour when `RELEASE_PVM` is unset.
 | `POST /api/auth/logout` | No |
 | `GET /api/categories` | No |
 | `GET /api/releases` | Conditional |
+| `GET /release9/latest`, `GET /release8/latest` | Conditional |
 | `GET /api/search` | No |
 | `GET /api/files/*` | Conditional |
 | `GET /api/download/*` | Conditional |
 | `GET /api/hash/*` | Conditional |
 | `GET /api/download-zip` | Conditional |
-| `GET /`, `/index.html`, `/browse/*` | No (SPA) |
+| `GET /`, `/index.html`, `/browse/*`, `/download/release` | No (SPA) |
 | `GET /404`, `/404.html` | No |
 
 **Conditional auth:** When `AUTH_ENABLED=true`, `RELEASE_PVM` and `FILES_ROOT` are both set,
@@ -205,6 +206,32 @@ Also sets `Set-Cookie` header to clear the session cookie.
 ```
 
 **Source:** `lib/api-router.js` → `if (pathname === "/api/releases")` → `lib/files-service.js` → `listLatestReleases()`
+
+---
+
+## `GET /release9/latest`, `GET /release8/latest`
+
+**Auth:** Conditional — both paths are in `pathRequiresAuth()`'s protected prefixes, so they
+are gated whenever `/api/releases` is (requires `RELEASE_PVM` under `FILES_ROOT`).
+
+Stable CLI URLs that stream the newest artifact from the `el9` / `el8` subfolder of
+`RELEASE_PVM`. "Newest" is `listLatestReleases(root, 1, os)`: highest `pvm-release-<version>`
+(numeric segment compare), ties broken by most recent `mtime`.
+
+```bash
+curl -fLOJ https://<host>/release9/latest   # -J keeps the real filename
+```
+
+| Status | Code | When |
+|--------|------|------|
+| `200` | — | File streamed; `Content-Disposition` names the selected file |
+| `401` | `AUTH_REQUIRED` | Auth enabled and no valid session (no bytes streamed) |
+| `404` | `NO_RELEASE` | The OS folder is missing or holds no files |
+| `503` | `FILES_ROOT_MISSING` | `FILES_ROOT` not configured |
+
+**Source:** `lib/api-router.js` → `latestOs` branch → `listLatestReleases()` → `getDownloadTarget()` → `streamDownload()`
+
+**Check:** `npm run check:releases` (seeds a temp tree, asserts selection, empty folder, and auth).
 
 ---
 
@@ -394,7 +421,7 @@ the path policy).
 
 ---
 
-## `GET /`, `GET /index.html`, `GET /browse/*`
+## `GET /`, `GET /index.html`, `GET /browse/*`, `GET /download/release`
 
 **Auth:** None
 
@@ -402,10 +429,11 @@ the path policy).
 
 **Note:** `browse.html` is **not** served by any route. All `/browse/*` requests resolve to
 `index.html`; the SPA router then renders `BrowsePage` client-side. The standalone
-`browse.html` file in the repository root is unrouted — see
+`browse.html` file in the repository root is unrouted. `/download/release` (exact match) renders
+`ReleasePage` the same way — see
 [ARCHITECTURE.md → Standalone HTML Pages](ARCHITECTURE.md#standalone-html-pages).
 
-**Source:** `lib/api-router.js` → `if (pathname === "/" || pathname === "/index.html" || pathname.startsWith("/browse"))` → `lib/static-handler.js` → `serveSPA()`
+**Source:** `lib/api-router.js` → `if (pathname === "/" || pathname === "/index.html" || pathname.startsWith("/browse") || pathname === "/download/release")` → `lib/static-handler.js` → `serveSPA()`
 
 ---
 

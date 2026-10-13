@@ -14,6 +14,7 @@ const Router = (function () {
     function resolveRoute(path) {
         if (path === "/" || path === "/index.html") return "home";
         if (path === "/browse" || path.startsWith("/browse/")) return "browse";
+        if (path === "/download/release") return "release";
         return null;
     }
 
@@ -62,6 +63,7 @@ const Router = (function () {
         function resolveRoute(path) {
             if (path === "/" || path === "/index.html") return "home";
             if (path === "/browse" || path.startsWith("/browse/")) return "browse";
+            if (path === "/download/release") return "release";
             if (path === "/404" || path === "/404.html") return "notfound";
             return null;
         }
@@ -90,6 +92,8 @@ const Router = (function () {
                     HomePage.render(app);
                 } else if (route === "browse") {
                     BrowsePage.render(app, path);
+                } else if (route === "release") {
+                    ReleasePage.render(app, path);
                 } else if (route === "notfound") {
                     // Hard page is preferred; if landed here via SPA, bounce once
                     window.location.replace("/404.html");
@@ -126,6 +130,8 @@ const Router = (function () {
                 HomePage.render(app);
             } else if (route === "browse") {
                 BrowsePage.render(app, path);
+            } else if (route === "release") {
+                ReleasePage.render(app, path);
             }
 
             // 3. Apply Language to newly rendered DOM safely

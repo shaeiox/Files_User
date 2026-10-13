@@ -7,9 +7,9 @@ node_modules/
 # Ignore local development data
 data
 
+# Ignore runtime and tool logs (server-*.log, doxygen_warnings.log)
+*.log
+
 # Ignore build output
 .freebuff
 .opencode
-
-# Ignore IDE and editor specific files
-template

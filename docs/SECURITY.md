@@ -222,8 +222,14 @@ Authentication is controlled by the `AUTH_ENABLED` environment variable. When di
 
 **Protected prefixes** (computed dynamically from `FILES_ROOT` and `RELEASE_PVM`):
 - `/api/releases`
+- `/release9/latest`, `/release8/latest` (stream release bytes from outside `/api/`)
 - `/api/download/{rel}` and `/api/download/{rel}/`
 - `/api/files/{rel}` and `/api/files/{rel}/`
+
+Like the other prefixes, the `/releaseN/latest` routes are gated only when `RELEASE_PVM`
+resolves **inside** `FILES_ROOT`; if it lives outside, `pathRequiresAuth()` returns `false`
+and they are public. Any new route that streams release bytes must be added to the list —
+the gate matches pathnames, not the files they resolve to.
 
 **Source:** `lib/auth-service.js` → `pathRequiresAuth()`, `lib/files-service.js` → `resolveReleaseRoot()`
 
