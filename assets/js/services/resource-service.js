@@ -220,6 +220,17 @@ const ResourceService = (function () {
         return { browsePath: os || "", items: [] };
     }
 
+    /**
+     * @brief   Navbar folders set in the Admin (already filtered for this visitor).
+     * @returns {Promise<Array<{name: string, path: string, locked?: boolean}>>}
+     */
+    async function getNav() {
+        const res = await fetch("/api/nav", { cache: "no-store" });
+        if (!res.ok) throw await parseError(res);
+        const data = await res.json();
+        return data && Array.isArray(data.folders) ? data.folders : [];
+    }
+
     // --- Auth API ---
     let lastAuth = null;
 
@@ -269,6 +280,7 @@ const ResourceService = (function () {
         listFiles,
         search,
         getReleases,
+        getNav,
         browseHref,
         downloadHref,
         zipDownloadHref,

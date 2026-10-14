@@ -32,13 +32,76 @@ const Router = (function () {
             tab.removeAttribute("aria-current");
         });
 
-        const routeRoot = "/" + String(path || "/").split("/")[1];
+        // Deepest tab whose destination contains the path wins (an admin navbar
+        // folder over /browse); otherwise the route root decides as before.
+        const trim = (s) => String(s || "/").replace(/\/+$/, "") || "/";
+        const p = trim(path);
+        const routeRoot = "/" + p.split("/")[1];
+        let best = null, bestLen = 0;
         tabs.forEach(tab => {
-            if (tab.getAttribute("data-nav-tab") === routeRoot) {
-                tab.classList.add("active");
-                tab.setAttribute("aria-current", "page");
+            const dest = trim(tab.getAttribute("data-nav-tab"));
+            if (dest !== "/" && (p === dest || p.startsWith(dest + "/")) && dest.length > bestLen) {
+                best = tab;
+                bestLen = dest.length;
             }
         });
+        if (!best) best = Array.from(tabs).find(tab => tab.getAttribute("data-nav-tab") === routeRoot);
+        if (best) {
+            best.classList.add("active");
+            best.setAttribute("aria-current", "page");
+        }
+    }
+
+    // Admin navbar folders (/api/nav, filtered per visitor by the server).
+    // Rebuilt on sign-in/out because the visible set depends on who is asking.
+    const FOLDER_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"/></svg>';
+    const LOCK_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+
+    async function loadNavFolders() {
+        const group = document.getElementById("navTabs");
+        if (!group || typeof ResourceService === "undefined") return;
+        let folders = [];
+        try { folders = await ResourceService.getNav(); } catch { return; /* keep what is shown */ }
+
+        // The home cards are cached for minutes; an admin change to the navbar
+        // (e.g. "hide from home") must not wait for that cache to expire.
+        const sig = JSON.stringify(folders);
+        let prev = null;
+        try { prev = sessionStorage.getItem("cav_nav_sig"); sessionStorage.setItem("cav_nav_sig", sig); } catch { /* storage blocked */ }
+        if (prev !== null && prev !== sig) {
+            ResourceService.clearCache();
+            if (currentPath === "/" && typeof HomePage !== "undefined") HomePage.refreshResources();
+        }
+
+        group.querySelectorAll("[data-nav-folder]").forEach(el => el.remove());
+        if (!folders.length) return;
+
+        const d = typeof window.getDict === "function" ? window.getDict() : {};
+        const frag = document.createDocumentFragment();
+        const sep = document.createElement("span");
+        sep.className = "nav-sep";
+        sep.setAttribute("data-nav-folder", "");
+        sep.setAttribute("aria-hidden", "true");
+        frag.appendChild(sep);
+        for (const f of folders) {
+            const a = document.createElement("a");
+            const href = ResourceService.browseHref(f.path);
+            a.className = "nav-tab nav-tab-folder";
+            a.href = href;
+            a.setAttribute("data-nav-tab", href);
+            a.setAttribute("data-nav-folder", "");
+            a.innerHTML = f.locked ? LOCK_ICON : FOLDER_ICON;
+            const label = document.createElement("span");
+            label.textContent = f.name;
+            a.appendChild(label);
+            if (f.locked) {
+                a.classList.add("is-locked");
+                a.title = d.signInToOpen || "Sign in to open";
+            }
+            frag.appendChild(a);
+        }
+        group.appendChild(frag);
+        syncNavTab(currentPath);
     }
 
     // Task 6.1/6.5 (a11y-ux-debt) - mobile navigation disclosure. Below
@@ -145,6 +208,7 @@ const Router = (function () {
             // page on /browse too. Clear every tab, then mark only a tab whose
             // destination matches the active route.
             syncNavTab(path);
+            loadNavFolders(); // also catches admin navbar changes made since the last page
 
             // 4. Transition In
             requestAnimationFrame(() => {
@@ -192,6 +256,7 @@ const Router = (function () {
         history.replaceState({ path: currentPath }, "", currentPath + window.location.search + window.location.hash);
         bindNavDisclosure();
         navigate(currentPath, false);
+        document.addEventListener("auth:changed", loadNavFolders);
     }
 
     if (document.readyState === "loading") {

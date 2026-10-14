@@ -125,6 +125,60 @@
     color: var(--text);
 }
 
+/* Admin navbar folders (router.js loadNavFolders): a hairline splits them
+   from the fixed tabs; long names truncate instead of pushing the bar. */
+.nav-sep {
+    flex: none;
+    width: 1px;
+    height: 18px;
+    margin: 0 6px;
+    background: var(--border);
+}
+
+.nav-tab-folder > span {
+    max-width: 16ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nav-tab-folder.is-locked {
+    color: var(--text-3, var(--text-2));
+}
+
+@media (min-width: 901px) {
+    /* With folders the group joins the bar's flow and takes exactly the
+       space between logo and actions (absolute centring would overlap them);
+       extra links scroll sideways. Block padding keeps the active underline
+       (bottom: -1px) out of the clip. */
+    .nav-tabs:has(.nav-tab-folder) {
+        position: static;
+        transform: none;
+        flex: 1 1 auto;
+        min-width: 0;
+        justify-content: safe center;
+        overflow-x: auto;
+        padding-block: 3px;
+        scrollbar-width: none;
+    }
+
+    .nav-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-tabs .nav-tab {
+        flex: none;
+    }
+}
+
+@media (max-width: 900px) {
+    .nav-tabs.is-open .nav-sep {
+        width: auto;
+        height: 1px;
+        margin: 4px 6px;
+    }
+}
+
 /* Active tab. `.active` and [aria-current="page"] are both emitted on the
    current tab, so both selectors are kept to honour either contract. */
 .nav-tab.active,

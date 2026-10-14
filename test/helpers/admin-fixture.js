@@ -214,6 +214,33 @@ function createFixture({ tree = { 'docs/readme.txt': 'hello' } } = {}) {
             });
         },
 
+        /**
+         * Replaces the admin navbar folders (admin PortalNavService.set). The
+         * first call applies admin migration 3 (portal_nav_folders) verbatim.
+         * `folders`: [{ path: '/a', label?, hideFromHome? }] in order.
+         */
+        setNav(folders) {
+            write((db) => {
+                if (!db.prepare("SELECT 1 FROM sqlite_master WHERE name = 'portal_nav_folders'").get()) {
+                    db.exec(`CREATE TABLE portal_nav_folders (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        client_path TEXT NOT NULL UNIQUE,
+                        label TEXT,
+                        position INTEGER NOT NULL,
+                        hide_from_home INTEGER NOT NULL DEFAULT 0 CHECK (hide_from_home IN (0,1)),
+                        created_at INTEGER NOT NULL,
+                        updated_at INTEGER NOT NULL
+                    );`);
+                    db.prepare('INSERT INTO schema_migrations (version, applied_at) VALUES (3, ?)').run(Date.now());
+                }
+                db.exec('DELETE FROM portal_nav_folders');
+                const now = Date.now();
+                folders.forEach((f, i) => db.prepare(
+                    'INSERT INTO portal_nav_folders (client_path, label, position, hide_from_home, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
+                ).run(f.path, f.label || null, i, f.hideFromHome ? 1 : 0, now, now));
+            });
+        },
+
         /** Raw write access. */
         exec(sql, ...params) {
             return write((db) => db.prepare(sql).run(...params));

@@ -201,13 +201,14 @@ describe('fail closed', () => {
         assert.ok(adminDb.getSnapshot().policyByPath.get('/a.txt'), 'recovers on the next call');
     });
 
-    test('a schema upgraded past v2 at runtime makes the snapshot unavailable', () => {
+    test('a schema upgraded past the known version at runtime makes the snapshot unavailable', () => {
         const fx = fixture();
         useFixture(fx);
         adminDb.getSnapshot();
-        fx.exec('INSERT INTO schema_migrations (version, applied_at) VALUES (3, ?)', Date.now());
+        const future = adminDb.KNOWN_SCHEMA_VERSION + 1;
+        fx.exec('INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)', future, Date.now());
         adminDb.resetSnapshot();
-        assert.throws(() => adminDb.getSnapshot(), /schema version 3/);
+        assert.throws(() => adminDb.getSnapshot(), new RegExp('schema version ' + future));
     });
 });
 
@@ -253,8 +254,8 @@ describe('configuration', () => {
         const db = new DatabaseSync(bogus); db.exec('CREATE TABLE t (x)'); db.close();
         assert.ok(refused({ ADMIN_DB_PATH: bogus }), 'not the admin schema');
 
-        fx.exec('INSERT INTO schema_migrations (version, applied_at) VALUES (3, ?)', Date.now());
-        assert.ok(refused({}), 'schema newer than v2');
+        fx.exec('INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)', adminDb.KNOWN_SCHEMA_VERSION + 1, Date.now());
+        assert.ok(refused({}), 'schema newer than known');
     });
 
     test('neither variable set is legacy mode with nothing to validate', () => {
