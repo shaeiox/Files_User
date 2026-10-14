@@ -274,10 +274,12 @@ portal never reads the admin project's `.env` — the two stay decoupled.
 - `test/access-policy.test.js` (new, `npm test`) — 27 assert-based checks over the
   config matrix and the full decision table.
 
-### 10c. Known limitation
+### 10c. Category counts
 
-`/api/categories` still folds a hidden governed child into its parent's
-`fileCount` (in `files-service.summarizeTree`), so existence leaks through counts
-even though the entry itself is hidden. Documented in `access-policy.js`; fix is
-to subtract hidden files during summarization.
+`/api/categories` previously folded a hidden governed child into its parent's
+`fileCount`, leaking existence through aggregate counts. `summarizeTree()` now
+takes an authorization predicate (threaded from `listCategories()` via
+`access-policy.visiblePredicate()`), so a governed entry — or a whole governed
+category — is neither counted nor walked. Legacy mode passes no predicate and
+counts everything as before.
 

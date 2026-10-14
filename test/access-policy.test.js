@@ -22,6 +22,7 @@ const { DatabaseSync } = require('node:sqlite');
 const adminDb = require('../lib/admin-db');
 const accessPolicy = require('../lib/access-policy');
 const authService = require('../lib/auth-service');
+const filesService = require('../lib/files-service');
 
 const ANON = { ok: true, user: { anonymous: true } };
 const USER = (id) => ({ ok: true, user: { id, username: 'u' + id, role: 'user' } });
@@ -223,6 +224,32 @@ async function test(name, fn) {
         const stored = salt + ':' + require('crypto').scryptSync('hunter2', salt, 64).toString('hex');
         assert.strictEqual(await authService.verifyPassword('hunter2', stored), true);
         assert.strictEqual(await authService.verifyPassword('nope', stored), false);
+    });
+
+    /* ── 3. Category counts exclude governed entries ───────────────────────── */
+    const treeRoot = path.join(dir, 'tree');
+    for (const rel of ['alpha/a.txt', 'alpha/b.txt', 'alpha/secret.txt', 'alpha/sub/c.txt', 'beta/d.txt']) {
+        fs.mkdirSync(path.dirname(path.join(treeRoot, rel)), { recursive: true });
+        fs.writeFileSync(path.join(treeRoot, rel), 'x');
+    }
+
+    await test('category counts exclude a governed file (no count leak)', async () => {
+        process.env.FILES_ROOT = treeRoot;
+        const allow = (rel) => rel !== 'alpha/secret.txt';
+        const cats = await filesService.listCategories(process.cwd(), allow);
+        assert.strictEqual(cats.find(c => c.name === 'alpha').fileCount, 3); // a, b, sub/c
+        assert.strictEqual(cats.find(c => c.name === 'alpha').folderCount, 1); // sub
+        assert.strictEqual(cats.find(c => c.name === 'beta').fileCount, 1);
+    });
+    await test('a category whose own path is governed is omitted entirely', async () => {
+        process.env.FILES_ROOT = treeRoot;
+        const cats = await filesService.listCategories(process.cwd(), (rel) => rel !== 'beta');
+        assert.deepStrictEqual(cats.map(c => c.name), ['alpha']);
+    });
+    await test('legacy listCategories (no predicate) counts everything', async () => {
+        process.env.FILES_ROOT = treeRoot;
+        const cats = await filesService.listCategories(process.cwd());
+        assert.strictEqual(cats.find(c => c.name === 'alpha').fileCount, 4);
     });
 
     /* ── restore a neutral environment ─────────────────────────────────────── */
