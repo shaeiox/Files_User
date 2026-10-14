@@ -43,6 +43,7 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, HOST, () => {
     const peek = filesService.peekRootSync(PROJECT_ROOT);
+    logger.info(`Portal started on port ${PORT} (auth ${process.env.AUTH_ENABLED || 'unset'}, admin gate ${adminDb.isIntegrationEnabled() ? 'on' : 'off'})`);
     const rootState = !peek.configured ? `${c.yellow}FILES_ROOT is not set${c.reset}`
         : !peek.exists ? `${c.yellow}FILES_ROOT path was not found${c.reset}`
             : !peek.isDirectory ? `${c.yellow}FILES_ROOT is not a directory${c.reset}`

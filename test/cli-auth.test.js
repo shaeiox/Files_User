@@ -119,6 +119,15 @@ test('Basic over plain HTTP through a proxy is refused before the password is ch
     assert.strictEqual((await cli('/api/download/docs/locked.txt', { auth: basic('mallory', 'password123') })).status, 200);
 });
 
+test('AUTH_BASIC_ALLOW_HTTP=true accepts Basic over plain HTTP', async () => {
+    process.env.AUTH_BASIC_ALLOW_HTTP = 'true';
+    try {
+        const res = await cli('/release9/latest', { auth: basic('alice', 'password123'), secure: false });
+        assert.strictEqual(res.status, 200);
+        assert.strictEqual(res.body, 'r9');
+    } finally { delete process.env.AUTH_BASIC_ALLOW_HTTP; }
+});
+
 test('Basic from loopback without a proxy is accepted over HTTP', async () => {
     const res = await cli('/api/download/docs/locked.txt', { auth: basic('alice', 'password123'), proxied: false });
     assert.strictEqual(res.status, 200);
