@@ -80,7 +80,7 @@ const FileActions = (function () {
     const ACTIONS = [
         {
             id: "download",
-            appliesTo: (item) => item.type === "file" && !item.locked,
+            appliesTo: (item) => item.type === "file" && !item.locked && !item.viewOnly,
             render: (item, d) => {
                 const label = escapeHtml(((d && d.btnDownload) || "Download") + " " + (item.name || ""));
                 const href = escapeHtml(ResourceService.downloadHref(item.relPath));

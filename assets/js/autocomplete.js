@@ -14,6 +14,10 @@ const Autocomplete = (function () {
 
     function itemHref(item) {
         if (typeof ResourceService !== "undefined") {
+            // A view-only file (admin policy) opens its folder instead of a download.
+            if (item.type !== "directory" && item.viewOnly) {
+                return ResourceService.browseHref(String(item.path || "").split("/").slice(0, -1).join("/"));
+            }
             return item.type === "directory"
                 ? ResourceService.browseHref(item.path)
                 : ResourceService.downloadHref(item.path);
@@ -48,7 +52,7 @@ const Autocomplete = (function () {
                 : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>`;
 
             return `
-        <li class="ac-item ${isActive ? 'active' : ''}" id="ac-option-${index}" role="option" aria-selected="${isActive}" data-index="${index}" data-href="${href}" data-type="${item.type}"${item.locked ? ' data-locked-item="true"' : ''}>
+        <li class="ac-item ${isActive ? 'active' : ''}" id="ac-option-${index}" role="option" aria-selected="${isActive}" data-index="${index}" data-href="${href}" data-type="${item.viewOnly ? 'directory' : item.type}"${item.locked ? ' data-locked-item="true"' : ''}>
           <div class="ac-item-left">
             <div class="ac-icon ${item.type === 'directory' ? 'ac-icon-dir' : 'ac-icon-file'}">
               ${iconSvg}
@@ -58,8 +62,8 @@ const Autocomplete = (function () {
               <span class="ac-path">${item.path || ""}</span>
             </div>
           </div>
-          <span class="badge ${item.locked ? 'badge-locked' : item.type === 'directory' ? 'badge-dir' : 'badge-file'}">
-            ${item.locked ? (d.lockedBadge || 'Locked') : item.type === 'directory' ? (d.dirBadge || 'DIR') : (d.fileBadge || 'FILE')}
+          <span class="badge ${item.locked || item.viewOnly ? 'badge-locked' : item.type === 'directory' ? 'badge-dir' : 'badge-file'}">
+            ${item.locked ? (d.lockedBadge || 'Locked') : item.viewOnly ? (d.viewOnlyBadge || 'View only') : item.type === 'directory' ? (d.dirBadge || 'DIR') : (d.fileBadge || 'FILE')}
           </span>
         </li>
       `;

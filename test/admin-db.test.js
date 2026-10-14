@@ -79,13 +79,28 @@ describe('row validation', () => {
         assert.strictEqual(validity({}, [{ file_id: 1, user_id: 2, permission: 'maybe' }]), false);
         assert.strictEqual(validity({}, [{ file_id: 9, user_id: 2, permission: 'maybe' }]), true);
     });
-    test('grants and denies are indexed by file then user', () => {
+    test('grants and denies are indexed by file then user, as a level rank or DENY', () => {
         const snap = adminDb.buildSnapshot({
             users: [], policies: [policy()],
             permissions: [{ file_id: 1, user_id: 2, permission: 'grant' }, { file_id: 1, user_id: 3, permission: 'deny' }],
         });
-        assert.strictEqual(snap.grants.get(1).get(2), 'grant');
-        assert.strictEqual(snap.grants.get(1).get(3), 'deny');
+        assert.strictEqual(snap.grants.get(1).get(2), adminDb.levelRank('download'), 'a pre-levels grant is full access');
+        assert.strictEqual(snap.grants.get(1).get(3), adminDb.DENY);
+    });
+    test('group grants reach every member; the highest level wins and any deny beats it', () => {
+        const snap = adminDb.buildSnapshot({
+            users: [], policies: [policy()],
+            permissions: [{ file_id: 1, user_id: 2, permission: 'grant', level: 'view' }, { file_id: 1, user_id: 3, permission: 'deny', level: 'view' }],
+            groupMembers: [{ group_id: 7, user_id: 2 }, { group_id: 7, user_id: 3 }, { group_id: 7, user_id: 4 }],
+            groupPermissions: [{ file_id: 1, group_id: 7, permission: 'grant', level: 'download' }],
+        });
+        assert.strictEqual(snap.grants.get(1).get(2), adminDb.levelRank('download'));
+        assert.strictEqual(snap.grants.get(1).get(3), adminDb.DENY);
+        assert.strictEqual(snap.grants.get(1).get(4), adminDb.levelRank('download'));
+    });
+    test('an unknown level invalidates the policy it touches', () => {
+        assert.strictEqual(validity({ default_level: 'owner' }), false);
+        assert.strictEqual(validity({}, [{ file_id: 1, user_id: 2, permission: 'grant', level: 'owner' }]), false);
     });
     test('rows that fold to the same key are all kept', () => {
         const snap = adminDb.buildSnapshot({
@@ -126,7 +141,7 @@ describe('snapshot reads the admin database', () => {
 
         const snap = adminDb.getSnapshot();
         assert.strictEqual(snap.policyByPath.get('/docs')[0].accessMode, 'restricted');
-        assert.strictEqual(snap.grants.get(snap.policyByPath.get('/docs')[0].fileId).get(erfan), 'grant');
+        assert.strictEqual(snap.grants.get(snap.policyByPath.get('/docs')[0].fileId).get(erfan), adminDb.levelRank('download'));
         assert.strictEqual(adminDb.findActiveUserByUsername('  erfan ').id, erfan);
         assert.strictEqual(adminDb.findActiveUserById(erfan).username, 'Erfan');
         assert.strictEqual(adminDb.findActiveUserByUsername('off'), null);

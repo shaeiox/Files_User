@@ -74,7 +74,9 @@ const BrowsePage = (function () {
             size: Number(x.size || 0),
             modified: x.mtime || x.modified || x.time || 0,
             // Admin policy: visible by name only until the visitor signs in.
-            locked: x.locked === true
+            locked: x.locked === true,
+            // Admin policy "view" level: listed, but not downloadable.
+            viewOnly: x.viewOnly === true
         };
     }
 
@@ -490,21 +492,24 @@ const BrowsePage = (function () {
             // A locked folder still navigates (its page shows the sign-in state); a locked
             // file opens sign-in instead of a download (see FileActions download guard).
             const linkAttr = f.type === "directory" ? `href="${href}"`
-                : f.locked ? `href="#" data-locked="true"` : `href="${href}" data-file="true"`;
+                : f.locked ? `href="#" data-locked="true"`
+                : f.viewOnly ? `aria-disabled="true"` : `href="${href}" data-file="true"`;
             const iconStr = f.type === "directory" ? 'f-icon-dir' : 'f-icon-file';
             const badgeStr = f.type === "directory" ? 'badge-dir' : 'badge-file';
             const badgeLabel = f.type === "directory" ? (d.folder || 'Folder') : (d.file || 'File');
 
             const iconVerb = f.type === "directory" ? (d.btnOpen || 'Open')
-                : f.locked ? (d.signInToOpen || 'Sign in to open') : (d.btnDownload || 'Download');
+                : f.locked ? (d.signInToOpen || 'Sign in to open')
+                : f.viewOnly ? (d.viewOnlyBadge || 'View only') : (d.btnDownload || 'Download');
+            const noDownload = f.locked || (f.viewOnly && f.type !== "directory");
             const iconLabel = escapeHtml(iconVerb + " " + f.name);
             const selLabel = escapeHtml((d.select || "Select") + " " + f.name);
 
             // Cells: [1] select [2] icon [3] name [4] type [5] modified [6] size [7] actions
             row.innerHTML = `
-                <div class="c-select"><input type="checkbox" class="row-select" aria-label="${selLabel}"${f.locked ? " disabled" : ""} /></div>
+                <div class="c-select"><input type="checkbox" class="row-select" aria-label="${selLabel}"${noDownload ? " disabled" : ""} /></div>
                 <div class="f-icon ${iconStr}" data-kind="${BrowseIcons.kindOf(f).kind}"><a class="f-icon-link" ${linkAttr} title="${iconLabel}" aria-label="${iconLabel}">${svgIcon(f)}</a></div>
-                <div class="f-name"><a class="f-link" ${linkAttr} title="${escapeHtml(searchResults ? f.relPath : f.name)}">${escapeHtml(f.name)}</a>${f.locked ? ` <span class="badge badge-locked">${escapeHtml(d.lockedBadge || "Locked")}</span>` : ""}</div>
+                <div class="f-name"><a class="f-link" ${linkAttr} title="${escapeHtml(searchResults ? f.relPath : f.name)}">${escapeHtml(f.name)}</a>${f.locked ? ` <span class="badge badge-locked">${escapeHtml(d.lockedBadge || "Locked")}</span>` : ""}${noDownload && !f.locked ? ` <span class="badge badge-locked">${escapeHtml(d.viewOnlyBadge || "View only")}</span>` : ""}</div>
                 <div><span class="badge ${badgeStr}">${badgeLabel}</span></div>
                 <div class="f-sub">${f.locked ? '—' : fmtDate(f.modified, lang)}</div>
                 <div class="f-sub">${f.type === 'directory' || f.locked ? '—' : humanSize(f.size, lang)}</div>
@@ -518,7 +523,7 @@ const BrowsePage = (function () {
         // Hand the rendered set to BulkDownload so select-all scopes to exactly
         // these rows and checkbox state survives the next filter change.
         // Locked rows cannot be selected, so select-all never includes them.
-        if (typeof BulkDownload !== "undefined") BulkDownload.setRendered(files.filter(f => !f.locked));
+        if (typeof BulkDownload !== "undefined") BulkDownload.setRendered(files.filter(f => !f.locked && !(f.viewOnly && f.type !== "directory")));
     }
 
     /* ═══════════════════════════════════════════════════════════════════════════════

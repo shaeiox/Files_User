@@ -130,8 +130,8 @@ describe('availability window', () => {
     test('bounds are inclusive', () => {
         const policy = { valid: true, isPublished: true, isLocked: false, accessMode: 'public', fileId: 1, availableFrom: 100, availableUntil: 200 };
         const grants = new Map();
-        assert.strictEqual(accessPolicy.evaluate(policy, grants, null, 100), 'allow');
-        assert.strictEqual(accessPolicy.evaluate(policy, grants, null, 200), 'allow');
+        assert.strictEqual(accessPolicy.evaluate(policy, grants, null, 100), 'download');
+        assert.strictEqual(accessPolicy.evaluate(policy, grants, null, 200), 'download');
         assert.strictEqual(accessPolicy.evaluate(policy, grants, null, 99), 'hidden');
         assert.strictEqual(accessPolicy.evaluate(policy, grants, null, 201), 'hidden');
     });

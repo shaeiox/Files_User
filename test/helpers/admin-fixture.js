@@ -202,14 +202,99 @@ function createFixture({ tree = { 'docs/readme.txt': 'hello' } } = {}) {
             ).run(clientPath));
         },
 
-        /** Sets a grant/deny for a user on a governed path (null revokes). */
-        setPermission(clientPath, userId, permission) {
+        /** Sets a grant/deny for a user on a governed path (null revokes); `level` needs useLevels(). */
+        setPermission(clientPath, userId, permission, level) {
             write((db) => {
                 const id = fileId(db, clientPath, false);
                 db.prepare('DELETE FROM user_file_permissions WHERE file_id = ? AND user_id = ?').run(id, userId);
-                if (permission) {
+                if (permission && level) {
+                    db.prepare('INSERT INTO user_file_permissions (file_id, user_id, permission, level, created_at) VALUES (?, ?, ?, ?, ?)')
+                        .run(id, userId, permission, level, Date.now());
+                } else if (permission) {
                     db.prepare('INSERT INTO user_file_permissions (file_id, user_id, permission, created_at) VALUES (?, ?, ?, ?)')
                         .run(id, userId, permission, Date.now());
+                }
+            });
+        },
+
+        /**
+         * Upgrades the fixture to admin schema v4 (access levels and groups),
+         * applying admin migrations 3 and 4 verbatim when absent.
+         */
+        useLevels() {
+            if (!write((db) => db.prepare("SELECT 1 FROM sqlite_master WHERE name = 'portal_nav_folders'").get())) fixture.setNav([]);
+            write((db) => {
+                if (db.prepare("SELECT 1 FROM sqlite_master WHERE name = 'user_groups'").get()) return;
+                db.exec(`
+                    ALTER TABLE file_access_policies ADD COLUMN default_level TEXT NOT NULL DEFAULT 'download'
+                        CHECK (default_level IN ('view','download'));
+                    ALTER TABLE user_file_permissions ADD COLUMN level TEXT NOT NULL DEFAULT 'download'
+                        CHECK (level IN ('view','download'));
+                    CREATE TABLE user_groups (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        name TEXT NOT NULL UNIQUE COLLATE NOCASE,
+                        description TEXT,
+                        created_at INTEGER NOT NULL,
+                        updated_at INTEGER NOT NULL
+                    );
+                    CREATE TABLE user_group_members (
+                        group_id INTEGER NOT NULL REFERENCES user_groups(id) ON DELETE CASCADE,
+                        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        created_at INTEGER NOT NULL,
+                        PRIMARY KEY (group_id, user_id)
+                    );
+                    CREATE TABLE group_file_permissions (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        file_id INTEGER NOT NULL REFERENCES files(id) ON DELETE CASCADE,
+                        group_id INTEGER NOT NULL REFERENCES user_groups(id) ON DELETE CASCADE,
+                        permission TEXT NOT NULL CHECK (permission IN ('grant','deny')),
+                        level TEXT NOT NULL DEFAULT 'download' CHECK (level IN ('view','download')),
+                        granted_by INTEGER REFERENCES users(id),
+                        created_at INTEGER NOT NULL,
+                        UNIQUE (file_id, group_id)
+                    );`);
+                db.prepare('INSERT INTO schema_migrations (version, applied_at) VALUES (4, ?)').run(Date.now());
+            });
+        },
+
+        /** Sets a policy's default level (schema v4). */
+        setDefaultLevel(clientPath, level) {
+            write((db) => db.prepare(
+                'UPDATE file_access_policies SET default_level = ? WHERE file_id = (SELECT id FROM files WHERE client_path = ?)'
+            ).run(level, clientPath));
+        },
+
+        /** Creates a group with these members (schema v4); returns its id. */
+        addGroup(name, memberIds = []) {
+            return write((db) => {
+                const now = Date.now();
+                const id = Number(db.prepare('INSERT INTO user_groups (name, created_at, updated_at) VALUES (?, ?, ?)')
+                    .run(name, now, now).lastInsertRowid);
+                for (const userId of memberIds) {
+                    db.prepare('INSERT INTO user_group_members (group_id, user_id, created_at) VALUES (?, ?, ?)').run(id, userId, now);
+                }
+                return id;
+            });
+        },
+
+        /** Replaces a group's members (schema v4). */
+        setGroupMembers(groupId, memberIds) {
+            write((db) => {
+                db.prepare('DELETE FROM user_group_members WHERE group_id = ?').run(groupId);
+                for (const userId of memberIds) {
+                    db.prepare('INSERT INTO user_group_members (group_id, user_id, created_at) VALUES (?, ?, ?)').run(groupId, userId, Date.now());
+                }
+            });
+        },
+
+        /** Sets a grant/deny for a group on a governed path (null revokes; schema v4). */
+        setGroupPermission(clientPath, groupId, permission, level = 'download') {
+            write((db) => {
+                const id = fileId(db, clientPath, false);
+                db.prepare('DELETE FROM group_file_permissions WHERE file_id = ? AND group_id = ?').run(id, groupId);
+                if (permission) {
+                    db.prepare('INSERT INTO group_file_permissions (file_id, group_id, permission, level, created_at) VALUES (?, ?, ?, ?, ?)')
+                        .run(id, groupId, permission, level, Date.now());
                 }
             });
         },

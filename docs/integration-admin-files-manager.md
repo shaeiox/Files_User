@@ -45,10 +45,11 @@ only:
 | Admin table | Columns used | Purpose |
 |---|---|---|
 | `users` | `id`, `username`, `role`, `status`, `password_hash`, `locked_until` | Login and session validity |
-| `files` ⋈ `file_access_policies` | `client_path`, `is_directory`, `access_mode`, `is_published`, `is_locked`, `available_from`, `available_until` | Access decisions |
-| `user_file_permissions` | `file_id`, `user_id`, `permission` | Per-user grant / deny |
+| `files` ⋈ `file_access_policies` | `client_path`, `is_directory`, `access_mode`, `is_published`, `is_locked`, `available_from`, `available_until`, `default_level` (v4) | Access decisions |
+| `user_file_permissions` | `file_id`, `user_id`, `permission`, `level` (v4) | Per-user grant / deny |
+| `user_group_members`, `group_file_permissions` (v4) | `group_id`, `user_id`; `file_id`, `group_id`, `permission`, `level` | Group grants, folded into each member's grant |
 | `audit_logs` | latest successful `user.revoke_sessions` per `target_id` | "Revoke sessions" |
-| `schema_migrations` | `MAX(version)` | Must be ≤ 2 |
+| `schema_migrations` | `MAX(version)` | Must be ≤ 4 (v3 adds navbar folders, v4 levels and groups) |
 
 Not used, by design: `users.email` (the admin logs in by username only), `users.failed_login_count`
 (updating it would be a write), and `sessions` (admin-panel sessions; a normal admin logout also
@@ -68,18 +69,26 @@ a malformed permission row poisons its file's policy. A user row outside its dom
 | Invalid row | hidden | hidden |
 | `is_published = 0` | hidden | hidden |
 | Before `available_from` / after `available_until` (bounds inclusive) | hidden | hidden |
-| `deny` row for this user (any `access_mode`) | — | hidden |
+| `deny` row for this user or one of their groups (any `access_mode`) | — | hidden |
 | `is_locked = 1` | **locked** | rules below |
-| `public` | allow | allow |
-| `authenticated` | hidden | allow |
-| `restricted` | hidden | allow only with a `grant` on **this** policy's file |
+| `public` | `default_level` | `default_level`, raised by a grant |
+| `authenticated` | hidden | `default_level`, raised by a grant |
+| `restricted` | hidden | the level granted to the user or their groups on **this** policy's file; none → hidden |
+
+Levels (admin schema v4) are `view` < `download`. A user's grants and their groups' grants on one
+file fold into one level: any deny wins, else the highest. Before v4 every grant and every
+non-restricted policy meant `download`. Listings, search, navbar, categories and the release list
+need `view`; download, hash, ZIP entries and `/release{8,9}/latest` need `download` (`latest` serves
+the newest build the caller may download). The policies govern this portal only: the admin
+application never enforces them on itself, and its administrators get no bypass here. A visible path below `download` is listed with
+`viewOnly: true` and its content endpoints answer `403 VIEW_ONLY`.
 
 ### 3.2 Folders and combination
 
 - A policy applies to its path **and everything inside it**, decided by path. `is_directory` is not
   consulted because the admin's own "Set a policy" form never sets it.
 - The decision for a path combines the policy on the path, on every parent folder, and on `/`:
-  **hidden > locked > allow**. No applicable policy → allow (ungoverned).
+  **hidden > locked > the lowest level**. No applicable policy → allow at `download` (ungoverned).
 - A grant on a restricted folder covers ungoverned contents. A restricted file inside it with its
   own policy still needs its own grant.
 - A `files` row whose policy was deleted is ungoverned; leftover permission rows are ignored.

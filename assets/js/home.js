@@ -596,10 +596,12 @@ const HomePage = (function () {
     // A locked file opens sign-in (FileActions download guard); a locked folder
     // navigates to its page, which shows the sign-in state.
     const linkAttr = item.locked && item.type === "file" ? 'href="#" data-locked="true"'
+      : item.viewOnly && item.type === "file" ? 'aria-disabled="true"'
       : `href="${escapeHtml(item.href)}"${item.type === "file" ? ' data-file="true"' : ""}`;
     row.innerHTML = `
       <div class="res-info">
-        <a ${linkAttr}>${escapeHtml(item.name)}</a>${item.locked ? ` <span class="badge badge-locked">${escapeHtml(d.lockedBadge || "Locked")}</span>` : ""}
+        <a ${linkAttr}>${escapeHtml(item.name)}</a>${item.locked ? ` <span class="badge badge-locked">${escapeHtml(d.lockedBadge || "Locked")}</span>`
+          : item.viewOnly && item.type === "file" ? ` <span class="badge badge-locked">${escapeHtml(d.viewOnlyBadge || "View only")}</span>` : ""}
         <div class="res-path">${escapeHtml(item.path || item.href)}</div>
       </div>
       <div>
@@ -655,7 +657,7 @@ const HomePage = (function () {
           ? ResourceService.browseHref(e.path)
           : ResourceService.downloadHref(e.path);
 
-        addResult({ name: e.name, href, path: e.path, type, locked: e.locked === true });
+        addResult({ name: e.name, href, path: e.path, type, locked: e.locked === true, viewOnly: e.viewOnly === true });
         found++;
       }
 
