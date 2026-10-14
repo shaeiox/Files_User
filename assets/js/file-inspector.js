@@ -174,6 +174,12 @@ const FileInspector = (function () {
         });
     }
 
+    /** @brief How many selected files the ZIP will hold — folders are not archived. */
+    function zipCount() {
+        const n = tabItems.filter(t => t.type === "file").length || 1;
+        return escapeHtml((dict().bulkSelected || "%n selected").replace("%n", n.toLocaleString(lang() === "fa" ? "fa-IR" : "en-US")));
+    }
+
     /** @brief Renders the card markup for one item. */
     function cardHtml(item) {
         const d = dict();
@@ -207,6 +213,11 @@ const FileInspector = (function () {
           ${BrowseIcons.get("download", 16)}<span>${escapeHtml(d.btnDownload || "Download")}</span>
           <span class="insp-btn-sub">${escapeHtml(humanSize(item.size))}</span>
         </a>
+        <button class="insp-btn insp-btn-ghost insp-zip" id="inspZip" type="button"
+                title="${escapeHtml(d.bulkZipTitle || "Download as ZIP")}">
+          ${BrowseIcons.get("download", 16)}<span>${escapeHtml(d.bulkZip || "Download ZIP")}</span>
+          <span class="insp-btn-sub">${zipCount()}</span>
+        </button>
       </div>` : ""}
 
       <dl class="insp-specs">
@@ -441,6 +452,17 @@ const FileInspector = (function () {
                 // showing the next one rather than closing outright.
                 if (typeof BulkDownload !== "undefined" && item) BulkDownload.toggle(item.relPath, false);
                 else close();
+            });
+        }
+
+        // Same server archive as the bulk bar: every selected file, scoped to this folder.
+        const zipBtn = document.getElementById("inspZip");
+        if (zipBtn && typeof BulkDownload !== "undefined") {
+            zipBtn.addEventListener("click", async () => {
+                zipBtn.disabled = true;
+                zipBtn.classList.add("is-busy");
+                try { await BulkDownload.downloadZip(); }
+                finally { zipBtn.disabled = false; zipBtn.classList.remove("is-busy"); }
             });
         }
 

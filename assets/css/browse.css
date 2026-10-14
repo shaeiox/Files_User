@@ -1353,3 +1353,34 @@
         font-size: var(--text-headline-sm);
     }
 }
+/* ── CARD ZIP ACTION ───────────────────────────────────────────────────── */
+/* Actions rise in one after another as the card opens. */
+.browse-inspector.is-open .insp-actions > * {
+    animation: fadeUp 280ms var(--ease) both;
+}
+
+.browse-inspector.is-open .insp-actions > :nth-child(2) {
+    animation-delay: 70ms;
+}
+
+.insp-btn svg {
+    transition: transform var(--dur-2) var(--ease);
+}
+
+.insp-btn:hover:not(:disabled) svg {
+    transform: translateY(2px);
+}
+
+.insp-btn:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.insp-zip.is-busy svg {
+    animation: insp-zip-drop 700ms var(--ease) infinite;
+}
+
+@keyframes insp-zip-drop {
+    0%   { transform: translateY(-3px); opacity: 0.4; }
+    60%  { transform: translateY(2px);  opacity: 1; }
+    100% { transform: translateY(2px);  opacity: 0.4; }
+}

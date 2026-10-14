@@ -1187,3 +1187,49 @@ kbd {
 [data-theme="light"] .perf-dropdown-wrap.show .perf-pill {
     background: rgba(28, 28, 30, 0.04);
 }
+/* ─────────────────────────────────────────────
+   Navbar version label + sign-in toggle
+   ───────────────────────────────────────────── */
+.nav-version {
+    align-self: flex-start;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: var(--bg-hover);
+    color: var(--text-3);
+    font-size: var(--text-label-mono-sm);
+    font-variant-numeric: tabular-nums;
+    animation: fadeUp 320ms var(--ease) both;
+}
+
+.auth-btn .icon-logout {
+    opacity: 0;
+    transform: translateX(-8px) scale(0.7);
+}
+
+.auth-btn .icon-login {
+    opacity: 1;
+    transform: none;
+}
+
+.auth-btn.is-auth .icon-login {
+    opacity: 0;
+    transform: translateX(8px) scale(0.7);
+}
+
+.auth-btn.is-auth .icon-logout {
+    opacity: 1;
+    transform: none;
+}
+
+.auth-btn.is-auth {
+    color: var(--text-accent);
+    border-color: var(--border-focus);
+}
+
+/* The arrow nudges toward the door on hover: in for sign-in, out for sign-out. */
+.auth-btn:hover:not(.is-auth) .icon-login { transform: translateX(2px); }
+.auth-btn.is-auth:hover .icon-logout { transform: translateX(2px); }
+.auth-btn:active { transform: scale(0.94); }
+.auth-btn:disabled { cursor: progress; opacity: 0.6; }
+.auth-btn:not([hidden]) { animation: scaleIn 260ms var(--ease) both; }
+.auth-btn[hidden] { display: none; }

@@ -251,12 +251,14 @@ const ResourceService = (function () {
         // What a visitor may see depends on who they are (admin access policies),
         // so the cached category view must not outlive a sign-in or sign-out.
         clearCache();
+        document.dispatchEvent(new CustomEvent("auth:changed"));
         return data;
     }
 
     async function logout() {
         await fetch("/api/auth/logout", { method: "POST" });
         clearCache();
+        document.dispatchEvent(new CustomEvent("auth:changed"));
     }
 
     return {

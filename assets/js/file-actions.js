@@ -203,7 +203,48 @@ const FileActions = (function () {
         }, true);
     }
 
+    /**
+     * @brief Navbar sign-in / sign-out toggle plus the version label, both fed by
+     *        /api/auth/status. Hidden when auth is disabled on the server.
+     */
+    function bindNavAuth() {
+        const btn = document.getElementById("authBtn");
+        if (!btn || typeof ResourceService === "undefined") return;
+        let status = null;
+
+        const paint = () => {
+            const d = typeof window.getDict === "function" ? window.getDict() : {};
+            const on = !!(status && status.enabled && status.authenticated);
+            const name = on && status.user && status.user.username;
+            const label = on
+                ? (d.btnSignOut || "Sign Out") + (name ? " · " + name : "")
+                : (d.btnSignIn || "Sign In");
+            btn.hidden = !(status && status.enabled);
+            btn.classList.toggle("is-auth", on);
+            btn.title = label;
+            btn.setAttribute("aria-label", label);
+
+            const v = document.getElementById("appVersion");
+            if (v && status && status.version) { v.textContent = "v" + status.version; v.hidden = false; }
+        };
+
+        const sync = () => ResourceService.checkAuthStatus()
+            .then((s) => { status = s; paint(); })
+            .catch(() => { /* status unavailable: leave the button as it is */ });
+
+        btn.addEventListener("click", async () => {
+            if (!(status && status.authenticated)) return signIn();
+            btn.disabled = true;
+            try { await ResourceService.logout(); refreshView(); }
+            finally { btn.disabled = false; }
+        });
+        document.addEventListener("auth:changed", sync);
+        document.addEventListener("i18n:changed", paint);
+        sync();
+    }
+
     bindGuard();
+    bindNavAuth();
 
     return { render, preflight, download, signIn };
 })();
