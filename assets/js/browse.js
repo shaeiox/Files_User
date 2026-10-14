@@ -59,6 +59,25 @@ const BrowsePage = (function () {
     /** @type {string} Current local search query (case-insensitive) */
     let searchQuery = "";
 
+    /** @type {Array|null} Recursive search hits under the current folder (null = not searching) */
+    let searchResults = null;
+
+    /** @type {number} Guards against out-of-order search responses */
+    let searchSeq = 0;
+
+    /** @brief Maps an API entry (listing or search hit) to a table row model. */
+    function mapEntry(x, relPath) {
+        return {
+            name: String(x.name),
+            relPath: x.path || (relPath ? relPath.replace(/\/+$/, "") + "/" + x.name : x.name),
+            type: x.type === "directory" ? "directory" : "file",
+            size: Number(x.size || 0),
+            modified: x.mtime || x.modified || x.time || 0,
+            // Admin policy: visible by name only until the visitor signs in.
+            locked: x.locked === true
+        };
+    }
+
     /** @type {string} Active extension chip ('' means no extension filter) */
     let activeExt = "";
 
@@ -82,6 +101,8 @@ const BrowsePage = (function () {
         activeType = "all";
         activeSort = "name-asc";
         searchQuery = "";
+        searchResults = null;
+        searchSeq++;
         activeExt = "";
 
         document.title = d.browseTitle || "Downloads • CloudAvid";
@@ -263,15 +284,7 @@ const BrowsePage = (function () {
             allFiles = data
                 .filter(x => x && x.name && x.name !== "." && x.name !== "..")
                 .filter(x => !isHidden(x.name))
-                .map(x => ({
-                    name: String(x.name),
-                    relPath: x.path || (relPath ? relPath.replace(/\/+$/, "") + "/" + x.name : x.name),
-                    type: x.type === "directory" ? "directory" : "file",
-                    size: Number(x.size || 0),
-                    modified: x.mtime || x.modified || x.time || 0,
-                    // Admin policy: visible by name only until the visitor signs in.
-                    locked: x.locked === true
-                }));
+                .map(x => mapEntry(x, relPath));
 
             renderChips(d);
             applyFiltersAndRender();
@@ -381,10 +394,9 @@ const BrowsePage = (function () {
      */
     function applyFiltersAndRender() {
         const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
-        let filtered = [...allFiles];
-
-        // 1. Local Search Filter
-        if (searchQuery) {
+        // 1. Search: recursive server hits when available, else filter this folder
+        let filtered = searchResults ? [...searchResults] : [...allFiles];
+        if (searchQuery && !searchResults) {
             filtered = filtered.filter(f => f.name.toLowerCase().includes(searchQuery));
         }
 
@@ -492,7 +504,7 @@ const BrowsePage = (function () {
             row.innerHTML = `
                 <div class="c-select"><input type="checkbox" class="row-select" aria-label="${selLabel}"${f.locked ? " disabled" : ""} /></div>
                 <div class="f-icon ${iconStr}" data-kind="${BrowseIcons.kindOf(f).kind}"><a class="f-icon-link" ${linkAttr} title="${iconLabel}" aria-label="${iconLabel}">${svgIcon(f)}</a></div>
-                <div class="f-name"><a class="f-link" ${linkAttr} title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</a>${f.locked ? ` <span class="badge badge-locked">${escapeHtml(d.lockedBadge || "Locked")}</span>` : ""}</div>
+                <div class="f-name"><a class="f-link" ${linkAttr} title="${escapeHtml(searchResults ? f.relPath : f.name)}">${escapeHtml(f.name)}</a>${f.locked ? ` <span class="badge badge-locked">${escapeHtml(d.lockedBadge || "Locked")}</span>` : ""}</div>
                 <div><span class="badge ${badgeStr}">${badgeLabel}</span></div>
                 <div class="f-sub">${f.locked ? '—' : fmtDate(f.modified, lang)}</div>
                 <div class="f-sub">${f.type === 'directory' || f.locked ? '—' : humanSize(f.size, lang)}</div>
@@ -517,9 +529,28 @@ const BrowsePage = (function () {
         // 1. Search Input Binding
         const searchInput = document.getElementById("localSearchInput");
         if (searchInput) {
+            let timer = null;
             searchInput.addEventListener("input", (e) => {
                 searchQuery = e.target.value.trim().toLowerCase();
-                applyFiltersAndRender();
+                searchResults = null;
+                const seq = ++searchSeq;
+                applyFiltersAndRender(); // instant filter of this folder meanwhile
+                clearTimeout(timer);
+                // The server needs 3+ chars; it then searches every subdirectory.
+                if (searchQuery.length < 3) return;
+                timer = setTimeout(async () => {
+                    const relPath = currentPath.replace(/^\/browse\/?/, "").replace(/\/+$/, "");
+                    try {
+                        const data = await ResourceService.search(searchQuery, { path: relPath, limit: 200 });
+                        if (seq !== searchSeq) return;
+                        searchResults = (data.results || [])
+                            .filter(x => x && x.name && !isHidden(x.name))
+                            .map(x => mapEntry(x, relPath));
+                        applyFiltersAndRender();
+                    } catch (err) {
+                        console.error("[BrowsePage] Search Error:", err);
+                    }
+                }, 250);
             });
         }
 

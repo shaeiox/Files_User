@@ -190,6 +190,7 @@ const ResourceService = (function () {
         const params = new URLSearchParams();
         params.set("q", query || "");
         if (options.limit) params.set("limit", String(options.limit));
+        if (options.path) params.set("path", options.path);
         const res = await fetch("/api/search?" + params.toString(), { cache: "no-store" });
         if (!res.ok) throw await parseError(res);
         return res.json();

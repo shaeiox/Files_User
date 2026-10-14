@@ -254,6 +254,11 @@ describe('search', () => {
         assert.deepStrictEqual((await search(await as('bob'), 'secret')).json.results, []);
         assert.deepStrictEqual((await search(await as('bob'), 'future')).json.results, []);
     });
+    test('path scopes the search to a subdirectory, including nested folders', async () => {
+        const res = await search(await as('alice'), 'c.iso', '&path=beta');
+        assert.deepStrictEqual(res.json.results.map((r) => r.path), ['beta/sub/c.iso']);
+        assert.deepStrictEqual((await search(await as('alice'), 'c.iso', '&path=docs')).json.results, []);
+    });
     test('the limit counts only what the caller may see', async () => {
         const res = await search(anon(), '.txt', '&limit=3');
         assert.strictEqual(res.json.results.length, 3);
