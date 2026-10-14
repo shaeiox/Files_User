@@ -293,7 +293,7 @@ describe('router answers the decision', () => {
             adminDb.resetSnapshot();
         }
     });
-    test('the portal RELEASE_PVM login rule still applies on top of admin policies', async () => {
+    test('RELEASE_PVM alone no longer requires login; admin policies still apply', async () => {
         fs.mkdirSync(path.join(fx.filesRoot, 'release', 'el9'), { recursive: true });
         fs.writeFileSync(path.join(fx.filesRoot, 'release', 'el9', 'pvm-release-1.0.0-el9.tgz'), 'r1');
         fs.writeFileSync(path.join(fx.filesRoot, 'release', 'el9', 'pvm-release-2.0.0-el9.tgz'), 'r2');
@@ -301,9 +301,10 @@ describe('router answers the decision', () => {
         applyEnv({ RELEASE_PVM: path.join(fx.filesRoot, 'release') });
         adminDb.resetSnapshot();
         try {
+            // Release protection is the admin lock on the folder (test/release-access.test.js).
             const anon = client(base);
-            assert.strictEqual((await anon.get('/api/download/release/el9/pvm-release-1.0.0-el9.tgz')).status, 401);
-            assert.strictEqual((await anon.get('/release9/latest')).status, 401);
+            assert.strictEqual((await anon.get('/api/download/release/el9/pvm-release-1.0.0-el9.tgz')).status, 200);
+            assert.strictEqual((await anon.get('/release9/latest')).body.toString(), 'r1');
 
             const user = client(base);
             await user.login('alice', 'password123');

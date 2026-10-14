@@ -119,7 +119,7 @@ const FileInspector = (function () {
         // Built from the app's real download target, never a hard-coded domain.
         const href = ResourceService.downloadHref(item.relPath);
         const origin = window.location.origin || "";
-        return `curl -fSL ${origin}${href} -o ${item.name}`;
+        return `curl -fSL${ResourceService.cliUserArg()} ${origin}${href} -o ${item.name}`;
     }
 
     /**

@@ -752,8 +752,11 @@ const HomePage = (function () {
       }
 
     });
-    window.triggerAuthModal = showLoginModal;
+    document.getElementById('authUsername').focus();
   }
+
+  // Global entry point for pages that load before (or without) HomePage.render.
+  window.triggerAuthModal = showLoginModal;
 
   /* ═══════════════════════════════════════════════
      PUBLIC API

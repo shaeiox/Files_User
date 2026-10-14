@@ -231,7 +231,20 @@ resolves **inside** `FILES_ROOT`; if it lives outside, `pathRequiresAuth()` retu
 and they are public. Any new route that streams release bytes must be added to the list —
 the gate matches pathnames, not the files they resolve to.
 
-**Source:** `lib/auth-service.js` → `pathRequiresAuth()`, `lib/files-service.js` → `resolveReleaseRoot()`
+This `.env` gate applies in **legacy mode only**. In admin integration mode release protection is
+the admin lock on the `RELEASE_PVM` folder, and the server logs a warning at startup while that
+folder is open to anonymous callers.
+
+**Source:** `lib/auth-service.js` → `pathRequiresAuth()`, `lib/files-service.js` → `releaseRel()`
+
+### Command-line (HTTP Basic) credentials
+
+Content routes accept `Authorization: Basic` for curl/PowerShell (see `docs/API.md`). Safeguards:
+same `login()` path as the modal (per-username lockout, admin status/`locked_until`, fail-closed);
+request-scoped, never a cookie; refused over plain HTTP except direct loopback
+(`INSECURE_TRANSPORT`, password not checked); the header and password are never logged. The
+`WWW-Authenticate` challenge is sent only to clients without `Sec-Fetch-Mode`; a misdetected old
+browser would show its native dialog, but access control is unchanged.
 
 ---
 

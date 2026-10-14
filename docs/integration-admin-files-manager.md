@@ -84,7 +84,13 @@ a malformed permission row poisons its file's policy. A user row outside its dom
   own policy still needs its own grant.
 - A `files` row whose policy was deleted is ungoverned; leftover permission rows are ignored.
 - `users.role` never changes the outcome (admins get no bypass).
-- The portal's own `RELEASE_PVM` login rule still applies on top and can only add a `401`.
+- `RELEASE_PVM` alone no longer requires login in integration mode. Release protection is the
+  admin lock on the `RELEASE_PVM` folder (or an OS subfolder such as `el8`): locked → anonymous
+  `/api/releases` and `/release{8,9}/latest` answer `401` and the Release page asks for sign-in;
+  unlocked → public; hidden → the page shows no releases. Changes apply within `ADMIN_SYNC_TTL_MS`.
+  At startup the portal logs a warning while the release folder is open to anonymous callers.
+  **Upgrade note:** lock the release folder in the Admin Files Manager *before* upgrading a
+  deployment that relied on the old implicit gate, or releases become public.
 
 ### 3.3 Owner decisions (where the admin spec was silent or contradictory)
 

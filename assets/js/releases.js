@@ -87,11 +87,11 @@ const ReleasePage = (function () {
     const CURL = { posix: "curl", pwsh: "curl.exe" };
 
     function fileCommand(relPath) {
-        return CURL[shell] + " -fLO " + shellUrl(ResourceService.downloadHref(relPath));
+        return CURL[shell] + " -fLO" + ResourceService.cliUserArg() + " " + shellUrl(ResourceService.downloadHref(relPath));
     }
 
     function latestCommand() {
-        return CURL[shell] + " -fLOJ " + shellUrl(LATEST[activeOs]);
+        return CURL[shell] + " -fLOJ" + ResourceService.cliUserArg() + " " + shellUrl(LATEST[activeOs]);
     }
 
     function verifyCommand(relPath, value) {
@@ -217,7 +217,7 @@ const ReleasePage = (function () {
                 <button type="button" class="rel-btn rel-btn-primary" id="relAuthBtn">${escapeHtml(d.btnAuth || "Authenticate to Access")}</button>
               </div>`;
             document.getElementById("relAuthBtn").addEventListener("click", () => {
-                if (typeof window.triggerAuthModal === "function") window.triggerAuthModal(load);
+                FileActions.signIn(load);
             });
         } else if (status === "error") {
             body.innerHTML = `
@@ -356,6 +356,8 @@ const ReleasePage = (function () {
         clearTimeout(loadingTimer);
         loadingTimer = setTimeout(() => { if (id === requestId && status === "loading") renderLoading(); }, LOADING_DELAY);
         try {
+            // Auth status first: the shown commands add -u for a signed-in visitor.
+            await ResourceService.checkAuthStatus().catch(() => null);
             const data = await ResourceService.getReleases(LIST_LIMIT, activeOs);
             if (id !== requestId) return;
             items = data.items;

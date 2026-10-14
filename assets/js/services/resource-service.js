@@ -220,9 +220,24 @@ const ResourceService = (function () {
     }
 
     // --- Auth API ---
+    let lastAuth = null;
+
     async function checkAuthStatus() {
         const res = await fetch("/api/auth/status", { cache: "no-store" });
-        return res.json();
+        lastAuth = await res.json();
+        return lastAuth;
+    }
+
+    /**
+     * ` -u <username>` for shown curl commands when the visitor is signed in: the
+     * terminal has no browser session, so curl must prompt for the password
+     * itself. The password is never part of the command. A username that is not
+     * shell-safe in both POSIX shells and PowerShell becomes a placeholder.
+     */
+    function cliUserArg() {
+        if (!lastAuth || !lastAuth.enabled || !lastAuth.authenticated || !lastAuth.user) return "";
+        const name = String(lastAuth.user.username || "");
+        return " -u " + (/^[A-Za-z0-9._@-]+$/.test(name) ? name : "<username>");
     }
 
     async function login(username, password) {
@@ -258,6 +273,7 @@ const ResourceService = (function () {
         encodeRelPath,
         inferIcon,
         checkAuthStatus,
+        cliUserArg,
         login,
         logout
     };

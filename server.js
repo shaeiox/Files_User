@@ -14,6 +14,7 @@ const logger = require("./lib/logger");
 const apiRouter = require("./lib/api-router");
 const filesService = require("./lib/files-service");
 const adminDb = require("./lib/admin-db");
+const accessPolicy = require("./lib/access-policy");
 const { c } = logger;
 
 // Configuration gate: in integration mode a missing or invalid ADMIN_DB_PATH
@@ -24,6 +25,13 @@ if (configProblems.length) {
     logger.error("Configuration is not usable — refusing to start:");
     for (const problem of configProblems) logger.error("  • " + problem);
     process.exit(1);
+}
+
+// Integration mode: RELEASE_PVM no longer implies sign-in; the admin lock on the
+// release folder does. Say so once when that folder is open to anonymous callers.
+const releaseRel = adminDb.isIntegrationEnabled() && filesService.releaseRel(PROJECT_ROOT);
+if (releaseRel && accessPolicy.decide(releaseRel, null).result === "allow") {
+    logger.warn(`Release folder "${releaseRel}" is public. Lock it in the Admin Files Manager to require sign-in for releases.`);
 }
 
 const HOST = "0.0.0.0";

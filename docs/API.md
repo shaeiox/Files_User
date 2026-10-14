@@ -32,6 +32,41 @@ and the requested path falls under the `RELEASE_PVM` subtree, `pathRequiresAuth(
 true and the request requires a valid session. The check is **string-prefix based and runs
 before any filesystem resolution** — path containment does not protect it.
 
+**Integration mode:** `pathRequiresAuth()` is off; the admin lock on the `RELEASE_PVM` folder
+decides instead (see `docs/integration-admin-files-manager.md`). `/api/releases` answers
+`401 AUTH_REQUIRED` when the release root (or `?os=` subfolder) is locked for the caller and
+`200 {items: []}` when it is hidden.
+
+### Command-line clients (HTTP Basic)
+
+`GET`/`HEAD` on `/api/download/*`, `/api/hash/*`, `/api/download-zip` and `/release{8,9}/latest`
+also accept `Authorization: Basic`, so `curl -u <username>` prompts for the password in the
+terminal and the download proceeds. Basic is used only when there is no valid session cookie,
+goes through the same `login()` (lockout, admin account status), is authorized under the same
+policy, and never sets a cookie. It is ignored on every other route.
+
+- A `401` on those routes adds `WWW-Authenticate: Basic realm="CloudAvid Downloads", charset="UTF-8"`
+  **only when the request has no `Sec-Fetch-Mode` header** (i.e. not a browser), so browsers keep
+  the portal's sign-in modal instead of a native dialog.
+- For such clients the error body is one line of `text/plain` unless `Accept` includes
+  `application/json`: `Invalid username or password.`, `Too many failed sign-in attempts…`, or
+  the re-run hint for `AUTH_REQUIRED`.
+- `400 INSECURE_TRANSPORT`: Basic credentials over plain HTTP are refused (the password is not
+  checked) unless the request is TLS (`X-Forwarded-Proto: https`) or comes directly from loopback
+  with no proxy headers.
+
+```bash
+curl.exe -fLOJ -u alice "https://files.example.com/release9/latest"
+```
+
+```powershell
+Invoke-WebRequest "https://files.example.com/release9/latest" -Credential (Get-Credential) -Authentication Basic -OutFile pkg.rpm
+```
+
+Limitations: plain curl prompts only for the password (the username is on the command line);
+Windows PowerShell 5.1 `Get-Credential` opens a dialog; each command asks again (no stored CLI
+session).
+
 **When adding an endpoint, classify its auth requirement explicitly.** Anything not listed as
 Conditional is reachable without a session.
 
@@ -486,6 +521,7 @@ With HTTP status code set by `err.httpStatus`.
 | `400` | `NOT_A_DIRECTORY` | Path is a file, not a directory |
 | `400` | `NOT_A_FILE` | Path is a directory, not a file |
 | `401` | `INVALID_CREDENTIALS` | Wrong username or password |
+| `400` | `INSECURE_TRANSPORT` | Basic credentials sent over plain HTTP |
 | `403` | `AUTH_DISABLED` | Auth is off; login not possible |
 | `403` | `PATH_TRAVERSAL` | Resolved path is outside `FILES_ROOT` |
 | `403` | `SYMLINK_TRAVERSAL` | Symlink target is outside `FILES_ROOT` |

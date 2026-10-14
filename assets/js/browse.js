@@ -300,18 +300,10 @@ const BrowsePage = (function () {
                   </div>
                 `;
 
+                // The locked state replaced the table shell, so fetchList() has nothing
+                // to render into; signIn() re-renders the whole route after login.
                 const btn = document.getElementById("browseAuthBtn");
-                if (btn) {
-                    btn.addEventListener("click", () => {
-                        if (typeof HomePage !== "undefined" && typeof HomePage.showLoginModal === "function") {
-                            HomePage.showLoginModal(fetchList);
-                        } else if (typeof window.triggerAuthModal === "function") {
-                            window.triggerAuthModal(fetchList);
-                        } else {
-                            Router.navigate("/");
-                        }
-                    });
-                }
+                if (btn) btn.addEventListener("click", () => FileActions.signIn());
                 return;
             }
 
