@@ -13,7 +13,18 @@ loadEnv(PROJECT_ROOT);
 const logger = require("./lib/logger");
 const apiRouter = require("./lib/api-router");
 const filesService = require("./lib/files-service");
+const adminDb = require("./lib/admin-db");
 const { c } = logger;
+
+// Configuration gate: in integration mode a missing or invalid ADMIN_DB_PATH
+// must stop the server. It must never start and silently serve governed files
+// as public. Any partial/inconsistent combination is refused here too.
+const configProblems = adminDb.validateStartup(PROJECT_ROOT);
+if (configProblems.length) {
+    logger.error("Configuration is not usable — refusing to start:");
+    for (const problem of configProblems) logger.error("  • " + problem);
+    process.exit(1);
+}
 
 const HOST = "0.0.0.0";
 const PORT = process.env.PORT || 4000;
@@ -39,6 +50,8 @@ ${c.cyan}${c.bold}
   ${c.green}➜${c.reset}  Health:      http://localhost:${PORT}/api/health
   ${c.green}➜${c.reset}  Files API:   http://localhost:${PORT}/api/files/
   ${c.green}➜${c.reset}  Auth Status: http://localhost:${PORT}/api/auth/status
+
+  ${c.green}➜${c.reset}  Admin gate:  ${adminDb.isIntegrationEnabled() ? `${c.green}enabled (admin.sqlite read-only)` : `${c.dim}legacy — all content public`}${c.reset}
 
   ${rootState}
   ${c.dim}Press Ctrl+C to stop${c.reset}
