@@ -262,7 +262,7 @@ const FileInspector = (function () {
     function errorText(err) {
         const d = dict();
         if (err && err.code === "FILE_TOO_LARGE") return d.shaTooLarge || "This file is too large to verify.";
-        if (err && err.code === "AUTH_REQUIRED") return d.shaForbidden || "You do not have access to this file.";
+        if (err && err.code === "AUTH_REQUIRED") return d.signInToVerify || "Sign in to verify this file.";
         if (err && (err.code === "NOT_FOUND" || err.code === "NOT_HASHABLE" || err.status === 404)) {
             return d.shaUnavailable || "The file is no longer available.";
         }
@@ -391,6 +391,8 @@ const FileInspector = (function () {
         } catch (err) {
             digest = null;
             digestError = errorText(err);
+            // The session ended or the file became locked: offer sign-in directly.
+            if (err && err.code === "AUTH_REQUIRED" && typeof FileActions !== "undefined") FileActions.signIn();
         } finally {
             verifying = false;
             refresh();

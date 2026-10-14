@@ -1,285 +1,208 @@
 # Integration: CloudAvid File Portal ↔ Dimension Files Manager
 
-Discovery report. **No code written.** This records what exists in both systems,
-how the two can act as one, the exact enforcement design, and the decisions still
-open before implementation.
+The Admin Files Manager (`D:\Projects\Admin-Files-Manager-fixed`) is where administrators manage
+users and file policies. This portal is the user-facing side and the **only** place those policies
+are enforced: the admin application stores them in `admin.sqlite` but does not apply them to any
+download (its ADR-009 §4).
 
-- Portal (consumer): `C:\PRO\files-server-web` — Node 24, no framework, hand-rolled HTTP.
-- Admin (owner): `D:\Projects\Admin-Files-Manager-fixed` — Node 24, `node:sqlite`.
+The portal reads `admin.sqlite` **read-only** and is never a second source of truth. An
+administrator configures users, restrictions and permissions once, in the admin app.
+
+Change record: `openspec/changes/enforce-admin-file-policies/` (proposal, specs, design, tasks).
 
 ---
 
-## 1. What each side actually is (verified)
+## 1. Configuration
 
-### Admin (owner of identity + policy)
-- DB: `D:\Projects\Admin-Files-Manager-fixed\data\admin.sqlite` (`journal_mode=delete`, single writer, **not** WAL).
-- Schema v2 (`src/db/schema.js`): `users`, `sessions`, `audit_logs`, `files`,
-  `file_access_policies`, `user_file_permissions`.
-- `STORAGE_ROOT=C:/Users/eleven/` (`.env`), data dir `<repo>/data`.
-- Live rows:
-  - `users`: `id=1 admin/admin/active`, `id=2 erfan/user/active`.
-  - `files`: one row — `id=1 client_path=/CodeGeeXProjects is_directory=0`.
-  - `file_access_policies`: one row — `access_mode=authenticated, is_published=0, is_locked=1`, window null.
-  - `user_file_permissions`: empty.
-- **The admin enforces nothing.** ADR-009 §4 and the file-access-policy spec
-  ("This Change Enforces Nothing Against A Real Download") state that
-  `fs.routes.js` read endpoints are deliberately not wired to policies. The
-  admin is a **write-only data model** today. All enforcement therefore lands in
-  the portal. Admin stays the sole writer of `admin.sqlite`.
-
-## 2. What the portal already does
-
-- `lib/auth-service.js` — HS256 JWT in an `avid_session` cookie, bcrypt/scrypt
-  `verifyPassword()`, in-memory lockout, `pathRequiresAuth()` (a **synchronous
-  string-prefix** check over the `RELEASE_PVM` subtree only).
-- `lib/api-router.js` — one gate at lines 87–95 calls `pathRequiresAuth(pathname)`
-  before handlers; `/api/download-zip` re-implements it against synthetic
-  `/api/files/<rel>` pathnames (lines 172–189).
-- `lib/files-service.js` — `resolveInsideRoot()` already enforces the `FILES_ROOT`
-  boundary **and** symlink escape (requirement 4 is satisfied here). Every
-  file-serving route funnels through `listPath`, `getDownloadTarget`,
-  `resolveReadableFile`, `searchEntries`, or `listLatestReleases`.
-- Portal `AUTH_ENABLED=false` and **`data/users.json` does not exist**.
-  (`verifySession()` calls an undefined `loadUsersSync` at line 656; the
-  ReferenceError is swallowed by `catch {}`, so the "USER_REVOKED" check is dead
-  code — a latent bug, not blocking.)
-
-## 3. How the two become one
-
-**Shared read-only SQLite.** Portal opens `admin.sqlite` with
-`new DatabaseSync(path, { readOnly: true })` (built into Node 24 — no dependency).
-Admin keeps writing; the portal only reads `users`, `files`,
-`file_access_policies`, `user_file_permissions`. No admin code changes.
-
-Path roots:
-
-| Value | Source | Value (dev) |
-|---|---|---|
-| Admin storage root | admin `.env` `STORAGE_ROOT` | `C:\Users\eleven` |
-| Portal root | portal `.env` `FILES_ROOT` | `C:\Users\eleven\Downloads` |
-
-Mapping (portal rel → admin `client_path`):
-
-```
-prefix          = path.relative(ADMIN_STORAGE_ROOT, FILES_ROOT)   // "Downloads"
-adminClientPath = "/" + [prefix, ...splitRel(relPath)].filter(Boolean).join("/")
-```
-
-- `relPath ""` → `/Downloads`
-- `relPath "release/el9/x.tgz"` → `/Downloads/release/el9/x.tgz`
-- If `FILES_ROOT` is **not inside** `ADMIN_STORAGE_ROOT` → mapping is impossible →
-  **configuration error, fail closed** (do not fall back to an unmapped read).
-
-**Reachability gap (real):** the one locked row today is `/CodeGeeXProjects`, a
-sibling of `C:\Users\eleven\Downloads`. Through the portal it maps to nothing, so
-that lock cannot be enforced until either `FILES_ROOT` becomes `C:\Users\eleven`
-or the admin policy is set on `/Downloads/...`. This is a config/expectation
-decision, not a bug in the bridge.
-
-## 3a. Admin password format (exact)
-
-`src/utils/crypto.js` writes `"<saltHex>:<hashHex>"` using
-`crypto.scryptSync(password, salt, 64)` where **`salt` is the 32-char hex string
-used as a UTF-8 string**, not the decoded bytes; `N=16384, r=8, p=1` (Node
-defaults), `keylen=64`.
-
-Verification recipe the portal must use:
-
-```js
-const [salt, hashHex] = String(stored).split(':');        // admin format, no '$'
-const derived = crypto.scryptSync(password, salt, 64);    // salt as STRING
-crypto.timingSafeEqual(derived, Buffer.from(hashHex, 'hex'))
-```
-
-**Trap:** the portal's existing `scrypt$N$salt$hash` branch decodes the salt with
-`Buffer.from(saltHex, 'hex')`, which is *wrong* for admin hashes. The admin format
-needs its own branch/adapter. `verifyPassword()` must gain an admin-format path
-and keep the existing bcrypt/scrypt paths for `AUTH_USERS_FILE` compatibility.
-
-User lookup: `SELECT ... WHERE username = ? COLLATE NOCASE`, require
-`status='active'`, honour `locked_until` **read-only**. The portal cannot
-increment `failed_login_count` in a read-only DB — the portal keeps its own
-in-memory lockout (already present). Portal JWT `sub` = admin `users.id`.
-
-## 4. Policy semantics (as defined by the admin spec)
-
-Field intent, quoted from `openspec/.../authorization/file-access-policy/spec.md`:
-
-- `access_mode` ∈ `public` | `authenticated` | `restricted`; a new policy
-  **defaults to `restricted`** (fail-safe).
-- `is_published` / `is_locked` are independent. `is_locked` is the force-auth
-  floor. `is_published=0` must not be served publicly.
-- `available_from`/`available_until`: optional window; outside it the file is not
-  "available".
-- `user_file_permissions`: one row per `(file_id, user_id)`, `grant` or `deny`;
-  absence = deny. **Per-file, no directory inheritance.**
-
-Proposed portal decision (to confirm — see §9):
-
-```
-effectiveRequirement(clientPath, user):
-  if mapping impossible          -> DENY (fail closed)
-  policy = lookup(clientPath)    // admin JOIN, exact/NOCASE
-  if policy is NULL              -> PUBLIC (no row = never governed)
-  if now < available_from or now > available_until (when set) -> DENY
-  if is_published == 0           -> DENY            # confirm: or anonymous-only?
-  floor = is_locked ? AUTHENTICATED : PUBLIC        # locked raises the floor
-  base  = access_mode
-  need  = max(floor, base)      # public < authenticated < restricted
-  if need == PUBLIC              -> ALLOW
-  if user is anonymous           -> AUTH_CHALLENGE (401)
-  if access_mode == restricted:
-       perm = user_file_permissions[(file_id, user.id)]
-       if perm == 'grant' (and not 'deny') -> ALLOW else DENY
-  # access_mode public/authenticated with a valid active user
-  -> ALLOW
-```
-
-Notes:
-- `is_locked` **raises** the floor, never lowers it. `locked + restricted` still
-  requires an explicit grant.
-- A `deny` row beats `grant`, and absence = deny, for `restricted`.
-- On Windows, path comparison must be separator-normalized **and**
-  case-insensitive (`win32`).
-- Availability window applies to everyone (no portal admin role exists).
-
-## 5. Where enforcement must attach (all file-serving routes)
-
-The current single prefix gate is insufficient: it matches **URL pathnames
-before resolution**, and the new model needs the **resolved `relPath`**. The gate
-becomes a per-route call `authorize(projectRoot, relPath, session)` (kept in one
-module so there is one definition of the rule — mirroring the existing
-`/api/download-zip` re-check, which already exists because pathnames lose the
-target).
-
-| Route | relPath source | Action |
-|---|---|---|
-| `GET /api/categories` | each top-level name | filter/hide governed entries |
-| `GET /api/releases` | each item `.path` | filter item list |
-| `GET /release8/latest`, `/release9/latest` | resolved `items[0].path` | authorize before `streamDownload` |
-| `GET /api/search` | each result `.path` | filter results |
-| `GET /api/files/{rel}` | `rel` (+ children) | authorize dir; decide child visibility |
-| `GET /api/download/{rel}` | `rel` | authorize before stream |
-| `GET /api/hash/{rel}` | `rel` | authorize (hash leaks content identity) |
-| `GET /api/download-zip` | `dir` + every `items[]` | authorize every entry (existing pattern) |
-
-`resolveInsideRoot()` remains the **only** path-resolution boundary; policy
-lookup is an authorization layer on the relative path and must never bypass it.
-
-## 6. Fail-closed matrix
-
-| Condition | Result |
+| Variable | Meaning |
 |---|---|
-| `ADMIN_DB_PATH` unset / file missing / unreadable | deny gated paths, log server-side, never leak DB detail; **public (no-row) content still serves** |
-| `admin.sqlite` schema version > known | refuse to read → deny governed, log |
-| mapping impossible (FILES_ROOT outside STORAGE_ROOT) | config error → deny |
-| policy row unreadable / malformed enum | DENY (treat as `restricted`) |
-| `access_mode` unknown value | DENY |
-| authenticated user id not found / not active | treat as anonymous |
-| DB busy (rollback-journal single writer) | short retry, then fail closed for that request; optional short-TTL cache of `listPolicies()` |
+| `ADMIN_INTEGRATION_ENABLED` | `true` to enforce admin policies. |
+| `ADMIN_DB_PATH` | Path to the admin's `admin.sqlite`. Relative paths resolve against this project's folder. |
+| `ADMIN_SYNC_TTL_MS` | How often admin data is re-read, in ms. Default `5000`, clamped to `1000`–`60000`. |
+| `AUTH_ENABLED` | Must be `true` in integration mode. |
+| `FILES_ROOT` | Must be the **same directory** as the admin's `STORAGE_ROOT`. Portal path `a/b` is admin client path `/a/b`. |
 
-Never leak DB paths, SQL, or schema to clients — log server-side, return generic
-`403`/`401`.
+`ADMIN_STORAGE_ROOT` is no longer used; if set, the server logs that it is ignored.
 
-## 6a. Concurrency
+**Startup refuses to run** (it never falls back to "everything public") when:
 
-`admin.sqlite` is rollback-journal (not WAL), single writer. Portal reads open
-`readOnly:true` with a busy timeout and no long transactions; `listPolicies()` is
-tiny and cacheable with a short TTL (seconds) or mtime check on the DB file.
+| `ADMIN_INTEGRATION_ENABLED` | `ADMIN_DB_PATH` | Result |
+|---|---|---|
+| unset | unset | legacy mode (no admin policies, existing behaviour) |
+| `false` | unset | legacy mode |
+| unset or `false` | set | **refused**: inconsistent |
+| `true` | unset | **refused** |
+| `true` | missing file, not the admin schema, schema newer than v2, or unreadable | **refused** |
+| `true` | valid | integration mode (also requires `AUTH_ENABLED=true`) |
 
-## 7. Fail-closed is not fail-silent
+---
 
-Requirement 1: any unreadable/invalid admin DB must (a) deny gated files,
-(b) log server-side with the reason, (c) never expose DB internals to the client.
-`AUTH_ENABLED=false` currently makes the whole auth layer a no-op — the new
-policy layer must **not** inherit that off-switch for governed files. Decide
-whether admin-gating has its own enable flag or is always-on when the DB is
-configured.
+## 2. What the portal reads
 
-## 8. Pre-existing observations (not caused by this work)
+Every `ADMIN_SYNC_TTL_MS`, in one read transaction on a connection opened read-only for that read
+only:
 
-- `lib/files-service.js` defines `listPath` and `getDownloadTarget` **twice**
-  (lines 170/520 and 236/610). The later declarations win; behaviour is
-  identical, so it is harmless, but it is dead code worth a cleanup.
-- `lib/auth-service.js:656` calls undefined `loadUsersSync()`; the resulting
-  `ReferenceError` is swallowed, so `USER_REVOKED` never fires.
+| Admin table | Columns used | Purpose |
+|---|---|---|
+| `users` | `id`, `username`, `role`, `status`, `password_hash`, `locked_until` | Login and session validity |
+| `files` ⋈ `file_access_policies` | `client_path`, `is_directory`, `access_mode`, `is_published`, `is_locked`, `available_from`, `available_until` | Access decisions |
+| `user_file_permissions` | `file_id`, `user_id`, `permission` | Per-user grant / deny |
+| `audit_logs` | latest successful `user.revoke_sessions` per `target_id` | "Revoke sessions" |
+| `schema_migrations` | `MAX(version)` | Must be ≤ 2 |
+
+Not used, by design: `users.email` (the admin logs in by username only), `users.failed_login_count`
+(updating it would be a write), and `sessions` (admin-panel sessions; a normal admin logout also
+sets `revoked_at` and must not log the user out of the portal).
+
+Every row is validated. A policy row outside its domain makes its path **hidden for everyone**, and
+a malformed permission row poisons its file's policy. A user row outside its domain cannot log in.
+
+---
+
+## 3. Access rules
+
+### 3.1 One policy, one caller
+
+| Condition | Anonymous | Logged in |
+|---|---|---|
+| Invalid row | hidden | hidden |
+| `is_published = 0` | hidden | hidden |
+| Before `available_from` / after `available_until` (bounds inclusive) | hidden | hidden |
+| `deny` row for this user (any `access_mode`) | — | hidden |
+| `is_locked = 1` | **locked** | rules below |
+| `public` | allow | allow |
+| `authenticated` | hidden | allow |
+| `restricted` | hidden | allow only with a `grant` on **this** policy's file |
+
+### 3.2 Folders and combination
+
+- A policy applies to its path **and everything inside it**, decided by path. `is_directory` is not
+  consulted because the admin's own "Set a policy" form never sets it.
+- The decision for a path combines the policy on the path, on every parent folder, and on `/`:
+  **hidden > locked > allow**. No applicable policy → allow (ungoverned).
+- A grant on a restricted folder covers ungoverned contents. A restricted file inside it with its
+  own policy still needs its own grant.
+- A `files` row whose policy was deleted is ungoverned; leftover permission rows are ignored.
+- `users.role` never changes the outcome (admins get no bypass).
+- The portal's own `RELEASE_PVM` login rule still applies on top and can only add a `401`.
+
+### 3.3 Owner decisions (where the admin spec was silent or contradictory)
+
+| Topic | Admin spec | Portal |
+|---|---|---|
+| `is_locked` | "No access regardless of publication" | Anonymous visitors see the name with a lock; they must sign in, then `access_mode` applies |
+| Unpublished + locked | Independent flags | Unpublished wins: hidden |
+| Folder policies | "Per-file, no inheritance" (ADR-009 §3), yet the UI sets them on folders | Apply to everything inside |
+| `deny` on public/authenticated | Defined only for restricted | Always hides from that user |
+
+---
+
+## 4. What each endpoint does
+
+`allow` serves normally. `locked` → `401 AUTH_REQUIRED`. `hidden` → `404` with exactly the body the
+endpoint gives for a missing path. Unreadable admin data → `503 POLICY_UNAVAILABLE`.
+
+| Endpoint | Behaviour |
+|---|---|
+| `GET /api/files/<p>` | Decides `<p>` first. Children: allowed in full; self-locked as `{name, path, type, locked: true}` (no size/date); everything else omitted. |
+| `GET/HEAD /api/download/<p>` | Allowed only. |
+| `GET /api/hash/<p>` | Allowed only; the file is not opened otherwise. |
+| `GET /api/download-zip` | The browsed folder and **every** item must be allowed; any hidden → 404, else any locked → 401. |
+| `GET /api/search` | Hidden entries and everything inside locked or hidden folders are skipped during the walk, so `limit` and `truncated` count only visible results. Self-locked matches are reduced. |
+| `GET /api/categories` | Hidden categories omitted; a self-locked category shows no counts or dates; counts and dates include only allowed files. |
+| `GET /api/releases` | Same projection, applied before the limit. |
+| `GET /release{8,9}/latest` | Streams the newest **allowed** build; if none is allowed but some are locked → 401; none → 404. |
+
+**Aliases.** Every content endpoint decides the requested path **and** its real on-disk path. An
+in-root symlink or junction, and on Windows a trailing dot or space, a `::$DATA` suffix, a case
+change or an 8.3 short name, therefore cannot reach a governed file under another name. `..` and
+`.` segments are refused, and links that escape `FILES_ROOT` stay refused as before.
+
+### 4.1 In the portal UI
+
+- Locked files and categories show a **Locked** chip and no size or date. Clicking a locked file
+  (in Browse, search, autocomplete or Releases) opens the sign-in modal, and the page re-renders in
+  place after sign-in. A locked folder opens its sign-in page.
+- Locked rows cannot be selected, so they never reach the metadata card or a bulk download.
+- Every download link goes through one guard (`assets/js/file-actions.js`): a `HEAD` preflight
+  first, so a `401` opens sign-in and a `404` refreshes the view. The browser never lands on a
+  JSON error page. A ZIP request is preflighted the same way.
+- The cached home-page category view is cleared on sign-in and sign-out.
+
+---
+
+## 5. Authentication
+
+- Login checks the admin `users` table only: usernames are trimmed and case-insensitive (any
+  username the admin can store, up to 255 characters); passwords use the admin's scrypt format
+  `"<saltHex>:<hashHex>"` with the salt string used as-is.
+- Unknown user, wrong password and disabled account get the **same** response. An active
+  `locked_until` gives `429 LOCKED_OUT` with `retryAfterMs`. Unreadable admin data gives
+  `503 SERVER_ERROR`.
+- The portal keeps its own per-username throttle (`AUTH_MAX_FAILED_ATTEMPTS`,
+  `AUTH_LOCKOUT_MINUTES`) because it cannot write `failed_login_count`.
+- A portal session ends, within the sync interval, when the admin:
+
+| Admin action | Portal reason |
+|---|---|
+| Disables or deletes the user | `USER_REVOKED` |
+| Resets the password | `PASSWORD_CHANGED` (sessions carry a fingerprint of the stored hash) |
+| Uses **Revoke sessions** | `SESSION_REVOKED` (sessions carry their original login time; renewals never extend it) |
+
+---
+
+## 6. Synchronization
+
+All admin changes (users, policies, grants, denies, windows, revocations) take effect within
+`ADMIN_SYNC_TTL_MS` (default **5 seconds**) without a restart. A download that is already streaming
+is not cut off.
+
+A failed refresh drops the cached copy instead of reusing it; the next request retries.
+
+---
+
+## 7. Known limitations
+
+- **Admin folder renames.** The admin renames only the exact `files` row
+  (`FileAccessPolicyRepository.renamePath`). Policies on paths *inside* a renamed folder keep their
+  old paths and stop applying until an administrator sets them again.
+- **Write contention.** The admin opens its database without a busy timeout, so an admin write that
+  coincides with a portal read can fail with `SQLITE_BUSY`. The portal reads once per sync interval
+  (about a millisecond every 5 s) and waits up to 2 s for the admin's write lock, so this is rare.
+  Switching the database to WAL would be a write to the admin database and is out of scope.
+- **Revoke sessions relies on the audit log.** The admin never prunes `audit_logs` today
+  (`AuditLogRepository.prune` is never called). If it starts doing so, a portal session left unused
+  across both the revoke and the prune would survive.
+- **Existence hints.** A `401` under a locked folder confirms the folder is governed, which the lock
+  icon already shows. Names inside locked or hidden folders are never revealed.
+
+---
+
+## 8. Pre-existing observations (not part of this change)
+
+- Legacy mode only: `lib/auth-service.js` calls an undefined `loadUsersSync()` in `verifySession`;
+  the `ReferenceError` is swallowed, so a user removed from `users.json` keeps their session until
+  it expires. Integration mode does not use that path.
 - `docs/SECURITY.md` records `.env` committed with a live `AUTH_JWT_SECRET`.
 
 ---
 
-## 9. Decisions (settled)
+## 9. Code map and tests
 
-1. **`is_published = 0` → deny everyone.** Unpublished files are not served
-   through the portal at all, including to authenticated users (draft state).
-   `is_locked` is still the auth floor; `is_published=0` is a hard deny that
-   short-circuits before the floor is evaluated.
-2. **Governed entries are hidden until authorized.** Listings, categories and
-   search filter out any path the current caller is not authorized to fetch. A
-   path with no policy row is public and stays visible. The filter is per-path
-   (no inheritance), matching the admin model — only the exact governed path is
-   hidden, not its parent or siblings.
-3. **Roots unchanged:** `FILES_ROOT=C:\Users\eleven\Downloads`, admin
-   `STORAGE_ROOT=C:\Users\eleven`. Admin client paths map under `/Downloads/...`.
-   The existing `/CodeGeeXProjects` lock stays unreachable through the portal
-   until an admin policy is set on a path under `/Downloads`.
-4. **Always-on when the admin DB is configured** — no separate off-switch, so a
-   forgotten flag cannot silently expose governed files. If no admin DB is
-   configured, behaviour is unchanged (all content public); if a DB is
-   configured but unreadable, governed lookups fail closed (§6).
+| Module | Role |
+|---|---|
+| `lib/admin-db.js` | Configuration, startup validation, read-only snapshot, row validation |
+| `lib/access-policy.js` | `decide(path, session)` and the listing projection |
+| `lib/auth-service.js` | Admin login, session fingerprint / login time, revocation |
+| `lib/files-service.js` | Walks that apply the decision; `canonicalRel` for aliases |
+| `lib/api-router.js` | One gate for every endpoint |
 
-Ready to implement portal-side only: a read-only `admin.sqlite` client, the admin
-password adapter (§3a), the generalized `authorize()` gate + listing filter (§5),
-config/env additions, and tests for the fail-closed matrix (§6).
+Tests (`npm test`) run the real server in-process against a temporary database built with the
+admin's exact schema (`test/helpers/admin-fixture.js`):
 
-## 10. Implementation (done) — configuration boundary + module map
-
-### 10a. How intentional legacy differs from a misconfigured integration
-
-Refines §9.4. `ADMIN_INTEGRATION_ENABLED` is **not** an enforcement off-switch;
-it is an intent declaration that pairs with the resource. Enforcement can never
-be silently off while a DB is configured:
-
-| `ADMIN_INTEGRATION_ENABLED` | `ADMIN_DB_PATH` | Result |
-|---|---|---|
-| unset | unset | **legacy** (unchanged public behaviour) |
-| `false` | unset | legacy |
-| unset | set | **startup failure** (resource without intent) |
-| `false` | set | **startup failure** (inconsistent) |
-| `true` | unset/blank | **startup failure** (intent without resource) |
-| `true` | set but invalid | **startup failure** |
-
-`true` + valid also requires `AUTH_ENABLED=true` (else governed files could never
-be opened) and an `ADMIN_STORAGE_ROOT` that contains `FILES_ROOT`. The only silent
-path is *both unset* — exactly the intentional-legacy case. `server.js` prints the
-problems and exits non-zero; it never starts in a partial state.
-
-`ADMIN_STORAGE_ROOT` is a portal-side value (the admin's `STORAGE_ROOT`), so the
-portal never reads the admin project's `.env` — the two stay decoupled.
-
-### 10b. Modules
-
-- `lib/admin-db.js` (new) — config resolution + startup validation, read-only
-  `node:sqlite` handle, portal-relPath ⇄ admin-client-path mapping, short-TTL
-  policy/grant snapshot, user lookups.
-- `lib/access-policy.js` (new) — the single `authorize(relPath, session)` rule and
-  `filterVisible(entries, session)`.
-- `lib/auth-service.js` — admin password-format branch in `verifyPassword()`,
-  admin-backed `login()`, live user-status check in `verifySession()` (closes the
-  dead `loadUsersSync()` revocation gap for admin sessions), `USERNAME_REGEX`
-  `0-0`→`0-9` typo fixed.
-- `lib/api-router.js` — `gateRel()` on `/api/files`, `/api/download`, `/api/hash`,
-  `/api/download-zip`; `filterVisible()` on `/api/categories`, `/api/releases`,
-  `/release8|9/latest`, `/api/search`.
-- `server.js` — startup gate + banner line.
-- `test/access-policy.test.js` (new, `npm test`) — 27 assert-based checks over the
-  config matrix and the full decision table.
-
-### 10c. Category counts
-
-`/api/categories` previously folded a hidden governed child into its parent's
-`fileCount`, leaking existence through aggregate counts. `summarizeTree()` now
-takes an authorization predicate (threaded from `listCategories()` via
-`access-policy.visiblePredicate()`), so a governed entry — or a whole governed
-category — is neither counted nor walked. Legacy mode passes no predicate and
-counts everything as before.
-
+| Suite | Covers |
+|---|---|
+| `test/admin-db.test.js` | Path mapping, validation, sync interval, fail-closed refresh, read-only access, startup matrix |
+| `test/access-policy.test.js` | Every row of the rule table, folders, grants/denies, invalid data |
+| `test/auth.test.js` | Login, status, locks, throttle, disable/delete/reset/revoke |
+| `test/endpoints.test.js` | Every endpoint, 503, aliases and traversal, admin changes over time |

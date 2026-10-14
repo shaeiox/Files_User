@@ -19,6 +19,8 @@
  *   - Action accessibility          — accessible naming and decorative-SVG hiding
  *   - Action SVG / icon rendering   — the inline action icon markup
  *   - Action rendering              — the `.f-actions` container and control assembly
+ *   - The download guard            — one delegated handler for every download link in the
+ *     app (`a[data-file]`) and every locked entry (`[data-locked]`), see `bindGuard()`
  *
  * ── OWNERSHIP: WHAT THIS MODULE DOES *NOT* OWN ─────────────────────────────────
  * The following are BrowsePage-owned and deliberately stay in `assets/js/browse.js`. The
@@ -78,7 +80,7 @@ const FileActions = (function () {
     const ACTIONS = [
         {
             id: "download",
-            appliesTo: (item) => item.type === "file",
+            appliesTo: (item) => item.type === "file" && !item.locked,
             render: (item, d) => {
                 const label = escapeHtml(((d && d.btnDownload) || "Download") + " " + (item.name || ""));
                 const href = escapeHtml(ResourceService.downloadHref(item.relPath));
@@ -86,6 +88,18 @@ const FileActions = (function () {
                     `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">` +
                     `<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>` +
                     `</svg></a>`;
+            }
+        },
+        {
+            // A locked entry (admin policy) offers sign-in instead of a download.
+            id: "sign-in",
+            appliesTo: (item) => item.locked === true,
+            render: (item, d) => {
+                const label = escapeHtml(((d && d.signInToOpen) || "Sign in to open") + " " + (item.name || ""));
+                return `<a class="f-action f-action-locked" href="#" data-locked="true" title="${label}" aria-label="${label}">` +
+                    `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">` +
+                    `<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>` +
+                    `</svg>` + `</a>`;
             }
         }
     ];
@@ -105,5 +119,91 @@ const FileActions = (function () {
         return `<div class="f-actions">${controls}</div>`;
     }
 
-    return { render };
+    /* ── DOWNLOAD GUARD ───────────────────────────────────────────────────── */
+
+    /** Re-renders the current page (after sign-in, or when an item has gone away). */
+    function refreshView() {
+        if (typeof Router !== "undefined" && typeof Router.refresh === "function") Router.refresh();
+    }
+
+    /** Opens the existing sign-in modal; the current page re-renders after a successful sign-in. */
+    function signIn(onDone) {
+        const done = typeof onDone === "function" ? onDone : refreshView;
+        if (typeof HomePage !== "undefined" && typeof HomePage.showLoginModal === "function") HomePage.showLoginModal(done);
+        else if (typeof window.triggerAuthModal === "function") window.triggerAuthModal(done);
+    }
+
+    /**
+     * @brief HEAD-probes a download URL without leaving the page.
+     * @returns {Promise<"ok"|"locked"|"missing"|"error">}  `locked` = sign-in needed (401),
+     *          `missing` = gone or not visible to this caller (404).
+     */
+    async function preflight(href) {
+        try {
+            const res = await fetch(href, { method: "HEAD", credentials: "same-origin", cache: "no-store" });
+            if (res.ok) return "ok";
+            if (res.status === 401) return "locked";
+            if (res.status === 404) return "missing";
+            return "error";
+        } catch {
+            return "error";
+        }
+    }
+
+    /** Hands a URL to the browser as a download through a transient anchor. */
+    function startDownload(href, fileName) {
+        const a = document.createElement("a");
+        a.href = href;
+        a.setAttribute("data-file", "true"); // keeps the SPA router out; the guard ignores scripted clicks
+        if (fileName) a.download = fileName;
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        // Removing the anchor synchronously would abort the pending download.
+        setTimeout(() => a.remove(), 0);
+    }
+
+    /**
+     * @brief Downloads a URL only after the server confirms it may be served.
+     * @details 401 opens sign-in, 404 refreshes the view (the item is gone or no longer
+     *          visible), anything else is reported. The browser never lands on a JSON
+     *          error page.
+     */
+    async function download(href, fileName) {
+        const outcome = await preflight(href);
+        if (outcome === "ok") return startDownload(href, fileName);
+        if (outcome === "locked") return signIn();
+        if (outcome === "missing") return refreshView();
+        const d = typeof window.getDict === "function" ? window.getDict() : {};
+        window.alert(d.downloadUnavailable || "The download is temporarily unavailable. Try again shortly.");
+    }
+
+    /**
+     * @brief Binds the one delegated download guard for the whole app (capture phase,
+     *        so it runs before the SPA router). Only real user clicks are handled;
+     *        scripted clicks from startDownload() and BulkDownload pass through.
+     */
+    function bindGuard() {
+        document.addEventListener("click", (e) => {
+            if (!e.isTrusted || e.button !== 0) return;
+            if (e.target.closest("[data-locked]")) {
+                e.preventDefault();
+                e.stopPropagation();
+                signIn();
+                return;
+            }
+            const link = e.target.closest("a[data-file]");
+            if (!link || !link.href) return;
+            e.preventDefault();
+            e.stopPropagation();
+            if (link.getAttribute("aria-busy") === "true") return;
+            link.setAttribute("aria-busy", "true");
+            download(link.href, link.getAttribute("download") || "")
+                .finally(() => link.removeAttribute("aria-busy"));
+        }, true);
+    }
+
+    bindGuard();
+
+    return { render, preflight, download, signIn };
 })();

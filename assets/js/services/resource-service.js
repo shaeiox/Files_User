@@ -108,6 +108,8 @@ const ResourceService = (function () {
             path: browseHref(cat.path || name),
             relPath: cat.path || name,
             iconType: inferIcon(name),
+            // Admin policy: the category is visible by name only until sign-in.
+            locked: cat.locked === true,
             stats: {
                 available: true,
                 total: files + folders,
@@ -231,11 +233,15 @@ const ResourceService = (function () {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Authentication failed");
+        // What a visitor may see depends on who they are (admin access policies),
+        // so the cached category view must not outlive a sign-in or sign-out.
+        clearCache();
         return data;
     }
 
     async function logout() {
         await fetch("/api/auth/logout", { method: "POST" });
+        clearCache();
     }
 
     return {

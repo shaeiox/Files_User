@@ -182,7 +182,7 @@ const ReleasePage = (function () {
     function renderLead() {
         const lead = document.getElementById("relLead");
         if (!lead) return;
-        const f = status === "ok" ? items[0] : null;
+        const f = status === "ok" ? items.find(it => !it.locked) : null;
         lead.hidden = !f;
         if (!f) { lead.innerHTML = ""; return; }
         const d = dict();
@@ -243,14 +243,16 @@ const ReleasePage = (function () {
                 </tr></thead>
                 <tbody>
                   ${items.map((f, i) => `
-                    <tr data-path="${escapeHtml(f.path)}" class="${f.path === selectedPath ? "is-selected" : ""}">
-                      <td class="rel-pick"><input type="radio" name="relPick" id="relPick${i}" value="${escapeHtml(f.path)}" ${f.path === selectedPath ? "checked" : ""}></td>
+                    <tr data-path="${escapeHtml(f.path)}" class="${f.path === selectedPath ? "is-selected" : ""}${f.locked ? " is-locked" : ""}">
+                      <td class="rel-pick"><input type="radio" name="relPick" id="relPick${i}" value="${escapeHtml(f.path)}" ${f.path === selectedPath ? "checked" : ""}${f.locked ? " disabled" : ""}></td>
                       <td class="rel-file"><label for="relPick${i}"><code class="rel-name">${escapeHtml(f.name)}</code></label></td>
-                      <td class="rel-num" data-label="${escapeHtml(cols.version)}">${escapeHtml(f.version || "—")}${i === 0 ? ` <span class="rel-latest">${escapeHtml(d.relLatest)}</span>` : ""}</td>
-                      <td class="rel-num" data-label="${escapeHtml(cols.size)}">${humanSize(f.size)}</td>
-                      <td class="rel-num" data-label="${escapeHtml(cols.date)}">${fmtDate(f.mtime)}</td>
-                      <td class="rel-act"><a class="rel-btn" data-file href="${escapeHtml(ResourceService.downloadHref(f.path))}"
-                        aria-label="${escapeHtml(d.btnDownload + " " + f.name)}">${escapeHtml(d.btnDownload)}</a></td>
+                      <td class="rel-num" data-label="${escapeHtml(cols.version)}">${escapeHtml(f.version || "—")}${f === items.find(it => !it.locked) ? ` <span class="rel-latest">${escapeHtml(d.relLatest)}</span>` : ""}</td>
+                      <td class="rel-num" data-label="${escapeHtml(cols.size)}">${f.locked ? "—" : humanSize(f.size)}</td>
+                      <td class="rel-num" data-label="${escapeHtml(cols.date)}">${f.locked ? "—" : fmtDate(f.mtime)}</td>
+                      <td class="rel-act">${f.locked
+                        ? `<a class="rel-btn" href="#" data-locked="true" aria-label="${escapeHtml((d.signInToOpen || "Sign in to open") + " " + f.name)}">${escapeHtml(d.lockedBadge || "Locked")}</a>`
+                        : `<a class="rel-btn" data-file href="${escapeHtml(ResourceService.downloadHref(f.path))}"
+                        aria-label="${escapeHtml(d.btnDownload + " " + f.name)}">${escapeHtml(d.btnDownload)}</a>`}</td>
                     </tr>`).join("")}
                 </tbody>
               </table>`;
@@ -358,7 +360,7 @@ const ReleasePage = (function () {
             if (id !== requestId) return;
             items = data.items;
             status = items.length ? "ok" : "empty";
-            if (!items.some(f => f.path === selectedPath)) selectedPath = items[0]?.path || null;
+            if (!items.some(f => f.path === selectedPath && !f.locked)) selectedPath = items.find(f => !f.locked)?.path || null;
         } catch (err) {
             if (id !== requestId) return;
             items = [];

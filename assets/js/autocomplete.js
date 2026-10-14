@@ -48,7 +48,7 @@ const Autocomplete = (function () {
                 : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>`;
 
             return `
-        <li class="ac-item ${isActive ? 'active' : ''}" id="ac-option-${index}" role="option" aria-selected="${isActive}" data-index="${index}" data-href="${href}" data-type="${item.type}">
+        <li class="ac-item ${isActive ? 'active' : ''}" id="ac-option-${index}" role="option" aria-selected="${isActive}" data-index="${index}" data-href="${href}" data-type="${item.type}"${item.locked ? ' data-locked-item="true"' : ''}>
           <div class="ac-item-left">
             <div class="ac-icon ${item.type === 'directory' ? 'ac-icon-dir' : 'ac-icon-file'}">
               ${iconSvg}
@@ -58,8 +58,8 @@ const Autocomplete = (function () {
               <span class="ac-path">${item.path || ""}</span>
             </div>
           </div>
-          <span class="badge ${item.type === 'directory' ? 'badge-dir' : 'badge-file'}">
-            ${item.type === 'directory' ? (d.dirBadge || 'DIR') : (d.fileBadge || 'FILE')}
+          <span class="badge ${item.locked ? 'badge-locked' : item.type === 'directory' ? 'badge-dir' : 'badge-file'}">
+            ${item.locked ? (d.lockedBadge || 'Locked') : item.type === 'directory' ? (d.dirBadge || 'DIR') : (d.fileBadge || 'FILE')}
           </span>
         </li>
       `;
@@ -80,7 +80,7 @@ const Autocomplete = (function () {
         dropdownEl.querySelectorAll('.ac-item').forEach(el => {
             el.addEventListener('click', (e) => {
                 e.preventDefault();
-                selectItem(el.getAttribute('data-href'), el.getAttribute('data-type'));
+                selectItem(el.getAttribute('data-href'), el.getAttribute('data-type'), el.getAttribute('data-locked-item') === 'true');
             });
             el.addEventListener('mouseenter', () => {
                 activeIndex = parseInt(el.getAttribute('data-index'), 10);
@@ -115,11 +115,14 @@ const Autocomplete = (function () {
         syncActiveDescendant();
     }
 
-    function selectItem(href, type) {
+    function selectItem(href, type, locked) {
         hide();
         if (inputEl) inputEl.value = '';
         if (type === "file") {
-            window.location.href = href;
+            // Locked: sign in first. Otherwise preflight, so a 401/404 never shows raw JSON.
+            if (typeof FileActions === "undefined") { window.location.href = href; return; }
+            if (locked) FileActions.signIn();
+            else FileActions.download(href);
             return;
         }
         if (typeof Router !== 'undefined') {
@@ -196,7 +199,7 @@ const Autocomplete = (function () {
                     e.preventDefault();
                     e.stopPropagation();
                     const item = matches[activeIndex];
-                    selectItem(itemHref(item), item.type);
+                    selectItem(itemHref(item), item.type, item.locked === true);
                 }
             } else if (e.key === 'Escape') {
                 hide();

@@ -190,6 +190,7 @@
 .rel-table tbody tr { cursor: pointer; transition: background var(--dur-1) ease; }
 .rel-table tbody tr:hover { background: var(--bg-hover); }
 .rel-table tr.is-selected { background: var(--glow); }
+.rel-table tr.is-locked .rel-name { opacity: 0.7; }
 
 .rel-pick { position: relative; width: 1%; }
 

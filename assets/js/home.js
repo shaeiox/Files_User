@@ -245,7 +245,9 @@ const HomePage = (function () {
       const desc = d.categoryDesc || "Browse and download files in this category.";
 
       let statsBadge;
-      if (!resource.stats || !resource.stats.available) {
+      if (resource.locked) {
+        statsBadge = `<span class="badge badge-locked">${escapeHtml(d.lockedBadge || "Locked")}</span>`;
+      } else if (!resource.stats || !resource.stats.available) {
         statsBadge = `<span class="badge badge-error">${d.unavailable || "Unavailable"}</span>`;
       } else if (resource.stats.total === 0) {
         statsBadge = `<span class="stat-empty">${d.emptyFolder || "Empty"}</span>`;
@@ -258,7 +260,7 @@ const HomePage = (function () {
         statsBadge = parts.join(" · ") || (d.emptyFolder || "Empty");
       }
 
-      let updatedLabel = d.updated || "Updated";
+      let updatedLabel = resource.locked ? (d.signInToOpen || "Sign in to open") : (d.updated || "Updated");
       if (resource.stats && resource.stats.latestModified) {
         const lang = typeof window.getLang === 'function' ? window.getLang() : getLang();
         updatedLabel = formatDate(resource.stats.latestModified, lang);
@@ -278,7 +280,7 @@ const HomePage = (function () {
       <a class="resource-card" href="${href}">
         <div class="resource-icon">${iconSvg}</div>
         <div class="resource-meta">
-          <h3>${title}</h3>
+          <h3>${escapeHtml(title)}</h3>
           <p>${desc}</p>
           <div class="resource-bottom">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -591,11 +593,14 @@ const HomePage = (function () {
 
     const row = document.createElement("div");
     row.className = "res-row";
-    const fileAttr = item.type === "file" ? ' data-file="true"' : "";
+    // A locked file opens sign-in (FileActions download guard); a locked folder
+    // navigates to its page, which shows the sign-in state.
+    const linkAttr = item.locked && item.type === "file" ? 'href="#" data-locked="true"'
+      : `href="${escapeHtml(item.href)}"${item.type === "file" ? ' data-file="true"' : ""}`;
     row.innerHTML = `
       <div class="res-info">
-        <a href="${item.href}"${fileAttr}>${item.name}</a>
-        <div class="res-path">${item.path || item.href}</div>
+        <a ${linkAttr}>${escapeHtml(item.name)}</a>${item.locked ? ` <span class="badge badge-locked">${escapeHtml(d.lockedBadge || "Locked")}</span>` : ""}
+        <div class="res-path">${escapeHtml(item.path || item.href)}</div>
       </div>
       <div>
         <span class="badge ${item.type === 'directory' ? 'badge-dir' : 'badge-file'}">
@@ -650,7 +655,7 @@ const HomePage = (function () {
           ? ResourceService.browseHref(e.path)
           : ResourceService.downloadHref(e.path);
 
-        addResult({ name: e.name, href, path: e.path, type });
+        addResult({ name: e.name, href, path: e.path, type, locked: e.locked === true });
         found++;
       }
 

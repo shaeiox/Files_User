@@ -573,6 +573,13 @@ kbd {
     border-color: #4a4b50;
 }
 
+/* Locked chip — admin policy: visible by name, sign-in required */
+.badge-locked {
+    background: color-mix(in srgb, var(--warning) 14%, transparent);
+    color: color-mix(in srgb, var(--warning) 70%, var(--text));
+    border: 1px solid color-mix(in srgb, var(--warning) 40%, transparent);
+}
+
 /* ─────────────────────────────────────────────
    CARD PRIMITIVE
    ───────────────────────────────────────────── */

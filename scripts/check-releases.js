@@ -57,6 +57,9 @@ async function main() {
         RELEASE_PVM: path.join(tmp, 'files', 'release'),
         AUTH_USERS_FILE: usersFile,
         AUTH_JWT_SECRET: 'check-releases-secret-0123456789abcdef',
+        // This check exercises legacy mode; a developer .env must not switch on admin integration.
+        ADMIN_INTEGRATION_ENABLED: 'false',
+        ADMIN_DB_PATH: '',
     };
 
     let server = await start({ ...env, AUTH_ENABLED: 'false' });

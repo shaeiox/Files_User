@@ -907,6 +907,33 @@
     }
 }
 
+/* Locked rows (admin policy): the sign-in action is always shown, and the row
+   cannot be selected, so its checkbox reads as unavailable. */
+.file-tbl .trow.is-locked .f-actions {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.file-tbl .trow.is-locked .row-select {
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+
+.f-action-locked {
+    color: var(--warning);
+}
+
+/* The name keeps its ellipsis; the Locked chip sits after it and never shrinks. */
+.file-tbl .trow.is-locked .f-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.file-tbl .trow.is-locked .f-name .badge-locked {
+    flex-shrink: 0;
+}
+
 .f-action {
     width: 26px;
     height: 26px;

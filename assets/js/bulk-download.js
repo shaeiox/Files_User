@@ -347,7 +347,7 @@ const BulkDownload = (function () {
      *          Only files are included — the endpoint rejects directories, and folders
      *          have no byte total to archive.
      */
-    function downloadZip() {
+    async function downloadZip() {
         const d = dict();
         const files = selectedItems().filter(it => it.type === "file");
         if (!files.length) {
@@ -359,8 +359,20 @@ const BulkDownload = (function () {
             return;
         }
 
+        const href = ResourceService.zipDownloadHref(dirRel, files.map(it => it.relPath));
+        // The server refuses the whole archive if any file is no longer allowed:
+        // 401 opens sign-in, 404 means part of the selection is gone or hidden.
+        const outcome = await FileActions.preflight(href);
+        if (outcome === "locked") { FileActions.signIn(); return; }
+        if (outcome !== "ok") {
+            flash("bulkZip", outcome === "missing"
+                ? (d.bulkUnavailable || "Selection is no longer available")
+                : (d.downloadUnavailable || "Download unavailable, try again"), true);
+            return;
+        }
+
         const a = document.createElement("a");
-        a.href = ResourceService.zipDownloadHref(dirRel, files.map(it => it.relPath));
+        a.href = href;
         a.setAttribute("data-file", "true");   // keeps the SPA router from intercepting
         // No `download` attribute: the endpoint's Content-Disposition already names the
         // archive. Setting an empty `download` value makes Chrome derive an empty name.
@@ -465,7 +477,7 @@ const BulkDownload = (function () {
         // the row checkbox, and any button. Only inert row area toggles selection.
         if (e.target.closest('a[href], button, input, select, [role="button"]')) return;
         const row = e.target.closest(".trow");
-        if (!row || !row.dataset.rel) return;
+        if (!row || !row.dataset.rel || row.classList.contains("is-locked")) return;
         toggle(row.dataset.rel);
         row.focus();
     }

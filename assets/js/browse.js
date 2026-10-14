@@ -268,7 +268,9 @@ const BrowsePage = (function () {
                     relPath: x.path || (relPath ? relPath.replace(/\/+$/, "") + "/" + x.name : x.name),
                     type: x.type === "directory" ? "directory" : "file",
                     size: Number(x.size || 0),
-                    modified: x.mtime || x.modified || x.time || 0
+                    modified: x.mtime || x.modified || x.time || 0,
+                    // Admin policy: visible by name only until the visitor signs in.
+                    locked: x.locked === true
                 }));
 
             renderChips(d);
@@ -478,25 +480,30 @@ const BrowsePage = (function () {
             // type even if it is toggled before setRendered() has run for this pass.
             row.dataset.name = f.name;
             row.dataset.size = String(f.size);
+            if (f.locked) row.classList.add("is-locked");
             row.style.animationDelay = Math.min(idx * 15, 300) + "ms"; // Staggered entry
 
-            const linkAttr = f.type === "directory" ? `href="${href}"` : `href="${href}" data-file="true"`;
+            // A locked folder still navigates (its page shows the sign-in state); a locked
+            // file opens sign-in instead of a download (see FileActions download guard).
+            const linkAttr = f.type === "directory" ? `href="${href}"`
+                : f.locked ? `href="#" data-locked="true"` : `href="${href}" data-file="true"`;
             const iconStr = f.type === "directory" ? 'f-icon-dir' : 'f-icon-file';
             const badgeStr = f.type === "directory" ? 'badge-dir' : 'badge-file';
             const badgeLabel = f.type === "directory" ? (d.folder || 'Folder') : (d.file || 'File');
 
-            const iconVerb = f.type === "directory" ? (d.btnOpen || 'Open') : (d.btnDownload || 'Download');
+            const iconVerb = f.type === "directory" ? (d.btnOpen || 'Open')
+                : f.locked ? (d.signInToOpen || 'Sign in to open') : (d.btnDownload || 'Download');
             const iconLabel = escapeHtml(iconVerb + " " + f.name);
             const selLabel = escapeHtml((d.select || "Select") + " " + f.name);
 
             // Cells: [1] select [2] icon [3] name [4] type [5] modified [6] size [7] actions
             row.innerHTML = `
-                <div class="c-select"><input type="checkbox" class="row-select" aria-label="${selLabel}" /></div>
+                <div class="c-select"><input type="checkbox" class="row-select" aria-label="${selLabel}"${f.locked ? " disabled" : ""} /></div>
                 <div class="f-icon ${iconStr}" data-kind="${BrowseIcons.kindOf(f).kind}"><a class="f-icon-link" ${linkAttr} title="${iconLabel}" aria-label="${iconLabel}">${svgIcon(f)}</a></div>
-                <div class="f-name"><a class="f-link" ${linkAttr} title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</a></div>
+                <div class="f-name"><a class="f-link" ${linkAttr} title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</a>${f.locked ? ` <span class="badge badge-locked">${escapeHtml(d.lockedBadge || "Locked")}</span>` : ""}</div>
                 <div><span class="badge ${badgeStr}">${badgeLabel}</span></div>
-                <div class="f-sub">${fmtDate(f.modified, lang)}</div>
-                <div class="f-sub">${f.type === 'directory' ? '—' : humanSize(f.size, lang)}</div>
+                <div class="f-sub">${f.locked ? '—' : fmtDate(f.modified, lang)}</div>
+                <div class="f-sub">${f.type === 'directory' || f.locked ? '—' : humanSize(f.size, lang)}</div>
                 ${FileActions.render(f, d)}
             `;
             frag.appendChild(row);
@@ -506,7 +513,8 @@ const BrowsePage = (function () {
 
         // Hand the rendered set to BulkDownload so select-all scopes to exactly
         // these rows and checkbox state survives the next filter change.
-        if (typeof BulkDownload !== "undefined") BulkDownload.setRendered(files);
+        // Locked rows cannot be selected, so select-all never includes them.
+        if (typeof BulkDownload !== "undefined") BulkDownload.setRendered(files.filter(f => !f.locked));
     }
 
     /* ═══════════════════════════════════════════════════════════════════════════════
