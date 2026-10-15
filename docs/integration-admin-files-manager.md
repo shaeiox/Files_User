@@ -20,9 +20,58 @@ Change record: `openspec/changes/enforce-admin-file-policies/` (proposal, specs,
 | `ADMIN_DB_PATH` | Path to the admin's `admin.sqlite`. Relative paths resolve against this project's folder. |
 | `ADMIN_SYNC_TTL_MS` | How often admin data is re-read, in ms. Default `5000`, clamped to `1000`–`60000`. |
 | `AUTH_ENABLED` | Must be `true` in integration mode. |
-| `FILES_ROOT` | Must be the **same directory** as the admin's `STORAGE_ROOT`. Portal path `a/b` is admin client path `/a/b`. |
+| `FILES_ROOT` | The admin storage **or any folder in it**, wherever it is mounted on this host. The portal works out which admin folder it is (its *position*, §1.1), and portal path `a/b` is admin client path `<position>/a/b`. Nothing in the admin has to match. |
+| `RELEASE_PVM` | Legacy mode and admin schema < 5 only. With a v5 admin the release folder is set in Admin → File portal and this is ignored (logged). |
 
 `ADMIN_STORAGE_ROOT` is no longer used; if set, the server logs that it is ignored.
+
+### 1.1 Storage volume (admin schema v5)
+
+The admin stamps its `STORAGE_ROOT` with `.dimension-volume`
+(`{"volumeId":"<uuid>","clientPath":"/"}`) and stores the same UUID in
+`integration_settings.volume_id`. At startup and on every refresh the portal locates itself
+(`lib/admin-db.js` `locate`):
+
+1. It canonicalises `FILES_ROOT` (`realpath`) and reads `.dimension-volume` in it and in every
+   folder above it, up to the filesystem root.
+2. Markers of this volume that it trusts: the **storage-root marker** (`clientPath "/"`, or none),
+   and the **portal folder** marker the admin published (`clientPath` =
+   `integration_settings.portal_root_client_path`), which is for hosts that cannot see the storage
+   root. Every other marker is skipped: another volume's, or a copy that travelled with its folder.
+3. The outermost storage-root marker wins; without one, the nearest published one. The position is
+   that marker's `clientPath` plus the folders climbed.
+
+| Trusted marker at or above `FILES_ROOT` | Startup | While running |
+|---|---|---|
+| Found | integration mode; logs `FILES_ROOT is the admin folder <position>` | serves |
+| None (or no UUID in the database) | **refused**, saying how to fix it | `503 POLICY_UNAVAILABLE` until one is found again |
+
+Example: admin `STORAGE_ROOT=C:\Users\eleven`, portal `FILES_ROOT=C:\Users\eleven\Downloads`,
+nothing set in the admin. The position is `/Downloads`, so portal path `docs/a.txt` is decided as
+`/Downloads/docs/a.txt`, under the policies on `/`, `/Downloads`, `/Downloads/docs` and the file.
+A policy on `/docs` does not apply. Several portals may serve different folders of one storage.
+Moving `FILES_ROOT` changes which files are served, never which policy governs a file. A v4 admin has no volume id: the portal runs as
+before and logs once that the volume is unverified. That compatibility is removed one release
+after the v5 rollout.
+
+The marker is a dotfile. Like every hidden entry, it is never listed and every endpoint answers
+`404` for it by name. Since this change that includes `/api/download` and `/api/hash`, which
+previously served dotfiles by name.
+
+### 1.2 Admin-managed settings (admin schema v5)
+
+`integration_settings`, re-read every `ADMIN_SYNC_TTL_MS`, so no restart is needed. An invalid
+value is ignored (logged once) and the next source applies.
+
+| Key | Portal use | Fallback |
+|---|---|---|
+| `portal_root_client_path` | The published portal folder: its marker is trusted too, for hosts that cannot see the storage root (§1.1) | none: only the storage-root marker is trusted; an invalid value is ignored, which only trusts fewer markers |
+| `release_client_path` | Release folder (`/api/releases`, `/release{8,9}/latest`): a full admin client path, used when strictly inside this portal's position and resolved under `FILES_ROOT`; its admin lock protects releases (§3.2). Outside it is ignored (logged once) | none: no dedicated folder, the whole root is scanned |
+| `portal.auth_session_minutes` (1–10080) | Session length | `AUTH_SESSION_MINUTES`, then 30 |
+| `portal.max_failed_attempts` (1–1000) | Per-username throttle | `AUTH_MAX_FAILED_ATTEMPTS`, then 5 |
+| `portal.lockout_minutes` (1–10080) | Throttle lockout | `AUTH_LOCKOUT_MINUTES`, then 15 |
+
+Change record: `openspec/changes/decouple-storage-and-release-paths/`.
 
 **Startup refuses to run** (it never falls back to "everything public") when:
 
@@ -32,7 +81,8 @@ Change record: `openspec/changes/enforce-admin-file-policies/` (proposal, specs,
 | `false` | unset | legacy mode |
 | unset or `false` | set | **refused**: inconsistent |
 | `true` | unset | **refused** |
-| `true` | missing file, not the admin schema, schema newer than v2, or unreadable | **refused** |
+| `true` | missing file, not the admin schema, schema newer than v5, or unreadable | **refused** |
+| `true` | v5, but `FILES_ROOT` is not the admin's storage volume (§1.1) | **refused** |
 | `true` | valid | integration mode (also requires `AUTH_ENABLED=true`) |
 
 ---
@@ -49,7 +99,11 @@ only:
 | `user_file_permissions` | `file_id`, `user_id`, `permission`, `level` (v4) | Per-user grant / deny |
 | `user_group_members`, `group_file_permissions` (v4) | `group_id`, `user_id`; `file_id`, `group_id`, `permission`, `level` | Group grants, folded into each member's grant |
 | `audit_logs` | latest successful `user.revoke_sessions` per `target_id` | "Revoke sessions" |
-| `schema_migrations` | `MAX(version)` | Must be ≤ 4 (v3 adds navbar folders, v4 levels and groups) |
+| `integration_settings` (v5) | `key`, `value` | Storage volume id, release folder, auth tunables (§1.1, §1.2) |
+| `schema_migrations` | `MAX(version)` | Must be ≤ 5 (v3 adds navbar folders, v4 levels and groups, v5 integration settings) |
+
+Navbar folders (`portal_nav_folders.client_path`) are full admin client paths. Those strictly
+inside this portal's position become portal-relative links; the rest are dropped.
 
 Not used, by design: `users.email` (the admin logs in by username only), `users.failed_login_count`
 (updating it would be a write), and `sessions` (admin-panel sessions; a normal admin logout also
@@ -94,7 +148,8 @@ application never enforces them on itself, and its administrators get no bypass 
 - A `files` row whose policy was deleted is ungoverned; leftover permission rows are ignored.
 - `users.role` never changes the outcome (admins get no bypass).
 - `RELEASE_PVM` alone no longer requires login in integration mode. Release protection is the
-  admin lock on the `RELEASE_PVM` folder (or an OS subfolder such as `el8`): locked → anonymous
+  admin lock on the release folder (`release_client_path` with a v5 admin, else `RELEASE_PVM`),
+  or on an OS subfolder such as `el8`: locked → anonymous
   `/api/releases` and `/release{8,9}/latest` answer `401` and the Release page asks for sign-in;
   unlocked → public; hidden → the page shows no releases. Changes apply within `ADMIN_SYNC_TTL_MS`.
   At startup the portal logs a warning while the release folder is open to anonymous callers.
@@ -125,8 +180,8 @@ endpoint gives for a missing path. Unreadable admin data → `503 POLICY_UNAVAIL
 | `GET /api/download-zip` | The browsed folder and **every** item must be allowed; any hidden → 404, else any locked → 401. |
 | `GET /api/search` | Hidden entries and everything inside locked or hidden folders are skipped during the walk, so `limit` and `truncated` count only visible results. Self-locked matches are reduced. |
 | `GET /api/categories` | Hidden categories omitted; a self-locked category shows no counts or dates; counts and dates include only allowed files. |
-| `GET /api/releases` | Same projection, applied before the limit. |
-| `GET /release{8,9}/latest` | Streams the newest **allowed** build; if none is allowed but some are locked → 401; none → 404. |
+| `GET /api/releases` | Same projection, applied before the limit. Nothing visible while the walk skipped a locked folder → `401 AUTH_REQUIRED`, so the Release page asks for sign-in as Browse does instead of saying "No releases". This matters when no release folder is set and the whole root is scanned. |
+| `GET /release{8,9}/latest` | Streams the newest **allowed** build; if none is allowed but some are locked, or a locked folder was skipped → 401; none → 404. |
 
 **Aliases.** Every content endpoint decides the requested path **and** its real on-disk path. An
 in-root symlink or junction, and on Windows a trailing dot or space, a `::$DATA` suffix, a case

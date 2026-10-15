@@ -326,6 +326,40 @@ function createFixture({ tree = { 'docs/readme.txt': 'hello' } } = {}) {
             });
         },
 
+        /**
+         * Upgrades the fixture to admin schema v5 (integration_settings) and
+         * stamps the storage like the admin does: `volume_id` in the table and
+         * FILES_ROOT/.dimension-volume. `marker: false` skips the file, a string
+         * writes that UUID instead. `portalRoot` ("/Downloads") makes FILES_ROOT the
+         * folder the admin published, as Admin > File portal > Portal folder does:
+         * stored in the table and named by the marker. Returns the stored UUID.
+         */
+        useVolume({ volumeId = crypto.randomUUID(), marker = true, portalRoot = '/' } = {}) {
+            fixture.useLevels();
+            write((db) => {
+                if (db.prepare("SELECT 1 FROM sqlite_master WHERE name = 'integration_settings'").get()) return;
+                db.exec('CREATE TABLE integration_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);');
+                db.prepare('INSERT INTO schema_migrations (version, applied_at) VALUES (5, ?)').run(Date.now());
+            });
+            fixture.setSetting('volume_id', volumeId);
+            fixture.setSetting('portal_root_client_path', portalRoot === '/' ? null : portalRoot);
+            if (marker) fixture.writeMarker(typeof marker === 'string' ? marker : volumeId, portalRoot);
+            return volumeId;
+        },
+
+        /** Writes FILES_ROOT/.dimension-volume naming `clientPath` (or `raw`, the whole file body). */
+        writeMarker(volumeId, clientPath = '/', raw = JSON.stringify({ volumeId, clientPath })) {
+            fs.writeFileSync(path.join(filesRoot, '.dimension-volume'), raw);
+        },
+
+        /** Sets (or with null deletes) one integration_settings row (schema v5). */
+        setSetting(key, value) {
+            write((db) => {
+                db.prepare('DELETE FROM integration_settings WHERE key = ?').run(key);
+                if (value !== null) db.prepare('INSERT INTO integration_settings (key, value) VALUES (?, ?)').run(key, String(value));
+            });
+        },
+
         /** Raw write access. */
         exec(sql, ...params) {
             return write((db) => db.prepare(sql).run(...params));

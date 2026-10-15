@@ -19,11 +19,18 @@ directory.
 ## What Changes
 
 - **Volume check (new, fail closed).** In integration mode, startup and every snapshot refresh
-  compare `FILES_ROOT/.dimension-volume` with `integration_settings.volume_id`. A missing,
+  look for a trusted `.dimension-volume` of `integration_settings.volume_id` at or above `FILES_ROOT`. A missing,
   unreadable or different marker refuses startup, or answers `503 POLICY_UNAVAILABLE` at runtime.
+- **FILES_ROOT may be any folder of the admin storage, with nothing to match (new).** The portal
+  climbs from `FILES_ROOT` to the first trusted marker of the volume (the storage-root marker, or
+  the folder marker the admin published) and derives its position. Example: admin
+  `C:\Users\eleven`, portal `C:\Users\eleven\Downloads` → `/Downloads`, with no admin setting.
+  Portal path `rel` maps to `join(position, rel)`, so policies on that folder and on every ancestor
+  apply. A copied, stale subfolder marker is not trusted.
 - **Release folder from the database.** In integration mode the release folder is
-  `integration_settings.release_client_path`, resolved under `FILES_ROOT`. `RELEASE_PVM` is
-  ignored, with a warning. Legacy mode is unchanged.
+  `integration_settings.release_client_path` (a full admin client path), used when it is inside
+  the portal's position and resolved under `FILES_ROOT`. `RELEASE_PVM` is ignored, with a warning.
+  Legacy mode is unchanged. Navbar folders outside the position are dropped.
 - **Tunables from the database.** Session minutes, failed-attempt limit and lockout minutes come
   from the database, then env, then the default. They are re-read every snapshot, so no restart
   is needed.
@@ -37,5 +44,5 @@ directory.
 
 ## Non-goals
 
-Serving a subtree of the admin storage. A release volume outside `FILES_ROOT`: bind-mount it
-inside instead. Any change to access rules.
+Several portal roots or tenants in one portal (designed in the admin change, D2; deferred). A
+release volume outside `FILES_ROOT`: bind-mount it inside instead. Any change to access rules.

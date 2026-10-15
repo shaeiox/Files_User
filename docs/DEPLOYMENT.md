@@ -110,16 +110,26 @@ For the complete environment-variable inventory, see [ARCHITECTURE.md](ARCHITECT
 | Variable | Required | Default | Security-Sensitive | Notes |
 |----------|----------|---------|-------------------|-------|
 | `FILES_ROOT` | Yes | — | No | Absolute path to file repository |
-| `RELEASE_PVM` | No | — | No | Protected release directory |
+| `RELEASE_PVM` | No | — | No | Release directory. Ignored with a v5 admin (release folder set in Admin → File portal) |
+| `PORTAL_DATA_DIR` | With `NODE_ENV=production` | `<project>/data` | No | Base of `users.json` and `portal.log` defaults. Keep it outside the code directory |
+| `NODE_ENV` | No | — | No | `production` refuses a relative `FILES_ROOT`, `ADMIN_DB_PATH`, `LOG_FILE`, `AUTH_USERS_FILE`, `RELEASE_PVM` or `PORTAL_DATA_DIR`, and an unset `PORTAL_DATA_DIR` |
 | `AUTH_ENABLED` | No | `false` | No | Enable auth gate |
 | `AUTH_JWT_SECRET` | If auth on | — | **Yes** | HMAC signing key (min 32 chars) |
 | `AUTH_SESSION_MINUTES` | No | `30` | No | Session idle timeout |
-| `AUTH_USERS_FILE` | No | `./data/users.json` | No | Path to users database |
+| `AUTH_USERS_FILE` | No | `<PORTAL_DATA_DIR>/users.json` | No | Path to users database |
 | `AUTH_MAX_FAILED_ATTEMPTS` | No | `5` | No | Brute-force threshold |
 | `AUTH_LOCKOUT_MINUTES` | No | `15` | No | Lockout duration |
 | `PORT` | No | `4000` | No | HTTP server port — **must match nginx `proxy_pass`**, see [Port Mismatch](#%EF%B8%8F-port-mismatch--reconcile-before-deploying) |
 
-**Source:** `lib/auth-service.js` → `getJwtSecret()`, `getSessionTtlSeconds()`, `getBruteForceConfig()`; `server.js` → `process.env.PORT || 4000`
+**Source:** `lib/auth-service.js` → `getJwtSecret()`, `getSessionTtlSeconds()`, `getBruteForceConfig()`; `lib/load-env.js` → `dataDir()`, `productionPathProblems()`; `server.js` → `process.env.PORT || 4000`
+
+With the admin integration on and a v5 admin, the three `AUTH_*` tunables are overridden by the
+values set in Admin → File portal ([integration doc §1.2](integration-admin-files-manager.md)).
+
+**Upgrading next to a v5 admin:** deploy this portal first (it accepts admin schema v4 and v5), then
+the admin. The admin stamps its `STORAGE_ROOT`, and from then on this portal refuses to start unless
+`FILES_ROOT` holds the same `.dimension-volume` marker. Then set and lock the release folder in
+Admin → File portal and remove `RELEASE_PVM`.
 
 ### Environment Notes
 

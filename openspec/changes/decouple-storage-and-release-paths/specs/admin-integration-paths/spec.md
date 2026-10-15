@@ -38,6 +38,41 @@ governed content when they differ.
 
 - **WHEN** a caller lists, searches, downloads, hashes or zips `.dimension-volume`
 - **THEN** it is absent from listings and refused as a missing path
+- **AND** the same holds for every hidden entry (any dot-prefixed segment), which closes a gap where
+  `/api/download` and `/api/hash` served dotfiles by name
+
+### Requirement: FILES_ROOT May Be Any Folder Of The Admin Storage
+
+The portal SHALL derive which admin folder its canonical `FILES_ROOT` is, from the nearest trusted
+marker of this volume at or above it, without any matching setting. It SHALL map portal path `rel`
+to admin client path `join(position, rel)`. Trusted markers are the storage-root marker and the
+folder marker the admin published.
+
+#### Scenario: Portal in a subfolder, nothing configured in the admin
+
+- **WHEN** the admin `STORAGE_ROOT` holds the storage-root marker, `FILES_ROOT` is its `Downloads` folder, and `portal_root_client_path` is unset
+- **THEN** integration mode starts with position `/Downloads`
+- **AND** portal path `docs/a.txt` is decided as admin client path `/Downloads/docs/a.txt`, under the policies on `/`, `/Downloads`, `/Downloads/docs` and the file
+
+#### Scenario: Deeper subfolder
+
+- **WHEN** `FILES_ROOT` is `STORAGE_ROOT/Downloads/team/a`
+- **THEN** the position is `/Downloads/team/a`
+
+#### Scenario: Isolated host with a published folder marker
+
+- **WHEN** only the folder is visible, it holds a marker with `clientPath "/Downloads"`, and the admin published `/Downloads`
+- **THEN** the position is `/Downloads` (or below it, for a `FILES_ROOT` inside that folder)
+
+#### Scenario: Copied or stale subfolder marker is not trusted
+
+- **WHEN** the only marker found has this volume but a `clientPath` that is neither `/` nor the published folder
+- **THEN** it is skipped; with no trusted marker, startup is refused and content endpoints answer `503` while running
+
+#### Scenario: Release folder and navbar folders outside the position
+
+- **WHEN** the release folder or a navbar folder is not strictly inside the position
+- **THEN** it is ignored (logged once for the release folder) and never resolved outside `FILES_ROOT`
 
 ### Requirement: The Release Folder Comes From The Admin Database
 
@@ -83,14 +118,19 @@ each snapshot refresh.
 
 ### Requirement: Production Paths Are Absolute
 
-With `NODE_ENV=production`, the portal SHALL refuse startup when `FILES_ROOT`, `ADMIN_DB_PATH`,
-`LOG_FILE`, `AUTH_USERS_FILE` or `RELEASE_PVM` is relative. Default data files SHALL live under
-`PORTAL_DATA_DIR`.
+With `NODE_ENV=production`, the portal SHALL refuse startup when `PORTAL_DATA_DIR` is unset, or
+when `PORTAL_DATA_DIR`, `FILES_ROOT`, `ADMIN_DB_PATH`, `LOG_FILE`, `AUTH_USERS_FILE` or
+`RELEASE_PVM` is relative. Default data files SHALL live under `PORTAL_DATA_DIR`.
 
 #### Scenario: Relative path in production
 
 - **WHEN** `NODE_ENV=production` and `ADMIN_DB_PATH=./admin.sqlite`
 - **THEN** startup is refused naming the variable
+
+#### Scenario: Data directory required in production
+
+- **WHEN** `NODE_ENV=production` and `PORTAL_DATA_DIR` is unset
+- **THEN** startup is refused, so default data files never land in the code directory
 
 #### Scenario: Development unchanged
 

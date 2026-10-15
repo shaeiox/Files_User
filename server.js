@@ -5,7 +5,7 @@
 'use strict';
 
 const http = require("http");
-const { loadEnv } = require("./lib/load-env");
+const { loadEnv, productionPathProblems } = require("./lib/load-env");
 
 const PROJECT_ROOT = __dirname;
 loadEnv(PROJECT_ROOT);
@@ -20,7 +20,7 @@ const { c } = logger;
 // Configuration gate: in integration mode a missing or invalid ADMIN_DB_PATH
 // must stop the server. It must never start and silently serve governed files
 // as public. Any partial/inconsistent combination is refused here too.
-const configProblems = adminDb.validateStartup(PROJECT_ROOT);
+const configProblems = [...productionPathProblems(), ...adminDb.validateStartup(PROJECT_ROOT)];
 if (configProblems.length) {
     logger.error("Configuration is not usable — refusing to start:");
     for (const problem of configProblems) logger.error("  • " + problem);
