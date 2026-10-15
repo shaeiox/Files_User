@@ -1,26 +1,26 @@
-# Graph Report - files-server-web  (2026-10-14)
+# Graph Report - files-server-web  (2026-10-15)
 
 ## Corpus Check
-- 178 files · ~392,963 words
+- 182 files · ~396,663 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 24 file(s) not represented in the graph (top: .woff2 10, .css 7, (none) 5)
 
 ## Summary
-- 3187 nodes · 3919 edges · 280 communities (252 shown, 28 thin omitted)
-- Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 471 edges (avg confidence: 0.93)
+- 3249 nodes · 4017 edges · 297 communities (268 shown, 29 thin omitted)
+- Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 486 edges (avg confidence: 0.93)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3c86140b`
+- Built from commit: `978e189f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - login
 - resolveInsideRoot
-- api-router.js
+- admin-fixture.js
 - Hardening Controls
-- ref_path
+- logger.js
 - getDict
 - Code Review and Quality
 - Test-Driven Development
@@ -41,8 +41,8 @@
 - Code Simplification
 - Debugging and Error Recovery
 - Documentation and ADRs
-- handleRequest
-- Proposal
+- Decisions
+- Requirement: Integration Mode Verifies The Storage Volume
 - Interview Me
 - Planning and Task Breakdown
 - ReOrder: Keep Your Regulars Ordering Direct
@@ -121,17 +121,17 @@
 - ADDED Requirements
 - Requirements
 - Design: Accessibility & UX Debt Clearance
-- listLatestReleases
+- Design
 - ADDED Requirements
-- pathRequiresAuth
+- ADR-004: Auth gates only `RELEASE_PVM`, not the whole portal
 - admin-db.test.js
 - lenis.min.js
 - files-service.js
 - overflow
 - check-file-icons.js
 - ADDED Requirements
-- streamDownload
-- ref_fs
+- api-router.js
+- hash-service.check.js
 - Decisions
 - Design: Enterprise UI Redesign ("Obsidian Kinetic")
 - Requirement: Content routes accept HTTP Basic credentials
@@ -144,7 +144,7 @@
 - ADDED Requirements
 - ADDED Requirements
 - Requirement: In integration mode, release protection comes from the admin folder lock
-- admin-fixture.js
+- ref_assert
 - auth.test.js
 - endpoints.test.js
 - signJwt
@@ -161,35 +161,41 @@
 - ADR-011: Self-hosted WOFF2 fonts to satisfy CSP `font-src 'self'`
 - ADDED Requirements
 - legacy-auth.test.js
-- Data Flows
+- 9. Cross-Cutting Flows
 - ADR-001: No web framework — plain `node:http`
-- resolveConfiguredRoot
+- volume.test.js
 - 8. Overlays & States Mapping
-- Decisions
+- ADR-009: Runtime performance tiers gate visual effects
 - Decisions
 - Requirement: Hero Section Freeze
 - API Reference
 - ADR-005: Three-layer path containment for the filesystem boundary
-- Browse Row Targets and File Actions
+- access-policy.js
 - ADDED Requirements
 - ADDED Requirements
 - Requirement: Breakpoint behaviours that remove functionality are preserved
-- verifySession
-- searchEntries
+- Decisions
+- ADR-006: Vanilla JS SPA with no build step
+- ADR-002: The filesystem is the datastore
+- ADR-008: CSS custom properties as the design-token layer, no preprocessor
 - Tasks
 - Proposal: Browse Page Inspector Redesign
 - Requirement: Locked rows show a lock and open sign-in instead of downloading
 - Alternatives Considered
 - auth-service.js
+- ADR-007: nginx serves static assets and proxies `/api/`
+- ref_fs
 - Process
 - Requirement: Complete File Action ownership
 - Requirement: Primary Browse icon is an additional navigation target
 - Proposal
 - Tasks
 - Requirement: Language switch rebuilds all dynamic text
-- extractToken
 - Proposal
-- buildSessionCookie
+- Data Flows
+- Proposal
+- Security
+- Project Brain Documentation
 - Tasks
 - ADDED Requirements
 - 2. Token Architecture
@@ -201,15 +207,17 @@
 - Requirement: The autocomplete dropdown keeps its mechanism and internal scroll
 - Requirement: Login from a locked folder shows the folder without a reload
 - Tasks
+- serviceError
 - Local Setup
 - Development Workflow
-- Adding or Changing an API Endpoint
+- pathRequiresAuth
 - Core Principles
-- main
+- getSnapshot
 - Requirement: Row layout compatibility with the existing column structure
 - Requirement: Locked rows are excluded from bulk actions until sign-in
 - Requirement: A locked item reveals no metadata before sign-in
 - 3. Font Loading Strategy
+- validateStartup
 - Requirement: The bottom grid, releases UI, and status bar are removed
 - Requirement: The category filter and sort controls keep their contract
 - Requirement: The full search flow is preserved end to end
@@ -225,6 +233,7 @@
 - Requirement: The tier is selected before paint and honours reduced motion
 - Tasks
 - scrollTo
+- Tasks (§P — ships before the admin change)
 - Requirement: Directory items expose no dedicated File Action
 - 1. Architecture Direction
 - 4. Backdrop Strategy
@@ -239,13 +248,15 @@
 - Requirement: The login modal's 250 ms contract is preserved
 - Requirement: Both directions render correctly
 - Requirement: Every new effect has a low-tier and a potato-tier override
-- Frontend Development
+- Proposal
+- Development
 - Release & Versioning
 - Requirement: Event isolation is achieved structurally, not by speculative cancellation
 - Requirement: Independent action definitions
 - Requirement: Availability windows are enforced for everyone
 - Requirement: Folder policies apply to everything inside the folder
 - Requirement: Invalid or unreadable policy data fails closed
+- Extending Frontend Behavior
 - Requirement: Every surviving Home id survives unchanged
 - Requirement: Pre-existing Home defects are neither fixed nor worsened
 - Requirement: The logo wipe contract survives
@@ -285,16 +296,22 @@
 - file-inspector.js
 - releases.js
 - idle-timer.js
+- Architecture Decision Records
+- Verification After an Extension
+- Observability and Instrumentation
+- Proposal
+- main
+- bcrypt
 
 ## God Nodes (most connected - your core abstractions)
 1. `pathRequiresAuth()` - 34 edges
 2. `login()` - 27 edges
-3. `resolveInsideRoot()` - 25 edges
+3. `resolveInsideRoot()` - 27 edges
 4. `handleRequest()` - 23 edges
-5. `verifySession()` - 22 edges
-6. `ADDED Requirements` - 22 edges
-7. `listLatestReleases()` - 21 edges
-8. `client()` - 21 edges
+5. `client()` - 23 edges
+6. `verifySession()` - 22 edges
+7. `ADDED Requirements` - 22 edges
+8. `listLatestReleases()` - 21 edges
 9. `API Reference` - 21 edges
 10. `serviceError()` - 20 edges
 
@@ -317,27 +334,27 @@
 - **Multi-page Application Structure** — 404_html_page, browse_html_page, index_html_page [INFERRED 0.85]
 - **Shared JavaScript Dependencies** — browse_html_router, index_html_router, browse_html_i18n, index_html_i18n [INFERRED 0.85]
 
-## Communities (280 total, 28 thin omitted)
+## Communities (297 total, 29 thin omitted)
 
 ### Community 0 - "login"
-Cohesion: 0.16
-Nodes (22): ResourceService, Environment Variables, Production-Relevant Variables, Auth Issues, Adding Authentication-Protected Behavior, Documentation to Update, Extension Points, Where Auth Is Implemented (+14 more)
+Cohesion: 0.19
+Nodes (20): ResourceService, Environment Variables, Production-Relevant Variables, Auth Issues, Adding Authentication-Protected Behavior, Documentation to Update, Extension Points, Where Auth Is Implemented (+12 more)
 
 ### Community 1 - "resolveInsideRoot"
-Cohesion: 0.14
-Nodes (25): `GET /api/files/*`, 3. File Browsing Flow, Code Conventions, Error Handling Pattern, Observed Conventions, Adding a New File Operation, Extending File/Content Behavior, Path Containment (+17 more)
+Cohesion: 0.17
+Nodes (27): `GET /api/download-zip`, Consequences, Decision, Startup Failures, Adding a New File Operation, Extending File/Content Behavior, Path Containment, Verified Responsibilities (+19 more)
 
-### Community 2 - "api-router.js"
+### Community 2 - "admin-fixture.js"
 Cohesion: 0.14
-Nodes (12): accessPolicy, adminDb, archiveService, authService, filesService, hashService, logger, path (+4 more)
+Nodes (12): adminHashPassword(), crypto, { DatabaseSync }, fs, http, os, path, assert (+4 more)
 
 ### Community 3 - "Hardening Controls"
 Cohesion: 0.05
 Nodes (42): Broken Access Control, Broken Authentication, Cross-Site Scripting (XSS), Data Classification, Dependency Audit Triage, Destructive Operations on Derived Paths, File Upload Safety, Hardening Patterns (+34 more)
 
-### Community 4 - "ref_path"
+### Community 4 - "logger.js"
 Cohesion: 0.16
-Nodes (18): Logging Pattern, Existing Logging, Extending Logging / Operational Behavior, Extension Point, 5. Usernames logged in plaintext (LOW), Logging/Security Observability, c, error() (+10 more)
+Nodes (20): Logging, Existing Logging, Extending Logging / Operational Behavior, Extension Point, 5. Usernames logged in plaintext (LOW), Logging/Security Observability, c, { dataDir } (+12 more)
 
 ### Community 5 - "getDict"
 Cohesion: 0.33
@@ -372,8 +389,8 @@ Cohesion: 0.08
 Nodes (25): Acceptance Criteria, Assumptions (not fully verified), Completeness, Confirmed Facts (verified against source), Confirmed Facts vs. Assumptions, Consistency, Documentation Maintenance, Goals (+17 more)
 
 ### Community 13 - "Extending"
-Cohesion: 0.07
-Nodes (28): Adding a Dedicated Browse File Action, Adding a Frontend Component, Adding a Stylesheet or Design Token, Adding Dependencies, API Client, API/Manual Checks, Application Startup, Authentication Checks (when `AUTH_ENABLED=true`) (+20 more)
+Cohesion: 0.18
+Nodes (11): Adding Dependencies, Documentation Update Matrix, Extending, Extending Security-Sensitive Behavior, Installation, Non-Extension Boundaries, Notes, Purpose and Extension Model (+3 more)
 
 ### Community 14 - "API and Interface Design"
 Cohesion: 0.08
@@ -419,13 +436,13 @@ Nodes (21): Build Failure Triage, Common Rationalizations, Debugging and Error R
 Cohesion: 0.09
 Nodes (21): ADR Lifecycle, ADR Template, API Documentation, Architecture Decision Records (ADRs), Changelog Maintenance, Common Rationalizations, Document Known Gotchas, Documentation and ADRs (+13 more)
 
-### Community 25 - "handleRequest"
-Cohesion: 0.27
-Nodes (12): Adding/Changing API Behavior, Development, Documentation Maintenance, Generated and Non-Source Paths, Repository Structure, Documentation to Update, handleRequest(), isSecureRequest() (+4 more)
+### Community 25 - "Decisions"
+Cohesion: 0.18
+Nodes (11): D10. Header row and skeleton rows are unaffected, D1. The primary Browse icon target lives in BrowsePage, not in FileActions, D2. The icon anchor is nested **inside** the existing `.f-icon` cell, not substituted for it, D3. Two sibling anchors, not one merged anchor, D4. The icon target's accessible name is an action label, distinct from the name link's, D5. `FileActions.render()` keeps returning the container for every item; only its *controls* change, D6. Removal of the `open` action definition, not just its suppression, D7. No `stopPropagation()` / `preventDefault()` in the Browse row (+3 more)
 
-### Community 26 - "Proposal"
-Cohesion: 0.29
-Nodes (6): Capabilities, Modified Capabilities, New Capabilities, Proposal, What Changes, Why
+### Community 26 - "Requirement: Integration Mode Verifies The Storage Volume"
+Cohesion: 0.09
+Nodes (21): ADDED Requirements, Purpose, Requirement: Auth Tunables Follow The Admin Database, Requirement: Integration Mode Verifies The Storage Volume, Requirement: Production Paths Are Absolute, Requirement: The Release Folder Comes From The Admin Database, Scenario: Admin changes session length, Scenario: Data directory required in production (+13 more)
 
 ### Community 27 - "Interview Me"
 Cohesion: 0.11
@@ -480,8 +497,8 @@ Cohesion: 0.18
 Nodes (10): Check for context, Ending Discovery, Guardrails, OpenSpec Awareness, Planning a Change, The Stance, What You Don't Have To Do, What You Might Do (+2 more)
 
 ### Community 40 - "Design: Project Brain Documentation"
-Cohesion: 0.18
-Nodes (10): 10. Extension Documentation Strategy, 8. Deployment Documentation Strategy, 9. Development Documentation Strategy, Approach, Coverage, Design: Project Brain Documentation, Environment Variables, Repository vs. Production Distinction (+2 more)
+Cohesion: 0.20
+Nodes (9): 10. Extension Documentation Strategy, 8. Deployment Documentation Strategy, 9. Development Documentation Strategy, Approach, Design: Project Brain Documentation, Environment Variables, Repository vs. Production Distinction, Scope (+1 more)
 
 ### Community 41 - "package.json"
 Cohesion: 0.12
@@ -532,8 +549,8 @@ Cohesion: 0.40
 Nodes (5): 12. Confirmed Facts, Assumptions, and Unresolved Details, Assumptions (not fully verified), Confirmed Facts (verified against source), Tool-Generated Inferences (NOT to be presented as facts), Unresolved Implementation Details
 
 ### Community 53 - "docs/README.md"
-Cohesion: 0.05
-Nodes (62): ADR-006: Vanilla JS SPA with no build step, Alpine.js / htmx / petite-vue (no build, CDN script), Alternatives Considered, Consequences, Context, Date, Decision, ES modules (`<script type="module">`) (+54 more)
+Cohesion: 0.40
+Nodes (3): Node.js Crypto Module, Server Entry Point, Server Setup Instructions
 
 ### Community 54 - "Requirement: Action applicability derived from item data"
 Cohesion: 0.40
@@ -620,8 +637,8 @@ Cohesion: 0.13
 Nodes (16): Theme, blockVar(), DARK, fs, LIGHT, luminance(), MUTED, oklchToRgb() (+8 more)
 
 ### Community 99 - "admin-db.js"
-Cohesion: 0.05
-Nodes (51): adminDb, ALLOW, callerId(), decide(), defaultRank(), evaluate(), filterVisible(), FORBIDDEN (+43 more)
+Cohesion: 0.11
+Nodes (20): ACCESS_MODES, buildSettings(), buildSnapshot(), crypto, { DatabaseSync }, fs, isFlag(), isNullableInt() (+12 more)
 
 ### Community 100 - "ADDED Requirements"
 Cohesion: 0.05
@@ -656,20 +673,20 @@ Cohesion: 0.06
 Nodes (31): ADDED Requirements, Capability: Typography, Purpose, Requirement: Font faces declare swap and explicit weights, Requirement: Fonts are self-hosted from the application origin, Requirement: Remote Google Fonts links are removed from `index.html`, Requirement: The five existing font tokens re-point to the self-hosted families, Requirement: Typography scale tokens are consumed by later phases (+23 more)
 
 ### Community 108 - "client"
-Cohesion: 0.07
-Nodes (23): signedIn(), anon(), as(), client(), anon(), as(), assert, { createFixture, applyEnv, client } (+15 more)
+Cohesion: 0.08
+Nodes (20): client(), anon(), as(), assert, { createFixture, applyEnv, client }, fx, { test, before, after }, anon() (+12 more)
 
 ### Community 109 - "archive-service.check.js"
 Cohesion: 0.07
 Nodes (19): BrowseIcons, BulkDownload, archiveService, BIG, { execFileSync }, fs, has(), os (+11 more)
 
 ### Community 110 - "Secrets and Configuration"
-Cohesion: 0.17
-Nodes (16): Environment Configuration, Environment Notes, Debugging / Troubleshooting, Environment Setup, Frontend Issues, Log Files, nginx/API Routing, Startup Failures (+8 more)
+Cohesion: 0.24
+Nodes (12): 1. Application Startup, Environment Configuration, Environment Notes, Environment Setup, Access Pattern, Adding Configuration, Documentation to Update, How Configuration Is Loaded (+4 more)
 
 ### Community 111 - "verifyPassword"
-Cohesion: 0.25
-Nodes (10): Password Handling, hashPassword(), safeCompare(), verifyAdminPassword(), verifyPassword(), { hashPassword }, D6. Authentication, 4. Authentication (`lib/auth-service.js`) (+2 more)
+Cohesion: 0.29
+Nodes (9): Password Handling, hashPassword(), safeCompare(), verifyAdminPassword(), verifyPassword(), { hashPassword }, D6. Authentication, 4. Authentication (`lib/auth-service.js`) (+1 more)
 
 ### Community 112 - "ADDED Requirements"
 Cohesion: 0.07
@@ -687,29 +704,29 @@ Nodes (26): bulk-download Specification, Purpose, Requirement: Bulk controls are
 Cohesion: 0.08
 Nodes (25): 10. Verification Approach, 1. Method, 2.1 Root cause, 2.2 Fix, 2.3 Hover dead zone (defect 3), 2.4 `role="tablist"` (J3), 2.5 Stale `aria-current`, 2.6 Touch targets (+17 more)
 
-### Community 116 - "listLatestReleases"
-Cohesion: 0.10
-Nodes (21): Releases, Coverage Gaps Worth Knowing, Manual Validation, Tests and Validation, calculateReleaseBrowsePath(), compareVersions(), listLatestReleases(), Decisions (+13 more)
+### Community 116 - "Design"
+Cohesion: 0.25
+Nodes (7): Apply notes, Context, Decisions, Design, Goals / Non-Goals, Migration Plan, Risks / Trade-offs
 
 ### Community 117 - "ADDED Requirements"
 Cohesion: 0.08
 Nodes (24): ADDED Requirements, Requirement: Commands are generated for a user-selected shell, Requirement: Copy actions confirm their result accessibly, Requirement: Loading, empty, error and locked states are distinct, Requirement: Rows are selectable as a whole and keyboard operable, Requirement: The active OS tab is addressable in the URL, Requirement: The page leads with the latest release of the active OS family, Scenario: A shared el8 link (+16 more)
 
-### Community 118 - "pathRequiresAuth"
-Cohesion: 0.09
-Nodes (27): Authentication, Command-line clients (HTTP Basic), ADR-004: Auth gates only `RELEASE_PVM`, not the whole portal, Alternatives Considered, Consequences, Context, Date, Decision (+19 more)
+### Community 118 - "ADR-004: Auth gates only `RELEASE_PVM`, not the whole portal"
+Cohesion: 0.20
+Nodes (10): ADR-004: Auth gates only `RELEASE_PVM`, not the whole portal, Alternatives Considered, Consequences, Context, Date, Decision, Global auth gate when `AUTH_ENABLED=true`, Separate deployments / two portals (+2 more)
 
 ### Community 119 - "admin-db.test.js"
-Cohesion: 0.09
-Nodes (20): adminDb, assert, { createFixture, applyEnv }, crypto, fixture(), fixtures, fs, os (+12 more)
+Cohesion: 0.14
+Nodes (11): adminDb, assert, { createFixture, applyEnv }, crypto, fixture(), fixtures, fs, os (+3 more)
 
 ### Community 120 - "lenis.min.js"
 Cohesion: 0.13
 Nodes (11): advance(), cleanUpClassName(), destroy(), isLocked(), isScrolling(), isStopped(), n(), r() (+3 more)
 
 ### Community 121 - "files-service.js"
-Cohesion: 0.17
-Nodes (22): Categories, Decision, 9. Code map and tests, Path Traversal / Filesystem Boundaries, projectEntry(), assertCategoryStructure(), canonicalRel(), extractVersion() (+14 more)
+Cohesion: 0.12
+Nodes (31): 5. Search/Categories/Releases Flows, Categories, Releases, Search, Filesystem / Content Layout, Prerequisites, Coverage Gaps Worth Knowing, projectEntry() (+23 more)
 
 ### Community 122 - "overflow"
 Cohesion: 0.09
@@ -723,13 +740,13 @@ Nodes (8): assert, ctx, fs, names, path, root, sprite, vm
 Cohesion: 0.09
 Nodes (21): ADDED Requirements, Purpose, Requirement: A selected release can be checksum-verified on demand, Requirement: Per-OS latest-release endpoints stream the highest-version artifact, Requirement: Selecting a release generates a deterministic CLI download command, Requirement: The latest-release endpoints honor the release auth gate, Requirement: The package list offers el8 and el9 tabs that switch release folders, Requirement: The Releases page renders as a clean root route reachable only through the navbar (+13 more)
 
-### Community 125 - "streamDownload"
-Cohesion: 0.20
-Nodes (18): Frontend Cross-Cutting Conventions, Standalone HTML Pages, 2. HTTP Request Routing, Application Headers, HTTP/Security Headers, nginx Headers, securityHeaders(), fs (+10 more)
-
-### Community 126 - "ref_fs"
+### Community 125 - "api-router.js"
 Cohesion: 0.10
-Nodes (17): `GET /api/hash/*`, crypto, fs, hashService, os, path, results, ROOT (+9 more)
+Nodes (36): Browse Row Targets and File Actions, Dedicated File Actions, Frontend Cross-Cutting Conventions, Primary navigation target (BrowsePage-owned), Standalone HTML Pages, 2. HTTP Request Routing, Adding/Changing API Behavior, Application Headers (+28 more)
+
+### Community 126 - "hash-service.check.js"
+Cohesion: 0.12
+Nodes (15): `GET /api/hash/*`, crypto, fs, hashService, os, path, results, ROOT (+7 more)
 
 ### Community 127 - "Decisions"
 Cohesion: 0.10
@@ -748,12 +765,12 @@ Cohesion: 0.11
 Nodes (18): ADDED Requirements, Capability: Navbar, Purpose, Requirement: Every navbar control is operable by keyboard, Requirement: Primary navbar controls meet the touch-target recommendation, Requirement: The current-page indicator is truthful, Requirement: The navigation group declares only semantics it implements, Scenario: `aria-expanded` reflects the real state (+10 more)
 
 ### Community 131 - "archive-service.js"
-Cohesion: 0.16
-Nodes (14): ADR-0001, `GET /api/download-zip`, archiveError(), createArchive(), { createDeflateRaw, crc32 }, deflateEntry(), dosDateTime(), entryNameFor() (+6 more)
+Cohesion: 0.17
+Nodes (12): ADR-0001, archiveError(), { createDeflateRaw, crc32 }, deflateEntry(), dosDateTime(), entryNameFor(), filesService, fs (+4 more)
 
 ### Community 132 - "Design: Browse Files Item Targets and File Actions"
-Cohesion: 0.11
-Nodes (18): 0. What changed from the previous revision of this design, Architecture Sizing, Click flows, Compatibility considerations, Context, CSS / layout ownership (revised), D11. Complete File Action ownership is confirmed as already satisfied; no helper movement is required, D11a. The action track is pinned so column alignment is content-independent (+10 more)
+Cohesion: 0.10
+Nodes (19): 0. What changed from the previous revision of this design, Architecture Sizing, Click flows, Compatibility considerations, Context, CSS / layout ownership (revised), D11. Complete File Action ownership is confirmed as already satisfied; no helper movement is required, D11a. The action track is pinned so column alignment is content-independent (+11 more)
 
 ### Community 133 - "access-policy.test.js"
 Cohesion: 0.12
@@ -779,17 +796,17 @@ Nodes (15): ADDED Requirements, Capability: Search Accessibility, Purpose, Requi
 Cohesion: 0.12
 Nodes (15): ADDED Requirements, Purpose, Requirement: In integration mode, release protection comes from the admin folder lock, Requirement: Legacy mode keeps the `.env` release gate, Requirement: The Release page opens the login modal whenever login is required, Scenario: Administrator locks the release folder, Scenario: Administrator unlocks the release folder, Scenario: Direct visit to the Release page (+7 more)
 
-### Community 139 - "admin-fixture.js"
-Cohesion: 0.12
-Nodes (11): assert, { createFixture, client }, fx, http, { test, before, after }, crypto, { DatabaseSync }, fs (+3 more)
+### Community 139 - "ref_assert"
+Cohesion: 0.14
+Nodes (9): assert, { createFixture, client }, fx, { test, after }, assert, { createFixture, client }, fx, http (+1 more)
 
 ### Community 140 - "auth.test.js"
 Cohesion: 0.14
 Nodes (12): adminDb, afterSync(), assert, authService, { createFixture, applyEnv, client, adminHashPassword }, crypto, fs, fx (+4 more)
 
 ### Community 141 - "endpoints.test.js"
-Cohesion: 0.17
-Nodes (11): adminDb, afterSync(), assert, { createFixture, applyEnv, client }, crypto, { execFileSync }, fs, fx (+3 more)
+Cohesion: 0.14
+Nodes (13): adminDb, afterSync(), anon(), as(), assert, { createFixture, applyEnv, client }, crypto, { execFileSync } (+5 more)
 
 ### Community 142 - "signJwt"
 Cohesion: 0.15
@@ -804,8 +821,8 @@ Cohesion: 0.14
 Nodes (13): ADDED Requirements, Capability: Footer Localisation, Purpose, Requirement: Existing dictionary entries are untouched, Requirement: Footer links expose a localised accessible name, Requirement: The hook is inert on elements that cannot use it, Scenario: A language switch updates the names, Scenario: Accessible names follow the language (+5 more)
 
 ### Community 145 - "Integration: CloudAvid File Portal ↔ Dimension Files Manager"
-Cohesion: 0.15
-Nodes (12): 1. Configuration, 2. What the portal reads, 3.1 One policy, one caller, 3.2 Folders and combination, 3.3 Owner decisions (where the admin spec was silent or contradictory), 3. Access rules, 4.1 In the portal UI, 4. What each endpoint does (+4 more)
+Cohesion: 0.12
+Nodes (15): 1.1 Storage volume (admin schema v5), 1.2 Admin-managed settings (admin schema v5), 1. Configuration, 2. What the portal reads, 3.1 One policy, one caller, 3.2 Folders and combination, 3.3 Owner decisions (where the admin spec was silent or contradictory), 3. Access rules (+7 more)
 
 ### Community 146 - "Style Guide"
 Cohesion: 0.15
@@ -847,45 +864,45 @@ Nodes (11): ADDED Requirements, Capability: Content Strategy, Purpose, Requireme
 Cohesion: 0.17
 Nodes (11): { applyEnv, client }, assert, authService, dir, fs, http, os, path (+3 more)
 
-### Community 156 - "Data Flows"
-Cohesion: 0.10
-Nodes (19): 1. Application Startup, 4. Download Flow, 4a. Bulk Selection and Download Flows, 5. Search/Categories/Releases Flows, 7. Error Flow, 8. Frontend Data Flow, 9. Cross-Cutting Flows, Checksum verification (+11 more)
+### Community 156 - "9. Cross-Cutting Flows"
+Cohesion: 0.20
+Nodes (9): 9. Cross-Cutting Flows, Idle Timer (client-side), Path Containment (per filesystem request), Performance Tier Adaptation, Rate Limiting, Theme and Direction Initialization, Rate Limiting, checkLimit() (+1 more)
 
 ### Community 157 - "ADR-001: No web framework — plain `node:http`"
 Cohesion: 0.18
 Nodes (11): ADR-001: No web framework — plain `node:http`, Alternatives Considered, Build a mini-framework in-repo, Consequences, Context, Date, Decision, Express (+3 more)
 
-### Community 158 - "resolveConfiguredRoot"
-Cohesion: 0.40
-Nodes (6): Filesystem / Content Layout, Prerequisites, peekRootSync(), releaseRel(), resolveConfiguredRoot(), resolveReleaseRoot()
+### Community 158 - "volume.test.js"
+Cohesion: 0.20
+Nodes (8): adminDb, anon(), assert, { createFixture, client, applyEnv }, fx, path, { productionPathProblems }, { test, describe, before, after }
 
 ### Community 159 - "8. Overlays & States Mapping"
 Cohesion: 0.50
 Nodes (4): 8.1 Auth modal, 8.2 Dropdowns, 8.3 Loading, empty, error, locked states, 8. Overlays & States Mapping
 
-### Community 160 - "Decisions"
-Cohesion: 0.18
-Nodes (11): D10. Header row and skeleton rows are unaffected, D1. The primary Browse icon target lives in BrowsePage, not in FileActions, D2. The icon anchor is nested **inside** the existing `.f-icon` cell, not substituted for it, D3. Two sibling anchors, not one merged anchor, D4. The icon target's accessible name is an action label, distinct from the name link's, D5. `FileActions.render()` keeps returning the container for every item; only its *controls* change, D6. Removal of the `open` action definition, not just its suppression, D7. No `stopPropagation()` / `preventDefault()` in the Browse row (+3 more)
+### Community 160 - "ADR-009: Runtime performance tiers gate visual effects"
+Cohesion: 0.17
+Nodes (12): ADR-009: Runtime performance tiers gate visual effects, Alternatives Considered, Build-time / UA-string branching, Consequences, Context, Date, Decision, `@media (prefers-reduced-transparency)`, hover, and pointer queries (+4 more)
 
 ### Community 161 - "Decisions"
-Cohesion: 0.17
-Nodes (11): Context, D1. Agreed semantics (owner decisions, 2026-10-14), D2. Path mapping: `/` + relative path, D3. One snapshot of the admin data, refreshed by TTL, D4. Decision function, D7. Frontend, Decisions, Design (+3 more)
+Cohesion: 0.18
+Nodes (10): D1. Agreed semantics (owner decisions, 2026-10-14), D2. Path mapping: `/` + relative path, D3. One snapshot of the admin data, refreshed by TTL, D4. Decision function, D7. Frontend, Decisions, Design, Goals / Non-Goals (+2 more)
 
 ### Community 162 - "Requirement: Hero Section Freeze"
 Cohesion: 0.18
 Nodes (11): Requirement: Hero Section Freeze, Scenario: Hero autocomplete still binds, Scenario: Hero DOM is byte-identical after redesign [HARD GATE], Scenario: Hero token drift is compensated, Scenario: No CSS rule targets a frozen selector, Scenario: The Hero-emitting code path is untouched, Scenario: The `--hero-grad` token is not repointed, Scenario: The Hero's keyboard shortcut is unchanged (+3 more)
 
 ### Community 163 - "API Reference"
-Cohesion: 0.12
-Nodes (17): limit(), API Reference, Blocked Paths, Error Response Format, `GET /404`, `GET /404.html`, `GET /api/categories`, `GET /api/download/*`, `GET /api/health` (+9 more)
+Cohesion: 0.13
+Nodes (16): limit(), API Reference, Authentication, Blocked Paths, Command-line clients (HTTP Basic), `GET /404`, `GET /404.html`, `GET /api/categories`, `GET /api/download/*` (+8 more)
 
 ### Community 164 - "ADR-005: Three-layer path containment for the filesystem boundary"
-Cohesion: 0.20
-Nodes (10): ADR-005: Three-layer path containment for the filesystem boundary, Alternatives Considered, Canonicalize then check (resolve + realpath, one layer), chroot / container / mount namespace isolation, Consequences, Context, Date, `sendfile`/stream without full resolution (+2 more)
+Cohesion: 0.22
+Nodes (9): ADR-005: Three-layer path containment for the filesystem boundary, Alternatives Considered, Canonicalize then check (resolve + realpath, one layer), chroot / container / mount namespace isolation, Context, Date, `sendfile`/stream without full resolution, Single `path.resolve()` + `startsWith(root)` check (+1 more)
 
-### Community 165 - "Browse Row Targets and File Actions"
-Cohesion: 0.67
-Nodes (3): Browse Row Targets and File Actions, Dedicated File Actions, Primary navigation target (BrowsePage-owned)
+### Community 165 - "access-policy.js"
+Cohesion: 0.24
+Nodes (11): adminDb, ALLOW, callerId(), decide(), defaultRank(), evaluate(), filterVisible(), FORBIDDEN (+3 more)
 
 ### Community 166 - "ADDED Requirements"
 Cohesion: 0.20
@@ -899,21 +916,29 @@ Nodes (9): ADDED Requirements, Capability: Performance, RTL, and Responsive Pari
 Cohesion: 0.20
 Nodes (10): Requirement: Breakpoint behaviours that remove functionality are preserved, Scenario: **HARD GATE** — Mobile navigation removal is preserved, Scenario: Hero positioning declarations are byte-identical, Scenario: Hero responsive breakpoints are preserved [HARD GATE], Scenario: No alternative mobile navigation exists, Scenario: The grid reflow is preserved, Scenario: The listing column collapse is preserved, Scenario: The mobile view toggle suppression is preserved (+2 more)
 
-### Community 169 - "verifySession"
-Cohesion: 0.15
-Nodes (14): `GET /api/auth/status`, Where Authentication Checks Belong, Authentication, Enable/Disable, Login/Session Lifecycle, verifySession(), D1 — Bugs 1 and 3 are fixed where they originate, D2 — Release protection uses the existing admin folder lock, not a new setting (+6 more)
+### Community 169 - "Decisions"
+Cohesion: 0.20
+Nodes (9): D1 — Bugs 1 and 3 are fixed where they originate, D2 — Release protection uses the existing admin folder lock, not a new setting, D3 — "Logged in" for a CLI means valid Basic credentials on the request, D4 — Challenge only non-browser clients, D5 — Commands shown to users, Decisions, Design, Limitations (to accept before implementation) (+1 more)
 
-### Community 171 - "searchEntries"
+### Community 170 - "ADR-006: Vanilla JS SPA with no build step"
 Cohesion: 0.18
-Nodes (13): Search, ADR-002: The filesystem is the datastore, Alternatives Considered, Consequences, Context, Date, Decision, Elasticsearch / Meilisearch (+5 more)
+Nodes (11): ADR-006: Vanilla JS SPA with no build step, Alpine.js / htmx / petite-vue (no build, CDN script), Alternatives Considered, Consequences, Context, Date, Decision, ES modules (`<script type="module">`) (+3 more)
+
+### Community 171 - "ADR-002: The filesystem is the datastore"
+Cohesion: 0.20
+Nodes (10): ADR-002: The filesystem is the datastore, Alternatives Considered, Consequences, Context, Date, Decision, Elasticsearch / Meilisearch, In-memory cache with mtime invalidation (+2 more)
+
+### Community 172 - "ADR-008: CSS custom properties as the design-token layer, no preprocessor"
+Cohesion: 0.18
+Nodes (11): ADR-008: CSS custom properties as the design-token layer, no preprocessor, Alternatives Considered, Consequences, Context, Date, Decision, JS-injected theme tokens, PostCSS with custom-properties plugin (+3 more)
 
 ### Community 173 - "Tasks"
 Cohesion: 0.22
 Nodes (8): 1. Backend: latest-release endpoints and auth gate, 2. Routing: clean root entry for the page, 3. Releases page UI (template → production logic), 4. Navbar integration, 5. Documentation, 6. Integration verification, Tasks, Workflow follow-up
 
 ### Community 174 - "Proposal: Browse Page Inspector Redesign"
-Cohesion: 0.22
-Nodes (8): Capabilities, Explicitly out of this change, Impact, Modified Capabilities, New Capabilities, Proposal: Browse Page Inspector Redesign, What Changes, Why
+Cohesion: 0.25
+Nodes (7): Capabilities, Explicitly out of this change, Modified Capabilities, New Capabilities, Proposal: Browse Page Inspector Redesign, What Changes, Why
 
 ### Community 175 - "Requirement: Locked rows show a lock and open sign-in instead of downloading"
 Cohesion: 0.22
@@ -924,12 +949,20 @@ Cohesion: 0.25
 Nodes (8): i(), scroll(), Alternatives Considered, Bundle Lenis via npm (it *is* in `package.json`), CSS-only scroll-driven animations (`animation-timeline: view()` / `scroll()`), CSS `scroll-behavior: smooth`, Native inertia on macOS / trackpad scrolling, No smooth scroll; ship native
 
 ### Community 177 - "auth-service.js"
-Cohesion: 0.13
-Nodes (21): RFC-7515, RFC-7617, `POST /api/auth/logout`, `data/users.json` Schema, Logout, 8. Pre-existing observations (not part of this change), Resolved Items, adminDb (+13 more)
+Cohesion: 0.12
+Nodes (24): RFC-7515, RFC-7617, `GET /api/auth/status`, `data/users.json` Schema, 8. Pre-existing observations (not part of this change), Resolved Items, adminDb, crypto (+16 more)
+
+### Community 178 - "ADR-007: nginx serves static assets and proxies `/api/`"
+Cohesion: 0.20
+Nodes (10): ADR-007: nginx serves static assets and proxies `/api/`, Alternatives Considered, CDN in front of nginx, Consequences, Context, Date, Dev server (Vite) with HMR, nginx for TLS only, proxy everything to Node (+2 more)
+
+### Community 179 - "ref_fs"
+Cohesion: 0.12
+Nodes (14): fs, path, PATH_VARS, productionPathProblems(), PROJECT_ROOT, accessPolicy, adminDb, apiRouter (+6 more)
 
 ### Community 180 - "Process"
-Cohesion: 0.13
-Nodes (14): 1. Define "working" before instrumenting, 2. Pick the right signal for each question, 4. Metrics, 5. Distributed tracing, 6. Alerting, 7. Verify the telemetry itself, Common Rationalizations, Observability and Instrumentation (+6 more)
+Cohesion: 0.25
+Nodes (8): 1. Define "working" before instrumenting, 2. Pick the right signal for each question, 4. Metrics, 5. Distributed tracing, 6. Alerting, 7. Verify the telemetry itself, Process, Writing Runbooks
 
 ### Community 181 - "Requirement: Complete File Action ownership"
 Cohesion: 0.25
@@ -940,8 +973,8 @@ Cohesion: 0.25
 Nodes (8): Requirement: Primary Browse icon is an additional navigation target, Scenario: Icon is interactive, not decorative, Scenario: Icon on a directory item navigates, Scenario: Icon on a file item downloads, Scenario: Icon resolves to the same target as the name link, Scenario: Name link remains an independent target, Scenario: No duplicate navigation from the two targets, Scenario: Targets are not nested inside one another
 
 ### Community 183 - "Proposal"
-Cohesion: 0.25
-Nodes (7): Capabilities, Impact, Modified Capabilities, New Capabilities, Proposal, What Changes, Why
+Cohesion: 0.29
+Nodes (6): Capabilities, Impact, Modified Capabilities, New Capabilities, Proposal, Why
 
 ### Community 184 - "Tasks"
 Cohesion: 0.25
@@ -951,17 +984,25 @@ Nodes (7): 1. Test harness, 2. Admin data snapshot (`lib/admin-db.js`), 3. Decis
 Cohesion: 0.25
 Nodes (8): Requirement: Language switch rebuilds all dynamic text, Scenario: Browser history is not polluted by a language change, Scenario: **HARD GATE** — Browse page text is rebuilt, Scenario: **HARD GATE** — Language switch rebuilds all dynamic text, Scenario: The active option in the menu is marked, Scenario: The current-language label updates, Scenario: The direction attribute follows the language, Scenario: The selection persists
 
-### Community 186 - "extractToken"
-Cohesion: 0.18
-Nodes (10): extractToken(), parseCookies(), Capabilities, Impact, Modified Capabilities, New Capabilities, Non-goals, Proposal (+2 more)
+### Community 186 - "Proposal"
+Cohesion: 0.25
+Nodes (7): Capabilities, Impact, Modified Capabilities, New Capabilities, Non-goals, Proposal, What Changes
+
+### Community 187 - "Data Flows"
+Cohesion: 0.25
+Nodes (8): 3. File Browsing Flow, 4. Download Flow, 4a. Bulk Selection and Download Flows, 8. Frontend Data Flow, Checksum verification, Data Flows, Multi-file download, ZIP download
 
 ### Community 188 - "Proposal"
 Cohesion: 0.25
 Nodes (7): Capabilities, Impact, Modified Capabilities, New Capabilities, Proposal, What Changes, Why
 
-### Community 189 - "buildSessionCookie"
-Cohesion: 0.40
-Nodes (6): Session/Cookie Security, buildSessionCookie(), makeSessionCookieHeader(), 7. Security Documentation Strategy, Source References, Topics to Cover
+### Community 189 - "Security"
+Cohesion: 0.10
+Nodes (22): `POST /api/auth/logout`, Logout, Accepted Risks, Authentication, Authentication Bypass Boundaries, Command-line (HTTP Basic) credentials, Enable/Disable, HTTP/Security Headers (+14 more)
+
+### Community 190 - "Project Brain Documentation"
+Cohesion: 0.25
+Nodes (8): Architecture Decision Records, Intended Audience, Known Issues, Maintenance, Project Brain Documentation, Reference Documents, Source of Truth, Start Here
 
 ### Community 191 - "Tasks"
 Cohesion: 0.29
@@ -1007,6 +1048,10 @@ Nodes (6): ADDED Requirements, Requirement: Login from a locked folder shows the
 Cohesion: 0.29
 Nodes (6): 1. State and command generation (`assets/js/releases.js`), 2. Markup and interaction, 3. Visual rebuild (`assets/css/release.css`), 4. Integration verification, Tasks, Workflow follow-up
 
+### Community 202 - "serviceError"
+Cohesion: 0.13
+Nodes (21): Error Response Format, Verified Error Codes, 7. Error Flow, Code Conventions, Error Handling Pattern, Logging Pattern, Observed Conventions, Documentation to Update (+13 more)
+
 ### Community 203 - "Local Setup"
 Cohesion: 0.22
 Nodes (9): Lifecycle, Process Supervision, Production Process, Startup, Installation, Local Setup, Prerequisites, Startup (+1 more)
@@ -1015,17 +1060,17 @@ Nodes (9): Lifecycle, Process Supervision, Production Process, Startup, Installa
 Cohesion: 0.33
 Nodes (6): Backend Changes, Change Workflow (OpenSpec), Development Workflow, Frontend Changes, Manual Verification, No Build Step
 
-### Community 205 - "Adding or Changing an API Endpoint"
-Cohesion: 0.33
-Nodes (6): Adding or Changing an API Endpoint, Classifying the Auth Requirement, How Responses/Errors Are Produced, Pattern, Where Domain/File Operations Belong, Where Routing Is Handled
+### Community 205 - "pathRequiresAuth"
+Cohesion: 0.11
+Nodes (20): `GET /release9/latest`, `GET /release8/latest`, Adding or Changing an API Endpoint, Classifying the Auth Requirement, How Responses/Errors Are Produced, Pattern, Where Authentication Checks Belong, Where Domain/File Operations Belong, Where Routing Is Handled (+12 more)
 
 ### Community 206 - "Core Principles"
 Cohesion: 0.33
 Nodes (6): 1. Commit Early, Commit Often, 2. Atomic Commits, 3. Descriptive Messages, 4. Keep Concerns Separate, 5. Size Your Changes, Core Principles
 
-### Community 207 - "main"
-Cohesion: 0.33
-Nodes (6): Branch Naming, Branching Strategy, Feature Branches, Trunk-Based Development (Recommended), main(), seed()
+### Community 207 - "getSnapshot"
+Cohesion: 0.28
+Nodes (9): activeUserRow(), findActiveUserById(), findActiveUserByUsername(), getSnapshot(), isIntegrationEnabled(), navFolders(), releaseClientPath(), syncTtlMs() (+1 more)
 
 ### Community 208 - "Requirement: Row layout compatibility with the existing column structure"
 Cohesion: 0.33
@@ -1042,6 +1087,10 @@ Nodes (5): ADDED Requirements, Requirement: A locked item reveals no metadata be
 ### Community 211 - "3. Font Loading Strategy"
 Cohesion: 0.33
 Nodes (6): 3.1 Files added, 3.2 `@font-face` declarations, 3.3 Token re-pointing, 3.4 Google Fonts link removal, 3.5 RTL, 3. Font Loading Strategy
+
+### Community 212 - "validateStartup"
+Cohesion: 0.24
+Nodes (12): filesRoot(), hasExpectedTables(), openReadOnly(), parseBool(), readSchemaVersion(), readSettings(), readSnapshot(), resolveConfig() (+4 more)
 
 ### Community 213 - "Requirement: The bottom grid, releases UI, and status bar are removed"
 Cohesion: 0.33
@@ -1103,6 +1152,10 @@ Nodes (5): 1. Frontend bugs, 2. Release access from the Admin UI, 3. CLI authent
 Cohesion: 0.40
 Nodes (5): preventNextNativeScrollEvent(), scrollTo(), setScroll(), u(), Phase 8 — Cross-Browser Mobile Responsiveness
 
+### Community 228 - "Tasks (§P — ships before the admin change)"
+Cohesion: 0.33
+Nodes (5): 2. Release folder, 3. Tunables, 4. Production paths, 5. Docs, Tasks (§P — ships before the admin change)
+
 ### Community 229 - "Requirement: Directory items expose no dedicated File Action"
 Cohesion: 0.40
 Nodes (5): Requirement: Directory items expose no dedicated File Action, Scenario: Directory icon is the equivalent alternative, Scenario: Directory name link still navigates, Scenario: Directory row has no File Action control, Scenario: File rows are unaffected
@@ -1159,9 +1212,13 @@ Nodes (5): Requirement: Both directions render correctly, Scenario: Bidirectiona
 Cohesion: 0.40
 Nodes (5): Requirement: Every new effect has a low-tier and a potato-tier override, Scenario: Existing overrides still win over restyled rules, Scenario: **HARD GATE** — Every effect-bearing selector has a low-tier override, Scenario: **HARD GATE** — Every effect-bearing selector has a potato-tier override, Scenario: The enumeration is complete
 
-### Community 244 - "Frontend Development"
-Cohesion: 0.50
-Nodes (4): API Client, Component Pattern, Frontend Development, Module Loading
+### Community 243 - "Proposal"
+Cohesion: 0.33
+Nodes (5): clientPathOf(), Non-goals, Proposal, What Changes, Why
+
+### Community 244 - "Development"
+Cohesion: 0.14
+Nodes (14): API Client, Component Pattern, Debugging / Troubleshooting, Development, Documentation Maintenance, Frontend Development, Frontend Issues, Generated and Non-Source Paths (+6 more)
 
 ### Community 245 - "Release & Versioning"
 Cohesion: 0.50
@@ -1186,6 +1243,10 @@ Nodes (4): Requirement: Folder policies apply to everything inside the folder, S
 ### Community 250 - "Requirement: Invalid or unreadable policy data fails closed"
 Cohesion: 0.50
 Nodes (4): Requirement: Invalid or unreadable policy data fails closed, Scenario: Database lost at runtime, Scenario: Newer schema at startup, Scenario: Unknown access mode
+
+### Community 251 - "Extending Frontend Behavior"
+Cohesion: 0.22
+Nodes (9): Adding a Dedicated Browse File Action, Adding a Frontend Component, Adding a Stylesheet or Design Token, API Client, Browse Row Targets: Two Separate Categories, Existing Modules, Extending Frontend Behavior, Module Loading (+1 more)
 
 ### Community 252 - "Requirement: Every surviving Home id survives unchanged"
 Cohesion: 0.50
@@ -1327,10 +1388,30 @@ Nodes (3): Requirement: ZIP archives contain only allowed files, Scenario: Locke
 Cohesion: 0.67
 Nodes (3): Requirement: The performance monitor's surfaces survive, Scenario: The debug panel shortcut still toggles the panel, Scenario: The monitor still observes page performance
 
+### Community 291 - "Architecture Decision Records"
+Cohesion: 0.40
+Nodes (5): Architecture Decision Records, Format, Index, Lifecycle, Relationship to `docs/`
+
+### Community 292 - "Verification After an Extension"
+Cohesion: 0.25
+Nodes (8): API/Manual Checks, Application Startup, Authentication Checks (when `AUTH_ENABLED=true`), Documentation Consistency, Filesystem/Content Checks, Frontend/Manual Checks, Production Checks, Verification After an Extension
+
+### Community 293 - "Observability and Instrumentation"
+Cohesion: 0.29
+Nodes (6): Common Rationalizations, Observability and Instrumentation, Overview, Red Flags, Verification, When to Use
+
+### Community 294 - "Proposal"
+Cohesion: 0.29
+Nodes (6): Capabilities, Modified Capabilities, New Capabilities, Proposal, What Changes, Why
+
+### Community 295 - "main"
+Cohesion: 0.33
+Nodes (6): Branch Naming, Branching Strategy, Feature Branches, Trunk-Based Development (Recommended), main(), seed()
+
 ## Knowledge Gaps
-- **2016 isolated node(s):** `idea-refine.sh script`, `Autocomplete`, `BrowsePage`, `FileActions`, `FileInspector` (+2011 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 2170 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **28 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **2051 isolated node(s):** `idea-refine.sh script`, `Autocomplete`, `BrowsePage`, `FileActions`, `FileInspector` (+2046 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 2206 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **29 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -1340,12 +1421,12 @@ _Questions this graph is uniquely positioned to answer:_
 - **Are the 33 inferred relationships involving `pathRequiresAuth()` (e.g. with `Authentication` and ``GET /release9/latest`, `GET /release8/latest``) actually correct?**
   _`pathRequiresAuth()` has 33 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `idea-refine.sh script`, `Autocomplete`, `BrowsePage` to the rest of the system?**
-  _2016 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `resolveInsideRoot` be split into smaller, more focused modules?**
-  _Cohesion score 0.14333333333333334 - nodes in this community are weakly interconnected._
-- **Why does `pathRequiresAuth()` connect `pathRequiresAuth` to `login`, `resolveInsideRoot`, `API Reference`, `verifySession`, `Locked Decisions`, `Requirement: In integration mode, release protection comes from the admin folder lock`, `Adding or Changing an API Endpoint`, `Tasks`, `Proposal: Browse Page Inspector Redesign`, `auth-service.js`, `listLatestReleases`, `handleRequest`, `extractToken`, `Data Flows`, `buildSessionCookie`, `resolveConfiguredRoot`, `Decisions`?**
-  _High betweenness centrality (0.036) - this node is a cross-community bridge._
+  _2051 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `admin-fixture.js` be split into smaller, more focused modules?**
+  _Cohesion score 0.14285714285714285 - nodes in this community are weakly interconnected._
+- **Why does `pathRequiresAuth()` connect `pathRequiresAuth` to `login`, `resolveInsideRoot`, `API Reference`, `Decisions`, `Locked Decisions`, `Requirement: In integration mode, release protection comes from the admin folder lock`, `Tasks`, `auth-service.js`, `ADR-004: Auth gates only `RELEASE_PVM`, not the whole portal`, `Security`, `files-service.js`, `Proposal`, `Data Flows`, `api-router.js`, `Decisions`?**
+  _High betweenness centrality (0.033) - this node is a cross-community bridge._
 - **Are the 16 inferred relationships involving `login()` (e.g. with `ResourceService` and `Command-line clients (HTTP Basic)`) actually correct?**
   _`login()` has 16 INFERRED edges - model-reasoned connections that need verification._
-- **Should `api-router.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.14285714285714285 - nodes in this community are weakly interconnected._
+- **Should `Hardening Controls` be split into smaller, more focused modules?**
+  _Cohesion score 0.045454545454545456 - nodes in this community are weakly interconnected._
