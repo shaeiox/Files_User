@@ -34,6 +34,13 @@ if (releaseRel && accessPolicy.decide(releaseRel, null).result === "allow") {
     logger.warn(`Release folder "${releaseRel}" is public. Lock it in the Admin Files Manager to require sign-in for releases.`);
 }
 
+// AUTH_BASIC_ALLOW_HTTP accepts CLI credentials over plain HTTP, so the password
+// crosses the wire in cleartext. Allowed only for deliberate plain-HTTP setups;
+// say it loudly at startup so it is never enabled by accident.
+if (process.env.AUTH_BASIC_ALLOW_HTTP === "true" && String(process.env.NODE_ENV || "").toLowerCase() === "production") {
+    logger.warn("AUTH_BASIC_ALLOW_HTTP=true: CLI Basic-auth credentials are accepted over plain HTTP. Prefer HTTPS.");
+}
+
 const HOST = "0.0.0.0";
 const PORT = process.env.PORT || 4000;
 
@@ -67,7 +74,9 @@ ${c.cyan}${c.bold}
 `);
 });
 
-process.on("SIGINT", () => {
+// SIGTERM: systemd stop / docker stop (as PID 1, node ignores it without a handler).
+for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => {
     logger.warn("\nShutting down file portal…");
     server.close(() => process.exit(0));
+    setTimeout(() => process.exit(0), 5000).unref(); // open downloads keep close() waiting
 });

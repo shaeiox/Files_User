@@ -59,6 +59,34 @@ test('legacy mode keeps the .env release gate', async () => {
     }
 });
 
+test('legacy release gate is not bypassed via the query string or an extra separator', async () => {
+    applyEnv({ RELEASE_PVM: path.join(dir, 'storage', 'release') });
+    const file = 'release/el9/pvm-release-1.0.0-el9.tgz';
+    try {
+        const anon = client(base);
+        for (const url of [
+            `/api/files?path=${encodeURIComponent('release/el9')}`,
+            `/api/download?path=${encodeURIComponent(file)}`,
+            `/api/hash?path=${encodeURIComponent(file)}`,
+            `/api/search?path=${encodeURIComponent('release/el9')}&q=x`,
+            `/api/download//${file}`,
+            // Segments are trimmed on resolution, so a padded name must still be gated.
+            `/api/download/%20${file}`,
+            `/api/hash/%09${file}`,
+            `/api/files/%20release/el9`,
+        ]) {
+            assert.strictEqual((await anon.get(url)).status, 401, url);
+        }
+        const c = client(base);
+        assert.strictEqual((await c.login('legacy1', 'password123')).status, 200);
+        const ok = await c.get(`/api/download?path=${encodeURIComponent(file)}`);
+        assert.strictEqual(ok.status, 200, JSON.stringify(ok.json));
+        assert.strictEqual(ok.body.toString(), 'r9');
+    } finally {
+        applyEnv({ RELEASE_PVM: undefined });
+    }
+});
+
 test('a user removed from users.json loses their session with USER_REVOKED', async () => {
     const c = client(base);
     const login = await c.login('legacy1', 'password123');
