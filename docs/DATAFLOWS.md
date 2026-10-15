@@ -407,13 +407,13 @@ lib/logger.js logAccess(method, status, url, extra)
 ### Idle Timer (client-side)
 
 ```
-lib/idle-timer.js IdleTimer.start(minutes, onTimeout)
+assets/js/idle-timer.js IdleTimer.start(minutes, onTimeout)
   → monitors mousemove, keydown, scroll, touchstart, pointerdown
   → checkExpiration() every 10 seconds (CHECK_INTERVAL_MS = 10000)
   → on timeout: calls onTimeout callback (typically ResourceService.logout())
 ```
 
-**Source:** `lib/idle-timer.js` → `IdleTimer.start()`, `assets/js/home.js` → `IdleTimer.start(30, ...)`
+**Source:** `assets/js/idle-timer.js` → `IdleTimer.start()`, `assets/js/home.js` → `IdleTimer.start(30, ...)`
 
 ### Rate Limiting
 

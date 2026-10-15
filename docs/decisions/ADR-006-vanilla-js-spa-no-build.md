@@ -63,7 +63,7 @@ navigation and assumes every page module is already registered.
 ### ES modules (`<script type="module">`)
 - Pros: Native, real scoping, `import`/`export`, browser-managed dependency order.
 - Cons: `type="module"` implies strict mode and deferred execution for *every* file, which
-  conflicts with `banner.js` needing to run early and with `lib/idle-timer.js` currently
+  conflicts with `banner.js` needing to run early and with `assets/js/idle-timer.js` currently
   loading as a classic script. It also makes top-level `await` and deep relative-import
   paths a live footgun under a flat directory structure.
 - Rejected: The migration cost to restructure every global reference exceeded the benefit.

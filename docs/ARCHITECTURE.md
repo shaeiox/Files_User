@@ -29,7 +29,7 @@
 | `lib/static-handler.js` | SPA serving, 404, static files, downloads | `lib/static-handler.js` |
 | `lib/load-env.js` | `.env` file loading with dotenv fallback | `lib/load-env.js` |
 | `lib/logger.js` | Terminal logging with ANSI colors | `lib/logger.js` |
-| `lib/idle-timer.js` | Client-side session auto-lock | `lib/idle-timer.js` |
+| `assets/js/idle-timer.js` | Client-side session auto-lock | `assets/js/idle-timer.js` |
 | `lib/hash-password.js` | CLI utility for password hashing | `lib/hash-password.js` |
 
 ## Backend Dependency Relationships
@@ -103,7 +103,7 @@ index.html
 ├── assets/js/browse.js                        defer
 ├── assets/js/vendor/lenis.min.js              defer   ← must precede smooth-scroll.js
 ├── assets/js/smooth-scroll.js                 defer
-├── lib/idle-timer.js                          (no defer)
+├── assets/js/idle-timer.js                          (no defer)
 └── assets/js/router.js                        defer   ← must be last
 ```
 
@@ -116,7 +116,7 @@ index.html
    and degrades to native scrolling rather than throwing. There is no error to notice.
 
 `defer` preserves execution order while allowing parallel download. `banner.js` and
-`lib/idle-timer.js` intentionally load without it.
+`assets/js/idle-timer.js` intentionally load without it.
 
 ### Frontend Stylesheet Loading Order
 

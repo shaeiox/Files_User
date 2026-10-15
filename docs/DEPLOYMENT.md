@@ -222,10 +222,10 @@ Two filesystems are in play, and it is easy to deploy only one of them:
 | Path | Served by | In production |
 |------|-----------|---------------|
 | `/api/*` | Node.js | via `proxy_pass` |
-| `/assets/*`, `/lib/idle-timer.js`, `*.html` | nginx | directly from `root` |
+| `/assets/*`, `/assets/js/idle-timer.js`, `*.html` | nginx | directly from `root` |
 
 The nginx `root` is `/var/www/html/files-server-web`. **The whole repository tree must exist
-at that path**, not just `assets/` — `index.html`, `404.html`, and `lib/idle-timer.js` are
+at that path**, not just `assets/` — `index.html`, `404.html`, and `assets/js/idle-timer.js` are
 all read from it. `lib/` additionally being reachable is why `location ~ /\.` and the
 application-level `/lib/` deny both exist; see
 [ADR-005](decisions/ADR-005-defense-in-depth-path-containment.md).
