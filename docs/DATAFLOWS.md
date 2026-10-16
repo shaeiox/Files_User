@@ -8,7 +8,9 @@ process start
     → lib/load-env.js loadEnv(PROJECT_ROOT)
       → tries require('dotenv').config()
       → fallback: parseEnvText() reads .env file
-    → lib/logger.js (ANSI color codes)
+    → lib/settings.js problems() + lib/admin-db.js validateStartup()
+      → any problem: print every one, exit 1 (--check-config: exit 0 when none)
+    → lib/logger.js (ANSI color codes, JSON trace)
     → lib/api-router.js (router module)
     → lib/files-service.js (service module)
     → http.createServer((req, res) => apiRouter.handleRequest(req, res, PROJECT_ROOT, PORT))
@@ -26,33 +28,34 @@ process start
 ```
 HTTP Request
   → lib/api-router.js handleRequest(req, res, projectRoot, port)
+    → X-Request-Id (trusted proxy's, else new); one access line when the response closes
+    → URL parsing: new URL(req.url, ...)
+    → /livez, /readyz, /metrics (lib/routes/ops.js) — before the rate limiter
     → lib/rate-limiter.js checkLimit(req)
       → if exceeded: sendJSON(429, { error: "Too many requests.", code: "RATE_LIMITED" })
-    → URL parsing: new URL(req.url, ...)
     → CORS preflight (OPTIONS → 204)
     → Method check (GET/HEAD/POST-only-for-auth)
     → Block sensitive paths (/.env, /lib/*, /data/*, /node_modules/*)
-    → Auth gate (if pathRequiresAuth())
-    → Route handlers (see below)
+    → Sign-in routes (lib/routes/auth.js)
+    → lib/request-context.js createRequestContext() (cookie + Basic sessions, gates)
+    → Legacy release gate (if pathRequiresAuth())
+    → First matching route in lib/routes/index.js ROUTES (see below)
     → Error catch → sendServiceError()
 ```
 
-**Route dispatch order:**
+**Route dispatch order** (`lib/routes/index.js`):
 
-1. `GET /__health` or `GET /api/health` → `sendJSON(200, { status: "ok", uptime: ... })`
-2. `GET /api/auth/status` → `authService.isAuthEnabled()` + `verifySession()`
-3. `POST /api/auth/login` → `authService.login()`
-4. `POST /api/auth/logout` → `authService.makeClearCookieHeader()`
-5. Auth gate → `authService.pathRequiresAuth()` → `verifySession()`
-6. `GET /api/categories` → `filesService.listCategories()`
-7. `GET /api/releases` → `filesService.listLatestReleases()`
-8. `GET /api/search` → `filesService.searchEntries()`
-9. `GET /api/files/*` → `filesService.listPath()`
-10. `GET /api/download/*` → `filesService.getDownloadTarget()` + `streamDownload()`
-11. `GET /404` or `GET /404.html` → `serve404()`
-12. `GET /`, `GET /index.html`, `GET /browse/*` → `serveSPA()` or `serveStatic()`
+1. `GET /livez`, `GET /readyz`, `GET /metrics` (loopback only) → `lib/routes/ops.js`
+2. `GET /api/auth/status`, `POST /api/auth/login`, `POST /api/auth/logout` → `lib/routes/auth.js`
+3. Legacy release gate → `authService.pathRequiresAuth()`
+4. `GET /__health` or `GET /api/health` → `sendJSON(200, { status: "ok", uptime: ... })`
+5. `GET /api/nav`, `GET /api/categories` → `lib/routes/catalog.js`
+6. `GET /api/releases`, `GET /release[89]/latest` → `lib/routes/releases.js`
+7. `GET /api/search` → `lib/routes/catalog.js`
+8. `GET /api/files/*`, `/api/download/*`, `/api/hash/*`, `/api/download-zip` → `lib/routes/content.js`
+9. `GET /404`, SPA routes, static fallback → `lib/routes/static.js`
 
-**Source:** `lib/api-router.js` → `handleRequest()`
+**Source:** `lib/api-router.js` → `handleRequest()`, `lib/routes/index.js`
 
 ---
 
@@ -107,7 +110,7 @@ GET /api/download/{relPath}
 
 ## 4a. Bulk Selection and Download Flows
 
-The Browse page keeps a selection `Set` of `relPath` strings in `assets/js/bulk-download.js`. It is
+The Browse page keeps a selection `Set` of `relPath` strings in `public/assets/js/bulk-download.js`. It is
 held outside the row markup on purpose: the list pipeline rewrites `#rows` on every search
 keystroke, so a selection stored in the DOM would be destroyed by typing. Navigation resets it
 because a new directory is a different item universe.
@@ -214,7 +217,7 @@ GET /release9/latest | /release8/latest            (auth gate first: protected p
   → streamDownload(req, res, fileInfo)
 ```
 
-Releases page (`/download/release`, navbar tab only): `ReleasePage` (`assets/js/releases.js`)
+Releases page (`/download/release`, navbar tab only): `ReleasePage` (`public/assets/js/releases.js`)
 calls `ResourceService.getReleases(50, os)` per el8/el9 tab, and builds each row's
 `curl -fLO '<origin><downloadHref(path)>'` command from `ResourceService.downloadHref`, so a
 file always yields the same command.
@@ -330,12 +333,12 @@ Service operation fails
 ```
 Browser loads index.html
   → inline pre-paint script sets data-theme from localStorage / prefers-color-scheme
-  → assets/js/theme.js, i18n.js initialize
+  → public/assets/js/theme.js, i18n.js initialize
   → scripts load in dependency order (see ARCHITECTURE.md)
       - router.js last; vendor/lenis.min.js immediately before smooth-scroll.js
-  → assets/js/services/performance-monitor.js starts frame-timing
+  → public/assets/js/services/performance-monitor.js starts frame-timing
       → classifies device → sets data-perf on <html>
-      → assets/js/smooth-scroll.js MutationObserver starts/stops Lenis accordingly
+      → public/assets/js/smooth-scroll.js MutationObserver starts/stops Lenis accordingly
   → router.js init()
     → navigate(currentPath, false)
       → resolveRoute(path) → "home" | "browse" | null
@@ -348,7 +351,7 @@ Browser loads index.html
         → ResourceService.login() — POST /api/auth/login
 ```
 
-**Source:** `assets/js/router.js` → `navigate()`, `assets/js/home.js` → `render()`, `assets/js/services/resource-service.js` → API methods, `assets/js/services/performance-monitor.js`, `assets/js/smooth-scroll.js`
+**Source:** `public/assets/js/router.js` → `navigate()`, `public/assets/js/home.js` → `render()`, `public/assets/js/services/resource-service.js` → API methods, `public/assets/js/services/performance-monitor.js`, `public/assets/js/smooth-scroll.js`
 
 ---
 
@@ -361,9 +364,9 @@ index.html <head>
   → inline script (before first paint)
     → reads localStorage, else prefers-color-scheme
     → document.documentElement.setAttribute('data-theme', theme)   ← prevents FOUC
-  → assets/js/theme.js
+  → public/assets/js/theme.js
     → resolves the theme, persists toggles back to localStorage
-  → assets/js/i18n.js
+  → public/assets/js/i18n.js
     → document.documentElement.dir = d.dir   (ltr | rtl)
     → document.documentElement.lang = d.lang
     → CSS re-resolves the semantic token layer via [data-theme] and [dir="rtl"]
@@ -372,12 +375,12 @@ index.html <head>
 Note the inline script runs **before** `theme.js` and is what prevents a flash of the wrong
 theme. `theme.js` alone is not sufficient — it loads deferred, after first paint.
 
-**Source:** `index.html` → inline `<script>`, `assets/js/theme.js`, `assets/js/i18n.js`
+**Source:** `public/index.html` → inline `<script>`, `public/assets/js/theme.js`, `public/assets/js/i18n.js`
 
 ### Performance Tier Adaptation
 
 ```
-assets/js/services/performance-monitor.js
+public/assets/js/services/performance-monitor.js
   → measures FPS, reads navigator.connection, hardwareConcurrency, battery
   → classifies into TIERS = [HIGH, MEDIUM, LOW, POTATO], clamped to bounds
   → document.documentElement.setAttribute('data-perf', tier.toLowerCase())
@@ -392,41 +395,60 @@ assets/js/services/performance-monitor.js
     → (asymmetric hysteresis prevents oscillation)
 ```
 
-**Source:** `assets/js/services/performance-monitor.js`, `assets/css/performance-modes.css`, `assets/js/smooth-scroll.js`
+**Source:** `public/assets/js/services/performance-monitor.js`, `public/assets/css/performance-modes.css`, `public/assets/js/smooth-scroll.js`
 
 ### Logging
 
 ```
-lib/logger.js logAccess(method, status, url, extra)
-  → console.log with ANSI colors
-  → called from lib/api-router.js after each request
+lib/api-router.js handleRequest()
+  → logger.runRequest(record)          ← per-request record (AsyncLocalStorage)
+    → route handlers call logAccess()  ← only notes the detail while the request runs
+  → res 'close' → logger.finishRequest(record, status)
+    → one console line + one JSON trace line: requestId, durationMs, status, url, msg
+    → metrics.observeRequest(route template, status, duration)
 ```
 
-**Source:** `lib/logger.js` → `logAccess()`, `lib/api-router.js` → `logger.logAccess()`
+**Source:** `lib/logger.js` → `runRequest()`, `finishRequest()`, `lib/api-router.js` → `handleRequest()`
+
+### Admin Snapshot (integration mode)
+
+```
+lib/admin-db.js getSnapshot()
+  → copy younger than ADMIN_SYNC_TTL_MS? → return it
+  → else: read every table in one transaction (synchronous), validate, cache
+    → schedule a background re-read at 0.8 × ADMIN_SYNC_TTL_MS
+      → success: fresh copy (requests never wait on SQLite in steady state)
+      → failure: drop the copy → the next request reads now and fails closed (503)
+```
+
+A snapshot is never served older than `ADMIN_SYNC_TTL_MS`.
+
+**Source:** `lib/admin-db.js` → `getSnapshot()`, `scheduleRefresh()`
 
 ### Idle Timer (client-side)
 
 ```
-assets/js/idle-timer.js IdleTimer.start(minutes, onTimeout)
+public/assets/js/idle-timer.js IdleTimer.start(minutes, onTimeout)
   → monitors mousemove, keydown, scroll, touchstart, pointerdown
   → checkExpiration() every 10 seconds (CHECK_INTERVAL_MS = 10000)
   → on timeout: calls onTimeout callback (typically ResourceService.logout())
 ```
 
-**Source:** `assets/js/idle-timer.js` → `IdleTimer.start()`, `assets/js/home.js` → `IdleTimer.start(30, ...)`
+**Source:** `public/assets/js/idle-timer.js` → `IdleTimer.start()`, `public/assets/js/home.js` → `IdleTimer.start(30, ...)`
 
 ### Rate Limiting
 
 ```
 lib/rate-limiter.js checkLimit(req)
-  → keyed by x-forwarded-for || socket.remoteAddress   ← header trusted; see ADR-012
-  → 120 requests per 60-second window per key
+  → keyed by getClientIp() (trusted-proxy X-Forwarded-For, else socket address)
+  → RATE_LIMIT_MAX_REQUESTS per aligned RATE_LIMIT_WINDOW_MS window
+  → counts locally, flushes to lib/state-store.js every 1 s or 20 requests
+    → reads back the total from every process sharing PORTAL_DATA_DIR
   → returns false if exceeded → 429 response
-  → setInterval sweeps expired keys every 60 seconds
 ```
 
-State is **in-memory and per-process**: lost on restart, and not shared between workers.
-See [ADR-012](decisions/ADR-012-in-memory-rate-limiting.md).
+State is **shared and persistent** (`portal-state.sqlite`); if the store fails, counting
+falls back to this process. See [ADR-013](decisions/ADR-013-shared-sqlite-security-state.md).
 
 **Source:** `lib/rate-limiter.js` → `checkLimit()`, `lib/api-router.js` → `rateLimiter.checkLimit(req)`
 

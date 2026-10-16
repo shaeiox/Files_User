@@ -5,10 +5,18 @@
 'use strict';
 
 const http = require("http");
-const { loadEnv, productionPathProblems } = require("./lib/load-env");
+const { loadEnv } = require("./lib/load-env");
 
 const PROJECT_ROOT = __dirname;
 loadEnv(PROJECT_ROOT);
+
+const settings = require("./lib/settings");
+const settingProblems = settings.problems();
+
+// --check-config: run every startup check, print the result, never listen.
+// The trace file is not opened (LOG_FILE is checked above, before this).
+const CHECK_ONLY = process.argv.includes("--check-config");
+if (CHECK_ONLY) process.env.LOG_FILE = "off";
 
 const logger = require("./lib/logger");
 const apiRouter = require("./lib/api-router");
@@ -20,11 +28,15 @@ const { c } = logger;
 // Configuration gate: in integration mode a missing or invalid ADMIN_DB_PATH
 // must stop the server. It must never start and silently serve governed files
 // as public. Any partial/inconsistent combination is refused here too.
-const configProblems = [...productionPathProblems(), ...adminDb.validateStartup(PROJECT_ROOT)];
+const configProblems = [...settingProblems, ...adminDb.validateStartup(PROJECT_ROOT)];
 if (configProblems.length) {
-    logger.error("Configuration is not usable — refusing to start:");
+    logger.error(CHECK_ONLY ? "Configuration is not usable:" : "Configuration is not usable — refusing to start:");
     for (const problem of configProblems) logger.error("  • " + problem);
     process.exit(1);
+}
+if (CHECK_ONLY) {
+    logger.info("Configuration is usable.");
+    process.exit(0);
 }
 
 // Integration mode: RELEASE_PVM no longer implies sign-in; the admin lock on the
@@ -37,12 +49,12 @@ if (releaseRel && accessPolicy.decide(releaseRel, null).result === "allow") {
 // AUTH_BASIC_ALLOW_HTTP accepts CLI credentials over plain HTTP, so the password
 // crosses the wire in cleartext. Allowed only for deliberate plain-HTTP setups;
 // say it loudly at startup so it is never enabled by accident.
-if (process.env.AUTH_BASIC_ALLOW_HTTP === "true" && String(process.env.NODE_ENV || "").toLowerCase() === "production") {
+if (settings.get("AUTH_BASIC_ALLOW_HTTP") && settings.get("NODE_ENV").toLowerCase() === "production") {
     logger.warn("AUTH_BASIC_ALLOW_HTTP=true: CLI Basic-auth credentials are accepted over plain HTTP. Prefer HTTPS.");
 }
 
 const HOST = "0.0.0.0";
-const PORT = process.env.PORT || 4000;
+const PORT = settings.get("PORT");
 
 const server = http.createServer((req, res) => {
     apiRouter.handleRequest(req, res, PROJECT_ROOT, PORT);
@@ -50,7 +62,7 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, HOST, () => {
     const peek = filesService.peekRootSync(PROJECT_ROOT);
-    logger.info(`Portal started on port ${PORT} (auth ${process.env.AUTH_ENABLED || 'unset'}, admin gate ${adminDb.isIntegrationEnabled() ? 'on' : 'off'})`);
+    logger.info(`Portal started on port ${PORT} (auth ${settings.get('AUTH_ENABLED') ? 'on' : 'off'}, admin gate ${adminDb.isIntegrationEnabled() ? 'on' : 'off'})`);
     const rootState = !peek.configured ? `${c.yellow}FILES_ROOT is not set${c.reset}`
         : !peek.exists ? `${c.yellow}FILES_ROOT path was not found${c.reset}`
             : !peek.isDirectory ? `${c.yellow}FILES_ROOT is not a directory${c.reset}`

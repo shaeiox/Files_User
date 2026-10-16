@@ -5,61 +5,35 @@
 Read this before deploying anywhere new. Items below are **verified present in the
 repository as of 2026-10-03**, not hypotheticals.
 
-### 1. `.env` is tracked in git with a live signing secret (HIGH)
+### 1. A signing secret is in git history (HIGH)
 
-**What was found**
+**Current state (verified 2026-10-16)**
 
-- `.gitignore` contains the entry `#.env` — **commented out** (verified byte-level: the file
-  is two lines, `node_modules/` and `#.env`). The intent to ignore `.env` is present but
-  inert.
-- `.env` is therefore **tracked**: `git ls-files --error-unmatch .env` succeeds.
-- It contains a populated `AUTH_JWT_SECRET` (96 hex characters), plus `FILES_ROOT`,
-  `RELEASE_PVM`, and `AUTH_ENABLED=true`.
-- The file has been committed repeatedly — it appears in the history of at least five
-  commits.
+- `.env` is **no longer tracked**: `.gitignore` ignores it and `git ls-files .env` prints nothing.
+- It is **still in history**: `git log --all -- .env` lists `c1d6de8`, `692725d` and
+  `edef67b`. Those commits hold a populated `AUTH_JWT_SECRET`.
 
-**Why this is severe, not cosmetic**
+**Why this is severe**
 
-`AUTH_JWT_SECRET` is the **entire trust anchor** for authentication. Per
-[ADR-003](decisions/ADR-003-hand-rolled-jwt.md), sessions are stateless HS256 JWTs signed
-with this one symmetric key. Anyone holding it can mint an arbitrary valid session token
-for any user, with any expiry, and read every route that `pathRequiresAuth()` protects —
-including confidential `RELEASE_PVM` releases. There is no second factor behind it, no key
-ID, no rotation, and no per-user revocation (see [ADR-003](decisions/ADR-003-hand-rolled-jwt.md)
-consequences).
+`AUTH_JWT_SECRET` is the entire trust anchor for authentication. Per
+[ADR-003](decisions/ADR-003-hand-rolled-jwt.md), sessions are HS256 JWTs signed with this one
+key. Anyone with a copy of the repository can mint a valid session for any user and read
+every protected route. This needs no vulnerability at all.
 
-A path traversal bug elsewhere would be one control. This is a pre-authentication bypass
-that requires no vulnerability at all.
+**Remediation**
 
-**Remediation — order matters**
-
-1. **Rotate the secret first.** Generate a new one and update `AUTH_JWT_SECRET`:
+1. **Rotate the secret on every server** (operator step). Never reuse a value that was ever
+   committed:
    ```bash
    node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
    ```
-   This invalidates every existing session immediately. Do this **before** touching git
-   history, so there is no window where the old secret is live *and* public.
-2. **Untrack the file and restore the ignore rule:**
-   ```bash
-   # .gitignore: replace the commented line with a real one
-   printf 'node_modules/\n.env\n' > .gitignore
-   git rm --cached .env
-   git commit -m "chore: untrack .env, restore gitignore rule"
-   ```
-3. **Add `.env.example`** with the variable names and no values, so onboarding does not
-   require reconstructing it from `readme.md`.
-4. **Purge the secret from history** if the repository has ever been pushed anywhere other
-   than a trusted local remote. `git filter-repo --invert-paths --path .env` is the usual
-   tool. This rewrites history and requires a force-push plus every collaborator re-cloning
-   — which is why it is a separate, deliberate step rather than something to do casually.
-   **If the repository has never left your machine, steps 1–3 are sufficient and step 4 can
-   be skipped.**
+   Every existing session ends.
+2. **Purge `.env` from history** only if the repository was ever pushed to a remote you do
+   not fully trust: `git filter-repo --invert-paths --path .env`, then force-push, and every
+   collaborator re-clones. Rotation (step 1) makes the old value useless either way.
 
-**Not done here by design.** This is documented rather than fixed because rotating a signing
-secret and rewriting git history are irreversible, disruptive operations that need an
-explicit decision. Nothing in this change altered the secret, `.gitignore`, or git history.
-
-**Until step 1 is done, treat every historical commit's secret as compromised.**
+**Decision on history purge:** _pending, owner to record here (purged on <date>, or kept
+because rotation is sufficient)._
 
 ### 2. Rate limiter is bypassable if the port is exposed directly (MEDIUM)
 
@@ -113,7 +87,7 @@ reasoning behind each control, see [decisions/](decisions/README.md).
 | Path-scoped auth (`RELEASE_PVM` only) | [ADR-004](decisions/ADR-004-path-scoped-auth.md) |
 | Three-layer path containment | [ADR-005](decisions/ADR-005-defense-in-depth-path-containment.md) |
 | nginx as second containment layer | [ADR-007](decisions/ADR-007-nginx-static-and-proxy.md) |
-| In-memory rate limit / lockout | [ADR-012](decisions/ADR-012-in-memory-rate-limiting.md) |
+| Shared rate limit / lockout / revocation state | [ADR-013](decisions/ADR-013-shared-sqlite-security-state.md) |
 
 ---
 
@@ -254,27 +228,33 @@ browser would show its native dialog, but access control is unchanged.
 
 | Property | Value |
 |----------|-------|
-| Type | In-memory IP-based |
-| Key | `x-forwarded-for` header or `socket.remoteAddress` |
-| Window | 60 seconds |
-| Max requests | 120 per window |
+| Type | Per client IP, shared by every process using one `PORTAL_DATA_DIR` ([ADR-013](decisions/ADR-013-shared-sqlite-security-state.md)) |
+| Key | `getClientIp()`: trusted-proxy `X-Forwarded-For`, else `socket.remoteAddress` |
+| Window | `RATE_LIMIT_WINDOW_MS` (60 s), aligned so every process counts into the same bucket |
+| Max requests | `RATE_LIMIT_MAX_REQUESTS` (120) per window; overshoot at most 20 per process per window |
 | Response when blocked | `429` with `{ error: "Too many requests.", code: "RATE_LIMITED" }` |
-| Cleanup | Every 60 seconds, expired entries removed |
+| Store unavailable | Falls back to per-process counting and logs a warning |
+| Not limited | `/livez`, `/readyz`, `/metrics` (answered before the limiter) |
 
-**Source:** `lib/rate-limiter.js` → `checkLimit()`, `RATE_LIMIT_MAX_REQ`, `RATE_LIMIT_WINDOW_MS`
+**Source:** `lib/rate-limiter.js` → `checkLimit()`, `lib/state-store.js` → `addRequests()`
 
 ### Brute-Force Lockout
 
 | Property | Value |
 |----------|-------|
-| Type | In-memory per-username |
+| Type | Per username, shared across processes and kept across restarts (`portal-state.sqlite`) |
 | Key | Lowercased username |
 | Max failed attempts | `AUTH_MAX_FAILED_ATTEMPTS` (default 5) |
 | Lockout duration | `AUTH_LOCKOUT_MINUTES` (default 15 minutes) |
 | Response when locked | `429` with `{ error: "Auth failed", code: "LOCKED_OUT", retryAfterMs }` |
 | Reset on success | Yes — `clearFailedAttempts()` called after successful login |
+| Store unavailable | Sign-in answers `503 SERVER_ERROR` (fail closed): a sign-in that cannot be counted is never accepted |
 
-**Source:** `lib/auth-service.js` → `checkLockout()`, `recordFailedAttempt()`, `clearFailedAttempts()`, `getBruteForceConfig()`
+Logout revocations live in the same store: a logged-out session stays revoked on every process
+and after a restart. If the revocation list cannot be read, the session is rejected; if a
+sign-out cannot be recorded, the portal answers `503 SERVER_ERROR` and still clears the cookie.
+
+**Source:** `lib/auth/lockout.js`, `lib/auth/session.js` → `verifySession()`, `revokeSession()`, `lib/state-store.js`
 
 ---
 
@@ -333,7 +313,7 @@ Applied to: SPA serving, 404 pages, static files, downloads.
 
 - `/api/*` routes are handled by the Node.js server
 - Static assets (CSS, JS, images) are served by nginx with 30-day cache
-- SPA fallback: unknown paths rewrite to `index.html`
+- SPA fallback: unknown paths rewrite to `public/index.html`
 - Sensitive paths (`/.env`, `/lib/*`, `/data/*`, `/node_modules/*`) are blocked at the application level with `403 Forbidden`
 
 **Source:** `nginx.conf` → `location /api/`, `location ~* \.(?:css|js|png|jpg|jpeg|svg|ico)$`, `location @spa`, `lib/api-router.js` → sensitive path check
@@ -397,11 +377,11 @@ These are deliberate, documented trade-offs rather than defects. Each is argued 
 
 | Risk | Why accepted | ADR |
 |------|--------------|-----|
-| No server-side session revocation | Stateless JWTs keep the portal single-process with no session store. Rotating the secret is the only (all-or-nothing) revocation path. | [ADR-003](decisions/ADR-003-hand-rolled-jwt.md) |
+| Per-session revocation is by session id only | Logout revokes its session id (shared store, ADR-013); the admin's *Revoke sessions* ends a user's sessions. Ending every session at once still means rotating `AUTH_JWT_SECRET`. | [ADR-003](decisions/ADR-003-hand-rolled-jwt.md) |
 | No `kid` / key ring | Single symmetric secret is sufficient for one server. A `kid` + key ring is the natural first upgrade if rotation becomes frequent. | [ADR-003](decisions/ADR-003-hand-rolled-jwt.md) |
-| In-memory rate limit and lockout state | Correct **only** while there is a single Node process. Loses state on restart, which is also a lockout bypass. Must be revisited before scaling out. | [ADR-012](decisions/ADR-012-in-memory-rate-limiting.md) |
+| SQLite security state | Shared across processes on one host (or a shared `PORTAL_DATA_DIR` with working file locks) and kept across restarts. Multi-host without a shared filesystem needs Redis or similar. | [ADR-013](decisions/ADR-013-shared-sqlite-security-state.md) |
 | Per-username lockout enables user lockout DoS | A deliberate trade: per-IP-only fails against IP rotation. Combined per-IP **and** per-username thresholds would be the mitigation. | [ADR-012](decisions/ADR-012-in-memory-rate-limiting.md) |
 | Three filesystem `stat`/`realpath` calls per request | Containment latency is not on a fast path. This is the cost of the symlink-escape defence. | [ADR-005](decisions/ADR-005-defense-in-depth-path-containment.md) |
 | Coarse path deny-lists in `api-router.js` and nginx | Defence in depth only. `resolveInsideRoot()` is the real control; the deny-lists are prefix matches and would not stop a determined bypass on their own. | [ADR-005](decisions/ADR-005-defense-in-depth-path-containment.md) |
-| `script-src` and `style-src` allow `'unsafe-inline'` | Required by the inline pre-paint theme script in `index.html` and by inline styles. Tightening this needs a nonce strategy — see the ADR-006 caveats. | [ADR-006](decisions/ADR-006-vanilla-js-spa-no-build.md) |
+| `script-src` and `style-src` allow `'unsafe-inline'` | Required by the inline pre-paint theme script in `public/index.html` and by inline styles. Tightening this needs a nonce strategy — see the ADR-006 caveats. | [ADR-006](decisions/ADR-006-vanilla-js-spa-no-build.md) |
 | Vendored `lenis.min.js` is not integrity-checked | A third-party blob committed to the repo and updated manually. Reconciling it with the `lenis` npm version is the only freshness signal. | [ADR-010](decisions/ADR-010-vendored-lenis-smooth-scroll.md) |

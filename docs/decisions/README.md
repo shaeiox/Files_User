@@ -36,7 +36,8 @@ it is the reason the superseded approach looked reasonable at the time.
 | [ADR-009](ADR-009-runtime-performance-tiers.md) | Runtime performance tiers gate visual effects | Accepted |
 | [ADR-010](ADR-010-vendored-lenis-smooth-scroll.md) | Vendored Lenis for smooth scrolling, gated by perf and reduced-motion | Accepted |
 | [ADR-011](ADR-011-self-hosted-fonts.md) | Self-hosted WOFF2 fonts to satisfy CSP `font-src 'self'` | Accepted |
-| [ADR-012](ADR-012-in-memory-rate-limiting.md) | In-memory rate limiting and brute-force lockout | Accepted |
+| [ADR-012](ADR-012-in-memory-rate-limiting.md) | In-memory rate limiting and brute-force lockout | Superseded by ADR-013 |
+| [ADR-013](ADR-013-shared-sqlite-security-state.md) | Portal-owned SQLite file for shared security state | Accepted |
 
 ## Relationship to `docs/`
 

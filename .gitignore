@@ -13,3 +13,4 @@ data
 # Ignore build output
 .freebuff
 .opencode
+graphify-out/

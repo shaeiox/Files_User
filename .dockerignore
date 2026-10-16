@@ -1,0 +1,16 @@
+.git
+.github
+.env
+.env.*
+!.env.example
+node_modules
+data
+*.log
+graphify-out
+openspec
+docs
+template
+test
+.opencode
+.claude
+Doxyfile

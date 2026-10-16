@@ -287,3 +287,25 @@ function signWithoutFingerprint(payload) {
     const sig = crypto.createHmac('sha256', process.env.AUTH_JWT_SECRET).update(head + '.' + body).digest('base64url');
     return `${head}.${body}.${sig}`;
 }
+
+test('logout ends the session server-side, including tokens from earlier renewals', async () => {
+    fx.addUser({ username: 'leaver' });
+    const c = client(base);
+    assert.strictEqual((await c.login('leaver', 'password123')).status, 200);
+    const loginCookie = c.cookie;
+    assert.strictEqual((await c.get('/api/files/docs')).status, 200); // sliding renewal
+    const renewedCookie = c.cookie;
+    assert.notStrictEqual(renewedCookie, loginCookie);
+
+    assert.strictEqual((await c.post('/api/auth/logout')).status, 200);
+
+    for (const cookie of [loginCookie, renewedCookie]) {
+        const replay = client(base);
+        replay.cookie = cookie;
+        const status = await replay.get('/api/auth/status');
+        assert.strictEqual(status.json.authenticated, false);
+        assert.strictEqual(status.json.reason, 'SESSION_REVOKED');
+    }
+    // A fresh login works again.
+    assert.strictEqual((await client(base).login('leaver', 'password123')).status, 200);
+});

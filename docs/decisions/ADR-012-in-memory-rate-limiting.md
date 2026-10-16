@@ -1,7 +1,7 @@
 # ADR-012: In-memory rate limiting and brute-force lockout
 
 ## Status
-Accepted
+Superseded by [ADR-013](ADR-013-shared-sqlite-security-state.md) (2026-10-16)
 
 ## Date
 Established at project inception (pre-2026-10-01; recorded 2026-10-03)

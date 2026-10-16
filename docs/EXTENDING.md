@@ -12,11 +12,16 @@ This document explains how to safely extend the `files-server-web` system using 
 
 ### Where Routing Is Handled
 
-All HTTP routing is in `lib/api-router.js` → `handleRequest()`. Routes are registered as `if (pathname === "/api/...")` blocks.
+`lib/api-router.js` → `handleRequest()` runs the shared pipeline (rate limit, CORS, method
+check, sensitive paths, sign-in routes, request context, legacy release gate) and then
+dispatches to the **route table** in `lib/routes/index.js`. Each route lives in
+`lib/routes/{auth,catalog,releases,content,static}.js` as
+`{ name, pattern, gate, match, handler }`.
 
-**Route blocks are ordered and none of them fall through** — a new block placed before the
-SPA fallback will shadow static paths, and a block placed after an existing prefix match will
-never be reached. Placement is a correctness concern, not a style preference.
+**The table is ordered and the first match answers.** The last entry is the static fallback,
+which matches everything. A route registered after an existing prefix match (for example after
+`/api/download`) will never be reached. Placement is a correctness concern, not a style
+preference.
 
 ### Classifying the Auth Requirement
 
@@ -36,12 +41,26 @@ for everything.
 ### Pattern
 
 ```javascript
-// In lib/api-router.js → handleRequest()
-if (pathname === "/api/my-endpoint") {
-    const result = await myService.myMethod(projectRoot);
-    return sendJSON(res, 200, result);
+// In lib/routes/<area>.js, then listed in lib/routes/index.js ROUTES
+{
+    name: "my-endpoint", pattern: "/api/my-endpoint/*", gate: "policy",
+    match: (p) => p.startsWith("/api/my-endpoint"),
+    async handler({ req, res, projectRoot, pathname, stripPrefix, releaseGateLegacy, gate }) {
+        const rel = stripPrefix(pathname, "/api/my-endpoint");
+        if (releaseGateLegacy([rel])) return;               // legacy release gate
+        if (await gate([rel], "Not found.", "download")) return; // admin policy, requested + on-disk path
+        return sendJSON(res, req, 200, await myService.myMethod(projectRoot, rel));
+    },
 }
 ```
+
+`ctx` comes from `lib/request-context.js` and carries the sessions and every gate. `gate` is
+`policy` when the handler gates each target, `policy-aggregate` when it refuses while the policy
+is unavailable and screens every walked entry, and `none` when it serves no governed content.
+`pattern` is a template, never a real path (it becomes a metrics label). Any route that serves
+content under `/api/files`, `/api/download`, `/api/hash`, `/api/search`, `/api/download-zip`,
+`/api/releases`, `/api/categories`, `/api/nav` or `/release*/latest` must declare a gate:
+`test/routes.test.js` fails otherwise.
 
 ### Where Domain/File Operations Belong
 
@@ -58,7 +77,7 @@ Business logic belongs in the appropriate service module:
 
 ### Where Authentication Checks Belong
 
-Auth checks are in `lib/auth-service.js` → `pathRequiresAuth()` and `verifySession()`. Protected routes are gated in `lib/api-router.js` before the route handler.
+Auth checks are in `lib/auth-service.js` → `pathRequiresAuth()` and `verifySession()`. The legacy release gate runs in `lib/api-router.js` before dispatch; the admin policy gates are in `lib/request-context.js` and are called by each route handler.
 
 ### Documentation to Update
 
@@ -67,7 +86,7 @@ Auth checks are in `lib/auth-service.js` → `pathRequiresAuth()` and `verifySes
 - [DATAFLOWS.md](DATAFLOWS.md) — if request flow changes
 - [SECURITY.md](SECURITY.md) — if auth behavior changes
 
-**Source:** `lib/api-router.js` → `handleRequest()`, `lib/http-utils.js` → `sendJSON()`, `sendServiceError()`
+**Source:** `lib/api-router.js` → `handleRequest()`, `lib/routes/index.js`, `lib/request-context.js`, `lib/http-utils.js` → `sendJSON()`, `sendServiceError()`
 
 ---
 
@@ -106,7 +125,7 @@ All file operations use `resolveInsideRoot()` which:
 1. Add exported function to `lib/files-service.js`
 2. Use `resolveInsideRoot()` for any path-based operation
 3. Use `serviceError()` for error responses
-4. Add route handler in `lib/api-router.js` → `handleRequest()`
+4. Add a route to `lib/routes/` and list it in `lib/routes/index.js` (see the pattern above)
 
 **Source:** `lib/files-service.js` → `resolveInsideRoot()`, `serviceError()`
 
@@ -152,7 +171,7 @@ Security-sensitive changes require updates to:
 
 ### Verified Frontend Structure
 
-Frontend modules are in `assets/js/` using the IIFE pattern:
+Frontend modules are in `public/assets/js/` using the IIFE pattern:
 
 ```javascript
 const MyModule = (function () {
@@ -169,19 +188,19 @@ There is no bundler and no module system. Modules coordinate through globals, wh
 
 ### Module Loading
 
-Scripts are declared in `index.html` in dependency order. Three constraints are load-bearing:
+Scripts are declared in `public/index.html` in dependency order. Three constraints are load-bearing:
 
-1. **`assets/js/router.js` must load last** — it drives navigation and assumes every page
+1. **`public/assets/js/router.js` must load last** — it drives navigation and assumes every page
    module is registered.
-2. **`assets/js/vendor/lenis.min.js` must precede `assets/js/smooth-scroll.js`** — reversing
+2. **`public/assets/js/vendor/lenis.min.js` must precede `public/assets/js/smooth-scroll.js`** — reversing
    them silently disables smooth scrolling, because `smooth-scroll.js` degrades gracefully
    when `Lenis` is undefined rather than throwing.
 3. **Stylesheet `tokens.css` must be the first `<link>`** — there is no `@import` and no
    bundler, so `<link>` order *is* the cascade order. If tokens load after consumers, the
    entire semantic layer resolves to nothing.
 
-> `browse.html` is a separate, **unrouted** page with its own script and style set that does
-> not stay in sync. **Change `index.html`.** See
+> `public/browse.html` is a separate, **unrouted** page with its own script and style set that does
+> not stay in sync. **Change `public/index.html`.** See
 > [ARCHITECTURE.md → Standalone HTML Pages](ARCHITECTURE.md#standalone-html-pages).
 
 ### Existing Modules
@@ -204,11 +223,11 @@ Scripts are declared in `index.html` in dependency order. Three constraints are 
 
 ### Adding a Frontend Component
 
-1. Create `assets/js/myComponent.js` using the IIFE pattern, exposing a single global
-2. Add `<script src="/assets/js/myComponent.js" defer></script>` in `index.html` **before
+1. Create `public/assets/js/myComponent.js` using the IIFE pattern, exposing a single global
+2. Add `<script src="/assets/js/myComponent.js" defer></script>` in `public/index.html` **before
    `router.js`**. Forgetting this fails silently — the module is simply undefined.
 3. Register with the router if it is a page component
-4. If it adds styles, add the stylesheet in `index.html` **after `tokens.css`**
+4. If it adds styles, add the stylesheet in `public/index.html` **after `tokens.css`**
 5. Verify the change in both themes, both text directions, and at `data-perf="potato"` —
    local development only ever shows the `high` tier. See
    [STYLEGUIDE.md → Checklist](STYLEGUIDE.md#9-checklist-for-a-ui-change).
@@ -216,11 +235,11 @@ Scripts are declared in `index.html` in dependency order. Three constraints are 
 
 ### Adding a Stylesheet or Design Token
 
-- **Tokens go in `assets/css/tokens.css`**, in the foundation or semantic layer. Never
+- **Tokens go in `public/assets/css/tokens.css`**, in the foundation or semantic layer. Never
   hardcode a colour, radius, or spacing value in a component rule — use `var(--token)`, and
   reference semantic tokens rather than foundation ramps.
 - **New expensive visual effects need a `POTATO` override** in
-  `assets/css/performance-modes.css`. An effect without one defeats the entire mechanism on
+  `public/assets/css/performance-modes.css`. An effect without one defeats the entire mechanism on
   exactly the devices it was built for.
 - **If you change a colour token, re-measure the contrast ratios** quoted in its comment in
   `tokens.css`. Those comments document measured values for the token that is there now, not
@@ -238,8 +257,8 @@ Before extending anything in a Browse row, identify which category you are chang
 
 | Category | What it is | Owner |
 |----------|-----------|-------|
-| **Primary navigation target** | The item **name** and the **icon beside it** — two sibling anchors resolving to the *same* destination (directory → browse target, file → download target) | `BrowsePage` (`assets/js/browse.js`) |
-| **Dedicated File Action** | An independent per-item control rendered into a dedicated trailing column by the module | `FileActions` (`assets/js/file-actions.js`) |
+| **Primary navigation target** | The item **name** and the **icon beside it** — two sibling anchors resolving to the *same* destination (directory → browse target, file → download target) | `BrowsePage` (`public/assets/js/browse.js`) |
+| **Dedicated File Action** | An independent per-item control rendered into a dedicated trailing column by the module | `FileActions` (`public/assets/js/file-actions.js`) |
 
 The primary Browse icon is **not** a File Action and must not be implemented as one. Changing where an item
 navigates to — including the icon target — is a `BrowsePage` / Browse-row-rendering change in
@@ -251,7 +270,7 @@ File Action today is **Download, for files**.
 
 ### Adding a Dedicated Browse File Action
 
-Dedicated File Actions are owned by `assets/js/file-actions.js` (`FileActions`). `browse.js` only renders whatever the module returns for each row — action knowledge never moves into the Browse Page.
+Dedicated File Actions are owned by `public/assets/js/file-actions.js` (`FileActions`). `browse.js` only renders whatever the module returns for each row — action knowledge never moves into the Browse Page.
 
 1. Add or modify an entry in the module's internal `ACTIONS` list (`id`, `appliesTo(item)`, `render(item, d)`)
 2. Base applicability on the existing item model (`item.type` — `"directory"` | `"file"`); do not introduce a second capability/permission model
@@ -259,23 +278,23 @@ Dedicated File Actions are owned by `assets/js/file-actions.js` (`FileActions`).
 4. Use `<a>` for navigation/download actions: the router intercepts `a[href]` for SPA navigation, and downloads carry `data-file="true"` to bypass the router (native browser download)
 5. Use `<button type="button">` only for future non-navigation actions (the router ignores non-anchor elements)
 6. Keep action-specific behavior — markup, labels, escaping, event handling — inside `FileActions`; each control gets `aria-label`/`title` of the form `"{verb} {item name}"` and its SVG gets `aria-hidden="true"`
-7. Add any new localized label to `assets/js/i18n.js` for both `en` and `fa`; do not reuse `btnOpen` as an action label — it belongs to `BrowsePage`'s primary icon
+7. Add any new localized label to `public/assets/js/i18n.js` for both `en` and `fa`; do not reuse `btnOpen` as an action label — it belongs to `BrowsePage`'s primary icon
 8. Do not duplicate action markup, URLs, or handlers in `browse.js` — the row already renders the module's output as its sixth cell
 9. Keep the module a flat definition list; do not introduce a generic action/command framework unless a future requirement genuinely demands one
 
 **Layout constraint (future consideration, not current behavior):** every `.trow` is an independent grid
 container and the sixth (action) track is a **fixed `26px`**. A second action that does not fit inside 26px
 will be squeezed by `flex-shrink` rather than expanding the track. If you add or widen a dedicated action,
-revisit that track width (and `.f-actions`) in `assets/css/browse.css` so the header and every row keep
+revisit that track width (and `.f-actions`) in `public/assets/css/browse.css` so the header and every row keep
 identical column boundaries.
 
-**Source:** `assets/js/file-actions.js`, `assets/js/browse.js` → `renderFilesList()`, `assets/js/router.js`
+**Source:** `public/assets/js/file-actions.js`, `public/assets/js/browse.js` → `renderFilesList()`, `public/assets/js/router.js`
 
 ### API Client
 
-Use `ResourceService` from `assets/js/resource-service.js` for all API calls.
+Use `ResourceService` from `public/assets/js/resource-service.js` for all API calls.
 
-**Source:** `index.html` → `<script>` tags, `assets/js/router.js`, `assets/js/resource-service.js`
+**Source:** `public/index.html` → `<script>` tags, `public/assets/js/router.js`, `public/assets/js/resource-service.js`
 
 ---
 
@@ -290,9 +309,16 @@ Use `ResourceService` from `assets/js/resource-service.js` for all API calls.
 
 ### Access Pattern
 
+Declare the variable once in `lib/settings.js` `DEFS` (type, default, range, `secret`), then
+read it with:
+
 ```javascript
-const value = process.env.MY_VARIABLE || 'default';
+const settings = require('./settings');
+const value = settings.get('MY_VARIABLE'); // parsed; the default when unset
 ```
+
+Startup refuses an invalid value (`settings.problems()`), so never read `process.env` directly
+in `lib/`. `node server.js --check-config` runs the same checks without starting the server.
 
 ### Documentation to Update
 
@@ -361,7 +387,7 @@ Runtime dependencies are declared in `package.json` → `dependencies`:
 |------------|---------------------|-------|
 | `bcrypt` | Yes | `lib/auth-service.js` → password hashing. Falls back to `crypto.scrypt()` if unavailable. |
 | `dotenv` | Yes | `lib/load-env.js` → `.env` parsing, with a built-in fallback parser if unavailable. |
-| `lenis` | **No** | **Declared but unused.** The served smooth-scroll library is the vendored `assets/js/vendor/lenis.min.js`. The npm version is the only signal of what the vendored copy should be. |
+| `lenis` | **No** | **Declared but unused.** The served smooth-scroll library is the vendored `public/assets/js/vendor/lenis.min.js`. The npm version is the only signal of what the vendored copy should be. |
 
 ### Installation
 
@@ -377,7 +403,7 @@ npm install
   what it replaces.
 - **Frontend libraries cannot be imported from npm.** There is no bundler
   ([ADR-006](decisions/ADR-006-vanilla-js-spa-no-build.md)), so a browser-side library must
-  be vendored into `assets/js/vendor/` and loaded as a same-origin script. The CSP
+  be vendored into `public/assets/js/vendor/` and loaded as a same-origin script. The CSP
   (`script-src 'self' 'unsafe-inline'`, `font-src 'self' data:`) also forbids CDN hosts. A
   vendored file is a manual-update obligation with no integrity check — see
   [ADR-010](decisions/ADR-010-vendored-lenis-smooth-scroll.md).

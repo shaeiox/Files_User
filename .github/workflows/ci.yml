@@ -22,7 +22,8 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
-      - run: npm test
-      - run: node lib/archive-service.check.js
-      - run: node lib/hash-service.check.js
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:coverage
+      - run: npm run test:checks
       - run: npm audit --omit=dev --audit-level=high

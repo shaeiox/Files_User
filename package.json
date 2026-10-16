@@ -10,11 +10,22 @@
   "scripts": {
     "start": "node server.js",
     "test": "node --test \"test/*.test.js\"",
-    "check:releases": "node scripts/check-releases.js"
+    "check:releases": "node scripts/check-releases.js",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=\"lib/**\" --test-coverage-include=server.js --test-coverage-lines=89 \"test/*.test.js\"",
+    "test:checks": "node test/checks/archive-service.check.js && node test/checks/hash-service.check.js",
+    "typecheck": "tsc -p jsconfig.json",
+    "lint": "eslint server.js lib test scripts eslint.config.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "dotenv": "^16.4.7",
     "lenis": "^1.3.26"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^22.20.5",
+    "eslint": "^9.39.5",
+    "globals": "^15.15.0",
+    "typescript": "^5.9.3"
   }
 }

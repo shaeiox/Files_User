@@ -82,6 +82,69 @@ Conditional is reachable without a session.
 
 ---
 
+## Every response: `X-Request-Id`
+
+Every response carries `X-Request-Id`. A well-formed id (`[A-Za-z0-9._-]{1,128}`) sent by a
+trusted proxy (`TRUSTED_PROXIES`) is reused; otherwise the portal generates a UUID. The same id is
+the `requestId` field of that request's one line in the JSON trace (`LOG_FILE`).
+
+**Source:** `lib/api-router.js` → `requestIdFor()`, `handleRequest()`
+
+---
+
+## `GET /livez`
+
+**Auth:** None. Not rate limited. Never proxied by nginx (probe it on `127.0.0.1:4000`).
+
+**Response:** `200 OK` whenever the process accepts requests. It touches neither the filesystem nor the admin database.
+```json
+{ "status": "ok" }
+```
+
+**Source:** `lib/routes/ops.js` → route `livez`
+
+---
+
+## `GET /readyz`
+
+**Auth:** None. Not rate limited.
+
+**Response:** `200 OK` when `FILES_ROOT` is a readable directory and, in integration mode, the admin
+snapshot can be read and validated; `503 Service Unavailable` otherwise. The body names each check
+by a fixed identifier only (no paths or error text). `adminPolicy` is `"skipped"` in legacy mode.
+```json
+{ "status": "ready", "checks": { "filesRoot": "ok", "adminPolicy": "ok" } }
+{ "status": "not_ready", "checks": { "filesRoot": "fail", "adminPolicy": "ok" } }
+```
+
+**Source:** `lib/routes/ops.js` → route `readyz`
+
+---
+
+## `GET /metrics`
+
+**Auth:** Served only to loopback callers, or to a trusted proxy's own socket with no
+`X-Forwarded-For` / `X-Real-IP`. Everyone else gets exactly the response for an unknown path.
+
+**Response:** `200 OK`, `Content-Type: text/plain; version=0.0.4`. Labels are route templates
+(for example `/api/download/*`) and status classes, never a path, file name or user.
+
+| Series | Type | Meaning |
+|---|---|---|
+| `portal_http_requests_total{route,status_class}` | counter | Requests answered |
+| `portal_http_request_duration_seconds{route}` | histogram | Time to the response closing |
+| `portal_auth_login_failures_total` | counter | Failed sign-ins (modal and CLI) |
+| `portal_auth_lockouts_total` | counter | Accounts locked out |
+| `portal_downloads_active` | gauge | Open download and archive streams |
+| `portal_admin_snapshot_age_seconds` | gauge | Age of the admin snapshot in use (integration mode only) |
+
+Pseudo-routes label requests answered before routing: `(rate-limited)`, `(bad-request)`,
+`(preflight)`, `(method-not-allowed)`, `(forbidden)`. Each process exposes its own series.
+
+**Source:** `lib/routes/ops.js` → route `metrics`, `lib/metrics.js`
+
+---
+
 ## `GET /__health`
 
 **Auth:** None
@@ -93,7 +156,7 @@ Conditional is reachable without a session.
 { "status": "ok", "uptime": 123.45 }
 ```
 
-**Source:** `lib/api-router.js` → `if (pathname === "/__health" || pathname === "/api/health")`
+**Source:** `lib/routes/catalog.js` → route `health`
 
 ---
 
@@ -108,7 +171,7 @@ Conditional is reachable without a session.
 { "status": "ok", "uptime": 123.45 }
 ```
 
-**Source:** `lib/api-router.js` → `if (pathname === "/__health" || pathname === "/api/health")`
+**Source:** `lib/routes/catalog.js` → route `health`
 
 ---
 
@@ -207,6 +270,8 @@ Also sets `Set-Cookie` header to clear the session cookie.
 - `503 FILES_ROOT_NOT_DIRECTORY` — path is not a directory
 - `503 FILES_ROOT_EMPTY` — root directory is empty
 - `503 FILES_ROOT_NO_CATEGORIES` — no subdirectories found
+
+**Freshness:** counts and dates come from a directory cache and reflect filesystem changes within `CONTENT_INDEX_TTL_MS` (default 30 s). Which entries a caller may see is decided on every request. The same applies to `GET /api/search`.
 
 **Source:** `lib/api-router.js` → `if (pathname === "/api/categories")` → `lib/files-service.js` → `listCategories()`
 
@@ -403,7 +468,7 @@ Raising it increases I/O per verification; this is the calibration knob for the 
 
 **Source:** `lib/api-router.js` → `if (pathname.startsWith("/api/hash"))` → `lib/hash-service.js` → `hashFile()` → `lib/files-service.js` → `resolveReadableFile()`
 
-**Verification:** `node lib/hash-service.check.js` (correctness vs. an independent hash, binary and
+**Verification:** `node test/checks/hash-service.check.js` (correctness vs. an independent hash, binary and
 empty files, size cap, path policy, and flat memory on a 128 MiB file).
 
 ---
@@ -450,7 +515,7 @@ archive is never produced.
 
 **Source:** `lib/api-router.js` → `if (pathname === "/api/download-zip")` → `lib/archive-service.js` → `createArchive()` → `lib/files-service.js` → `resolveReadableFile()` → `lib/static-handler.js` → `streamArchive()`
 
-**Verification:** `node lib/archive-service.check.js` (validates the output against both `unzip`
+**Verification:** `node test/checks/archive-service.check.js` (validates the output against both `unzip`
 and .NET `ZipArchive`, checks byte-identical extraction, duplicate entry names, both ceilings, and
 the path policy).
 
@@ -460,11 +525,11 @@ the path policy).
 
 **Auth:** None
 
-**Response:** `200 OK` with `index.html` content (SPA shell)
+**Response:** `200 OK` with `public/index.html` content (SPA shell)
 
-**Note:** `browse.html` is **not** served by any route. All `/browse/*` requests resolve to
-`index.html`; the SPA router then renders `BrowsePage` client-side. The standalone
-`browse.html` file in the repository root is unrouted. `/download/release` (exact match) renders
+**Note:** `public/browse.html` is **not** served by any route. All `/browse/*` requests resolve to
+`public/index.html`; the SPA router then renders `BrowsePage` client-side. The standalone
+`public/browse.html` file in the repository root is unrouted. `/download/release` (exact match) renders
 `ReleasePage` the same way — see
 [ARCHITECTURE.md → Standalone HTML Pages](ARCHITECTURE.md#standalone-html-pages).
 
@@ -476,7 +541,7 @@ the path policy).
 
 **Auth:** None
 
-**Response:** `404 Not Found` with `404.html` content
+**Response:** `404 Not Found` with `public/404.html` content
 
 **Source:** `lib/api-router.js` → `if (pathname === "/404" || pathname === "/404.html")` → `lib/static-handler.js` → `serve404()`
 
