@@ -100,7 +100,7 @@ only:
 | `user_group_members`, `group_file_permissions` (v4) | `group_id`, `user_id`; `file_id`, `group_id`, `permission`, `level` | Group grants, folded into each member's grant |
 | `audit_logs` | latest successful `user.revoke_sessions` per `target_id` | "Revoke sessions" |
 | `integration_settings` (v5) | `key`, `value` | Storage volume id, release folder, auth tunables (§1.1, §1.2) |
-| `schema_migrations` | `MAX(version)` | Must be ≤ 5 (v3 adds navbar folders, v4 levels and groups, v5 integration settings) |
+| `schema_migrations` | `MAX(version)` | Must be ≤ 6 (v3 adds navbar folders, v4 levels and groups, v5 integration settings; v6 changes only the admin's own sessions, which the portal does not read) |
 
 Navbar folders (`portal_nav_folders.client_path`) are full admin client paths. Those strictly
 inside this portal's position become portal-relative links; the rest are dropped.
