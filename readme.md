@@ -74,10 +74,9 @@ All configuration is environment variables, loaded by `lib/load-env.js` from `.e
 | `AUTH_MAX_FAILED_ATTEMPTS` | No | `5` | Brute-force lockout threshold |
 | `AUTH_LOCKOUT_MINUTES` | No | `15` | Lockout duration |
 
-> **Port mismatch to be aware of.** `server.js` defaults to **4000**, but `nginx.conf`
-> proxies to **127.0.0.1:3000**. Either set `PORT=3000` in `.env` for the shipped nginx
-> config to work, or update `proxy_pass` to match. Reconcile this before deploying — see
-> [DEPLOYMENT.md](docs/DEPLOYMENT.md#api-proxying).
+> **Port:** the portal listens on `PORT` (default **4000**), which is what the nginx config
+> (`scripts/nginx/cloudavid.conf` in the Admin Files Manager repository) proxies to. Set
+> `PORT=4000` explicitly in production — see [DEPLOYMENT.md](docs/DEPLOYMENT.md#7-nginx).
 
 ### Security note
 
@@ -136,7 +135,7 @@ releases stay confidential.
 │   ├── logger.js          ANSI terminal logging
 │   ├── idle-timer.js      client-side session auto-lock
 │   └── hash-password.js   CLI password hashing
-├── assets/
+├── public/assets/
 │   ├── js/                frontend modules (IIFE, no build)
 │   │   ├── router.js      SPA routing — must load last
 │   │   ├── home.js        HomePage
@@ -191,7 +190,7 @@ authoritative for architecture and behaviour; ADRs are authoritative for *intent
 2. **Follow existing patterns.** Backend: `'use strict'`, JSDoc headers, `module.exports`,
    `serviceError()` for typed errors, `sendJSON()` for responses. Frontend: IIFE modules
    exposing one global.
-3. **Register new frontend modules** in `index.html` — script order is load-bearing, and
+3. **Register new frontend modules** in `public/index.html` — script order is load-bearing, and
    `router.js` must stay last.
 4. **Classify the auth requirement of every new endpoint** explicitly. Routes are public
    by default; see [ADR-004](docs/decisions/ADR-004-path-scoped-auth.md).
@@ -215,10 +214,9 @@ proposals are currently in flight — `enterprise-ui-redesign`, `a11y-ux-debt`,
 
 ## Known Issues
 
-- `.env` is tracked in git with a live `AUTH_JWT_SECRET`. See
+- `.env` is no longer tracked, but an old `AUTH_JWT_SECRET` remains in git history:
+  generate a fresh one for every deployment. See
   [SECURITY.md → Known Security Debt](docs/SECURITY.md#known-security-debt).
-- `PORT` default (`4000`) disagrees with `nginx.conf` (`3000`). See
-  [DEPLOYMENT.md](docs/DEPLOYMENT.md#api-proxying).
-- `browse.html` is not routed — `/browse/*` serves `index.html`. See
+- `public/browse.html` is not routed — `/browse/*` serves `public/index.html`. See
   [ARCHITECTURE.md](docs/ARCHITECTURE.md#standalone-html-pages).
 - No test suite and no process supervision definition.

@@ -27,7 +27,7 @@ script scope.
 
 ## Decision
 
-Plain ES5-compatible scripts in `assets/js/`, each an IIFE that attaches a single global to
+Plain ES5-compatible scripts in `public/assets/js/`, each an IIFE that attaches a single global to
 `window`. No bundler, no transpiler, no framework, no `node_modules` on the client.
 
 Module shape:
@@ -40,7 +40,7 @@ const BrowsePage = (function () {
 })();
 ```
 
-**Script loading contract.** Scripts are declared in `index.html` in dependency order.
+**Script loading contract.** Scripts are declared in `public/index.html` in dependency order.
 Modules other than `banner.js` and `idle-timer.js` carry `defer`, which preserves execution
 order while allowing parallel download. `router.js` loads **last** because it drives
 navigation and assumes every page module is already registered.
@@ -63,7 +63,7 @@ navigation and assumes every page module is already registered.
 ### ES modules (`<script type="module">`)
 - Pros: Native, real scoping, `import`/`export`, browser-managed dependency order.
 - Cons: `type="module"` implies strict mode and deferred execution for *every* file, which
-  conflicts with `banner.js` needing to run early and with `assets/js/idle-timer.js` currently
+  conflicts with `banner.js` needing to run early and with `public/assets/js/idle-timer.js` currently
   loading as a classic script. It also makes top-level `await` and deep relative-import
   paths a live footgun under a flat directory structure.
 - Rejected: The migration cost to restructure every global reference exceeded the benefit.
@@ -80,7 +80,7 @@ navigation and assumes every page module is already registered.
 - **Globals are the coupling mechanism.** Modules coordinate by reference to each other's
   globals, and there is no mechanism that enforces those references. A renamed global is a
   runtime `ReferenceError`, not a build error. Search for the old name before renaming.
-- **`index.html` is load-bearing.** Adding a module means adding a `<script>` tag in the
+- **`public/index.html` is load-bearing.** Adding a module means adding a `<script>` tag in the
   right position. Forgetting it fails silently — the module is simply undefined. This is
   the most common way to break the frontend.
 - No unit-test story for the frontend, because there is no module system to test against
@@ -89,6 +89,6 @@ navigation and assumes every page module is already registered.
 - No minification, so full source is shipped to the browser. Acceptable on a
   same-origin, cacheable deployment (nginx sets 30-day immutable caching on `.css`/`.js`).
 - **Revisit this ADR if** the frontend passes roughly a dozen modules, or if API response
-  shapes start drifting from `assets/js/services/resource-service.js` expectations. Either
+  shapes start drifting from `public/assets/js/services/resource-service.js` expectations. Either
   event makes the lack of static checking the dominant cost, and native ESM plus a
   lightweight type-check-only step would address it without a bundler.

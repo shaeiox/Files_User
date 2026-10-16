@@ -21,7 +21,7 @@ that can be adjusted in one place, with the reasoning preserved next to it.
 
 ## Decision
 
-Use native CSS custom properties in `assets/css/tokens.css`. No preprocessor, no build
+Use native CSS custom properties in `public/assets/css/tokens.css`. No preprocessor, no build
 step, consistent with ADR-006.
 
 Three token layers, in cascade order:
@@ -60,8 +60,8 @@ redefine the semantic layer; component CSS needs no theme awareness.
 ### JS-injected theme tokens
 - Pros: Theme values computed at runtime; no CSS duplication.
 - Cons: Requires a blocking script before first paint or a flash of wrong theme —
-  precisely the failure `assets/js/theme.js` exists to avoid via
-  `prefers-color-scheme` + an inline pre-paint script in `index.html`.
+  precisely the failure `public/assets/js/theme.js` exists to avoid via
+  `prefers-color-scheme` + an inline pre-paint script in `public/index.html`.
 - Rejected: Introduces FOUC risk for a problem CSS solves natively.
 
 ### Utility-first (Tailwind)
@@ -85,9 +85,9 @@ redefine the semantic layer; component CSS needs no theme awareness.
   migrated. Aligning them is a candidate cleanup, not a bug.
 - **No compile-time enforcement.** Nothing stops a component from hardcoding `#1b1b1f`
   instead of `var(--bg-card)`. Grep for literals before assuming a token change is complete:
-  `grep -rn "#[0-9a-fA-F]\{3,8\}" assets/css/components.css assets/css/home.css
-  assets/css/browse.css`
-- **Layer order is implicit, via `<link>` order in `index.html`.** `tokens.css` must load
+  `grep -rn "#[0-9a-fA-F]\{3,8\}" public/assets/css/components.css public/assets/css/home.css
+  public/assets/css/browse.css`
+- **Layer order is implicit, via `<link>` order in `public/index.html`.** `tokens.css` must load
   first or the entire semantic layer resolves to nothing. This is the same fragile
   ordering contract as the script tags in ADR-006.
 - Accessibility contrast decisions are recorded **in the token file next to the value**,

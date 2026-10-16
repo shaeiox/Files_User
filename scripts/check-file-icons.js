@@ -7,7 +7,7 @@ const assert = require("assert");
 
 const root = path.join(__dirname, "..");
 const ctx = {};
-vm.runInNewContext(fs.readFileSync(path.join(root, "assets/js/browse-icons.js"), "utf8") + ";this.BrowseIcons=BrowseIcons;", ctx);
+vm.runInNewContext(fs.readFileSync(path.join(root, "public/assets/js/browse-icons.js"), "utf8") + ";this.BrowseIcons=BrowseIcons;", ctx);
 const { kindOf, forItem } = ctx.BrowseIcons;
 const kind = (name, type = "file") => kindOf({ name, type }).kind;
 
@@ -23,7 +23,7 @@ assert.strictEqual(kind("server.log"), "text");
 assert.strictEqual(kind("Makefile"), "file");
 assert.strictEqual(kind(".hidden"), "file");
 
-const sprite = fs.readFileSync(path.join(root, "assets/icon/phosphor/file-icons.svg"), "utf8");
+const sprite = fs.readFileSync(path.join(root, "public/assets/icon/phosphor/file-icons.svg"), "utf8");
 const names = ["x.iso", "x.zip", "x.rpm", "x.sh", "x.sig", "x.pdf", "x.doc", "x.csv", "x.png", "x.mp4", "x.mp3", "x.txt", "x"];
 for (const n of names) assert.ok(sprite.includes(`id="${kindOf({ name: n }).symbol}"`), n);
 assert.ok(sprite.includes('id="folder-open"') && forItem({ type: "directory" }, 18, true).includes("#folder-open"));

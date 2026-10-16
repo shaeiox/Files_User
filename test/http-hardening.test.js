@@ -59,12 +59,12 @@ test('applyCors echoes an allowlisted origin, never a wildcard with credentials'
     assert.strictEqual(headers2['Access-Control-Allow-Origin'], undefined);
 });
 
-test('serveStatic refuses traversal and non-allowlisted files', (t, done) => {
+test('serveStatic serves public/ only and refuses traversal out of it', (t, done) => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'portal-static-'));
-    fs.mkdirSync(path.join(root, 'assets', 'js'), { recursive: true });
-    fs.writeFileSync(path.join(root, 'assets', 'js', 'app.js'), 'console.log(1)');
+    fs.mkdirSync(path.join(root, 'public', 'assets', 'js'), { recursive: true });
+    fs.writeFileSync(path.join(root, 'public', 'assets', 'js', 'app.js'), 'console.log(1)');
     fs.writeFileSync(path.join(root, 'server.js'), 'secret');
-    fs.writeFileSync(path.join(root, 'index.html'), '<h1>hi</h1>');
+    fs.writeFileSync(path.join(root, 'public', 'index.html'), '<h1>hi</h1>');
 
     const results = [];
     const step = (url, next) => {

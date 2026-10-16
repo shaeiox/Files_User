@@ -194,7 +194,7 @@ change or an 8.3 short name, therefore cannot reach a governed file under anothe
   (in Browse, search, autocomplete or Releases) opens the sign-in modal, and the page re-renders in
   place after sign-in. A locked folder opens its sign-in page.
 - Locked rows cannot be selected, so they never reach the metadata card or a bulk download.
-- Every download link goes through one guard (`assets/js/file-actions.js`): a `HEAD` preflight
+- Every download link goes through one guard (`public/assets/js/file-actions.js`): a `HEAD` preflight
   first, so a `401` opens sign-in and a `404` refreshes the view. The browser never lands on a
   JSON error page. A ZIP request is preflighted the same way.
 - The cached home-page category view is cleared on sign-in and sign-out.

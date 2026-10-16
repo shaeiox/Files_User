@@ -21,7 +21,7 @@ regressing the design on capable hardware.
 ## Decision
 
 Detect device capability and measured frame rate at runtime in
-`assets/js/services/performance-monitor.js`, classify the device into one of four tiers,
+`public/assets/js/services/performance-monitor.js`, classify the device into one of four tiers,
 and publish the result as a `data-perf` attribute on `<html>`. CSS reads that attribute;
 JavaScript reads it too.
 
@@ -49,12 +49,12 @@ tiers: `DOWNGRADE_THRESHOLD: 3` consecutive low-FPS samples are required to step
 `UPGRADE_THRESHOLD: 5` consecutive high-FPS samples to step up. Asymmetric on purpose —
 degrading quickly is user-visible in a good way, recovering slowly is invisible.
 
-**Consumption.** `assets/css/performance-modes.css` (790 lines) overrides by
+**Consumption.** `public/assets/css/performance-modes.css` (790 lines) overrides by
 `[data-perf="..."]`: aura glows, `backdrop-filter` blur, the logo shader, hero clouds, and
-dropdown transitions are progressively stripped. `assets/css/components.css` also carries
+dropdown transitions are progressively stripped. `public/assets/css/components.css` also carries
 targeted overrides for footer and dropdown costs.
 
-**Second consumer, and the important one:** `assets/js/smooth-scroll.js` reads the same
+**Second consumer, and the important one:** `public/assets/js/smooth-scroll.js` reads the same
 attribute and disables smooth scrolling entirely at `POTATO` — see ADR-010.
 
 **A user-facing manual override exists.** Performance mode can be selected explicitly from

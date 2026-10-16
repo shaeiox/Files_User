@@ -30,8 +30,8 @@ Two constraints decided the approach:
 
 ## Decision
 
-Commit WOFF2 files to `assets/fonts/` and declare them with `@font-face` in
-`assets/css/tokens.css`. Same-origin, no CDN, no build step.
+Commit WOFF2 files to `public/assets/fonts/` and declare them with `@font-face` in
+`public/assets/css/tokens.css`. Same-origin, no CDN, no build step.
 
 Four properties applied throughout:
 
@@ -58,7 +58,7 @@ Four properties applied throughout:
 
 ### Self-hosted via Fontsource npm packages + build step
 - Pros: Version-locked in `node_modules`; upstream updates via `npm`; automated subsetting.
-- Cons: Requires a build step to get the files into `assets/` (ADR-006). Fontsource does
+- Cons: Requires a build step to get the files into `public/assets/` (ADR-006). Fontsource does
   ship prebuilt CSS/woff2 that could be copied by hand — but then it is a vendored blob
   again, with an extra indirection.
 - Rejected: Only worth revisiting if a build step is introduced; then prefer it over manual
@@ -74,7 +74,7 @@ Four properties applied throughout:
 ### SVG-in-CSS icons / logo as text
 - Pros: No font.
 - Cons: Not applicable — this is about typography, not iconography. Noted because it is the
-  adjacent question (icons are already `.webp`/`.png` in `assets/icon/`).
+  adjacent question (icons are already `.webp`/`.png` in `public/assets/icon/`).
 - Rejected: Out of scope.
 
 ### Local fonts installed on the server, served via `font-src 'self'`
@@ -91,7 +91,7 @@ Four properties applied throughout:
 - **No preload hints.** `<link rel="preload">` for the two most important faces
   (`Inter-Regular`, and `Vazirmatn-Regular` for Persian) would meaningfully improve
   first paint, and is the highest-value follow-up here. It requires editing the inline
-  script/`index.html`, so it was out of scope for the redesign commit.
+  script/`public/index.html`, so it was out of scope for the redesign commit.
 - **`.woff2` is missing from the nginx static-asset regex**
   (`~* \.(?:css|js|png|jpg|jpeg|svg|ico)$`). Fonts are still served correctly — they fall
   through to `location /` → `try_files $uri $uri/ @spa` and resolve on disk — but they miss
@@ -99,7 +99,7 @@ Four properties applied throughout:
   every page load revalidates ten font files. See ADR-007 for the full consequence.
 - **Licensing is a manual obligation.** Inter, Vazirmatn, and JetBrains Mono are all OFL;
   Cinzel is OFL. Committing them means the licence obligations ship with the repo. Keep the
-  licence files alongside `assets/fonts/` if any of these are redistributed.
+  licence files alongside `public/assets/fonts/` if any of these are redistributed.
 - **Only one weight of Cinzel** (600) is committed, and it is used by exactly one selector
   — the frozen `.hero-content h1` hero headline. `--font-hero` is intentionally *not*
   repointed at Inter (see the comment on that token in `tokens.css`, which references the

@@ -17,7 +17,7 @@ fonts in [ADR-011](decisions/ADR-011-self-hosted-fonts.md).
 
 There is **no build step** (see [ADR-006](decisions/ADR-006-vanilla-js-spa-no-build.md)),
 so there is no preprocessor, no autoprefixer, and no import graph. Layering is achieved
-solely by `<link>` order in `index.html`. **Order is load-bearing.**
+solely by `<link>` order in `public/index.html`. **Order is load-bearing.**
 
 ```
 index.html and browse.html
@@ -40,8 +40,8 @@ index.html and browse.html
 | `performance-modes.css` | Nothing but `[data-perf="..."]` overrides. |
 | `lenis.css` | Upstream library requirements. Do not edit. |
 
-`browse.html` loads a **reduced** set — `tokens`, `base`, `components`, `home`, `browse`,
-`lenis`. It omits `performance-modes.css`. Since `browse.html` is not routed (see
+`public/browse.html` loads a **reduced** set — `tokens`, `base`, `components`, `home`, `browse`,
+`lenis`. It omits `performance-modes.css`. Since `public/browse.html` is not routed (see
 `ARCHITECTURE.md`), verify changes against the page actually served.
 
 ---
@@ -72,7 +72,7 @@ To check a token change is actually complete, look for literals that should have
 tokens:
 
 ```bash
-grep -rn "#[0-9a-fA-F]\{3,8\}" assets/css/components.css assets/css/home.css assets/css/browse.css
+grep -rn "#[0-9a-fA-F]\{3,8\}" public/assets/css/components.css public/assets/css/home.css public/assets/css/browse.css
 ```
 
 ### Known scars — do not "clean up" without reading
@@ -110,7 +110,7 @@ trust them; they describe the value that is there now, not any value you are abo
 | `--font-hero` | `Cinzel` | Hero headline only — frozen |
 | `--font-fa` | `Vazirmatn`, `Inter` | Persian content |
 
-All faces are self-hosted WOFF2 in `assets/fonts/`, declared in `tokens.css`, all with
+All faces are self-hosted WOFF2 in `public/assets/fonts/`, declared in `tokens.css`, all with
 `font-display: swap`. Vazirmatn faces carry an `unicode-range` so they download only for
 Arabic-script text.
 
@@ -131,8 +131,8 @@ Themes are a single attribute on `<html>`; component CSS is theme-agnostic.
 document.documentElement.setAttribute('data-theme', 'dark');   // or 'light'
 ```
 
-- Persisted in `localStorage` by `assets/js/theme.js`, applied **before first paint** by an
-  inline script in `index.html`.
+- Persisted in `localStorage` by `public/assets/js/theme.js`, applied **before first paint** by an
+  inline script in `public/index.html`.
 - Initial default follows `prefers-color-scheme` when no stored preference exists.
 - `color-scheme` is set in both themes so native UI (scrollbars, form controls) matches.
 
@@ -166,7 +166,7 @@ document.documentElement.setAttribute('data-perf', 'potato');
 ```
 
 Three independent systems read `data-perf`: `performance-modes.css`,
-`assets/js/smooth-scroll.js`, and the manual override UI. It is set from more than one
+`public/assets/js/smooth-scroll.js`, and the manual override UI. It is set from more than one
 place. Treat it as a cross-cutting contract.
 
 ---
@@ -216,7 +216,7 @@ track in the browse row grid, which must stay identical between header and rows)
   and dedicated File Actions. They are siblings, never nested, each appearing exactly once
   in tab order. Do not collapse them; see `ARCHITECTURE.md` for the ownership split.
 - `prefers-reduced-motion` is honoured in two places: CSS transitions and
-  `assets/js/smooth-scroll.js`. Any new animation must honour it too.
+  `public/assets/js/smooth-scroll.js`. Any new animation must honour it too.
 - Body text meets 4.5:1; large text and UI boundaries meet 3:1. When in doubt, measure and
   record the ratio in a comment next to the token.
 
@@ -232,5 +232,5 @@ track in the browse row grid, which must stay identical between header and rows)
 - [ ] Keyboard reachable with a visible focus ring
 - [ ] Contrast measured if a colour token changed, and the comment updated
 - [ ] A `POTATO` override added if the change is expensive
-- [ ] `index.html` `<link>` order still correct
+- [ ] `public/index.html` `<link>` order still correct
 - [ ] `docs/STYLEGUIDE.md` updated if a token, tier, or font changed

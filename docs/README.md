@@ -71,7 +71,7 @@ Each reference document owns its topic:
 
 Precedence when two sources disagree:
 
-- **JSDoc** in `lib/*.js` and `assets/js/*.js` is authoritative for module and function
+- **JSDoc** in `lib/*.js` and `public/assets/js/*.js` is authoritative for module and function
   implementation details.
 - The **`docs/` set** is authoritative for current architecture and behaviour.
 - **ADRs** are authoritative for intent. Where an ADR and a reference document disagree, the
@@ -88,9 +88,7 @@ Documented in full, tracked here so they are not lost:
 | Issue | Reference |
 |-------|-----------|
 | `.env` tracked in git with a live `AUTH_JWT_SECRET`; `.gitignore` rule commented out | [SECURITY.md §1](SECURITY.md#1-env-is-tracked-in-git-with-a-live-signing-secret-high) |
-| `PORT` default (`4000`) disagrees with `nginx.conf` `proxy_pass` (`3000`) → 502 in production | [DEPLOYMENT.md](DEPLOYMENT.md#port-mismatch-reconcile-before-deploying) |
-| `browse.html` is not routed — `/browse/*` serves `index.html` | [ARCHITECTURE.md](ARCHITECTURE.md#standalone-html-pages) |
-| `woff2`/`webp` missing from the nginx static-asset regex → no long-lived caching | [DEPLOYMENT.md](DEPLOYMENT.md#static-file-handling) |
+| `public/browse.html` is not routed — `/browse/*` serves `public/index.html` | [ARCHITECTURE.md](ARCHITECTURE.md#standalone-html-pages) |
 | `RELEASE_PVM` unset silently disables release protection (no fail-closed behaviour) | [SECURITY.md §3](SECURITY.md#3-release_pvm-unset-silently-makes-releases-public-medium) |
 | Rate limiter bypassable if the Node port is exposed directly | [SECURITY.md §2](SECURITY.md#2-rate-limiter-is-bypassable-if-the-port-is-exposed-directly-medium) |
 | `lenis` declared in `package.json` but unused; the vendored copy is what ships | [ARCHITECTURE.md](ARCHITECTURE.md#unresolved) |

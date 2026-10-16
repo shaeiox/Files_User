@@ -23,7 +23,7 @@ files-server-web/
 │   ├── logger.js             # ANSI terminal logging
 │   ├── idle-timer.js         # Client-side session auto-lock
 │   └── hash-password.js      # CLI password hashing
-├── assets/
+├── public/assets/
 │   ├── js/                   # Frontend modules (IIFE, no build step)
 │   │   ├── router.js         # SPA router — MUST load last
 │   │   ├── home.js           # HomePage component
@@ -140,9 +140,8 @@ node server.js
 The startup banner prints the resolved port and the `FILES_ROOT` status. Confirm it says
 `FILES_ROOT is configured` — every file endpoint fails without it.
 
-> **Port note.** `server.js` defaults to `4000`; the shipped `nginx.conf` proxies to
-> `3000`. Local development is unaffected, but reconcile the two before deploying — see
-> [DEPLOYMENT.md → API Proxying](DEPLOYMENT.md#api-proxying).
+> **Port note.** `server.js` defaults to `4000`, which is what production nginx proxies
+> to. Keep `PORT=4000` explicit when deploying — see [DEPLOYMENT.md → nginx](DEPLOYMENT.md#7-nginx).
 
 ---
 
@@ -158,10 +157,10 @@ Backend modules are in `lib/`. Each module exports a public API via `module.expo
 
 ### Frontend Changes
 
-Frontend modules are in `assets/js/`. Each module is an IIFE that attaches to `window`.
+Frontend modules are in `public/assets/js/`. Each module is an IIFE that attaches to `window`.
 
-- **Adding a page component:** Create `assets/js/myPage.js` (IIFE pattern), add `<script>` tag in `index.html`
-- **Adding an API method:** Extend `assets/js/resource-service.js`
+- **Adding a page component:** Create `public/assets/js/myPage.js` (IIFE pattern), add `<script>` tag in `public/index.html`
+- **Adding an API method:** Extend `public/assets/js/resource-service.js`
 
 ### No Build Step
 
@@ -170,9 +169,9 @@ directly by the application (development) or nginx (production).
 
 **Two ordering contracts follow from this, and both fail silently when broken:**
 
-- `<script>` order in `index.html` — `router.js` must be last, and
+- `<script>` order in `public/index.html` — `router.js` must be last, and
   `vendor/lenis.min.js` must precede `smooth-scroll.js`.
-- `<link>` order in `index.html` — `tokens.css` must be first, or the entire design-token
+- `<link>` order in `public/index.html` — `tokens.css` must be first, or the entire design-token
   layer resolves to nothing.
 
 Adding a frontend module means adding a `<script>` tag; forgetting it produces an undefined
@@ -258,15 +257,15 @@ The first two are the ones to watch in any future security review.
 |------------|---------|--------|
 | `'use strict'` at module top | All `lib/*.js` files | `lib/api-router.js` |
 | JSDoc headers for modules | `@file`, `@module`, `@brief`, `@description` | `lib/files-service.js` |
-| IIFE module pattern (frontend) | `const Module = (function () { ... })()` | `assets/js/home.js` |
+| IIFE module pattern (frontend) | `const Module = (function () { ... })()` | `public/assets/js/home.js` |
 | `serviceError()` for errors | `serviceError(httpStatus, code, message)` | `lib/files-service.js` |
 | `sendJSON()` for responses | `sendJSON(res, status, data)` | `lib/http-utils.js` |
 | Environment via `process.env` | `process.env.FILES_ROOT` | `lib/files-service.js` |
 | Lowercase module names | `lib/api-router.js`, `lib/files-service.js` | Repository structure |
 | camelCase functions | `listCategories()`, `getDownloadTarget()` | `lib/files-service.js` |
-| PascalCase frontend modules | `HomePage`, `BrowsePage`, `Router` | `assets/js/*.js` |
+| PascalCase frontend modules | `HomePage`, `BrowsePage`, `Router` | `public/assets/js/*.js` |
 | Double quotes for requires, single for most strings | `require("http")` | `server.js` |
-| Semantic CSS tokens, never literals | `var(--bg-card)` | `assets/css/tokens.css` |
+| Semantic CSS tokens, never literals | `var(--bg-card)` | `public/assets/css/tokens.css` |
 
 ### Error Handling Pattern
 
@@ -323,11 +322,11 @@ To add a new endpoint:
 
 ### Module Loading
 
-Scripts are declared in `index.html` in dependency order. Two constraints are load-bearing:
+Scripts are declared in `public/index.html` in dependency order. Two constraints are load-bearing:
 
-- **`assets/js/router.js` must load last** — it drives navigation and assumes every page
+- **`public/assets/js/router.js` must load last** — it drives navigation and assumes every page
   module is registered.
-- **`assets/js/vendor/lenis.min.js` must precede `assets/js/smooth-scroll.js`** — reversing
+- **`public/assets/js/vendor/lenis.min.js` must precede `public/assets/js/smooth-scroll.js`** — reversing
   them silently disables smooth scrolling, because `smooth-scroll.js` degrades gracefully
   when `Lenis` is undefined rather than throwing.
 
@@ -335,11 +334,11 @@ Stylesheets follow the same model: `tokens.css` must be the first `<link>`, or t
 design-token layer resolves to nothing. There is no `@import` and no bundler, so `<link>`
 order *is* the cascade order.
 
-> `browse.html` is a separate, unrouted page with its own script and style set. It does not
-> stay in sync with `index.html` — **change `index.html`.** See
+> `public/browse.html` is a separate, unrouted page with its own script and style set. It does not
+> stay in sync with `public/index.html` — **change `public/index.html`.** See
 > [ARCHITECTURE.md → Standalone HTML Pages](ARCHITECTURE.md#standalone-html-pages).
 
-**Source:** `index.html` → `<script>` and `<link>` tags
+**Source:** `public/index.html` → `<script>` and `<link>` tags
 
 ### Component Pattern
 
@@ -355,7 +354,7 @@ const MyComponent = (function () {
 })();
 ```
 
-**Source:** `assets/js/home.js` → `HomePage`
+**Source:** `public/assets/js/home.js` → `HomePage`
 
 ### API Client
 
@@ -367,7 +366,7 @@ const files = await ResourceService.listFiles(relPath);
 await ResourceService.login(username, password);
 ```
 
-**Source:** `assets/js/resource-service.js`
+**Source:** `public/assets/js/resource-service.js`
 
 ---
 
@@ -402,7 +401,7 @@ await ResourceService.login(username, password);
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| 502 Bad Gateway | `proxy_pass` port doesn't match the Node port | **Known mismatch:** `nginx.conf` targets `3000`, `server.js` defaults to `4000`. Align them |
+| 502 Bad Gateway | `proxy_pass` port doesn't match the Node port | nginx proxies to `127.0.0.1:4000`; check `PORT` in the portal environment and `systemctl status files-portal` |
 | 404 on API routes | nginx not proxying `/api/` | Check `location /api/` in `nginx.conf` |
 | SPA routes not working | Missing `@spa` fallback | Check `location @spa` in `nginx.conf` |
 | Static assets 404 | Wrong root path | Check `root` directive in `nginx.conf` |
@@ -414,11 +413,11 @@ await ResourceService.login(username, password);
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| `X is not defined` in console | Module `<script>` tag missing or out of order | Check `<script>` order in `index.html`; `router.js` must be last |
-| Page renders unstyled / wrong colours | `tokens.css` not first | Check `<link>` order in `index.html` |
+| `X is not defined` in console | Module `<script>` tag missing or out of order | Check `<script>` order in `public/index.html`; `router.js` must be last |
+| Page renders unstyled / wrong colours | `tokens.css` not first | Check `<link>` order in `public/index.html` |
 | Smooth scrolling does nothing | `vendor/lenis.min.js` after `smooth-scroll.js`, or `data-perf="potato"`, or reduced-motion requested | Check script order, then `document.documentElement.dataset.perf` |
 | Effects missing on a fast machine | `data-perf` is not `high` | Inspect `data-perf`; `performance-modes.css` is stripping effects by design |
-| Persian text renders in a Latin font | Vazirmatn not loaded | Verify `assets/fonts/Vazirmatn-*.woff2` are served (nginx cache policy differs from local) |
+| Persian text renders in a Latin font | Vazirmatn not loaded | Verify `public/assets/fonts/Vazirmatn-*.woff2` are served (nginx cache policy differs from local) |
 | A component ignores theme or RTL | Rule uses a physical property or a raw literal | Use logical properties and semantic tokens — see [STYLEGUIDE.md](STYLEGUIDE.md) |
 
 ### Log Files

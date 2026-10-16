@@ -31,7 +31,7 @@ Why front it at all:
   large artifact streaming that would otherwise buffer in the proxy.
 
 The split is: `location /api/` → Node; everything else → nginx, with `try_files` falling
-back to `@spa` → `index.html`.
+back to `@spa` → `public/index.html`.
 
 ## Alternatives Considered
 
@@ -67,7 +67,7 @@ back to `@spa` → `index.html`.
   `lib/static-handler.js`.** A new asset class — a font, a WebP variant — must be added to
   the nginx extension regex (`~* \.(?:css|js|png|jpg|jpeg|svg|ico)$`) to receive the
   intended caching policy.
-- **`assets/fonts/*.woff2` is a live example.** `.woff2` is not in that regex, so font
+- **`public/assets/fonts/*.woff2` is a live example.** `.woff2` is not in that regex, so font
   requests fall through to `location /` → `try_files $uri $uri/ @spa`, which does serve
   them correctly from disk. The gap is caching, not availability: fonts miss the
   `expires 30d` + `Cache-Control: public, immutable` treatment and `access_log off`, so

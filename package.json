@@ -4,6 +4,9 @@
   "private": true,
   "description": "CloudAvid File Portal — filesystem-driven download portal",
   "main": "server.js",
+  "engines": {
+    "node": ">=22.16"
+  },
   "scripts": {
     "start": "node server.js",
     "test": "node --test \"test/*.test.js\"",

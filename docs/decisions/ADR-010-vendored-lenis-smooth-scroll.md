@@ -26,8 +26,8 @@ Three additional constraints:
 
 ## Decision
 
-Vendor `lenis.min.js` into `assets/js/vendor/` and load it as a same-origin script. Wrap
-all use in `assets/js/smooth-scroll.js`, which is the only file that may reference `Lenis`.
+Vendor `lenis.min.js` into `public/assets/js/vendor/` and load it as a same-origin script. Wrap
+all use in `public/assets/js/smooth-scroll.js`, which is the only file that may reference `Lenis`.
 
 Configuration is deliberately minimal: `new Lenis({ lerp: 0.1, smoothWheel: true })`.
 
@@ -53,7 +53,7 @@ Because the tier can change after load (ADR-009), both are watched continuously:
 Both call `sync()`, which starts or stops accordingly. The library is never left running
 after the device has been judged unable to afford it.
 
-`assets/css/lenis.css` carries the upstream-required rules — `html.lenis { height: auto }`,
+`public/assets/css/lenis.css` carries the upstream-required rules — `html.lenis { height: auto }`,
 `overflow: clip` on stopped state, `overscroll-behavior: contain` for
 `[data-lenis-prevent]` subtrees, and `transition-behavior: allow-discrete` for the
 autoToggle case.
@@ -77,7 +77,7 @@ autoToggle case.
 - Pros: Already declared as a dependency; version-locked; no vendored blob to maintain.
 - Cons: **Requires a build step or a server route to serve it** — neither exists
   (ADR-006). `lenis` in `package.json` is currently unused by any server code; the served
-  file is the vendored copy under `assets/js/vendor/`.
+  file is the vendored copy under `public/assets/js/vendor/`.
 - Rejected: The dependency declaration is aspirational. **If a build step is ever
   introduced (ADR-008, ADR-006), prefer importing from npm over the vendored copy** and
   supersede this ADR.
@@ -95,12 +95,12 @@ autoToggle case.
 
 ## Consequences
 
-- **A vendored blob must be manually updated.** `assets/js/vendor/lenis.min.js` is not
+- **A vendored blob must be manually updated.** `public/assets/js/vendor/lenis.min.js` is not
   covered by `npm update` and will silently go stale. There is no integrity check on it.
   The npm version in `package.json` is the only signal of what it *should* be — reconcile
   them during dependency updates.
-- **The script must load before `smooth-scroll.js`** in both `index.html` and
-  `browse.html`. Load order is a plain `<script>` ordering contract (ADR-006); reversing
+- **The script must load before `smooth-scroll.js`** in both `public/index.html` and
+  `public/browse.html`. Load order is a plain `<script>` ordering contract (ADR-006); reversing
   the two silently disables smooth scrolling via gate 3, with no error.
 - Gate 3 means a missing vendor file is a graceful degradation, not a crash. Worth
   preserving: do not replace the `typeof Lenis` check with an unguarded reference.
@@ -114,5 +114,5 @@ autoToggle case.
 - **Continuous rAF cost is real on capable devices too** — Lenis animates the whole page
   for its lifetime. This is accepted as the price of the effect, bounded by the `POTATO`
   gate. If profiling ever shows it matters, the thresholds are the tuning surface.
-- `browse.html` loads Lenis but is not routed (see the dead-code note in
+- `public/browse.html` loads Lenis but is not routed (see the dead-code note in
   `docs/ARCHITECTURE.md`); verify any change here against the page that is actually served.
