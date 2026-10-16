@@ -12,7 +12,7 @@
     "test": "node --test \"test/*.test.js\"",
     "check:releases": "node scripts/check-releases.js",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=\"lib/**\" --test-coverage-include=server.js --test-coverage-lines=89 \"test/*.test.js\"",
-    "test:checks": "node test/checks/archive-service.check.js && node test/checks/hash-service.check.js",
+    "test:checks": "node test/checks/archive-service.check.js && node test/checks/hash-service.check.js && node test/checks/navbar-responsive.check.js",
     "typecheck": "tsc -p jsconfig.json",
     "lint": "eslint server.js lib test scripts eslint.config.js"
   },

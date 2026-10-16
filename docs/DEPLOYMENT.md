@@ -13,7 +13,7 @@ what nginx expects from it.
 Internet
   └─ nginx :80  → 301 to https
   └─ nginx :443  files.cloudavid.com
-       ├─ /index.html, /browse.html, /404.html, /assets/**   → files from  <checkout>/public/
+       ├─ /index.html, /404.html, /assets/**                → files from  <checkout>/public/
        ├─ /api/**, /release8/latest, /release9/latest        → proxy  127.0.0.1:4000 (this portal)
        └─ anything else                                       → /index.html (SPA shell)
      nginx :443  adminfiles.cloudavid.com  (HTTP Basic)       → proxy  127.0.0.1:3000 (Admin Files Manager)

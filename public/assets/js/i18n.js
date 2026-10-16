@@ -108,6 +108,9 @@ const i18n = {
         done: "Done",
         empty: "This folder is empty.",
         emptySearch: "No files matched.",
+        emptySearchFor: "Nothing matches “%q”.",
+        emptySearchHint: "Check the spelling, or search for a shorter part of the name.",
+        clearSearch: "Clear search",
         dirBadge: "DIR",
         fileBadge: "FILE",
         navNavigate: "Navigate",
@@ -122,14 +125,33 @@ const i18n = {
         loadErrHint: "Check the file API and FILES_ROOT configuration.",
         resourcesLoadError: "Unable to load resources. Check FILES_ROOT and try again.",
         noReleases: "No files found yet.",
-        categoryDesc: "Browse and download files in this category.",
+        // Per-category card descriptions, keyed by category id (the folder path the
+        // API returns). A category with no entry renders no description line rather
+        // than shared filler (ui-craft-elevation 1.1). Keep keys identical in fa.
+        categoryDescs: {},
+        featuredTag: "Recently updated",
+        sortByName: "Sort by: Name (A-Z)",
+        sortByCount: "Sort by: File Count",
+        refreshResources: "Refresh resources",
+        searchAria: "Search files",
+        trustTitle: "Verify what you download",
+        trustDesc: "Every file in this portal can be checked against its SHA-256 checksum before you install it. Open a file's details on the Browse page and choose Verify SHA-256.",
+        trustLink: "Open Browse",
 
-        perfLabel: "Performance",
-        perfAuto: "Auto Detect",
-        perfHigh: "High Power",
+        perfLabel: "Performance setting",
+        perfAuto: "Automatic (recommended)",
+        perfHigh: "Full effects",
         perfMed: "Balanced",
-        perfLow: "Power Saver",
-        perfPotato: "Potato Mode",
+        perfLow: "Reduced effects",
+        perfPotato: "Minimal effects",
+
+        // Accessible names for shell controls (ui-craft-elevation 6.8)
+        "aria.primaryNav": "Primary",
+        "aria.language": "Select language",
+        "aria.theme": "Toggle theme",
+        "aria.menu": "Menu",
+        "aria.perf": "Performance setting",
+        "aria.closeDialog": "Close sign-in",
 
         // Browse Page Filters & Sorting
         searchFolderPh: "Search in folder...",
@@ -182,6 +204,8 @@ const i18n = {
         lockedBadge: "Locked",
         viewOnlyBadge: "View only",
         downloadUnavailable: "The download is temporarily unavailable. Try again shortly.",
+        downloadChecking: "Checking…",
+        downloadUnreachable: "The server could not be reached. Check your connection and try again.",
         bulkUnavailable: "Selection is no longer available",
         shaUnavailable: "The file is no longer available.",
         shaFailed: "The checksum could not be computed.",
@@ -212,7 +236,7 @@ const i18n = {
         errorServerSub: "Network or server error.",
 
         // Enterprise Footer (markup: Phase 5 / D10; keys: Phase 8)
-        "footer.about": "CloudAvid cloud computing with over 15 years of experience, providing secure and scalable services in virtualization, cloud infrastructure, and enterprise support.",
+        "footer.about": "CloudAvid builds virtualization and cloud infrastructure software and supports the teams that run it. This portal is where those release packages, images and templates are published.",
         "footer.linksTitle": "Useful Links",
         "footer.linkHome": "Home",
         "footer.linkBrowse": "Browse Portal",
@@ -228,7 +252,7 @@ const i18n = {
         "footer.socialTelegramPh": "Telegram",
         "footer.socialLinkedInPh": "LinkedIn",
         "footer.socialGithubPh": "GitHub",
-        "footer.copyright": "All rights reserved for CloudAvid Technology Co."
+        "footer.copyright": "© {year} CloudAvid. All rights reserved."
     },
 
     fa: {
@@ -336,6 +360,9 @@ const i18n = {
         done: "پایان",
         empty: "این پوشه خالی است.",
         emptySearch: "فایلی پیدا نشد.",
+        emptySearchFor: "موردی با «%q» پیدا نشد.",
+        emptySearchHint: "املای عبارت را بررسی کنید یا بخش کوتاه‌تری از نام را جست‌وجو کنید.",
+        clearSearch: "پاک کردن جست‌وجو",
         dirBadge: "پوشه",
         fileBadge: "فایل",
         navNavigate: "جابه‌جایی",
@@ -350,14 +377,29 @@ const i18n = {
         loadErrHint: "رابط فایل و مقدار FILES_ROOT را بررسی کنید.",
         resourcesLoadError: "بارگذاری منابع ممکن نشد. FILES_ROOT را بررسی کنید.",
         noReleases: "هنوز فایلی پیدا نشد.",
-        categoryDesc: "مرور و دانلود فایل‌های این دسته.",
+        categoryDescs: {},
+        featuredTag: "به‌روزشده اخیر",
+        sortByName: "مرتب‌سازی: نام (الف-ی)",
+        sortByCount: "مرتب‌سازی: تعداد فایل",
+        refreshResources: "بازخوانی منابع",
+        searchAria: "جست‌وجوی فایل‌ها",
+        trustTitle: "آنچه دانلود می‌کنید را بررسی کنید",
+        trustDesc: "هر فایل این پورتال را می‌توان پیش از نصب با چک‌سام SHA-256 آن بررسی کرد. جزئیات فایل را در صفحه مرور باز کنید و «بررسی SHA-256» را بزنید.",
+        trustLink: "رفتن به صفحه مرور",
 
-        perfLabel: "عملکرد سیستم",
-        perfAuto: "تشخیص خودکار",
-        perfHigh: "حداکثر گرافیک",
-        perfMed: "عملکرد متعادل",
-        perfLow: "کاهش مصرف باتری",
-        perfPotato: "بسیار سبک (سیب‌زمینی)",
+        perfLabel: "تنظیم عملکرد",
+        perfAuto: "خودکار (پیشنهادی)",
+        perfHigh: "همه جلوه‌ها",
+        perfMed: "متعادل",
+        perfLow: "جلوه‌های کمتر",
+        perfPotato: "حداقل جلوه‌ها",
+
+        "aria.primaryNav": "ناوبری اصلی",
+        "aria.language": "انتخاب زبان",
+        "aria.theme": "تغییر پوسته",
+        "aria.menu": "منو",
+        "aria.perf": "تنظیم عملکرد",
+        "aria.closeDialog": "بستن پنجره ورود",
 
         // Browse Page Filters & Sorting
         searchFolderPh: "جستجو در این پوشه...",
@@ -410,6 +452,8 @@ const i18n = {
         lockedBadge: "قفل‌شده",
         viewOnlyBadge: "فقط مشاهده",
         downloadUnavailable: "دانلود موقتاً در دسترس نیست. کمی بعد دوباره تلاش کنید.",
+        downloadChecking: "در حال بررسی…",
+        downloadUnreachable: "ارتباط با سرور برقرار نشد. اتصال خود را بررسی و دوباره تلاش کنید.",
         bulkUnavailable: "انتخاب دیگر در دسترس نیست",
         shaUnavailable: "این فایل دیگر در دسترس نیست.",
         shaFailed: "محاسبه‌ی جمع‌سنجی ممکن نشد.",
@@ -439,7 +483,7 @@ const i18n = {
         errorServerLoad: "خطا در بارگذاری مسیر.",
         errorServerSub: "ارتباط با سرور قطع شده است.",
         // Enterprise Footer (markup: Phase 5 / D10; keys: Phase 8)
-        "footer.about": "CloudAvid — بیش از ۱۵ سال تجربه در رایانش ابری، ارائه‌دهنده خدمات امن و مقیاس‌پذیر در حوزه مجازی‌سازی، زیرساخت ابری و پشتیبانی سازمانی.",
+        "footer.about": "کلودآوید نرم‌افزارهای مجازی‌سازی و زیرساخت ابری می‌سازد و از تیم‌هایی که آن‌ها را راهبری می‌کنند پشتیبانی می‌کند. بسته‌های انتشار، ایمیج‌ها و قالب‌ها در همین پورتال منتشر می‌شوند.",
         "footer.linksTitle": "لینک‌های کاربردی",
         "footer.linkHome": "صفحه اصلی",
         "footer.linkBrowse": "پورتال فایل‌ها",
@@ -455,7 +499,7 @@ const i18n = {
         "footer.socialTelegramPh": "تلگرام",
         "footer.socialLinkedInPh": "لینکدین",
         "footer.socialGithubPh": "گیت‌هاب",
-        "footer.copyright": "تمامی حقوق برای شرکت رایانش ابری کلودآوید محفوظ است."
+        "footer.copyright": "© {year} کلودآوید. تمامی حقوق محفوظ است."
     }
 };
 
@@ -481,10 +525,12 @@ function applyLang(lang) {
     document.documentElement.lang = d.lang;
     document.documentElement.dir = d.dir;
 
-    // 2. Standard Text Translation
+    // 2. Standard Text Translation. `{year}` is the current calendar year, so a
+    // legal line never freezes at the year it was written (app-shell footer).
+    const year = String(new Date().getFullYear());
     document.querySelectorAll("[data-i18n]").forEach(el => {
         const k = el.getAttribute("data-i18n");
-        if (d[k] != null) el.textContent = d[k];
+        if (d[k] != null) el.textContent = String(d[k]).replace("{year}", year);
     });
 
     // 3. Input Placeholders Translation
@@ -498,10 +544,13 @@ function applyLang(lang) {
         if (d[k] != null) el.placeholder = d[k];
     });
 
-    // 3a. Accessible-Name Translation (aria-label)
+    // 3a. Accessible-Name Translation (aria-label). A visible tooltip carries the
+    // same words, so it follows the language too instead of staying English.
     document.querySelectorAll("[data-i18n-aria]").forEach(el => {
         const k = el.getAttribute("data-i18n-aria");
-        if (d[k] != null) el.setAttribute("aria-label", d[k]);
+        if (d[k] == null) return;
+        el.setAttribute("aria-label", d[k]);
+        if (el.hasAttribute("title")) el.title = d[k];
     });
 
     // 4. HTML Content Translation (Preserves tags like <span>)
@@ -544,36 +593,40 @@ function applyLang(lang) {
 function setupLanguageDropdown() {
     applyLang(getLang());
 
-    /* Task 1.2 (a11y-ux-debt) - report the language menu's expanded state.
-       CSS cannot write an attribute, so aria-expanded is hardcoded "false" in
-       index.html and never updated, leaving assistive tech told "collapsed"
-       even while the menu is open.
-       This does NOT toggle the menu: visibility stays pure CSS (:hover /
-       :focus-within), so the I8 freeze is preserved. This only mirrors that
-       CSS state into the attribute. */
-    const syncExpanded = (open) => {
-        const btn = document.getElementById("langBtn");
-        if (btn) btn.setAttribute("aria-expanded", open ? "true" : "false");
+    /* ui-craft-elevation D9 - one dropdown mechanism. The language menu opens
+       through the same script-toggled `.show` class on its wrapper as the
+       performance menu, so it works by touch and keyboard and stays open until
+       dismissed (option chosen, outside click, or Escape). aria-expanded is
+       written from that one state, so it always matches what is on screen. */
+    const wrap = document.querySelector(".lang-dropdown-wrap");
+    const btn = document.getElementById("langBtn");
+    const setOpen = (open) => {
+        if (!wrap || !btn) return;
+        wrap.classList.toggle("show", open);
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
     };
 
-    const wrap = document.querySelector(".lang-dropdown-wrap");
-    if (wrap) {
-        // Focus moves into the menu while the user tabs through the options,
-        // so focusin/focusout on the wrapper tracks the whole open session.
-        wrap.addEventListener("focusin", () => syncExpanded(true));
-        wrap.addEventListener("focusout", (e) => {
-            if (!wrap.contains(e.relatedTarget)) syncExpanded(false);
+    if (wrap && btn) {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            setOpen(!wrap.classList.contains("show"));
         });
-        wrap.addEventListener("pointerenter", () => syncExpanded(true));
-        wrap.addEventListener("pointerleave", () => {
-            if (!wrap.contains(document.activeElement)) syncExpanded(false);
+        wrap.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && wrap.classList.contains("show")) {
+                setOpen(false);
+                btn.focus();
+            }
+        });
+        document.addEventListener("click", (e) => {
+            if (!wrap.contains(e.target)) setOpen(false);
         });
     }
-    syncExpanded(false);
+    setOpen(false);
 
     document.addEventListener("click", (e) => {
         const langOption = e.target.closest(".lang-option");
         if (langOption) {
+            setOpen(false);
             const selectedLang = langOption.getAttribute("data-lang");
 
             if (selectedLang && selectedLang !== getLang()) {

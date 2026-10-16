@@ -50,16 +50,17 @@ body.rtl {
 
 [lang="fa"] ::selection,
 [dir="rtl"] ::selection {
-    background: rgba(86, 131, 218, 0.32);
+    background: rgba(255, 184, 0, 0.34);
 }
 
+/* Selection is an accent tint (D2), not a second hue. */
 ::selection {
-    background: rgba(86, 131, 218, 0.28);
+    background: rgba(255, 184, 0, 0.3);
     color: #ffffff;
 }
 
 [data-theme="light"] ::selection {
-    background: rgba(86, 131, 218, 0.2);
+    background: rgba(255, 184, 0, 0.28);
     color: inherit;
 }
 
@@ -79,13 +80,15 @@ img {
     max-width: 100%;
 }
 
-/* ── Page container — wide fluid enterprise layout ──
-   One shared container: navbar, hero, and every section align to it. */
+/* ── Page container — fluid enterprise layout ──
+   One shared container: navbar, hero, and every section align to it.
+   ui-craft-elevation 4.1: capped at 1400px (was 1720px). At 1720px the hero
+   text and its visual sat at opposite ends of an empty canvas. */
 .page {
     position: relative;
     z-index: 1;
     width: calc(100% - 48px);
-    max-width: 1720px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 16px 0 32px;
 }
@@ -111,9 +114,9 @@ img {
 /* ── Ambient backdrop — Obsidian Kinetic ──────────────────────────────
    Pure CSS only, and fully static: no shader, no animation, no script (D5).
    Layer order: body void -> .aura-base (wash + vignette)
-   -> .aura-glow-1 (amber bloom, top-right) -> .aura-glow-2 (indigo bloom,
+   -> .aura-glow-1 (amber bloom, top-right) -> .aura-glow-2 (iris bloom,
    bottom-left). All sit behind .page (z-index 1) and behind .nav (z-index 50).
-   Colours come from --color-ember-pulse / --color-electric-iris via
+   Colours come from --color-ember-pulse (accent) / --action (primary-action hue) via
    color-mix(), with a literal rgba() declared first as a fallback for
    engines without color-mix support. */
 .aura-backdrop {
@@ -162,19 +165,14 @@ img {
     height: 70vw;
     border-radius: 50%;
     background: radial-gradient(circle at center,
-            rgba(195, 192, 255, 0.07) 0%,
+            rgba(61, 107, 199, 0.07) 0%,
             transparent 65%);
     background: radial-gradient(circle at center,
-            color-mix(in srgb, var(--color-electric-iris) 7%, transparent) 0%,
+            color-mix(in srgb, var(--action) 7%, transparent) 0%,
             transparent 65%);
     filter: blur(100px);
     opacity: 0.4;
     pointer-events: none;
-}
-
-/* No matching element exists in the markup; rule retained unchanged. */
-.aura-vignette {
-    display: none;
 }
 
 [data-theme="dark"] .aura-glow-1 {
@@ -190,10 +188,10 @@ img {
 
 [data-theme="dark"] .aura-glow-2 {
     background: radial-gradient(circle at center,
-            rgba(195, 192, 255, 0.07) 0%,
+            rgba(61, 107, 199, 0.07) 0%,
             transparent 65%);
     background: radial-gradient(circle at center,
-            color-mix(in srgb, var(--color-electric-iris) 7%, transparent) 0%,
+            color-mix(in srgb, var(--action) 7%, transparent) 0%,
             transparent 65%);
 }
 
@@ -239,16 +237,6 @@ img {
     }
 }
 
-@keyframes shimmer {
-    0% {
-        transform: translateX(-100%)
-    }
-
-    100% {
-        transform: translateX(100%)
-    }
-}
-
 .anim-fade-up {
     animation: fadeUp 220ms var(--ease) both;
 }
@@ -281,6 +269,77 @@ img {
     animation-delay: 200ms
 }
 
+/* ── Motion contract primitives (ui-craft-elevation Phase 2) ──────────────
+   Every effect here animates transform and opacity only, and every one has
+   its reduced-motion branch (below, and in the @media block further down)
+   and its potato override (performance-modes.css §10) in the same change.
+   Script-driven effects (FLIP, cross-fade, search stagger, reveal) are
+   gated in assets/js/motion.js, which reads both conditions live. */
+
+@keyframes routeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* Route fallback where the View Transitions API is missing. router.js adds
+   the class only after the new view is rendered and removes it on
+   animationend, so the view never fades in empty and nothing lingers. */
+#app.route-enter {
+    animation: routeIn 220ms var(--ease) both;
+}
+
+/* Route and theme changes (document.startViewTransition): a short
+   cross-fade of the root snapshot. */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 280ms;
+    animation-timing-function: var(--ease-out);
+}
+
+/* Section reveal on scroll. motion.js adds .reveal-pending only when motion
+   is allowed, so with reduced motion, the potato tier, or no script, the
+   section is simply present. */
+.reveal-pending {
+    opacity: 0;
+    transform: translateY(16px);
+}
+
+.reveal-pending.is-revealed {
+    opacity: 1;
+    transform: none;
+    transition: opacity 520ms var(--ease), transform 520ms var(--ease);
+}
+
+/* Hero entrance cascade, top to bottom. The headline is deliberately not
+   animated: it is the largest paint on the route and must not be delayed. */
+@media (prefers-reduced-motion: no-preference) {
+    :root:not([data-perf="potato"]) .hero-content>.hero-pill,
+    :root:not([data-perf="potato"]) .hero-content>.hero-desc,
+    :root:not([data-perf="potato"]) .hero-content>.hero-search,
+    :root:not([data-perf="potato"]) .hero-visual {
+        animation: fadeUp 480ms var(--ease) both;
+    }
+
+    :root:not([data-perf="potato"]) .hero-content>.hero-desc {
+        animation-delay: 90ms;
+    }
+
+    :root:not([data-perf="potato"]) .hero-content>.hero-search {
+        animation-delay: 180ms;
+    }
+
+    :root:not([data-perf="potato"]) .hero-visual {
+        animation-delay: 240ms;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
 
     *,
@@ -307,6 +366,27 @@ img {
     }
 
     .resource-card:hover .resource-arrow {
+        transform: none !important;
+    }
+
+    /* Reduced-motion branches for the Phase 2 primitives: present at once,
+       no offset (the 0.01ms rule above would still flash the offset). */
+    .reveal-pending {
+        opacity: 1;
+        transform: none;
+    }
+
+    #app.route-enter {
+        animation: none;
+    }
+
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+        animation: none !important;
+    }
+
+    .nav-bar {
         transform: none !important;
     }
 }

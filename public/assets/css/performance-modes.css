@@ -67,11 +67,6 @@
     /* Reduced from 36px */
 }
 
-[data-perf="medium"] .hero-cloud-wrap {
-    animation-duration: 10s;
-    /* Slower animation = less GPU repaint */
-}
-
 /* ───────────────────────────────────────────────────────────────
    3. TIER: LOW (Power Saver)
    ───────────────────────────────────────────────────────────────
@@ -146,11 +141,6 @@
 [data-theme="dark"][data-perf="low"] .browse-head,
 [data-theme="dark"][data-perf="low"] .results-panel {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
-}
-
-/* Halt infinite decorative animations */
-[data-perf="low"] .hero-cloud-wrap {
-    animation: none;
 }
 
 /* Simplify skeleton shimmer to a static, low-opacity pulse */
@@ -244,7 +234,7 @@
     background: var(--bg-card);
 }
 
-/* Nuke all background aesthetics.
+/* Nuke all background aesthetics. */
 [data-perf="potato"] .aura-glow-1,
 [data-perf="potato"] .aura-glow-2,
 [data-perf="potato"] .logo-shader,
@@ -307,7 +297,7 @@
     box-shadow: none !important;
 }
 
-/* Remove functional toggle animations (Theme, Wipe, etc.) */
+/* Remove functional toggle animations (theme icon swap, logo cross-fade) */
 [data-perf="potato"] .theme-btn svg {
     transition: none !important;
 }
@@ -315,10 +305,6 @@
 [data-perf="potato"] .logo-layer {
     filter: none !important;
     transition: none !important;
-}
-
-[data-perf="potato"] .logo-swap.wiping {
-    clip-path: none !important;
 }
 
 /* Highly simplified scrollbar */
@@ -335,12 +321,12 @@
    shadcn-inspired minimal architecture
    ─────────────────────────────────────────────────────────────── */
 
-/* Dropdown Container */
+/* Dropdown Container. Height is owned by the touch-target block in
+   components.css (ui-craft-elevation 2.7). */
 .perf-dropdown-wrap {
     position: relative;
     display: inline-flex;
     align-items: stretch;
-    height: 32px;
 }
 
 /* Trigger Button (Pill) */
@@ -352,7 +338,7 @@
     justify-content: center;
     gap: 7px;
     padding: 0 11px;
-    border-radius: var(--radius-full);
+    border-radius: var(--r-full);
     border: 1px solid rgba(255, 184, 0, 0.3);
     background: rgba(255, 184, 0, 0.1);
     color: var(--color-ember-pulse);
@@ -362,7 +348,7 @@
     line-height: 1;
     cursor: pointer;
     white-space: nowrap;
-    transition: all var(--dur-1) ease;
+    transition: border-color var(--dur-1) ease, background-color var(--dur-1) ease, color var(--dur-1) ease;
 }
 
 /* SVG Icon in Pill */
@@ -398,16 +384,13 @@
     box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-4px) scale(0.98);
-    transition: all 0.15s ease;
     z-index: var(--z-dropdown-high);
-    /* Stays above general content */
-    display: flex;
+    /* Stays above general content. Closed = display:none; opening plays the
+       shared menuIn entrance (components.css). Same .show mechanism as the
+       language menu (D9). */
+    display: none;
     flex-direction: column;
     gap: 3px;
-    pointer-events: none;
 }
 
 /* RTL Layout Flip */
@@ -418,10 +401,8 @@
 
 /* Menu Visible State */
 .perf-dropdown-wrap.show .perf-dropdown-menu {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0) scale(1);
-    pointer-events: auto;
+    display: flex;
+    animation: menuIn 0.15s ease both;
 }
 
 /* Menu Item (Option) */
@@ -486,15 +467,28 @@
     box-shadow: 0 0 6px rgba(255, 184, 0, 0.6);
 }
 
-/* Mobile Responsiveness for Dropdown Trigger */
-@media (max-width: 480px) {
+/* Mobile Responsiveness for Dropdown Trigger
+   Same ladder as the navbar wordmark (components.css): the label goes at
+   640px so the bar never regrows as it narrows, the chevron follows at 480px
+   where the pill becomes a plain 44px icon button. */
+@media (max-width: 640px) {
     .perf-pill span {
         display: none;
         /* Hide text, keep only icon */
     }
+}
 
+@media (max-width: 480px) {
     .perf-pill {
-        padding: 0 10px;
+        padding: 0;
+        gap: 0;
+        min-width: 44px;
+        /* Match the four sibling icon buttons instead of staying a lone pill. */
+        border-radius: var(--radius-md);
+    }
+
+    .perf-pill > svg:last-child {
+        display: none;
     }
 }
 
@@ -566,7 +560,7 @@
     opacity: 0;
     visibility: hidden;
     transform: translateY(-8px) scale(0.96);
-    transition: all 150ms ease;
+    transition: opacity 150ms ease, transform 150ms ease, visibility 150ms;
     overflow: hidden;
 }
 
@@ -659,13 +653,13 @@
     font-size: 9px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 100ms ease;
+    transition: background-color 100ms ease, border-color 100ms ease, color 100ms ease;
 }
 
 .perf-debug-btn:hover {
-    background: var(--a-5, #5683da);
-    color: #ffffff;
-    border-color: var(--a-5, #5683da);
+    background: var(--action);
+    color: var(--text-on-action);
+    border-color: var(--action);
 }
 
 .perf-debug-btn-auto {
@@ -816,4 +810,75 @@
         inset-inline-end: auto;
         inset-inline-start: 0;
     }
+
+    /* The [dir="rtl"] physical rule above outranks this block (0,2,1 beats
+       0,1,0), so in Persian the menu kept `left: 0` and grew rightward off
+       the viewport instead of mirroring. Same specificity, later in source:
+       it now wins and the logical anchoring above governs both directions. */
+    [dir="rtl"] .perf-dropdown-menu {
+        left: auto;
+        right: 0;
+    }
+}
+
+/* ───────────────────────────────────────────────────────────────
+   10. MOTION CONTRACT (ui-craft-elevation Phase 2)
+   ───────────────────────────────────────────────────────────────
+   Lowest-tier override for every effect the phase introduced, declared in
+   the same change as the effect. Script-driven effects (reveal, FLIP,
+   grid/list cross-fade, search stagger) are gated in assets/js/motion.js
+   from the same data-perf value; these rules are the CSS half.
+     reveal on scroll   potato: not registered (.reveal-pending forced visible)
+     route transition   potato: router skips View Transitions and the fade
+     hero cascade       potato: excluded by selector in base.css
+     nav condense       potato: no transform (Lenis does not run either)
+     menu entrance      potato: the global 0.01ms rule above collapses it
+   ─────────────────────────────────────────────────────────────── */
+[data-perf="potato"] .reveal-pending {
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+[data-perf="potato"] #app.route-enter {
+    animation: none !important;
+}
+
+[data-perf="potato"] .nav.is-condensed .nav-bar {
+    transform: none !important;
+}
+
+/* The inspector's ZIP indicator loops only while a ZIP is being built
+   (.is-busy, removed in a finally). At the lowest tier the loop is dropped;
+   the busy state stays legible from the disabled control and aria-busy. */
+[data-perf="potato"] .insp-zip.is-busy svg {
+    animation: none !important;
+}
+
+/* The featured card's glow wash is a second gradient layer: flat at potato. */
+[data-perf="potato"] .resource-card.is-featured {
+    background: var(--bg-card);
+}
+
+/* ───────────────────────────────────────────────────────────────
+   11. PERFORMANCE SETTING IN THE FOOTER (ui-craft-elevation 6.1)
+   The tier override left the navbar's primary group; it now sits in the
+   footer's bottom bar, so its menu opens upward.
+   ─────────────────────────────────────────────────────────────── */
+.footer .perf-dropdown-menu {
+    top: auto;
+    bottom: calc(100% + 6px);
+}
+
+/* The ≤640px / ≤480px rules above shed the pill's label to fit the navbar's
+   width budget. The footer has room, and the label is what makes the control
+   read as a performance setting, so it stays visible here at every width. */
+.footer .perf-pill {
+    padding: 0 14px;
+    gap: 7px;
+    border-radius: var(--r-full);
+}
+
+.footer .perf-pill span,
+.footer .perf-pill > svg:last-child {
+    display: inline;
 }

@@ -38,6 +38,10 @@
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 
+// ES module, imported by router.js when its route is entered (ui-craft-elevation 5.2).
+import { BrowseIcons } from "./browse-icons.js?v=4.3.6";
+import { BulkDownload } from "./bulk-download.js?v=4.3.6";
+
 const FileInspector = (function () {
     'use strict';
 
@@ -458,11 +462,19 @@ const FileInspector = (function () {
         // Same server archive as the bulk bar: every selected file, scoped to this folder.
         const zipBtn = document.getElementById("inspZip");
         if (zipBtn && typeof BulkDownload !== "undefined") {
+            // The indicator loops only while the archive is being built; aria-busy
+            // and :disabled keep that state legible when a tier or reduced motion
+            // suppresses the loop (motion-contract).
             zipBtn.addEventListener("click", async () => {
                 zipBtn.disabled = true;
                 zipBtn.classList.add("is-busy");
+                zipBtn.setAttribute("aria-busy", "true");
                 try { await BulkDownload.downloadZip(); }
-                finally { zipBtn.disabled = false; zipBtn.classList.remove("is-busy"); }
+                finally {
+                    zipBtn.disabled = false;
+                    zipBtn.classList.remove("is-busy");
+                    zipBtn.removeAttribute("aria-busy");
+                }
             });
         }
 
@@ -504,4 +516,4 @@ const FileInspector = (function () {
     return { mount, close, isOpen: () => !!current };
 })();
 
-if (typeof window !== "undefined") window.FileInspector = FileInspector;
+export { FileInspector };

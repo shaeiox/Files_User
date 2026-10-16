@@ -28,6 +28,7 @@
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 
+// ES module, imported by router.js when its route is entered (ui-craft-elevation 5.2).
 const BrowseIcons = (function () {
     'use strict';
 
@@ -125,4 +126,4 @@ const BrowseIcons = (function () {
     return { get, has, forItem, kindOf, names: () => Object.keys(PATHS) };
 })();
 
-if (typeof window !== "undefined") window.BrowseIcons = BrowseIcons;
+export { BrowseIcons };

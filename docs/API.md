@@ -527,10 +527,9 @@ the path policy).
 
 **Response:** `200 OK` with `public/index.html` content (SPA shell)
 
-**Note:** `public/browse.html` is **not** served by any route. All `/browse/*` requests resolve to
-`public/index.html`; the SPA router then renders `BrowsePage` client-side. The standalone
-`public/browse.html` file in the repository root is unrouted. `/download/release` (exact match) renders
-`ReleasePage` the same way — see
+**Note:** all `/browse/*` requests resolve to `public/index.html`; the SPA router then renders
+`BrowsePage` client-side (the old unrouted `public/browse.html` was deleted by ui-craft-elevation).
+`/download/release` (exact match) renders `ReleasePage` the same way — see
 [ARCHITECTURE.md → Standalone HTML Pages](ARCHITECTURE.md#standalone-html-pages).
 
 **Source:** `lib/api-router.js` → `if (pathname === "/" || pathname === "/index.html" || pathname.startsWith("/browse") || pathname === "/download/release")` → `lib/static-handler.js` → `serveSPA()`

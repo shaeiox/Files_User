@@ -1660,3 +1660,11 @@ session: 8.1's answer is "no new labels outside the footer", and the footer keys
 - every scenario verified: every mechanically-checkable scenario verified with evidence; browser-only
   scenarios flagged above as manual remainder
 ```
+
+## Amendment (2026-10-16) — D8/I21 superseded by `ui-craft-elevation`
+
+**D8 / I21 (Hero freeze) is lifted.** `openspec/changes/ui-craft-elevation/` (design D1) deletes the
+`HERO DRIFT INSULATION` block in `home.css` and lets `.hero-max` resolve the single theme-level tokens.
+The token migration the freeze protected is complete, so the freeze no longer guards anything but itself.
+Every `HARD GATE (D8/I21)` assertion in this file is superseded by `ui-craft-elevation` §2 and §7; all
+other gates are unchanged.

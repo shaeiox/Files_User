@@ -9,6 +9,9 @@
    SELF-HOSTED FONTS — Phase 1 / D6
    Served same-origin so they satisfy `font-src 'self' data:`.
    font-display:swap everywhere so text paints immediately.
+   Vazirmatn carries an Arabic-script unicode-range (ui-craft-elevation
+   task 1.5), so a visitor whose page renders no Arabic-script glyph never
+   downloads its three faces (~150 KB).
    ─────────────────────────────────────────────────────────────── */
 
 @font-face {
@@ -65,6 +68,7 @@
     font-weight: 400;
     font-style: normal;
     font-display: swap;
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200F, U+FB50-FDFF, U+FE70-FEFF;
 }
 
 @font-face {
@@ -73,6 +77,7 @@
     font-weight: 500;
     font-style: normal;
     font-display: swap;
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200F, U+FB50-FDFF, U+FE70-FEFF;
 }
 
 @font-face {
@@ -81,6 +86,7 @@
     font-weight: 600;
     font-style: normal;
     font-display: swap;
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200F, U+FB50-FDFF, U+FE70-FEFF;
 }
 
 @font-face {
@@ -103,9 +109,23 @@
     --color-frost: #d1d1d1;
     --color-linen: #e5e5e7;
     --color-snow: #ffffff;
-    --color-electric-iris: #c3c0ff;
     --color-ember-pulse: #ffb800;
     --color-molasses: #5a250a;
+
+    /* ── Colour roles (ui-craft-elevation D2) ──────────────────────────────
+       The palette has exactly two hue roles. Nothing else may introduce a hue.
+         ACCENT          amber. Fill/indicator: --color-ember-pulse.
+                         Text: --text-accent. Tint: --glow*. Focus: --border-focus.
+         PRIMARY ACTION  iris blue, the fill of the one primary call to action
+                         per screen (.btn-primary, hero search, sign-in).
+       Status colours (--danger, --success, --warning) are semantic, not accents.
+       --action was #5683da; white text on it measured 3.71:1, below the 4.5:1
+       floor for 13-14px button labels. Deepened one step within the same hue:
+         #ffffff on --action       #3d6bc7  5.09:1
+         #ffffff on --action-hover #2f5cb2  6.37:1 */
+    --action: #3d6bc7;
+    --action-hover: #2f5cb2;
+    --text-on-action: #ffffff;
 
     /* ── Spacing scale (4px base) ── */
     --s1: 4px;
@@ -139,16 +159,6 @@
     --radius-panels: 0.5rem;
     --radius-buttons: 9999px;
 
-    /* ── Iris ramp (legacy --a-* aliases, now Electric Iris) ── */
-    --a-1: #12213c;
-    --a-2: #1d3a6b;
-    --a-3: #2f5cb2;
-    --a-4: #4a78cf;
-    --a-5: #5683da;
-    --a-6: #7ea4e5;
-    --a-7: #a9c3ee;
-    --a-8: #dce7fa;
-
     /* ── Semantic (status only — never brand accents) ── */
     --danger: #ef4444;
     --success: #10b981;
@@ -162,9 +172,9 @@
     --dur-3: 350ms;
 
     /* ── Typography families (D6 — self-hosted) ──
-       NOTE: --font-hero is intentionally NOT repointed. It is consumed by the
-       frozen Hero headline (.hero-content h1) and must keep its pre-redesign
-       value per D8/I21. */
+       --font-hero (Cinzel) is the inscriptional display face for the Latin
+       hero headline only; it is set with open tracking and leading >= 1
+       (ui-craft-elevation D3). */
     --font: 'Inter', 'Vazirmatn', ui-sans-serif, system-ui, -apple-system, sans-serif;
     --font-display: 'Inter', 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
     --font-heading: 'Inter', 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
@@ -230,7 +240,10 @@
 
     /* ─── OKLCH token foundation ─────────────────────────────────────────────
        Neutral ramp: hue 240, chroma ~0.006 (near-achromatic, cool lean)
-       Accent ramp:  hue 224, Electric Iris family
+       (The hue-224 iris "accent" ramp --a-1…--a-8 was removed by
+       ui-craft-elevation task 2.6: a legacy hex copy in :root and this OKLCH
+       copy shared the same names, and its only consumers were the retired
+       hero pins and one debug button.)
     ─────────────────────────────────────────────────────────────────────── */
 
     /* Neutral ramp — 12 steps, even lightness stride */
@@ -261,29 +274,11 @@
     --n-12: oklch(8% 0.004 240);
     /* #0d0d0f — near-black          */
 
-    /* Accent ramp — hue 224 (Electric Iris #5683da) */
-    --a-1: oklch(97% 0.018 224);
-    /* tinted surface                */
-    --a-2: oklch(93% 0.036 224);
-    /* hover tint                    */
-    --a-3: oklch(86% 0.072 224);
-    /* active tint / selection       */
-    --a-4: oklch(72% 0.130 224);
-    /* lighter accent                */
-    --a-5: oklch(58% 0.170 224);
-    /* primary — #5683da equiv       */
-    --a-6: oklch(50% 0.175 224);
-    /* primary hover                 */
-    --a-7: oklch(42% 0.170 224);
-    /* primary active / text accent  */
-    --a-8: oklch(32% 0.140 224);
-    /* deep accent                   */
-
     /* Semantic: destructive (hue 25 — warm red, not harsh) */
     --e-surface: oklch(97% 0.020 25);
     --e-border: oklch(80% 0.080 25);
     --e-text: oklch(48% 0.180 25);
-    /* 4.8:1 on --n-1 ✓             */
+    /* 6.79:1 on --n-1 ✓ (re-measured, ui-craft-elevation 2.9) */
 
     /* ─── shadcn-compatible semantic tokens ─────────────────────────────── */
     --background: var(--n-1);
@@ -295,24 +290,19 @@
     --popover: var(--n-0);
     --popover-foreground: var(--n-11);
 
-    --primary: var(--a-5);
-    --primary-foreground: var(--n-0);
-
     --secondary: var(--n-3);
     --secondary-foreground: var(--n-10);
 
     --muted: var(--n-2);
     --muted-foreground: var(--n-7);
 
-    --accent: var(--a-5);
-    --accent-foreground: var(--n-0);
-
     --destructive: var(--e-text);
     --destructive-foreground: var(--n-0);
 
     --border: rgba(0, 0, 0, 0.1);
     --input: var(--n-4);
-    --ring: #ffb800;
+    /* One focus colour per theme: --ring is an alias, never a second value. */
+    --ring: var(--border-focus);
 
     /* ─── surface roles (light Obsidian Kinetic) ────────────────────────── */
     --bg: #f5f5f0;
@@ -324,7 +314,10 @@
 
     --border-default: rgba(0, 0, 0, 0.1);
     --border-hover: rgba(0, 0, 0, 0.16);
-    --border-focus: #ffb800;
+    /* Light focus ring = the light accent text colour. #ffb800 measured
+       1.59:1 on --bg and 1.73:1 on --bg-card, under the 3:1 floor for a
+       focus indicator; #8a5a00 measures 5.42:1 on --bg, 5.93:1 on --bg-card. */
+    --border-focus: #8a5a00;
 
     /* ─── text roles ─────────────────────────────────────────────────────── */
     --text: #1f1f23;
@@ -335,36 +328,35 @@
     /* secondary                     */
     /* Task 2.2 (a11y-ux-debt): this step used to resolve to #9e8f78, which
        measured 3.16:1 on --bg-card - below the 4.5:1 floor for body text. It
-       is aliased to the step above because:
-         - the token cannot be deleted: the frozen browse.css references it in
-           six selectors, so removing the declaration would break them;
-         - a four-step muted scale is not achievable here. The step above
-           already sits at 4.37:1 on --n-4, so any value dimmer than it cannot
-           clear 4.5:1. Aliasing cannot invert the scale by construction.
+       is aliased to the step above because browse.css references it in six
+       selectors. Re-measured (ui-craft-elevation 2.9): --text-3 #514532 is
+       9.35:1 on --bg-card and 7.16:1 on --n-4. (The 4.37:1 figure previously
+       quoted here was the dark theme's old #9e8f78 on --n-4, not this token.)
        Hierarchy at the quiet end is carried by font size and weight. */
     --text-4: var(--text-3);
     /* placeholder / disabled        */
     --text-accent: #8a5a00;
-    /* inline links                  */
+    /* inline links / accent text. Measured: 5.93:1 on --bg-card,
+       5.42:1 on --bg, 5.28:1 on --bg-sunken, 4.54:1 on --n-4 */
     --text-on-accent: #ffffff;
 
-    /* ─── Browse redesign: info / cyan accent ───────────────────────────────
-       Added by browse-inspector-redesign. The only colour the ported Material-3
-       scale has no project equivalent for. Deepened for light mode so it clears
-       the 4.5:1 body-text floor on --bg-card; the dark value is the exact
-       mockup tertiary (#a5ebff). See the mapping table at the end of this file. */
-    --info: #0d6b7a;
+    /* ─── Browse inspector snippet colour ───────────────────────────────────
+       browse-inspector-redesign added a cyan "tertiary" accent here. Under the
+       two-role palette (D2) it is an alias of the accent text role, not a hue
+       of its own (ui-craft-elevation 2.5). */
+    --info: var(--text-accent);
 
     /* ─── glass / overlay surfaces ──────────────────────────────────────── */
     --surface-glass: rgba(255, 255, 255, 0.75);
     --nav-bg: rgba(255, 255, 255, 0.85);
     --input-bg: #f0f0ea;
 
-    /* ─── hero gradient (light mode) ── FROZEN per D8/I21 — value unchanged ── */
+    /* ─── hero gradient (light mode) — warm paper wash in the accent hue.
+       The D8/I21 freeze that pinned the old iris tint is lifted (D1). ── */
     --hero-grad: linear-gradient(160deg,
-            oklch(97% 0.022 224) 0%,
-            oklch(100% 0.010 224) 55%,
-            oklch(98% 0.008 60) 100%);
+            oklch(98% 0.018 80) 0%,
+            oklch(100% 0.004 80) 55%,
+            oklch(98% 0.010 80) 100%);
 
     /* ─── glow / ambient color ───────────────────────────────────────────── */
     --glow: rgba(255, 184, 0, 0.09);
@@ -407,24 +399,21 @@
     --popover: 0 0% 7%;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 220 64% 60%;
-    --primary-foreground: 0 0% 100%;
-
     --secondary: 220 3% 26%;
     --secondary-foreground: 0 0% 98%;
 
     --muted: 220 3% 24%;
     --muted-foreground: 225 1% 61%;
 
-    --accent: 220 64% 60%;
-    --accent-foreground: 0 0% 100%;
-
     --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 225 4% 30%;
     --input: 225 4% 30%;
-    --ring: 220 64% 60%;
+    /* Was `220 64% 60%` (a bare HSL triplet), so `outline: 2px solid
+       var(--ring)` was invalid in dark mode and buttons fell back to
+       currentColor while every other control drew amber. Now an alias. */
+    --ring: var(--border-focus);
 
     /* — neutral ramp — */
     --n-0: #090a0c;
@@ -453,6 +442,7 @@
     --border: rgba(255, 255, 255, 0.07);
     --border-default: rgba(255, 255, 255, 0.07);
     --border-hover: rgba(255, 255, 255, 0.12);
+    /* 10.71:1 on --bg, 9.90:1 on --bg-card */
     --border-focus: #ffb800;
 
     /* — text roles — */
@@ -469,18 +459,19 @@
        sub-AA value. */
     --text-4: var(--text-3);
     --text-accent: #ffdca1;
+    /* 13.08:1 on --bg-card, 14.71:1 on --bg-sunken, 9.35:1 on --bg-elevated */
     --text-on-accent: #412d00;
+    /* 7.57:1 on --color-ember-pulse */
 
-    /* — Browse redesign: info / cyan accent — see the mapping table at EOF — */
-    --info: #a5ebff;
+    /* — Browse inspector snippet colour: accent text alias (D2, task 2.5) — */
+    --info: var(--text-accent);
 
     /* — glass & overlays — */
     --surface-glass: rgba(31, 31, 35, 0.75);
     --nav-bg: rgba(27, 27, 31, 0.85);
     --input-bg: rgba(31, 31, 35, 0.75);
 
-    /* — hero gradient —
-       FROZEN per D8/I21: consumed only by .hero-max. Value unchanged. */
+    /* — hero gradient — the obsidian void behind the hero (neutral). */
     --hero-grad: linear-gradient(180deg, #090a0c 0%, #0d0e12 100%);
 
     /* — glow tokens — */
@@ -525,7 +516,8 @@
 
    Every value below was checked against the dark theme block above. The six
    surface tiers and every on-surface/primary role match the mockup's hex exactly;
-   only `tertiary` had no equivalent, and it is the single token this file adds.
+   only `tertiary` had no equivalent. It was first added as its own cyan token
+   (--info); ui-craft-elevation re-scoped it to the accent text role.
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 /*   M3 colour              mockup hex   project token (dark)              note
@@ -544,9 +536,9 @@
    on-primary               #412d00      --text-on-accent                   exact
    primary                  #ffdca1      --text-accent                      exact
    primary-container        #ffb800      --color-ember-pulse                exact
-   secondary                #c3c0ff      --color-electric-iris              exact
+   secondary                #c3c0ff      (retired — no second accent, D2)   n/a
    error                    #ffb4ab      --e-text                           exact
-   tertiary                 #a5ebff      --info                             NEW TOKEN
+   tertiary                 #a5ebff      --info → --text-accent             aliased (D2)
    ───────────────────────────────────────────────────────────────────────────────
    The following four do NOT match by hex, on purpose:
 

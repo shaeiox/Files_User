@@ -33,7 +33,11 @@
 
       root.setAttribute('data-theme', theme);
 
-      var perfTier = 'medium';
+      // ui-craft-elevation D8: pre-paint default is `high`, the unstyled
+      // baseline (performance-modes.css has no high rules). Auto-detection
+      // can then only ever reduce cost after first paint, never add it, so
+      // capable devices no longer repaint the backdrop blur/opacity post-paint.
+      var perfTier = 'high';
       var reducedMotion = false;
 
       try {
@@ -80,17 +84,25 @@
       }
     }, { once: true });
   </script>
-  <script src="/assets/js/banner.js"></script>
+  <script src="/assets/js/banner.js?v=4.3.6"></script>
 
 
-  <link rel="stylesheet" href="/assets/css/tokens.css">
-  <link rel="stylesheet" href="/assets/css/base.css">
-  <link rel="stylesheet" href="/assets/css/components.css">
-  <link rel="stylesheet" href="/assets/css/home.css">
-  <link rel="stylesheet" href="/assets/css/browse.css">
-  <link rel="stylesheet" href="/assets/css/release.css">
-  <link rel="stylesheet" href="/assets/css/performance-modes.css">
-  <link rel="stylesheet" href="/assets/css/lenis.css">
+  <!-- The two faces the hero headline paints with on first load (Cinzel for
+       "AVID Download", Inter for everything around it), so the largest text
+       does not reflow when the font swaps in. -->
+  <link rel="preload" href="/assets/fonts/Cinzel-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- Layer order is load-bearing (STYLEGUIDE §1). browse.css and release.css
+       are route stylesheets: router.js inserts each one before
+       performance-modes.css when its route is first entered, so that order
+       still holds (ui-craft-elevation 5.3). -->
+  <link rel="stylesheet" href="/assets/css/tokens.css?v=4.3.6">
+  <link rel="stylesheet" href="/assets/css/base.css?v=4.3.6">
+  <link rel="stylesheet" href="/assets/css/components.css?v=4.3.6">
+  <link rel="stylesheet" href="/assets/css/home.css?v=4.3.6">
+  <link rel="stylesheet" href="/assets/css/performance-modes.css?v=4.3.6" id="perfModesCss">
+  <link rel="stylesheet" href="/assets/css/lenis.css?v=4.3.6">
 
   <link rel="icon" href="/assets/icon/files-logo.webp">
 </head>
@@ -121,7 +133,7 @@
         </a>
 
 
-        <nav class="nav-tabs" id="navTabs" aria-label="Primary">
+        <nav class="nav-tabs" id="navTabs" aria-label="Primary" data-i18n-aria="aria.primaryNav">
           <a class="nav-tab" href="https://cloudavid.com" target="_blank" rel="noopener">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
@@ -165,48 +177,10 @@
 
         <div class="nav-actions">
 
-
-          <div class="perf-dropdown-wrap">
-            <button class="perf-pill" type="button" aria-haspopup="true" aria-expanded="false"
-              title="Performance Settings" aria-label="Performance Settings">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="m12 14 4-4" />
-                <path d="M3.34 19a10 10 0 1 1 17.32 0" />
-              </svg>
-              <span id="currentPerfLabel" data-i18n="perfLabel">Performance</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-            </button>
-            <div class="perf-dropdown-menu" role="menu">
-              <button class="perf-option" data-perf-val="AUTO" type="button" role="menuitem">
-                <span data-i18n="perfAuto">Auto Detect</span>
-                <span class="perf-indicator-dot"></span>
-              </button>
-              <button class="perf-option" data-perf-val="HIGH" type="button" role="menuitem">
-                <span data-i18n="perfHigh">High Power</span>
-                <span class="perf-indicator-dot"></span>
-              </button>
-              <button class="perf-option" data-perf-val="MEDIUM" type="button" role="menuitem">
-                <span data-i18n="perfMed">Balanced</span>
-                <span class="perf-indicator-dot"></span>
-              </button>
-              <button class="perf-option" data-perf-val="LOW" type="button" role="menuitem">
-                <span data-i18n="perfLow">Power Saver</span>
-                <span class="perf-indicator-dot"></span>
-              </button>
-              <button class="perf-option" data-perf-val="POTATO" type="button" role="menuitem">
-                <span data-i18n="perfPotato">Potato Mode</span>
-                <span class="perf-indicator-dot"></span>
-              </button>
-            </div>
-          </div>
-
-
           <div class="lang-dropdown-wrap">
             <button class="lang-pill" id="langBtn" type="button" aria-haspopup="true" aria-expanded="false"
-              title="Select language" aria-label="Select language">
+              aria-controls="langMenu" title="Select language" aria-label="Select language"
+              data-i18n-aria="aria.language">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10" />
@@ -219,7 +193,7 @@
               </svg>
             </button>
 
-            <div class="lang-dropdown-menu" role="menu">
+            <div class="lang-dropdown-menu" id="langMenu" role="menu">
               <button class="lang-option" data-lang="en" type="button" role="menuitem">
                 <span class="lang-opt-title">English</span>
                 <span class="lang-opt-sub">EN</span>
@@ -249,7 +223,8 @@
           </button>
 
 
-          <button class="theme-btn" id="themeBtn" type="button" title="Toggle theme" aria-label="Toggle theme">
+          <button class="theme-btn" id="themeBtn" type="button" title="Toggle theme" aria-label="Toggle theme"
+            data-i18n-aria="aria.theme">
             <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="4" />
@@ -264,7 +239,7 @@
 
 
           <button class="nav-disclosure" id="navDisclosure" type="button" title="Menu" aria-label="Menu"
-            aria-expanded="false" aria-controls="navTabs">
+            aria-expanded="false" aria-controls="navTabs" data-i18n-aria="aria.menu">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
               <line x1="3" y1="6" x2="21" y2="6" />
@@ -289,8 +264,8 @@
               <span class="footer-brand-name">CloudAvid</span>
             </div>
             <p class="footer-about-text" data-i18n="footer.about">
-              CloudAvid cloud computing with over 15 years of experience, providing secure and scalable services
-              in virtualization, cloud infrastructure, and enterprise support.
+              CloudAvid builds virtualization and cloud infrastructure software and supports the teams that run it.
+              This portal is where those release packages, images and templates are published.
             </p>
           </div>
 
@@ -342,30 +317,72 @@
         </div>
 
         <div class="footer-bottom">
+          <!-- One legal line for the whole portal; i18n.js fills {year} with the
+               current year, so it never freezes at authoring time. -->
           <p class="copyright-text" data-i18n="footer.copyright">
-            All rights reserved for CloudAvid Technology Co.
+            © CloudAvid. All rights reserved.
           </p>
+
+          <!-- Manual performance override (ui-craft-elevation 6.1): a secondary
+               setting, not a navbar destination. Auto-detection stays the default. -->
+          <div class="perf-dropdown-wrap">
+            <button class="perf-pill" type="button" aria-haspopup="true" aria-expanded="false"
+              aria-controls="perfMenu" title="Performance setting" aria-label="Performance setting"
+              data-i18n-aria="aria.perf">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m12 14 4-4" />
+                <path d="M3.34 19a10 10 0 1 1 17.32 0" />
+              </svg>
+              <span id="currentPerfLabel" data-i18n="perfLabel">Performance setting</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                aria-hidden="true">
+                <polyline points="18 15 12 9 6 15" />
+              </svg>
+            </button>
+            <div class="perf-dropdown-menu" id="perfMenu" role="menu">
+              <button class="perf-option" data-perf-val="AUTO" type="button" role="menuitem">
+                <span data-i18n="perfAuto">Automatic (recommended)</span>
+                <span class="perf-indicator-dot"></span>
+              </button>
+              <button class="perf-option" data-perf-val="HIGH" type="button" role="menuitem">
+                <span data-i18n="perfHigh">Full effects</span>
+                <span class="perf-indicator-dot"></span>
+              </button>
+              <button class="perf-option" data-perf-val="MEDIUM" type="button" role="menuitem">
+                <span data-i18n="perfMed">Balanced</span>
+                <span class="perf-indicator-dot"></span>
+              </button>
+              <button class="perf-option" data-perf-val="LOW" type="button" role="menuitem">
+                <span data-i18n="perfLow">Reduced effects</span>
+                <span class="perf-indicator-dot"></span>
+              </button>
+              <button class="perf-option" data-perf-val="POTATO" type="button" role="menuitem">
+                <span data-i18n="perfPotato">Minimal effects</span>
+                <span class="perf-indicator-dot"></span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
   </div>
 
-  <script src="/assets/js/services/resource-service.js" defer></script>
-  <script src="/assets/js/services/performance-monitor.js" defer></script>
-  <script src="/assets/js/theme.js" defer></script>
-  <script src="/assets/js/i18n.js" defer></script>
-  <script src="/assets/js/autocomplete.js" defer></script>
-  <script src="/assets/js/home.js" defer></script>
-  <script src="/assets/js/file-actions.js" defer></script>
-  <script src="/assets/js/browse-icons.js" defer></script>
-  <script src="/assets/js/bulk-download.js" defer></script>
-  <script src="/assets/js/file-inspector.js" defer></script>
-  <script src="/assets/js/browse.js" defer></script>
-  <script src="/assets/js/releases.js" defer></script>
-  <script src="/assets/js/vendor/lenis.min.js" defer></script>
-  <script src="/assets/js/smooth-scroll.js" defer></script>
-  <script src="/assets/js/idle-timer.js"></script>
-  <script src="/assets/js/router.js" defer></script>
+  <!-- Shell scripts only. The Browse group (browse.js + browse-icons,
+       bulk-download, file-inspector) and releases.js are ES modules that
+       router.js imports when their route is entered (ui-craft-elevation 5.2). -->
+  <script src="/assets/js/services/resource-service.js?v=4.3.6" defer></script>
+  <script src="/assets/js/services/performance-monitor.js?v=4.3.6" defer></script>
+  <script src="/assets/js/motion.js?v=4.3.6" defer></script>
+  <script src="/assets/js/theme.js?v=4.3.6" defer></script>
+  <script src="/assets/js/i18n.js?v=4.3.6" defer></script>
+  <script src="/assets/js/autocomplete.js?v=4.3.6" defer></script>
+  <script src="/assets/js/home.js?v=4.3.6" defer></script>
+  <script src="/assets/js/file-actions.js?v=4.3.6" defer></script>
+  <script src="/assets/js/vendor/lenis.min.js?v=4.3.6" defer></script>
+  <script src="/assets/js/smooth-scroll.js?v=4.3.6" defer></script>
+  <script src="/assets/js/idle-timer.js?v=4.3.6" defer></script>
+  <script src="/assets/js/router.js?v=4.3.6" defer></script>
 
 </body>
 

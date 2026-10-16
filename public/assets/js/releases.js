@@ -11,6 +11,7 @@
  *
  * Dependencies: ResourceService, getDict(), getLang()
  */
+// ES module, imported by router.js when its route is entered (ui-craft-elevation 5.2).
 const ReleasePage = (function () {
     'use strict';
 
@@ -467,3 +468,5 @@ const ReleasePage = (function () {
 
     return { render };
 })();
+
+export { ReleasePage };

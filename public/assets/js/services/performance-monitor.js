@@ -532,7 +532,10 @@ const PerformanceMonitor = (function () {
     }
 
     /* ═══════════════════════════════════════════════
-       USER INTERFACE BINDING — Dropdown in navbar
+       USER INTERFACE BINDING — performance setting (footer)
+       Same `.show`-on-wrapper mechanism as the language menu (ui-craft-
+       elevation D9); aria-expanded is written from that state, never left
+       at the markup's hardcoded "false".
        ═══════════════════════════════════════════════ */
     function bindUserInterface() {
         const wrap = document.querySelector(".perf-dropdown-wrap");
@@ -540,12 +543,23 @@ const PerformanceMonitor = (function () {
 
         const pill = wrap.querySelector(".perf-pill");
         const options = wrap.querySelectorAll(".perf-option");
+        const setOpen = (open) => {
+            wrap.classList.toggle("show", open);
+            pill.setAttribute("aria-expanded", open ? "true" : "false");
+        };
 
         // 1. Toggle dropdown visibility on pill click
         pill.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
-            wrap.classList.toggle("show");
+            setOpen(!wrap.classList.contains("show"));
+        });
+
+        wrap.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && wrap.classList.contains("show")) {
+                setOpen(false);
+                pill.focus();
+            }
         });
 
         // 2. Handle option selection
@@ -553,7 +567,7 @@ const PerformanceMonitor = (function () {
             btn.addEventListener("click", (e) => {
                 e.preventDefault();
                 const val = btn.getAttribute("data-perf-val");
-                wrap.classList.remove("show");
+                setOpen(false);
 
                 if (val === "AUTO") {
                     // Restore adaptive behavior
@@ -575,9 +589,7 @@ const PerformanceMonitor = (function () {
 
         // 3. Click-outside dismissal (mobile-friendly)
         document.addEventListener("click", (e) => {
-            if (!wrap.contains(e.target)) {
-                wrap.classList.remove("show");
-            }
+            if (!wrap.contains(e.target)) setOpen(false);
         });
 
         // Initial sync of active-state indicator

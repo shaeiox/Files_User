@@ -580,3 +580,16 @@ network access to third-party origins blocked.
 - [ ] **HARD GATE (Phase 8):** no horizontal overflow, clipping, or overlap at 360/480/768/900px in Firefox, Chrome, and one other browser.
 - [ ] **HARD GATE (Phase 9):** no computed `font-family` anywhere resolves to a browser default.
 - [ ] **HARD GATE (Phase 10):** zero CDN asset requests at runtime on `/`, `/browse`, and 404.
+## Amendment (2026-10-16) — superseded by `ui-craft-elevation`
+
+The following gates are **amended** so this change no longer conflicts with
+`openspec/changes/ui-craft-elevation/` (design D1, D13; tasks 0.1, 2.1):
+
+- **J5** (byte-identical `browse.css`, `browse.js`, `file-actions.js`) — lifted. `ui-craft-elevation`
+  edits all three: `browse.js` and its helpers become route-loaded ES modules (task 5.2), `browse.css`
+  re-scopes `--info` (task 2.5), and `file-actions.js` replaces its blocking `alert()` (task 6.7).
+- **J6** (Hero stylesheet byte-identical) — lifted. The `HERO DRIFT INSULATION` block is deleted and the
+  Hero resolves the live tokens (task 2.1).
+
+Every other gate in this file is unchanged. Verification for the lifted gates moves to
+`ui-craft-elevation` §7.

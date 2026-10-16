@@ -33,10 +33,11 @@ const HomePage = (function () {
         ${renderHeroSection(d)}
         ${renderResourcesSection(d)}
         ${renderSearchResultsPanel(d)}
+        ${renderTrustBand(d)}
       </div>
     `;
 
-    bindEvents(container);
+    bindEvents();
     loadResources(); // Async fetch infrastructure resources
   }
 
@@ -55,7 +56,6 @@ const HomePage = (function () {
 
         <div class="hero-content">
           <div class="hero-pill">
-            <span class="hero-pill-dot"></span>
             ${d.portalStatus || "YOUR INFRASTRUCTURE. WITH AVID."}
           </div>
           <h1>
@@ -67,7 +67,7 @@ const HomePage = (function () {
           <div class="hero-search">
             <div class="input-wrap">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-              <input id="globalSearch" type="text" autocomplete="off" placeholder="${d.searchPh || 'Search for files, packages, templates...'}" aria-label="Search files" role="combobox" aria-expanded="false" aria-controls="acDropdown" />
+              <input id="globalSearch" type="text" autocomplete="off" placeholder="${d.searchPh || 'Search for files, packages, templates...'}" aria-label="${d.searchAria || 'Search files'}" role="combobox" aria-expanded="false" aria-controls="acDropdown" />
               <div class="search-keys"><kbd>⌘</kbd><kbd>K</kbd></div>
             </div>
             <button class="btn btn-primary" id="searchBtn" type="button">${d.searchBtn || 'Search'}</button>
@@ -91,7 +91,7 @@ const HomePage = (function () {
      ═══════════════════════════════════════════════ */
   function renderResourcesSection(d) {
     return `
-      <section class="resources-section">
+      <section class="resources-section" data-reveal>
         <div class="section-head">
           <div class="section-head-left">
             <div class="section-icon">
@@ -124,22 +124,22 @@ const HomePage = (function () {
               </button>
               <div class="filter-dropdown-menu">
                 <button class="filter-option active" data-val="latest" type="button">${d.sortLatest || "Sort by: Latest"}</button>
-                <button class="filter-option" data-val="name-asc" type="button">Sort by: Name (A-Z)</button>
-                <button class="filter-option" data-val="count-desc" type="button">Sort by: File Count</button>
+                <button class="filter-option" data-val="name-asc" type="button">${d.sortByName || "Sort by: Name (A-Z)"}</button>
+                <button class="filter-option" data-val="count-desc" type="button">${d.sortByCount || "Sort by: File Count"}</button>
               </div>
             </div>
 
             <!-- Refresh Button -->
-            <button class="icon-btn" id="refreshResourcesBtn" title="${d.refresh || 'Refresh'}" aria-label="Refresh resources" type="button">
+            <button class="icon-btn" id="refreshResourcesBtn" title="${d.refresh || 'Refresh'}" aria-label="${d.refreshResources || 'Refresh resources'}" type="button">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
             </button>
 
             <!-- Grid/List View Toggle -->
-            <div class="view-toggle" role="group" aria-label="View mode">
-              <button class="vt-btn active" id="viewGridBtn" aria-label="Grid view" aria-pressed="true" type="button">
+            <div class="view-toggle" role="group" aria-label="${d.viewMode || 'View mode'}">
+              <button class="vt-btn active" id="viewGridBtn" aria-label="${d.viewGrid || 'Grid view'}" aria-pressed="true" type="button">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
               </button>
-              <button class="vt-btn" id="viewListBtn" aria-label="List view" aria-pressed="false" type="button">
+              <button class="vt-btn" id="viewListBtn" aria-label="${d.viewList || 'List view'}" aria-pressed="false" type="button">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
               </button>
             </div>
@@ -180,11 +180,32 @@ const HomePage = (function () {
   }
 
   /* ═══════════════════════════════════════════════
+     SECTION: CLOSING TRUST BAND (ui-craft-elevation 4.5)
+     A real, checkable signal: every file can be verified against its SHA-256
+     checksum from the Browse page's metadata card.
+     ═══════════════════════════════════════════════ */
+  function renderTrustBand(d) {
+    return `
+      <section class="trust-band" data-reveal>
+        <div class="trust-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <div class="trust-copy">
+          <h2 class="trust-title">${d.trustTitle || "Verify what you download"}</h2>
+          <p class="trust-desc">${d.trustDesc || "Every file in this portal can be checked against its SHA-256 checksum before you install it. Open a file's details on the Browse page and choose Verify SHA-256."}</p>
+        </div>
+        <a class="btn trust-link" href="/browse">${d.trustLink || "Open Browse"}</a>
+      </section>
+    `;
+  }
+
+  /* ═══════════════════════════════════════════════
      RESOURCE CARDS RENDERING & FILTERING
      ═══════════════════════════════════════════════ */
   function renderSkeletonCards() {
     if (typeof ResourceService === 'undefined') {
-      return '<div class="resources-error">ResourceService not loaded</div>';
+      const d = typeof window.getDict === 'function' ? window.getDict() : {};
+      return `<div class="resources-error">${escapeHtml(d.resourcesLoadError || "Unable to load resources.")}</div>`;
     }
     return ResourceService.getRegistry().map(() => `
       <div class="resource-card resource-card-skeleton" aria-busy="true">
@@ -227,10 +248,28 @@ const HomePage = (function () {
       }
     });
 
-    renderResourceCards(filtered);
+    // ui-craft-elevation 4.3: the featured resource is chosen from the data
+    // (the most recently updated open category), not a fixed index, and only
+    // when there are enough cards for a hierarchy to mean something.
+    let featuredId = null;
+    if (filtered.length > 3) {
+      const open = filtered.filter(r => !r.locked && r.stats && r.stats.available && r.stats.latestModified);
+      if (open.length) {
+        const top = open.reduce((a, b) => (b.stats.latestModified > a.stats.latestModified ? b : a));
+        featuredId = top.id;
+        filtered = [top, ...filtered.filter(r => r !== top)];
+      }
+    }
+
+    renderResourceCards(filtered, featuredId);
   }
 
-  function renderResourceCards(resources) {
+  /**
+   * Keyed render: a card whose markup is unchanged is the SAME element after a
+   * filter or sort, so Motion.flip can move it from its old position to its new
+   * one; excluded cards animate out, new ones animate in (3.4).
+   */
+  function renderResourceCards(resources, featuredId) {
     const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
     const grid = document.getElementById("resourcesGrid");
     if (!grid) return;
@@ -240,9 +279,10 @@ const HomePage = (function () {
       return;
     }
 
-    grid.innerHTML = resources.map(resource => {
-      const title = resource.name;
-      const desc = d.categoryDesc || "Browse and download files in this category.";
+    const cards = resources.map(resource => {
+      // Per-card description (1.1): resolved inside the callback from the
+      // dictionary, keyed by this category's id. None → no <p> at all.
+      const desc = (d.categoryDescs && d.categoryDescs[resource.id]) || "";
 
       let statsBadge;
       if (resource.locked) {
@@ -270,18 +310,49 @@ const HomePage = (function () {
         ? `<span class="status-live"><span class="dot"></span> ${updatedLabel}</span>`
         : `<span class="status-error"><span class="dot dot-error"></span> ${d.offline || "Offline"}</span>`;
 
-      return resourceCard(resource.path, title, desc, statsBadge, resource.iconType, statusHtml);
-    }).join('');
+      const featured = resource.id === featuredId ? (d.featuredTag || "Recently updated") : "";
+      return {
+        key: String(resource.id),
+        html: resourceCard(resource.path, resource.name, desc, statsBadge, resource.iconType, statusHtml, featured)
+      };
+    });
+
+    const mutate = () => {
+      const existing = new Map();
+      Array.from(grid.children).forEach(el => {
+        if (el.dataset.key) existing.set(el.dataset.key, el);
+        else el.remove(); // skeletons, empty and error states are not cards
+      });
+      const kept = new Set();
+      for (const { key, html } of cards) {
+        let el = existing.get(key);
+        if (!el || el.dataset.sig !== html) {
+          if (el) el.remove();
+          const tpl = document.createElement("template");
+          tpl.innerHTML = html.trim();
+          el = tpl.content.firstElementChild;
+          el.dataset.key = key;
+          el.dataset.sig = html;
+        }
+        kept.add(el);
+        grid.appendChild(el);
+      }
+      return Array.from(existing.values()).filter(el => el.isConnected && !kept.has(el));
+    };
+
+    if (typeof Motion !== "undefined") Motion.flip(grid, mutate);
+    else mutate().forEach(el => el.remove());
   }
 
-  function resourceCard(href, title, desc, meta, iconType, statusHtml) {
+  function resourceCard(href, title, desc, meta, iconType, statusHtml, featuredTag) {
     const iconSvg = getResourceIcon(iconType);
     return `
-      <a class="resource-card" href="${href}">
+      <a class="resource-card${featuredTag ? " is-featured" : ""}" href="${href}">
         <div class="resource-icon">${iconSvg}</div>
         <div class="resource-meta">
+          ${featuredTag ? `<span class="resource-featured-tag">${escapeHtml(featuredTag)}</span>` : ""}
           <h3>${escapeHtml(title)}</h3>
-          <p>${desc}</p>
+          ${desc ? `<p>${escapeHtml(desc)}</p>` : ""}
           <div class="resource-bottom">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             <span>${meta}</span>
@@ -389,62 +460,16 @@ const HomePage = (function () {
   /* ═══════════════════════════════════════════════
      DOM BINDINGS
      ═══════════════════════════════════════════════ */
-  function bindEvents(container) {
+  // Downloads started from this route (search results, autocomplete) go
+  // through the app-wide guard in file-actions.js, which reports progress on
+  // the control and failure in place (ui-craft-elevation 1.2 / 6.7). The
+  // [data-url] interceptor that used to live here matched no element and
+  // raised a hardcoded Persian alert(); it is removed.
+  function bindEvents() {
     bindSearchEvents();
     bindViewToggleEvents();
     bindRefreshEvent();
     bindFilterEvents();
-
-    bindDownloadInterception(container || document);
-  }
-
-  function bindDownloadInterception(container) {
-    const root = container || document;
-
-    root.addEventListener("click", async (e) => {
-      const link = e.target.closest('[data-url]');
-      if (!link) return;
-
-      const downloadUrl = link.getAttribute("data-url");
-      if (!downloadUrl) return;
-
-      e.preventDefault();
-      e.stopPropagation();
-
-      const originalContent = link.innerHTML;
-      link.style.pointerEvents = "none";
-      link.innerHTML = "Checking...";
-
-      try {
-        const res = await fetch(downloadUrl, {
-          method: "HEAD",
-          credentials: "same-origin"
-        });
-
-        if (res.status === 401 || res.status === 403) {
-          if (typeof window.triggerAuthModal === "function") window.triggerAuthModal();
-          else if (typeof showLoginModal === "function") showLoginModal();
-          return;
-        }
-
-        if (res.ok) {
-          const a = document.createElement("a");
-          a.href = downloadUrl;
-          a.download = "";
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-        } else {
-          alert("خطا در برقراری ارتباط با سرور: " + res.status);
-        }
-
-      } catch (err) {
-        console.error("Download Interception Error:", err);
-      } finally {
-        link.style.pointerEvents = "auto";
-        link.innerHTML = originalContent;
-      }
-    });
   }
 
   function bindFilterEvents() {
@@ -542,21 +567,24 @@ const HomePage = (function () {
     const grid = document.querySelector(".resources-grid");
     if (!gridBtn || !listBtn || !grid) return;
 
-    listBtn.addEventListener("click", () => {
-      grid.style.gridTemplateColumns = "1fr";
-      listBtn.classList.add("active");
-      gridBtn.classList.remove("active");
-      listBtn.setAttribute("aria-pressed", "true");
-      gridBtn.setAttribute("aria-pressed", "false");
-    });
+    // ui-craft-elevation 3.5: the buttons report the new mode at once; the
+    // cards fade and shrink out, the layout class flips, and they fade back
+    // in. The swap reads the latest choice, so rapid toggling settles right.
+    let wantList = grid.classList.contains("is-list");
+    const setMode = (list) => {
+      wantList = list;
+      listBtn.classList.toggle("active", list);
+      gridBtn.classList.toggle("active", !list);
+      listBtn.setAttribute("aria-pressed", list ? "true" : "false");
+      gridBtn.setAttribute("aria-pressed", list ? "false" : "true");
+      if (grid.classList.contains("is-list") === list) return;
+      const swap = () => grid.classList.toggle("is-list", wantList);
+      if (typeof Motion !== "undefined") Motion.crossfade(Array.from(grid.children), swap);
+      else swap();
+    };
 
-    gridBtn.addEventListener("click", () => {
-      grid.style.gridTemplateColumns = "";
-      gridBtn.classList.add("active");
-      listBtn.classList.remove("active");
-      gridBtn.setAttribute("aria-pressed", "true");
-      listBtn.setAttribute("aria-pressed", "false");
-    });
+    listBtn.addEventListener("click", () => setMode(true));
+    gridBtn.addEventListener("click", () => setMode(false));
   }
 
   function bindRefreshEvent() {
@@ -586,7 +614,7 @@ const HomePage = (function () {
     if (panel) panel.style.display = "none";
   }
 
-  function addResult(item) {
+  function addResult(item, index) {
     const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
     const list = document.getElementById("resultsList");
     if (!list) return;
@@ -610,8 +638,12 @@ const HomePage = (function () {
         </span>
       </div>`;
     list.appendChild(row);
+    // Staged reveal, capped at ten steps inside Motion.enter (3.9).
+    if (typeof Motion !== "undefined") Motion.enter(row, index);
   }
 
+  const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
+  const RESULT_BATCH = 10;
 
   async function scanAll(query) {
     const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
@@ -631,9 +663,11 @@ const HomePage = (function () {
       return;
     }
 
-    // UI Reset
+    // UI Reset. The panel replays its entrance on EVERY search, not only the
+    // first time it is un-hidden; nothing depends on the previous run (3.9).
     resultsList.innerHTML = "";
     resultsBox.style.display = "block";
+    if (typeof Motion !== "undefined") Motion.pop(resultsBox);
     resultsBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
 
     if (progressEl) progressEl.textContent = d.scanning || "Scanning…";
@@ -641,11 +675,10 @@ const HomePage = (function () {
     if (searchBtn) searchBtn.disabled = true;
 
     let found = 0;
-    let scanned = 0;
+    let failed = false;
 
     try {
       const data = await ResourceService.search(q, { limit: SEARCH_MAX_RESULTS });
-      scanned = data.scanned || 0;
       const entries = data.results || [];
 
       for (const e of entries) {
@@ -657,14 +690,22 @@ const HomePage = (function () {
           ? ResourceService.browseHref(e.path)
           : ResourceService.downloadHref(e.path);
 
-        addResult({ name: e.name, href, path: e.path, type, locked: e.locked === true, viewOnly: e.viewOnly === true });
+        addResult({ name: e.name, href, path: e.path, type, locked: e.locked === true, viewOnly: e.viewOnly === true }, found);
         found++;
+
+        // Rows land in batches, one per frame, and the count follows them, so
+        // a large result set visibly progresses (bounded: 200 max = 20 frames).
+        if (found % RESULT_BATCH === 0) {
+          if (progressEl) progressEl.textContent = `${found} ${d.foundText || 'found'}…`;
+          await nextFrame();
+        }
       }
 
       if (progressEl) {
         progressEl.textContent = `${d.done || 'Done'} · ${found} ${d.foundText || 'found'}`;
       }
     } catch (err) {
+      failed = true;
       console.error("[Search Error]:", err);
       if (progressEl) progressEl.textContent = d.resourcesLoadError || "Search failed";
       resultsList.innerHTML = `<div class="resources-error" style="padding:20px;">${escapeHtml(err.message || "Failed to perform search.")}</div>`;
@@ -673,55 +714,115 @@ const HomePage = (function () {
       if (searchBtn) searchBtn.disabled = false;
     }
 
-    if (!found && !stopFlag && resultsList.children.length === 0) {
-      resultsList.innerHTML = `<div class="ac-empty" style="padding:24px; text-align:center;">${d.emptySearch || 'No results for'} "${escapeHtml(q)}"</div>`;
-    }
+    if (!found && !stopFlag && !failed) renderEmptySearch(resultsList, q, d);
+  }
+
+  /** Composed empty state: names the query and offers a way out. */
+  function renderEmptySearch(list, q, d) {
+    const msg = escapeHtml(d.emptySearchFor || "Nothing matches “%q”.")
+      .replace("%q", `<strong>${escapeHtml(q)}</strong>`);
+    list.innerHTML = `
+      <div class="results-empty">
+        <p>${msg}</p>
+        <p>${escapeHtml(d.emptySearchHint || "Check the spelling, or search for a shorter part of the name.")}</p>
+        <button class="btn btn-sm" type="button" data-clear-search>${escapeHtml(d.clearSearch || "Clear search")}</button>
+      </div>`;
+    list.querySelector("[data-clear-search]").addEventListener("click", () => {
+      const input = document.getElementById("globalSearch");
+      clearResults();
+      if (input) { input.value = ""; input.focus(); }
+    });
   }
 
   /* ═══════════════════════════════════════════════
      AUTHENTICATION MODAL
+     ui-craft-elevation 6.4/6.5: a real dialog — role="dialog", aria-modal and
+     an accessible name, focus moved to the first field once the overlay is
+     interactive, Tab trapped inside, Escape to close, and focus returned to
+     the control that opened it. The existing 250ms open/close timing is kept
+     (design D10), so this is not yet a native <dialog>.
      ═══════════════════════════════════════════════ */
+  const FOCUSABLE = 'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])';
+
   function showLoginModal(onSuccessCallback) {
     const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
     if (document.getElementById('authOverlay')) return;
 
+    const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const overlay = document.createElement('div');
     overlay.className = 'auth-overlay';
     overlay.id = 'authOverlay';
 
     const formDir = d.dir === 'rtl' ? 'text-align: right;' : 'text-align: left;';
+    const closeLabel = escapeHtml(d["aria.closeDialog"] || "Close sign-in");
 
     overlay.innerHTML = `
-      <div class="auth-modal" style="${formDir}">
-        <button class="btn-close-modal" id="closeAuthBtn" style="${d.dir === 'rtl' ? 'left: 16px; right: auto;' : ''}">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="authTitle" style="${formDir}">
+        <button class="btn-close-modal" id="closeAuthBtn" type="button" aria-label="${closeLabel}" title="${closeLabel}" style="${d.dir === 'rtl' ? 'left: 16px; right: auto;' : ''}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
         <div class="auth-header" style="text-align: center;">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <h2>${d.clearanceReq || "Clearance Required"}</h2>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <h2 id="authTitle">${d.clearanceReq || "Clearance Required"}</h2>
         </div>
         <form class="auth-form" id="authForm">
           <div class="auth-input-group">
-            <label>${d.lblUsername || "Username"}</label>
-            <input type="text" id="authUsername" autocomplete="username" style="${formDir}" required autofocus />
+            <label for="authUsername">${d.lblUsername || "Username"}</label>
+            <input type="text" id="authUsername" autocomplete="username" style="${formDir}" required />
           </div>
           <div class="auth-input-group">
-            <label>${d.lblPassword || "Password"}</label>
+            <label for="authPassword">${d.lblPassword || "Password"}</label>
             <input type="password" id="authPassword" autocomplete="current-password" style="${formDir}" required />
           </div>
-          <div class="auth-error" id="authError"></div>
+          <div class="auth-error" id="authError" role="alert"></div>
           <button type="submit" class="btn-login" id="authSubmitBtn">${d.btnSignIn || "Sign In"}</button>
         </form>
       </div>
     `;
 
     document.body.appendChild(overlay);
-    requestAnimationFrame(() => overlay.classList.add('show'));
+    const modal = overlay.querySelector('.auth-modal');
 
+    // Focus only once the overlay is interactive (.show enables pointer
+    // events), so focus never sits in an element that cannot be typed into.
+    requestAnimationFrame(() => {
+      overlay.classList.add('show');
+      const first = modal.querySelector('#authUsername:not([disabled])') || modal.querySelector(FOCUSABLE);
+      if (first) first.focus();
+    });
+
+    let closed = false;
     const closeModal = () => {
+      if (closed) return;
+      closed = true;
       overlay.classList.remove('show');
       setTimeout(() => overlay.remove(), 250);
+      // Back to the opener; if it has since left the DOM (a re-render), fall
+      // back to the navbar sign-in control so focus is never on a dead node.
+      const target = trigger && trigger.isConnected ? trigger : document.getElementById('authBtn');
+      if (target && typeof target.focus === 'function') target.focus();
     };
+
+    overlay.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeModal();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const items = Array.from(modal.querySelectorAll(FOCUSABLE));
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) {
+        e.preventDefault();
+        first.focus();
+      }
+    });
+
     document.getElementById('closeAuthBtn').addEventListener('click', closeModal);
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
 
@@ -754,7 +855,6 @@ const HomePage = (function () {
       }
 
     });
-    document.getElementById('authUsername').focus();
   }
 
   // Global entry point for pages that load before (or without) HomePage.render.

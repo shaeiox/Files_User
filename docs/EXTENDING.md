@@ -199,9 +199,9 @@ Scripts are declared in `public/index.html` in dependency order. Three constrain
    bundler, so `<link>` order *is* the cascade order. If tokens load after consumers, the
    entire semantic layer resolves to nothing.
 
-> `public/browse.html` is a separate, **unrouted** page with its own script and style set that does
-> not stay in sync. **Change `public/index.html`.** See
-> [ARCHITECTURE.md → Standalone HTML Pages](ARCHITECTURE.md#standalone-html-pages).
+> A route-only module is an ES module with an `export`, registered in the `ROUTES` table in
+> `router.js` (with its stylesheet, if any). Only shell code gets a `<script>` tag in
+> `public/index.html`.
 
 ### Existing Modules
 

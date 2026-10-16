@@ -99,7 +99,9 @@ HTTP Request
 | `performance-monitor.js` | Runtime performance-tier detection; publishes `data-perf` | `public/assets/js/services/performance-monitor.js` |
 | `vendor/lenis.min.js` | Vendored third-party smooth-scroll library | `public/assets/js/vendor/lenis.min.js` |
 
-All modules are IIFEs exposing a single global. There is no build step and no bundler —
+Shell modules are IIFEs exposing a single global. The route-only modules (`browse.js`,
+`browse-icons.js`, `bulk-download.js`, `file-inspector.js`, `releases.js`) are native ES modules
+that `router.js` loads with `import()` when their route is entered (ui-craft-elevation 5.2). There is no build step and no bundler —
 see [ADR-006](decisions/ADR-006-vanilla-js-spa-no-build.md).
 
 ### Frontend Script Loading Order
@@ -111,28 +113,28 @@ index.html
 ├── public/assets/js/banner.js                        (no defer — runs immediately)
 ├── public/assets/js/services/resource-service.js     defer
 ├── public/assets/js/services/performance-monitor.js  defer
+├── public/assets/js/motion.js                        defer
 ├── public/assets/js/theme.js                         defer
 ├── public/assets/js/i18n.js                          defer
 ├── public/assets/js/autocomplete.js                  defer
 ├── public/assets/js/home.js                          defer
 ├── public/assets/js/file-actions.js                  defer
-├── public/assets/js/browse.js                        defer
 ├── public/assets/js/vendor/lenis.min.js              defer   ← must precede smooth-scroll.js
 ├── public/assets/js/smooth-scroll.js                 defer
-├── public/assets/js/idle-timer.js                          (no defer)
+├── public/assets/js/idle-timer.js                    defer
 └── public/assets/js/router.js                        defer   ← must be last
 ```
 
 **Two ordering constraints are load-bearing:**
 
-1. **`router.js` must load last.** It drives navigation and assumes every page module is
-   already registered.
+1. **`router.js` must load last.** It drives navigation and assumes every shell module is
+   already registered; route modules it imports on demand.
 2. **`vendor/lenis.min.js` must precede `smooth-scroll.js`.** Reversing them silently
    disables smooth scrolling — `smooth-scroll.js` gates on `typeof Lenis !== 'undefined'`
    and degrades to native scrolling rather than throwing. There is no error to notice.
 
-`defer` preserves execution order while allowing parallel download. `banner.js` and
-`public/assets/js/idle-timer.js` intentionally load without it.
+`defer` preserves execution order while allowing parallel download. `banner.js` intentionally
+loads without it.
 
 ### Frontend Stylesheet Loading Order
 
@@ -142,7 +144,7 @@ index.html
 ├── public/assets/css/base.css
 ├── public/assets/css/components.css
 ├── public/assets/css/home.css
-├── public/assets/css/browse.css
+│   (browse.css / release.css inserted here by router.js on their routes)
 ├── public/assets/css/performance-modes.css
 └── public/assets/css/lenis.css
 ```
@@ -151,9 +153,8 @@ There is no build step, so layering is achieved **solely by `<link>` order**. `t
 defines every design token; if it loads after a consumer stylesheet, the whole semantic
 layer resolves to nothing and the page renders unstyled or broken.
 
-`public/browse.html` loads a reduced set (`tokens`, `base`, `components`, `home`, `browse`,
-`lenis`) and omits `performance-modes.css`. See
-[Standalone HTML Pages](#standalone-html-pages) below.
+`browse.css` and `release.css` are route stylesheets: `router.js` inserts each one before
+`performance-modes.css` the first time its route is entered, and disables it on other routes.
 
 See [STYLEGUIDE.md](STYLEGUIDE.md) for the token contract and [ADR-008](decisions/ADR-008-css-custom-property-tokens.md)
 for the rationale.
@@ -190,18 +191,11 @@ Three HTML files exist in the repository root:
 |------|------------------|
 | `public/index.html` | `GET /`, `GET /index.html`, and **all** `GET /browse/*` paths, via `lib/static-handler.js` → `serveSPA()` |
 | `public/404.html` | `GET /404`, `GET /404.html`, via `serve404()` |
-| `public/browse.html` | **Not routed.** |
 
-**`public/browse.html` is effectively dead.** `lib/api-router.js` serves `public/index.html` for every
-`/browse/*` request, and there is no `public/browse.html` reference anywhere in `lib/` or
-`server.js`. Under the shipped `nginx.conf` the file is reachable only as a literal static
-request to `/browse.html` (which falls through to `location /` → `try_files`), and nothing
-links to it. It appears to be a leftover standalone browse page that predates the router.
-
-It carries its own `<script>` and `<link>` set and does **not** stay in sync with
-`public/index.html`. **When changing frontend loading order or stylesheets, change `public/index.html`;
-do not treat `public/browse.html` as a second entry point.** It should either be deleted or wired
-up deliberately — but that is a behavioural decision, not a documentation fix.
+**`public/browse.html` was deleted** (ui-craft-elevation 1.8). It was an unrouted leftover:
+`lib/api-router.js` serves `public/index.html` for every `/browse/*` request, nothing linked to it,
+and it loaded a stale script/stylesheet set (no `performance-modes.css`, a `logo.png` that does not
+exist). `public/index.html` is the only entry point; change it, and `router.js` for route-only assets.
 
 ### Frontend Cross-Cutting Conventions
 
@@ -316,7 +310,7 @@ bypassable — see [ADR-012](decisions/ADR-012-in-memory-rate-limiting.md).
 - nginx configuration from `nginx.conf`
 - Error handling pattern from `serviceError()` usage
 - `data/users.json` schema (see below)
-- Frontend stylesheet and script load order from `public/index.html` and `public/browse.html`
+- Frontend stylesheet and script load order from `public/index.html` and `public/assets/js/router.js`
 
 ### `data/users.json` Schema
 
@@ -363,8 +357,6 @@ below that.
 
 - **Process supervision** — no systemd unit, PM2 config, or Dockerfile exists. Deployment
   must supply it.
-- **`public/browse.html` intent** — whether it should be deleted or wired up is a product
-  decision, not a technical one.
 - **`lenis` in `package.json` is unused.** The served file is the vendored
   `public/assets/js/vendor/lenis.min.js`; no server code requires the npm package. The npm version
   is the only signal of what the vendored copy should be — see

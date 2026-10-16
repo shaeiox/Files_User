@@ -1,6 +1,15 @@
 /* ═══════════════════════════════════════════════
    router.js — Smart SPA Router (File Aware)
    Skill: Enterprise Architecture — Decoupled & State-managed
+
+   ui-craft-elevation (routing):
+   - Route modules are explicit handles. Home ships with the shell; Browse
+     and Releases are ES modules fetched with native import() the first time
+     their route is entered, together with their route stylesheet (5.1-5.3).
+   - The outgoing view stays on screen while the destination is prepared, and
+     the swap is a View Transition keyed to the DOM commit, not a timer. Where
+     the API is missing, the new view renders at once and plays a short
+     opacity/transform entrance that is removed when it ends (3.6/3.7).
    ═══════════════════════════════════════════════ */
 const Router = (function () {
     'use strict';
@@ -10,12 +19,52 @@ const Router = (function () {
 
     // Internal State
     let currentPath = window.location.pathname;
+    let navToken = 0;
 
     function resolveRoute(path) {
         if (path === "/" || path === "/index.html") return "home";
         if (path === "/browse" || path.startsWith("/browse/")) return "browse";
         if (path === "/download/release") return "release";
         return null;
+    }
+
+    /* ── Route table: one explicit handle per route (no bare globals) ── */
+    const ROUTES = {
+        home: {
+            load: async () => HomePage,
+        },
+        browse: {
+            css: "/assets/css/browse.css?v=4.3.6",
+            load: async () => (await import("/assets/js/browse.js?v=4.3.6")).BrowsePage,
+        },
+        release: {
+            css: "/assets/css/release.css?v=4.3.6",
+            load: async () => (await import("/assets/js/releases.js?v=4.3.6")).ReleasePage,
+        },
+    };
+
+    // Route stylesheets are inserted before performance-modes.css so the
+    // documented link order (STYLEGUIDE §1) still holds, and are disabled while
+    // another route is shown so their rules never leak onto it.
+    const sheets = {};
+
+    function loadStylesheet(href) {
+        if (sheets[href]) return sheets[href].ready;
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = href;
+        const ready = new Promise((resolve) => {
+            link.onload = resolve;
+            link.onerror = resolve; // an unstyled route still beats a dead one
+        });
+        const anchor = document.getElementById("perfModesCss");
+        document.head.insertBefore(link, anchor || null);
+        sheets[href] = { link, ready };
+        return ready;
+    }
+
+    function activateStylesheet(href) {
+        Object.keys(sheets).forEach((k) => { sheets[k].link.disabled = k !== href; });
     }
 
     // Task 1.6 (a11y-ux-debt) - mark at most one nav tab as the current page,
@@ -70,7 +119,7 @@ const Router = (function () {
         try { prev = sessionStorage.getItem("cav_nav_sig"); sessionStorage.setItem("cav_nav_sig", sig); } catch { /* storage blocked */ }
         if (prev !== null && prev !== sig) {
             ResourceService.clearCache();
-            if (currentPath === "/" && typeof HomePage !== "undefined") HomePage.refreshResources();
+            if (currentPath === "/") HomePage.refreshResources();
         }
 
         group.querySelectorAll("[data-nav-folder]").forEach(el => el.remove());
@@ -120,105 +169,70 @@ const Router = (function () {
         });
     }
 
-    function navigate(path, pushState = true) {
+    /** Commits the destination view. Runs inside the View Transition update. */
+    function commit(page, route, path) {
+        if (typeof Motion !== "undefined") Motion.teardown(); // outgoing observers
+        activateStylesheet(ROUTES[route].css);
+        page.render(app, path);
+
+        if (typeof applyLang === "function") applyLang(getLang());
+
+        // Task 1.6 (a11y-ux-debt) - keep the navbar's current-page indicator
+        // truthful: clear every tab, then mark only the one matching the route.
+        syncNavTab(path);
+        loadNavFolders(); // also catches admin navbar changes made since the last page
+
+        window.scrollTo({ top: 0, behavior: "instant" });
+        if (typeof Motion !== "undefined") Motion.reveal(app);
+    }
+
+    async function navigate(path, pushState = true) {
         const route = resolveRoute(path);
 
-        function resolveRoute(path) {
-            if (path === "/" || path === "/index.html") return "home";
-            if (path === "/browse" || path.startsWith("/browse/")) return "browse";
-            if (path === "/download/release") return "release";
-            if (path === "/404" || path === "/404.html") return "notfound";
-            return null;
+        // Unknown client route → one-shot full navigation to the real 404 page.
+        // replace() swaps the failing entry instead of pushing one, so Back
+        // does not return to the same failing path (routing: no history trap).
+        if (!route) {
+            window.location.replace("/404.html");
+            return;
         }
 
-        function navigate(path, pushState = true) {
-            const route = resolveRoute(path);
-
-            // Unknown client route → one-shot full navigation to real 404 page (no loop)
-            if (!route) {
-                if (path !== "/404.html" && path !== "/404") {
-                    window.location.replace("/404.html"); // replace = no back-button trap
-                }
-                return;
-            }
-
-            currentPath = path;
-            if (pushState) {
-                history.pushState({ path }, "", path);
-            }
-
-            app.style.opacity = "0";
-            app.style.transform = "translateY(8px)";
-
-            setTimeout(() => {
-                if (route === "home") {
-                    HomePage.render(app);
-                } else if (route === "browse") {
-                    BrowsePage.render(app, path);
-                } else if (route === "release") {
-                    ReleasePage.render(app, path);
-                } else if (route === "notfound") {
-                    // Hard page is preferred; if landed here via SPA, bounce once
-                    window.location.replace("/404.html");
-                    return;
-                }
-
-                if (typeof applyLang === "function") {
-                    applyLang(getLang());
-                }
-
-                requestAnimationFrame(() => {
-                    app.style.transition = "opacity 250ms ease, transform 250ms ease";
-                    app.style.opacity = "1";
-                    app.style.transform = "translateY(0)";
-                });
-
-                window.scrollTo({ top: 0, behavior: "instant" });
-            }, 150);
-        }
-
-        // Update State & Browser History
+        // State before render, so code running during render reads the
+        // destination route, not the previous one.
         currentPath = path;
-        if (pushState) {
-            history.pushState({ path }, "", path);
+        if (pushState) history.pushState({ path }, "", path);
+        const token = ++navToken;
+
+        // Prepare first, while the outgoing view stays on screen.
+        const def = ROUTES[route];
+        let page;
+        try {
+            [page] = await Promise.all([def.load(), def.css ? loadStylesheet(def.css) : null]);
+        } catch (err) {
+            console.error("[Router] Failed to load route module:", err);
+            window.location.reload(); // a full load serves the same route afresh
+            return;
+        }
+        if (token !== navToken) return; // a newer navigation superseded this one
+
+        // Nothing to transition from on the first render after a full load.
+        const animate = app.childElementCount > 0 && typeof Motion !== "undefined" && Motion.allowsMotion();
+        if (animate && typeof document.startViewTransition === "function") {
+            // A skipped transition (hidden tab, a newer one) still runs the
+            // update; only its promises reject, so they must not go unhandled.
+            const vt = document.startViewTransition(() => commit(page, route, path));
+            vt.ready.catch(() => { });
+            vt.finished.catch(() => { });
+            return;
         }
 
-        // 1. Transition Out
-        app.style.opacity = "0";
-        app.style.transform = "translateY(8px)";
-
-        setTimeout(() => {
-            // 2. Render Component
-            if (route === "home") {
-                HomePage.render(app);
-            } else if (route === "browse") {
-                BrowsePage.render(app, path);
-            } else if (route === "release") {
-                ReleasePage.render(app, path);
-            }
-
-            // 3. Apply Language to newly rendered DOM safely
-            if (typeof applyLang === 'function') {
-                applyLang(getLang());
-            }
-
-            // 3b. Task 1.6 (a11y-ux-debt) - keep the navbar's current-page
-            // indicator truthful. It used to be hardcoded to the Downloads tab
-            // in the static markup, so it claimed Downloads was the current
-            // page on /browse too. Clear every tab, then mark only a tab whose
-            // destination matches the active route.
-            syncNavTab(path);
-            loadNavFolders(); // also catches admin navbar changes made since the last page
-
-            // 4. Transition In
-            requestAnimationFrame(() => {
-                app.style.transition = "opacity 250ms ease, transform 250ms ease";
-                app.style.opacity = "1";
-                app.style.transform = "translateY(0)";
-            });
-
-            window.scrollTo({ top: 0, behavior: "instant" });
-        }, 150);
+        commit(page, route, path);
+        if (animate) {
+            app.classList.remove("route-enter");
+            void app.offsetWidth; // restart the entrance on back-to-back navigations
+            app.classList.add("route-enter");
+            app.addEventListener("animationend", () => app.classList.remove("route-enter"), { once: true });
+        }
     }
 
     // A clean method for other modules to request a page re-render (e.g. after language change)
@@ -235,7 +249,7 @@ const Router = (function () {
 
         if (href.startsWith("http") && !href.startsWith(window.location.origin)) return;
         if (link.target === "_blank") return;
-        if (href.startsWith("#") || href.startsWith("mailto:")) return;
+        if (href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
 
         if (fileExtensions.test(href) || link.hasAttribute("data-file")) {
             return;

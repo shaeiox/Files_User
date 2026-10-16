@@ -15,8 +15,8 @@
      Within each breakpoint, rules are subgrouped by section
      (Hero / Resources / Bottom grid / Auth) so narrower
      breakpoints cascade naturally over wider ones.
-   ─ @media (prefers-reduced-motion: reduce) stays beside the
-     logo-swap hook it disables (accessibility, not a breakpoint).
+   ─ Motion (reveal, FLIP, cross-fade, hero cascade) lives in base.css and
+     assets/js/motion.js; its potato overrides in performance-modes.css.
    ═══════════════════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════════════════════════
@@ -75,8 +75,8 @@
     width: min(480px, 100%);
     height: 480px;
     background: radial-gradient(circle,
-            rgba(255, 170, 129, 0.30) 0%,
-            rgba(255, 218, 159, 0.12) 35%,
+            rgba(255, 184, 0, 0.24) 0%,
+            rgba(255, 220, 161, 0.10) 35%,
             transparent 70%);
     filter: blur(36px);
     pointer-events: none;
@@ -99,10 +99,12 @@
     left: 6%;
     width: clamp(160px, 24%, 300px);
     height: 160%;
+    /* The beam is one accent hue at falling strength (D2), not the old
+       iris → coral two-hue ramp. */
     background: linear-gradient(180deg,
-            rgba(86, 131, 218, 0.60) 0%,
-            rgba(255, 137, 100, 0.42) 55%,
-            rgba(255, 255, 255, 0.05) 100%);
+            rgba(255, 184, 0, 0.36) 0%,
+            rgba(255, 184, 0, 0.16) 55%,
+            rgba(255, 255, 255, 0.04) 100%);
     filter: blur(64px);
 }
 
@@ -114,8 +116,8 @@
     width: 480px;
     height: 480px;
     background: radial-gradient(circle,
-            rgba(255, 170, 129, 0.30) 0%,
-            rgba(255, 218, 159, 0.12) 35%,
+            rgba(255, 184, 0, 0.24) 0%,
+            rgba(255, 220, 161, 0.10) 35%,
             transparent 70%);
     filter: blur(36px);
 }
@@ -137,7 +139,8 @@ body.rtl .hero-bg::after {
 .hero-content {
     position: relative;
     z-index: 2;
-    flex: 1;
+    flex: 1 1 0;
+    min-width: 0;
     max-width: 700px;
     padding-left: clamp(0px, 4vw, 48px);
 }
@@ -175,34 +178,30 @@ body.rtl .hero-max::after {
     width: fit-content;
     padding: 6px 14px;
     border-radius: var(--radius-tags);
-    background: rgba(86, 131, 218, 0.12);
-    border: 1px solid rgba(86, 131, 218, 0.32);
+    background: var(--glow);
+    border: 1px solid rgba(255, 184, 0, 0.32);
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #a9c3ee;
+    color: var(--text-accent);
     margin-bottom: 22px;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }
 
-.hero-pill-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--color-ember-pulse);
-    box-shadow: 0 0 8px rgba(255, 137, 100, 0.8);
-}
-
-/* — Display headline: Cinzel (fantasy display) for EN, Vazirmatn for FA — */
+/* — Display headline: Cinzel for EN, Vazirmatn for FA —
+   Cinzel is an inscriptional capital face whose identity is letter
+   separation. It used to be set at -0.045em / 0.98 (a neo-grotesque
+   treatment), which closed the spacing it is built on. It now gets open
+   tracking and leading above 1 (ui-craft-elevation D3). */
 .hero-content h1 {
     font-family: var(--font-hero);
-    font-size: clamp(38px, 4.6vw, 64px);
+    font-size: clamp(36px, 4.2vw, 58px);
     font-weight: 600;
-    line-height: 0.98;
-    letter-spacing: -0.045em;
-    color: #ffffff;
+    line-height: 1.12;
+    letter-spacing: 0.02em;
+    color: var(--text);
     margin-bottom: 20px;
     text-wrap: balance;
 }
@@ -231,22 +230,6 @@ body.rtl .hero-content h1 br {
     display: none;
 }
 
-[dir="rtl"] .hero-content h1 .accent,
-html[lang="fa"] .hero-content h1 .accent,
-body.rtl .hero-content h1 .accent {
-    -webkit-text-fill-color: initial;
-    -webkit-background-clip: initial;
-    background-clip: initial;
-    color: var(--color-ember-pulse);
-    background: none;
-}
-
-[dir="rtl"] .hero-content h1 .avid,
-html[lang="fa"] .hero-content h1 .avid,
-body.rtl .hero-content h1 .avid {
-    color: var(--color-electric-iris);
-}
-
 /* Persian body copy: Vazirmatn + generous line-height for joined scripts */
 [dir="rtl"] .hero-desc,
 html[lang="fa"] .hero-desc,
@@ -259,18 +242,17 @@ body.rtl .hero-desc {
     overflow-wrap: break-word;
 }
 
-/* "AVID" — pure white */
+/* "AVID" takes the heading colour; "Download" is the one accent word.
+   The three-stop iris → violet → amber gradient across that word was
+   decoration, not identity, and is removed (D2). Measured: dark
+   --text-accent #ffdca1 on the hero void 15.09:1; light #8a5a00 on the
+   hero wash 5.39:1. */
 .hero-content h1 .avid {
-    color: #ffffff;
+    color: var(--text);
 }
 
-/* "Download" — aurora gradient text (iris → ember) */
 .hero-content h1 .accent {
-    background: linear-gradient(100deg, #7ea4e5 0%, var(--color-electric-iris) 45%, var(--color-ember-pulse) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
+    color: var(--text-accent);
 }
 
 /* — Description — */
@@ -278,7 +260,7 @@ body.rtl .hero-desc {
     font-size: var(--text-body-lg, 16px);
     line-height: 1.55;
     letter-spacing: -0.16px;
-    color: #a9a9aa;
+    color: var(--text-3);
     max-width: 560px;
     margin-bottom: 32px;
 }
@@ -311,12 +293,12 @@ body.rtl .hero-desc {
     padding: 0 14px 0 18px;
     gap: 10px;
     box-shadow: none;
-    transition: all 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 .hero-search .input-wrap:focus-within {
-    border-color: rgba(126, 164, 229, 0.65);
-    box-shadow: 0 0 0 4px rgba(86, 131, 218, 0.18);
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 4px var(--glow);
     background: rgba(255, 255, 255, 0.08);
 }
 
@@ -353,7 +335,7 @@ body.rtl .hero-search .input-wrap input {
     padding-right: 4px;
 }
 
-/* Primary pill CTA */
+/* Primary pill CTA — the primary-action role (D2), measured in tokens.css. */
 .hero-search .btn-primary {
     height: 48px;
     padding: 0 26px;
@@ -361,43 +343,35 @@ body.rtl .hero-search .input-wrap input {
     font-size: 14px;
     font-weight: 500;
     letter-spacing: -0.01em;
-    background: var(--color-electric-iris);
+    background: var(--action);
     border: none;
-    color: #ffffff;
-    box-shadow: 0 2px 12px rgba(86, 131, 218, 0.4);
+    color: var(--text-on-action);
+    box-shadow: 0 2px 12px rgba(61, 107, 199, 0.4);
     flex-shrink: 0;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .hero-search .btn-primary:hover {
-    background: #4a78cf;
+    background: var(--action-hover);
     transform: translateY(-1px);
-    box-shadow: 0 4px 20px rgba(86, 131, 218, 0.5);
+    box-shadow: 0 4px 20px rgba(61, 107, 199, 0.5);
 }
 
-/* — Large hero logo: embedded background visual, center-right.
-   Big enough to anchor the composition, faded just enough to blend
-   with the aurora; warm amber + iris glow behind; bottom edge dissolves
-   via gradient mask so it melts into the panel. — */
+/* — Hero logo: the composition's second column.
+   ui-craft-elevation 4.1: the visual used to be absolutely positioned
+   against the hero's far edge, which left a 600-1000px empty band between
+   it and the text on wide screens. It now sits in the flex row beside the
+   text, so the gap is the row's gap plus whatever the text does not use. — */
 .hero-visual {
-    position: absolute;
+    position: relative;
     z-index: 1;
-    right: clamp(10px, 5vw, 50px);
-    top: 50%;
-    transform: translateY(-50%);
-    width: min(680px, 48vw);
+    flex: 0 1 min(520px, 42%);
+    min-width: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     pointer-events: none;
-}
-
-[dir="rtl"] .hero-visual,
-html[lang="fa"] .hero-visual,
-body.rtl .hero-visual {
-    right: auto;
-    left: clamp(-72px, -2vw, -8px);
 }
 
 .logo-shader {
@@ -408,8 +382,8 @@ body.rtl .hero-visual {
     aspect-ratio: 1;
     transform: translateY(-50%);
     background:
-        radial-gradient(circle at 40% 65%, rgba(255, 170, 129, 0.22) 0%, transparent 55%),
-        radial-gradient(circle at 62% 38%, rgba(86, 131, 218, 0.26) 0%, transparent 60%);
+        radial-gradient(circle at 40% 65%, rgba(255, 184, 0, 0.20) 0%, transparent 55%),
+        radial-gradient(circle at 62% 38%, rgba(255, 220, 161, 0.14) 0%, transparent 60%);
     filter: blur(52px);
     pointer-events: none;
     opacity: 0.95;
@@ -429,14 +403,14 @@ body.rtl .logo-shader {
     place-items: center;
     width: 100%;
     opacity: 0.48;
-    filter: drop-shadow(0 10px 44px rgba(255, 170, 129, 0.12));
+    filter: drop-shadow(0 10px 44px rgba(255, 184, 0, 0.12));
     -webkit-mask-image: radial-gradient(ellipse 78% 78% at 46% 42%, #000 52%, rgba(0, 0, 0, 0.45) 74%, transparent 96%);
     mask-image: radial-gradient(ellipse 78% 78% at 46% 42%, #000 52%, rgba(0, 0, 0, 0.45) 74%, transparent 96%);
 }
 
 [data-theme="light"] .logo-shader {
-    background: radial-gradient(circle, rgba(86, 131, 218, 0.16) 0%, transparent 70%),
-        radial-gradient(circle at 55% 45%, rgba(86, 131, 218, 0.22) 0%, transparent 58%);
+    background: radial-gradient(circle, rgba(255, 184, 0, 0.14) 0%, transparent 70%),
+        radial-gradient(circle at 55% 45%, rgba(255, 184, 0, 0.18) 0%, transparent 58%);
     opacity: 0.8;
 }
 
@@ -471,58 +445,37 @@ body.rtl .logo-shader {
     filter: blur(0);
 }
 
-/* — Wipe animation hook (theme.js) — */
-.logo-swap.wiping .logo-layer {
-    transition: opacity 350ms ease, filter 350ms ease;
-}
+/* (theme.js used to document a logo animation hooked here that was never
+   written; the hook is removed. The theme change is now a View Transitions
+   cross-fade — see theme.js.) */
 
-@media (prefers-reduced-motion: reduce) {
-    .logo-swap {
-        animation: none;
-    }
-}
-
-/* — Light theme hero: daytime aurora — soft iris sky, no void.
-   Same geometry, inverted mood: linen glass over a pale iris wash. — */
+/* — Light theme hero: daytime aurora — a warm paper wash in the accent hue,
+   same geometry as the dark void. — */
 [data-theme="light"] .hero-max {
     background:
-        radial-gradient(ellipse 90% 120% at 85% 0%, rgba(86, 131, 218, 0.14) 0%, transparent 55%),
-        radial-gradient(ellipse 70% 100% at 0% 100%, rgba(255, 137, 100, 0.12) 0%, transparent 55%),
+        radial-gradient(ellipse 90% 120% at 85% 0%, rgba(255, 184, 0, 0.12) 0%, transparent 55%),
+        radial-gradient(ellipse 70% 100% at 0% 100%, rgba(255, 184, 0, 0.08) 0%, transparent 55%),
         linear-gradient(180deg, #ffffff 0%, #f2f4f9 100%);
     border-color: var(--color-linen);
 }
 
 [data-theme="light"] .hero-max::before {
     background: linear-gradient(180deg,
-            rgba(86, 131, 218, 0.28) 0%,
-            rgba(255, 137, 100, 0.20) 55%,
+            rgba(255, 184, 0, 0.24) 0%,
+            rgba(255, 184, 0, 0.10) 55%,
             rgba(255, 255, 255, 0) 100%);
     filter: blur(72px);
 }
 
 [data-theme="light"] .hero-max::after {
     background: radial-gradient(circle,
-            rgba(255, 170, 129, 0.22) 0%,
-            rgba(255, 218, 159, 0.10) 35%,
+            rgba(255, 184, 0, 0.18) 0%,
+            rgba(255, 220, 161, 0.10) 35%,
             transparent 70%);
 }
 
 [data-theme="light"] .hero-pill {
-    background: rgba(86, 131, 218, 0.10);
-    border-color: rgba(86, 131, 218, 0.30);
-    color: #3d6bc7;
-}
-
-[data-theme="light"] .hero-content h1 {
-    color: var(--text, #050506);
-}
-
-[data-theme="light"] .hero-content h1 .avid {
-    color: #050506;
-}
-
-[data-theme="light"] .hero-desc {
-    color: #6b6c6d;
+    border-color: rgba(138, 90, 0, 0.30);
 }
 
 [data-theme="light"] .hero-search .input-wrap {
@@ -531,8 +484,8 @@ body.rtl .logo-shader {
 }
 
 [data-theme="light"] .hero-search .input-wrap:focus-within {
-    border-color: rgba(86, 131, 218, 0.6);
-    box-shadow: 0 0 0 4px rgba(86, 131, 218, 0.14);
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 4px var(--glow);
     background: #ffffff;
 }
 
@@ -593,7 +546,7 @@ body.rtl .logo-shader {
     justify-content: center;
     border-radius: 10px;
     background: var(--glow);
-    border: 1px solid rgba(86, 131, 218, 0.28);
+    border: 1px solid rgba(255, 184, 0, 0.28);
     color: var(--text-accent);
     flex-shrink: 0;
 }
@@ -639,7 +592,7 @@ body.rtl .logo-shader {
     color: var(--text-3);
     box-shadow: none;
     cursor: pointer;
-    transition: all var(--dur-1) ease;
+    transition: border-color var(--dur-1) ease, background-color var(--dur-1) ease, color var(--dur-1) ease;
 }
 
 .filter-pill:hover,
@@ -671,7 +624,7 @@ body.rtl .logo-shader {
     opacity: 0;
     visibility: hidden;
     transform: translateY(-4px) scale(0.98);
-    transition: all 0.15s ease;
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
     z-index: 100;
     display: flex;
     flex-direction: column;
@@ -720,8 +673,8 @@ body.rtl .logo-shader {
 }
 
 [data-theme="dark"] .filter-option.active {
-    background: rgba(86, 131, 218, 0.16);
-    color: #a9c3ee;
+    background: rgba(255, 184, 0, 0.16);
+    color: var(--text-accent);
 }
 
 /* ── View toggle — pill segmented control ── */
@@ -744,7 +697,7 @@ body.rtl .logo-shader {
     color: var(--text-4);
     background: transparent;
     border: none;
-    transition: all 120ms ease;
+    transition: background-color 120ms ease, color 120ms ease;
 }
 
 .vt-btn.active {
@@ -753,8 +706,8 @@ body.rtl .logo-shader {
 }
 
 [data-theme="dark"] .vt-btn.active {
-    background: rgba(86, 131, 218, 0.18);
-    color: #a9c3ee;
+    background: rgba(255, 184, 0, 0.18);
+    color: var(--text-accent);
 }
 
 .vt-btn:hover {
@@ -784,7 +737,7 @@ body.rtl .logo-shader {
     text-decoration: none;
     color: inherit;
     position: relative;
-    transition: all var(--dur-2) var(--ease);
+    transition: transform var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease), background-color var(--dur-2) var(--ease), box-shadow var(--dur-2) var(--ease);
     cursor: pointer;
 }
 
@@ -801,14 +754,14 @@ body.rtl .logo-shader {
     width: 140px;
     height: 140px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 137, 100, 0.10) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 184, 0, 0.10) 0%, transparent 70%);
     opacity: 0;
     transition: opacity var(--dur-2) ease;
     pointer-events: none;
 }
 
 .resource-card:hover {
-    border-color: rgba(86, 131, 218, 0.5);
+    border-color: rgba(255, 184, 0, 0.5);
     box-shadow: 0 0 0 4px var(--glow);
     transform: translateY(-2px);
 }
@@ -818,7 +771,7 @@ body.rtl .logo-shader {
 }
 
 [data-theme="dark"] .resource-card:hover {
-    border-color: #5683da;
+    border-color: var(--color-ember-pulse);
     box-shadow: none;
 }
 
@@ -834,12 +787,12 @@ body.rtl .logo-shader {
     color: var(--text-3);
     flex-shrink: 0;
     font-size: 18px;
-    transition: all var(--dur-2) ease;
+    transition: background-color var(--dur-2) ease, border-color var(--dur-2) ease, color var(--dur-2) ease;
 }
 
 .resource-card:hover .resource-icon {
-    background: rgba(86, 131, 218, 0.14);
-    border-color: rgba(86, 131, 218, 0.35);
+    background: rgba(255, 184, 0, 0.14);
+    border-color: rgba(255, 184, 0, 0.35);
     color: var(--text-accent);
 }
 
@@ -906,12 +859,12 @@ body.rtl .logo-shader {
     color: var(--text-4);
     flex-shrink: 0;
     align-self: center;
-    transition: all 150ms ease;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, transform 150ms ease;
 }
 
 .resource-card:hover .resource-arrow {
-    background: var(--color-electric-iris);
-    border-color: var(--color-electric-iris);
+    background: var(--color-ember-pulse);
+    border-color: var(--color-ember-pulse);
     color: #ffffff;
     transform: translateX(2px);
 }
@@ -1167,7 +1120,7 @@ body.rtl .logo-shader {
     justify-content: center;
     padding: 48px 24px;
     text-align: center;
-    background: linear-gradient(180deg, rgba(86, 131, 218, 0.03) 0%, transparent 100%);
+    background: linear-gradient(180deg, rgba(255, 184, 0, 0.03) 0%, transparent 100%);
     min-height: 220px;
     width: 100%;
     box-sizing: border-box;
@@ -1183,7 +1136,7 @@ body.rtl .logo-shader {
     background: var(--glow-strong);
     color: var(--text-accent);
     margin-bottom: 16px;
-    box-shadow: 0 0 20px rgba(86, 131, 218, 0.2);
+    box-shadow: 0 0 20px rgba(255, 184, 0, 0.2);
     flex-shrink: 0;
 }
 
@@ -1267,7 +1220,7 @@ body.rtl .logo-shader {
     inset-inline-start: -20%;
     width: 140%;
     height: 100%;
-    background: radial-gradient(circle at 50% 100%, rgba(86, 131, 218, 0.15) 0%, transparent 60%);
+    background: radial-gradient(circle at 50% 100%, rgba(255, 184, 0, 0.12) 0%, transparent 60%);
     pointer-events: none;
     z-index: 0;
 }
@@ -1323,7 +1276,7 @@ body.rtl .logo-shader {
     font-size: 13px;
     font-family: var(--font);
     outline: none;
-    transition: all 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .auth-input-group input:focus {
@@ -1341,23 +1294,23 @@ body.rtl .logo-shader {
 
 .btn-login {
     height: 44px;
-    background: var(--color-electric-iris);
+    background: var(--action);
     color: #ffffff;
     border: none;
     border-radius: var(--radius-buttons);
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, transform 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 4px 12px rgba(86, 131, 218, 0.3);
+    box-shadow: 0 4px 12px rgba(61, 107, 199, 0.3);
 }
 
 .btn-login:hover:not(:disabled) {
-    background: #4a78cf;
+    background: var(--action-hover);
     transform: translateY(-1px);
 }
 
@@ -1381,7 +1334,7 @@ body.rtl .logo-shader {
     align-items: center;
     justify-content: center;
     z-index: 10;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .btn-close-modal:hover {
@@ -1461,6 +1414,9 @@ body.rtl .logo-shader {
        in-flow element is not shifted. */
     .hero-visual {
         order: -1;
+        /* The desktop flex-basis is a column width; in this column stack it
+           would become a height. */
+        flex: none;
         position: relative;
         z-index: 1;
         top: auto;
@@ -1579,7 +1535,7 @@ body.rtl .logo-shader {
 
     .hero-content h1 {
         font-size: clamp(28px, 8vw, 40px);
-        letter-spacing: -0.03em;
+        letter-spacing: 0.01em;
     }
 
     /* Persian mobile: keep Vazirmatn + the relaxed FA line-height */
@@ -1765,8 +1721,8 @@ body.rtl .logo-shader {
    Phase 5 (D10) removed the .bottom-grid (releases + quick access) and the
    .status-bar from both the DOM and this stylesheet.
 
-   The Hero (.hero-max and every descendant) is FROZEN per D8/I21 and is NOT
-   touched here. The HERO DRIFT INSULATION block below is left byte-identical.
+   The Hero (.hero-max) is styled in Part A; its D8/I21 freeze and the
+   insulation block that enforced it were retired by ui-craft-elevation.
 
    This block is appended last, so it overrides the base rules above at equal
    specificity. Direction-sensitive rules use logical properties, so no
@@ -2064,9 +2020,12 @@ body.rtl .logo-shader {
     color: var(--text-3);
 }
 
+/* --error-container was never defined, so this border silently computed to
+   nothing in both themes (ui-craft-elevation 1.4). --e-border is the
+   destructive boundary token defined in both theme blocks. */
 .resources-error {
     background: rgba(147, 0, 10, 0.1);
-    border: 1px solid var(--error-container);
+    border: 1px solid var(--e-border);
     border-radius: var(--radius-lg);
     color: var(--danger);
     font-family: var(--font);
@@ -2119,65 +2078,127 @@ body.rtl .logo-shader {
             transparent 70%);
 }
 
-/* ==========================================================================
-   HERO DRIFT INSULATION -- Phase 1 / D8 / I21
-   --------------------------------------------------------------------------
-   The Home Hero (.hero-max) is FROZEN. Phase 1 repointed the global design
-   tokens to the Obsidian Kinetic palette, which would have visibly changed the
-   Hero. The tokens below are re-declared INSIDE a .hero-max scope, pinned to
-   their exact pre-redesign values, so the Hero renders identically while the
-   rest of the app adopts the new palette.
+/* (The HERO DRIFT INSULATION block that re-declared seven tokens inside
+   .hero-max was retired by ui-craft-elevation D1/task 2.1: the hero now
+   resolves the same theme-level tokens as every other surface, so the page
+   renders one accent per theme. D8/I21 and a11y-ux-debt J5/J6 are amended.) */
 
-   This is the ONLY CSS change permitted inside the Hero (D8 clause 3).
-
-   Scope is deliberate: .input-wrap is a SHARED component (also used by
-   .browse-search on the Browse page). Scoping to .hero-max insulates only the
-   Hero copy and leaves the Browse copy free to adopt the new tokens in Phase 5.
-
-   NOTE: --font is intentionally NOT pinned. It is inherited from <body>, and
-   D6 mandates self-hosted Inter application-wide. Pinning it would leave the
-   Hero on a different typeface from the rest of the app.
-
-   Do NOT add, remove, or alter any Hero rule outside this block.
-   ========================================================================== */
-
-/* Light theme is the :root default, so the unqualified block carries the
-   light pins. [data-theme="dark"] overrides them below.
-
-   --input-bg is pinned to `transparent` deliberately: it was UNDEFINED in the
-   light theme before Phase 1, so `.input-wrap { background: var(--input-bg) }`
-   computed to no background. Phase 1 added a real light value globally, so the
-   Hero must neutralize it to keep its original appearance. `transparent`
-   reproduces the pre-change computed result exactly. */
-.hero-max {
-    --border: var(--n-5);
-    --radius-panels: 20px;
-    --color-ember-pulse: #ff8964;
-    --color-electric-iris: #5683da;
-    --text: var(--n-11);
-    --text-2: var(--n-10);
-    --text-3: var(--n-8);
-    --text-4: var(--n-7);
-    --text-body-lg: 16px;
-    --glow: oklch(58% 0.170 224 / 0.07);
-    --border-focus: var(--a-5);
-    --input-bg: transparent;
+/* ── TIERED GRID + FEATURED RESOURCE (ui-craft-elevation 4.3 / 4.4) ───────
+   home.js marks the most recently updated resource as .is-featured whenever
+   more than three are listed, and places it first. It takes a double-width
+   cell, so the grid carries two cell treatments instead of one flat field.
+   The single-column collapse below 640px still applies: a 1-track grid
+   cannot span 2, and the span is reset there explicitly. */
+.resources-grid {
+    position: relative; /* containing block for cards animating out (FLIP) */
 }
 
-/* Dark theme (explicit; overrides the :root-default pins above). */
-[data-theme="dark"] .hero-max {
-    --border: #4a4b50;
-    --radius-panels: 20px;
-    --color-ember-pulse: #ff8964;
-    --color-electric-iris: #5683da;
-    --text: #ffffff;
-    --text-2: #d1d1d1;
-    --text-3: #a9a9aa;
-    --text-4: #95979e;
-    --text-body-lg: 16px;
-    --glow: rgba(86, 131, 218, 0.10);
-    --border-focus: #5683da;
-    --input-bg: rgba(9, 10, 12, 0.55);
+.resource-card.is-featured {
+    grid-column: span 2;
+    padding: var(--space-xl);
+    border-color: rgba(255, 184, 0, 0.28);
+    background:
+        radial-gradient(ellipse 80% 120% at 100% 0%, var(--glow) 0%, transparent 60%),
+        var(--bg-card);
+}
+
+.resource-card.is-featured .resource-icon {
+    width: 44px;
+    height: 44px;
+}
+
+.resource-card.is-featured .resource-meta h3 {
+    font-size: var(--text-headline-sm);
+}
+
+.resource-featured-tag {
+    align-self: flex-start;
+    margin-bottom: 2px;
+    font-family: var(--font-mono);
+    font-size: var(--text-label-mono-sm);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-accent);
+}
+
+/* List view: one track; the featured card keeps its emphasis, not its span. */
+.resources-grid.is-list {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.resources-grid.is-list .resource-card.is-featured {
+    grid-column: auto;
+}
+
+/* Closing trust band (4.5): below the last section, outside the hero. A
+   real, checkable claim (the SHA-256 Verify action), not a slogan. */
+.trust-band {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    padding: var(--space-lg) var(--space-xl);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.trust-icon {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-md);
+    background: var(--glow);
+    border: 1px solid rgba(255, 184, 0, 0.28);
+    color: var(--text-accent);
+}
+
+.trust-copy {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.trust-title {
+    font-size: var(--text-body-lg);
+    font-weight: 600;
+    color: var(--text);
+}
+
+.trust-desc {
+    margin-top: 2px;
+    font-size: var(--text-body-md);
+    color: var(--text-3);
+    max-width: 70ch;
+}
+
+.trust-link {
+    flex: none;
+}
+
+@media (max-width: 640px) {
+    .trust-band {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: var(--space-lg);
+    }
+}
+
+/* Composed empty state for a search that matched nothing (3.9). */
+.results-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-xl) var(--space-lg);
+    text-align: center;
+    font-size: var(--text-body-md);
+    color: var(--text-3);
+}
+
+.results-empty strong {
+    color: var(--text);
+    overflow-wrap: anywhere;
 }
 /* ─────────────────────────────────────────────
    PHASE 8 (a11y-ux-debt) — small-viewport tightening
@@ -2194,5 +2215,10 @@ body.rtl .logo-shader {
 
     .resource-card {
         padding: 14px;
+    }
+
+    .resource-card.is-featured {
+        grid-column: auto;
+        padding: 16px;
     }
 }

@@ -6,7 +6,6 @@
 files-server-web/
 ├── server.js                 # Entry point — HTTP server, boot sequence, SIGINT handling
 ├── index.html                # SPA shell — the primary page (script + stylesheet order is load-bearing)
-├── browse.html               # Standalone browse page — NOT routed, see ARCHITECTURE.md
 ├── 404.html                  # 404 page, served by serve404()
 ├── nginx.conf                # Production nginx config (template — ships with real hostnames/cert paths)
 ├── package.json              # Dependencies and scripts
@@ -334,9 +333,9 @@ Stylesheets follow the same model: `tokens.css` must be the first `<link>`, or t
 design-token layer resolves to nothing. There is no `@import` and no bundler, so `<link>`
 order *is* the cascade order.
 
-> `public/browse.html` is a separate, unrouted page with its own script and style set. It does not
-> stay in sync with `public/index.html` — **change `public/index.html`.** See
-> [ARCHITECTURE.md → Standalone HTML Pages](ARCHITECTURE.md#standalone-html-pages).
+> The Browse group (`browse.js`, `browse-icons.js`, `bulk-download.js`, `file-inspector.js`) and
+> `releases.js` are ES modules that `router.js` imports when their route is entered; they have no
+> `<script>` tag. Their stylesheets are loaded the same way.
 
 **Source:** `public/index.html` → `<script>` and `<link>` tags
 

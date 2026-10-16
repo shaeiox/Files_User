@@ -7,7 +7,11 @@
     <title>404 - Page Not Found | CloudAvid</title>
     <style>
         html { scroll-behavior: smooth; }
-        @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .btn-primary, .btn-secondary { transition: none; }
+            .btn-primary:hover { transform: none; }
+        }
         :root {
             --bg-color: #0b0d14;
             --card-bg: #121620;
@@ -142,7 +146,7 @@
             align-items: center;
             gap: 8px;
             box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-            transition: all 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .btn-primary:hover {
@@ -162,7 +166,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            transition: all 0.2s;
+            transition: background-color 0.2s, color 0.2s;
         }
 
         .btn-secondary:hover {

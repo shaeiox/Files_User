@@ -3,7 +3,6 @@ const Theme = (function () {
 
     const STORAGE_KEY = 'cav_theme';
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const WIPE_MS = 700;
 
     function getSystemTheme() {
         return mq.matches ? 'dark' : 'light';
@@ -28,32 +27,35 @@ const Theme = (function () {
     }
 
     /**
-     * Trigger diagonal wipe on hero logo (if present).
-     * Adds .wiping → CSS transitions clip-path + line animation.
+     * Applies a theme as a legible change rather than a hard cut
+     * (ui-craft-elevation 3.11): a ~280ms View Transitions cross-fade of the
+     * whole page (opacity only, timing in base.css). Reduced motion and the
+     * potato tier get the instant switch; browsers without the API fall back
+     * to the body background/colour transition in base.css.
      */
-    function triggerLogoWipe() {
-        const el = document.getElementById('logoSwap');
-        if (!el) return;
-
-        // restart animation cleanly
-        el.classList.remove('wiping');
-        void el.offsetWidth; // force reflow
-        el.classList.add('wiping');
-
-        clearTimeout(el._wipeTimer);
-        el._wipeTimer = setTimeout(() => {
-            el.classList.remove('wiping');
-        }, WIPE_MS + 50);
+    function applyAnimated(theme) {
+        const animate = typeof Motion !== 'undefined' && Motion.allowsMotion();
+        if (animate && typeof document.startViewTransition === 'function') {
+            // Apply whatever is current when the callback runs: overlapping
+            // transitions can run a skipped one's callback last.
+            const vt = document.startViewTransition(() => apply(resolve()));
+            vt.ready.catch(() => { });
+            vt.finished.catch(() => { });
+        } else {
+            apply(theme);
+        }
     }
 
     function set(theme, { animate = true } = {}) {
-        const current = document.documentElement.getAttribute('data-theme');
+        // Compare with the stored/resolved theme, not the DOM attribute: a
+        // pending View Transition has not applied the previous toggle yet.
+        const current = resolve();
         if (theme === current) return theme;
 
         try { localStorage.setItem(STORAGE_KEY, theme); } catch { }
 
-        if (animate) triggerLogoWipe();
-        apply(theme);
+        if (animate) applyAnimated(theme);
+        else apply(theme);
         return theme;
     }
 
@@ -64,9 +66,7 @@ const Theme = (function () {
 
     function reset() {
         try { localStorage.removeItem(STORAGE_KEY); } catch { }
-        const sys = getSystemTheme();
-        triggerLogoWipe();
-        apply(sys);
+        applyAnimated(getSystemTheme());
     }
 
     function init() {
@@ -74,10 +74,7 @@ const Theme = (function () {
         apply(resolve());
 
         mq.addEventListener('change', () => {
-            if (!getStored()) {
-                triggerLogoWipe();
-                apply(getSystemTheme());
-            }
+            if (!getStored()) applyAnimated(getSystemTheme());
         });
 
         document.addEventListener('click', (e) => {

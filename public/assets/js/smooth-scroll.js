@@ -11,6 +11,14 @@
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var lenis = null;
     var rafId = null;
+    var CONDENSE_AT = 24; // px scrolled before the nav condenses
+
+    // Nav condense (ui-craft-elevation 3.10) reads Lenis's own scroll
+    // emitter. There is deliberately no window scroll listener anywhere.
+    function condense(e) {
+        var nav = document.querySelector('.nav');
+        if (nav) nav.classList.toggle('is-condensed', e.scroll > CONDENSE_AT);
+    }
 
     function perfBlocked() {
         var p = (document.documentElement.getAttribute('data-perf') || '').toLowerCase();
@@ -20,6 +28,7 @@
     function start() {
         if (lenis || reduceMotion || perfBlocked() || typeof Lenis === 'undefined') return;
         lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+        lenis.on('scroll', condense);
         var raf = function (time) {
             lenis.raf(time);
             rafId = requestAnimationFrame(raf);
@@ -31,6 +40,8 @@
         if (rafId !== null) cancelAnimationFrame(rafId);
         rafId = null;
         if (lenis) { lenis.destroy(); lenis = null; }
+        var nav = document.querySelector('.nav');
+        if (nav) nav.classList.remove('is-condensed');
     }
 
     function sync() {

@@ -40,6 +40,7 @@
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 
+// ES module, imported by router.js when its route is entered (ui-craft-elevation 5.2).
 const BulkDownload = (function () {
     'use strict';
 
@@ -504,4 +505,4 @@ const BulkDownload = (function () {
     return { mount, setRendered, setDirectory, clear, toggle, has, count, selectedItems, onChange, downloadAll, downloadZip, copyList };
 })();
 
-if (typeof window !== "undefined") window.BulkDownload = BulkDownload;
+export { BulkDownload };

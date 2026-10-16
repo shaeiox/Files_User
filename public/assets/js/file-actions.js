@@ -146,7 +146,7 @@ const FileActions = (function () {
             if (res.status === 404) return "missing";
             return "error";
         } catch {
-            return "error";
+            return "unreachable";
         }
     }
 
@@ -169,13 +169,31 @@ const FileActions = (function () {
      *          visible), anything else is reported. The browser never lands on a JSON
      *          error page.
      */
-    async function download(href, fileName) {
+    async function download(href, fileName, control) {
         const outcome = await preflight(href);
         if (outcome === "ok") return startDownload(href, fileName);
         if (outcome === "locked") return signIn();
         if (outcome === "missing") return refreshView();
+        report(control, outcome);
+    }
+
+    /**
+     * In-place failure report (ui-craft-elevation 1.2 / 6.7): a localised
+     * role="alert" note beside the control that started the download, instead
+     * of a blocking browser dialog. It clears on the next attempt.
+     */
+    function report(control, outcome) {
         const d = typeof window.getDict === "function" ? window.getDict() : {};
-        window.alert(d.downloadUnavailable || "The download is temporarily unavailable. Try again shortly.");
+        const msg = outcome === "unreachable"
+            ? (d.downloadUnreachable || "The server could not be reached. Check your connection and try again.")
+            : (d.downloadUnavailable || "The download is temporarily unavailable. Try again shortly.");
+        const note = document.createElement("span");
+        note.className = "dl-error";
+        note.setAttribute("role", "alert");
+        note.textContent = msg;
+        if (control && control.isConnected) control.insertAdjacentElement("afterend", note);
+        else document.body.appendChild(note);
+        setTimeout(() => note.remove(), 6000);
     }
 
     /**
@@ -197,8 +215,12 @@ const FileActions = (function () {
             e.preventDefault();
             e.stopPropagation();
             if (link.getAttribute("aria-busy") === "true") return;
+            // In-progress state on the initiating control; the rest of the UI
+            // stays interactive and the control returns to rest when done.
+            const next = link.nextElementSibling;
+            if (next && next.classList.contains("dl-error")) next.remove();
             link.setAttribute("aria-busy", "true");
-            download(link.href, link.getAttribute("download") || "")
+            download(link.href, link.getAttribute("download") || "", link)
                 .finally(() => link.removeAttribute("aria-busy"));
         }, true);
     }
