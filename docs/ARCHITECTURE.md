@@ -169,7 +169,7 @@ rate, then publishes the result as a `data-perf` attribute on `<html>`. Tiers ar
 
 | Consumer | Effect |
 |----------|--------|
-| `public/assets/css/performance-modes.css` | Progressively strips blur, aura glows, logo shader, hero clouds, shadows, transitions |
+| `public/assets/css/performance-modes.css` | Progressively strips blur, the ambient field's mesh/blooms/lattice (the base wash survives `low`), the hero light layers, the logo shader, shadows, transitions |
 | `public/assets/js/smooth-scroll.js` | Disables Lenis entirely at `potato` |
 | Manual override UI | Lets the user pin a tier via `data-perf-val` |
 

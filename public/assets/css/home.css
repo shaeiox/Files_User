@@ -50,17 +50,23 @@
     gap: 40px;
 
     /* Layered shadow system:
+       0. top catch-light — the panel's own lit edge (--hero-edge), so the
+          border reads as a surface receiving light instead of a sticker
        1. tight ambient — fills the border gap and gives grounding
        2. mid diffuse  — main depth, soft and neutral
        3. wide bloom   — subtle glow that lifts the panel off the page */
     box-shadow:
+        var(--hero-edge),
         0 1px 2px oklch(0% 0 0 / 0.06),
         0 4px 12px oklch(0% 0 0 / 0.08),
         0 16px 40px oklch(0% 0 0 / 0.06);
 }
 
 
-/* — Radial sunburst glow at the beam's base — */
+/* — Radial sunburst glow at the beam's base —
+   One hue, but no longer a flat blob: the token gives it a warm-white core
+   that falls off into the accent, and the panel's own gradient carries the
+   cool side so the two ends of the hero disagree about temperature. */
 .hero-max::after {
     content: "";
     position: absolute;
@@ -74,15 +80,14 @@
        to the hero bounds, so no visual change at any width. */
     width: min(480px, 100%);
     height: 480px;
-    background: radial-gradient(circle,
-            rgba(255, 184, 0, 0.24) 0%,
-            rgba(255, 220, 161, 0.10) 35%,
-            transparent 70%);
-    filter: blur(36px);
+    background: var(--hero-sunburst);
+    filter: blur(44px);
     pointer-events: none;
     z-index: 0;
 }
 
+/* The sheen is the panel's diagonal light streak; it is deliberately the
+   faintest layer so the copy column never sits on a visible edge. */
 .hero-bg {
     position: absolute;
     inset: 0;
@@ -90,6 +95,7 @@
     overflow: hidden;
     z-index: 0;
     pointer-events: none;
+    background: var(--hero-sheen);
 }
 
 .hero-bg::before {
@@ -99,27 +105,26 @@
     left: 6%;
     width: clamp(160px, 24%, 300px);
     height: 160%;
-    /* The beam is one accent hue at falling strength (D2), not the old
-       iris → coral two-hue ramp. */
-    background: linear-gradient(180deg,
-            rgba(255, 184, 0, 0.36) 0%,
-            rgba(255, 184, 0, 0.16) 55%,
-            rgba(255, 255, 255, 0.04) 100%);
-    filter: blur(64px);
+    /* The beam stays one accent hue at falling strength (D2), not the old
+       iris → coral two-hue ramp. Its foot now fades to transparent white
+       instead of rgba(255, 255, 255, 0.04), so the shaft dissolves into the
+       panel rather than leaving a milky film where it lands. */
+    background: var(--hero-beam);
+    filter: blur(72px);
 }
 
+/* The cool counter-light on the logo side. It used to be a second copy of the
+   amber sunburst on the same corner, which is what pooled the yellow; the
+   panel's two ends now carry two different temperatures. */
 .hero-bg::after {
     content: "";
     position: absolute;
-    bottom: -240px;
-    left: -60px;
-    width: 480px;
-    height: 480px;
-    background: radial-gradient(circle,
-            rgba(255, 184, 0, 0.24) 0%,
-            rgba(255, 220, 161, 0.10) 35%,
-            transparent 70%);
-    filter: blur(36px);
+    top: -34%;
+    right: -8%;
+    width: min(440px, 58%);
+    height: 420px;
+    background: var(--hero-bounce);
+    filter: blur(48px);
 }
 
 [dir="rtl"] .hero-bg::before,
@@ -132,8 +137,8 @@ body.rtl .hero-bg::before {
 [dir="rtl"] .hero-bg::after,
 html[lang="fa"] .hero-bg::after,
 body.rtl .hero-bg::after {
-    left: auto;
-    right: -60px;
+    right: auto;
+    left: -8%;
 }
 
 .hero-content {
@@ -154,15 +159,10 @@ body.rtl .hero-content {
     padding-right: clamp(0px, 4vw, 48px);
 }
 
-/* — Mirror the aurora with the text: the beam and its base sunburst
-   follow the headline to the right side in RTL — */
-[dir="rtl"] .hero-max::before,
-html[lang="fa"] .hero-max::before,
-body.rtl .hero-max::before {
-    left: auto;
-    right: 6%;
-}
-
+/* — Mirror the aurora with the text: the beam and its base sunburst follow
+   the headline to the right side in RTL (`.hero-bg::before` / `::after` above
+   carry the beam and the bounce). The `.hero-max::before` mirror that used to
+   sit here targeted a pseudo-element that no rule ever defined — removed. — */
 [dir="rtl"] .hero-max::after,
 html[lang="fa"] .hero-max::after,
 body.rtl .hero-max::after {
@@ -381,9 +381,10 @@ body.rtl .hero-search .input-wrap input {
     width: min(700px, 50vw);
     aspect-ratio: 1;
     transform: translateY(-50%);
-    background:
-        radial-gradient(circle at 40% 65%, rgba(255, 184, 0, 0.20) 0%, transparent 55%),
-        radial-gradient(circle at 62% 38%, rgba(255, 220, 161, 0.14) 0%, transparent 60%);
+    /* Warm core where the mark sits, cool rim on its outer edge — the halo
+       used to be amber twice over, which is what turned the right half of the
+       hero yellow. */
+    background: var(--logo-halo);
     filter: blur(52px);
     pointer-events: none;
     opacity: 0.95;
@@ -408,9 +409,9 @@ body.rtl .logo-shader {
     mask-image: radial-gradient(ellipse 78% 78% at 46% 42%, #000 52%, rgba(0, 0, 0, 0.45) 74%, transparent 96%);
 }
 
+/* On paper the halo has less room to glow, so only its strength changes — the
+   colours are already the light theme's `--logo-halo`. */
 [data-theme="light"] .logo-shader {
-    background: radial-gradient(circle, rgba(255, 184, 0, 0.14) 0%, transparent 70%),
-        radial-gradient(circle at 55% 45%, rgba(255, 184, 0, 0.18) 0%, transparent 58%);
     opacity: 0.8;
 }
 
@@ -449,29 +450,14 @@ body.rtl .logo-shader {
    written; the hook is removed. The theme change is now a View Transitions
    cross-fade — see theme.js.) */
 
-/* — Light theme hero: daytime aurora — a warm paper wash in the accent hue,
-   same geometry as the dark void. — */
+/* — Light theme hero — the daytime field is now a token, not a second copy of
+   the geometry: `--hero-grad`, `--hero-beam`, `--hero-sunburst` and
+   `--logo-halo` each resolve per theme in tokens.css, so the panel keeps one
+   shape and two palettes. Only the border colour is still a light-theme
+   decision here. (STYLEGUIDE §2: never redeclare a token in a component scope;
+   never duplicate a token's value in one either.) */
 [data-theme="light"] .hero-max {
-    background:
-        radial-gradient(ellipse 90% 120% at 85% 0%, rgba(255, 184, 0, 0.12) 0%, transparent 55%),
-        radial-gradient(ellipse 70% 100% at 0% 100%, rgba(255, 184, 0, 0.08) 0%, transparent 55%),
-        linear-gradient(180deg, #ffffff 0%, #f2f4f9 100%);
     border-color: var(--color-linen);
-}
-
-[data-theme="light"] .hero-max::before {
-    background: linear-gradient(180deg,
-            rgba(255, 184, 0, 0.24) 0%,
-            rgba(255, 184, 0, 0.10) 55%,
-            rgba(255, 255, 255, 0) 100%);
-    filter: blur(72px);
-}
-
-[data-theme="light"] .hero-max::after {
-    background: radial-gradient(circle,
-            rgba(255, 184, 0, 0.18) 0%,
-            rgba(255, 220, 161, 0.10) 35%,
-            transparent 70%);
 }
 
 [data-theme="light"] .hero-pill {
@@ -1439,6 +1425,30 @@ body.rtl .logo-shader {
 
     [data-theme="light"] .logo-swap {
         opacity: 0.4;
+    }
+
+    /* — The hero light follows the layout —
+       The panel centres its copy at this width, so the cool bounce moves to the
+       centre line and sits behind the logo instead of parking in a corner that
+       now holds nothing. The beam stays on the inline-start edge: it is a shaft
+       of light, not a spotlight, and one asymmetric source is what the panel is
+       built around. RTL needs the explicit override — the mirrored base rule
+       carries a higher specificity than this block. */
+    .hero-bg::after {
+        top: -18%;
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(420px, 72%);
+        height: 300px;
+    }
+
+    [dir="rtl"] .hero-bg::after,
+    html[lang="fa"] .hero-bg::after,
+    body.rtl .hero-bg::after {
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
     }
 
     /* RTL: the base rule offsets the visual with a negative `left`, which

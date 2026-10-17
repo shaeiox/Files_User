@@ -215,6 +215,15 @@
     --nav-h: 56px;
     --nav-h-mobile: 52px;
 
+    /* ── Ambient light field (base.css .aura-*) ────────────────────────────
+       Geometry only — every colour lives in the two theme blocks below.
+       D5: the field is static. No keyframes, no shader, no script.
+       `--aura-lattice-pitch` is the fine dot lattice; `--aura-rule-pitch` is
+       the hairline major grid drawn over it. Both are masked to the middle of
+       the viewport (base.css), where the card grid leaves the field visible. */
+    --aura-lattice-pitch: 24px;
+    --aura-rule-pitch: 96px;
+
     /* ── Type scale (Obsidian Kinetic) ── */
     --text-headline-xl: 2.25rem;
     --text-headline-xl-mobile: 1.75rem;
@@ -356,12 +365,108 @@
     --nav-bg: rgba(255, 255, 255, 0.85);
     --input-bg: #f0f0ea;
 
-    /* ─── hero gradient (light mode) — warm paper wash in the accent hue.
-       The D8/I21 freeze that pinned the old iris tint is lifted (D1). ── */
-    --hero-grad: linear-gradient(160deg,
-            oklch(98% 0.018 80) 0%,
-            oklch(100% 0.004 80) 55%,
-            oklch(98% 0.010 80) 100%);
+    /* ─── Ambient light field — one light source, one bounce ───────────────
+       This used to be a single amber bloom at 8% opacity over a flat warm
+       wash: one hue, one strength, one value across the whole viewport — it
+       read as a yellow tint rather than a lit room. The field is now four
+       static layers (D5 — no keyframes, no script): a cool→warm diagonal
+       wash, a two-hue mesh blended into it, a hairline lattice masked to the
+       middle band, and a peripheral falloff. Both mesh hues come
+       from the two palette roles (D2) — amber accent, iris primary action —
+       never a third colour, and --aura-blend composes the mesh *with* the wash
+       so the crossing darkens instead of stacking alpha.
+       rgba() literals are declared first, the color-mix() form second: the
+       same fallback convention base.css uses for engines without color-mix. */
+    --aura-blend: multiply;
+
+    --aura-wash: linear-gradient(168deg,
+            oklch(99.6% 0.002 240) 0%,
+            oklch(98.4% 0.004 240) 34%,
+            oklch(97.2% 0.009 88) 70%,
+            oklch(95.4% 0.013 78) 100%);
+
+    --aura-mesh:
+        radial-gradient(ellipse 58% 44% at 14% 4%, rgba(255, 184, 0, 0.16) 0%, transparent 62%),
+        radial-gradient(ellipse 54% 46% at 90% 94%, rgba(61, 107, 199, 0.13) 0%, transparent 60%),
+        radial-gradient(ellipse 46% 32% at 60% 24%, rgba(255, 226, 176, 0.18) 0%, transparent 68%);
+    --aura-mesh:
+        radial-gradient(ellipse 58% 44% at 14% 4%, color-mix(in srgb, var(--color-ember-pulse) 16%, transparent) 0%, transparent 62%),
+        radial-gradient(ellipse 54% 46% at 90% 94%, color-mix(in srgb, var(--action) 13%, transparent) 0%, transparent 60%),
+        radial-gradient(ellipse 46% 32% at 60% 24%, color-mix(in srgb, var(--text-accent) 18%, transparent) 0%, transparent 68%);
+
+    --aura-falloff: radial-gradient(ellipse 122% 100% at 50% 38%,
+            transparent 0%,
+            transparent 54%,
+            oklch(93.5% 0.007 240) 100%);
+
+    --aura-lattice:
+        linear-gradient(to right, rgba(74, 75, 80, 0.05) 0 1px, transparent 1px) 0 0 / var(--aura-rule-pitch) 100%,
+        linear-gradient(to bottom, rgba(74, 75, 80, 0.05) 0 1px, transparent 1px) 0 0 / 100% var(--aura-rule-pitch),
+        radial-gradient(circle at 50% 50%, rgba(74, 75, 80, 0.09) 0 1px, transparent 1.6px) 0 0 / var(--aura-lattice-pitch) var(--aura-lattice-pitch);
+
+    /* Bloom strengths (base.css). Light mode barely carries a bloom at all —
+       the wash and the lattice do the work; 0.6 × these opacities would read
+       as a stain on paper. Same full-field measurement as the dark block: the
+       worst point of a 1440x900 viewport gives --text 13.76:1, --text-2
+       10.27:1, --text-3 7.83:1, --text-accent 4.96:1 (on the cool corner, the
+       darkest point of the wash). */
+    --aura-bloom-amber: 0.13;
+    /* The cool bloom gets the larger share on paper: it is the half of the
+       field that argues with "everything is yellow". */
+    --aura-bloom-iris: 0.18;
+
+    /* ─── hero panel (light mode) — the same field, brought inside ─────────
+       Three layers replace the old three-stop hue-80 ramp, which was the same
+       yellow at every stop. Cool rim on the logo side, warm source under the
+       beam, near-white diagonal core under the copy. Composed worst case
+       under the copy column — --hero-grad with --hero-sheen, --hero-beam and
+       --hero-sunburst stacked over it, Gaussian blur modelled, containers
+       unclipped (the conservative reading):
+         --text #1f1f23        13.65:1
+         --text-2 #343538      10.19:1
+         --text-3 #514532       7.77:1
+         --text-accent #8a5a00  4.93:1
+       Every role clears the 4.5:1 floor and the panel never drops below
+       oklch(94%). Raising any amber alpha below moves these numbers. */
+    --hero-grad:
+        radial-gradient(ellipse 58% 92% at 100% 0%, rgba(61, 107, 199, 0.10) 0%, transparent 62%),
+        radial-gradient(ellipse 66% 96% at 0% 100%, rgba(255, 184, 0, 0.16) 0%, transparent 64%),
+        linear-gradient(168deg, #ffffff 0%, #fdfdfe 40%, #f9f8f5 72%, #f4f4f7 100%);
+    --hero-grad:
+        radial-gradient(ellipse 58% 92% at 100% 0%, color-mix(in srgb, var(--action) 10%, transparent) 0%, transparent 62%),
+        radial-gradient(ellipse 66% 96% at 0% 100%, color-mix(in srgb, var(--color-ember-pulse) 16%, transparent) 0%, transparent 64%),
+        linear-gradient(168deg, #ffffff 0%, #fdfdfe 40%, #f9f8f5 72%, #f4f4f7 100%);
+
+    /* Hero light sources — the beam (top-left), its sunburst, and the cool
+       bounce on the opposite corner. Blur radii live in home.css; the tiers
+       halve them in performance-modes.css. */
+    --hero-beam: linear-gradient(180deg,
+            rgba(255, 184, 0, 0.18) 0%,
+            rgba(255, 214, 148, 0.075) 52%,
+            rgba(255, 255, 255, 0) 100%);
+    --hero-sunburst: radial-gradient(circle,
+            rgba(255, 184, 0, 0.13) 0%,
+            rgba(255, 232, 196, 0.065) 34%,
+            transparent 70%);
+    --hero-bounce: radial-gradient(circle,
+            rgba(61, 107, 199, 0.12) 0%,
+            transparent 66%);
+    /* Top edge catch-light: the panel reads as a lit surface, not a sticker. */
+    --hero-edge: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    /* Diagonal streak: cool edge → highlight → warm tail, one pass of light
+       across the panel. Faint on paper by design — a white sheen on a
+       near-white panel is only legible as the cool band beside it. */
+    --hero-sheen: linear-gradient(112deg,
+            rgba(61, 107, 199, 0) 0%,
+            rgba(61, 107, 199, 0.05) 26%,
+            rgba(255, 255, 255, 0.72) 44%,
+            rgba(255, 226, 176, 0.10) 64%,
+            rgba(61, 107, 199, 0) 100%);
+    /* Logo halo — warm where the mark sits, cool on the outer rim. */
+    --logo-halo:
+        radial-gradient(circle at 40% 65%, rgba(255, 184, 0, 0.13) 0%, transparent 58%),
+        radial-gradient(circle at 62% 38%, rgba(255, 226, 176, 0.12) 0%, transparent 62%),
+        radial-gradient(circle at 78% 20%, rgba(61, 107, 199, 0.07) 0%, transparent 66%);
 
     /* ─── glow / ambient color ───────────────────────────────────────────── */
     --glow: rgba(255, 184, 0, 0.09);
@@ -476,8 +581,90 @@
     --nav-bg: rgba(27, 27, 31, 0.85);
     --input-bg: rgba(31, 31, 35, 0.75);
 
-    /* — hero gradient — the obsidian void behind the hero (neutral). */
-    --hero-grad: linear-gradient(180deg, #090a0c 0%, #0d0e12 100%);
+    /* — Ambient light field (dark) — an obsidian room with one lamp.
+       Same four layers as light mode, tuned the other way: `screen` so the
+       mesh *adds* light to the void instead of darkening it, and about three
+       times the bloom strengths, because an 8% amber haze over #121316 is
+       invisible. See the light block for the layer contract. */
+    --aura-blend: screen;
+
+    --aura-wash: linear-gradient(168deg,
+            #15171d 0%,
+            #101217 38%,
+            #0c0d11 72%,
+            var(--color-void) 100%);
+
+    --aura-mesh:
+        radial-gradient(ellipse 58% 44% at 14% 4%, rgba(255, 184, 0, 0.13) 0%, transparent 62%),
+        radial-gradient(ellipse 54% 46% at 90% 94%, rgba(61, 107, 199, 0.16) 0%, transparent 60%),
+        radial-gradient(ellipse 46% 32% at 60% 24%, rgba(255, 220, 161, 0.08) 0%, transparent 68%);
+    --aura-mesh:
+        radial-gradient(ellipse 58% 44% at 14% 4%, color-mix(in srgb, var(--color-ember-pulse) 13%, transparent) 0%, transparent 62%),
+        radial-gradient(ellipse 54% 46% at 90% 94%, color-mix(in srgb, var(--action) 16%, transparent) 0%, transparent 60%),
+        radial-gradient(ellipse 46% 32% at 60% 24%, color-mix(in srgb, var(--text-accent) 8%, transparent) 0%, transparent 68%);
+
+    --aura-falloff: radial-gradient(ellipse 122% 100% at 50% 38%,
+            transparent 0%,
+            transparent 48%,
+            rgba(0, 0, 0, 0.55) 100%);
+
+    --aura-lattice:
+        linear-gradient(to right, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px) 0 0 / var(--aura-rule-pitch) 100%,
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px) 0 0 / 100% var(--aura-rule-pitch),
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.07) 0 1px, transparent 1.6px) 0 0 / var(--aura-lattice-pitch) var(--aura-lattice-pitch);
+
+    /* Held at 0.36, not higher: at 0.45 the amber bloom lifted the void to
+       #41361a under its own core and put --text-3 at 4.47:1 — under the
+       floor. Measured on the full field (wash + mesh blended + falloff +
+       both blooms, 1440x900), worst point of the viewport:
+         --text 9.58:1   --text-2 7.24:1   --text-3 4.63:1   --text-accent 9.41:1
+       The cool bloom gets more room than the warm one here because iris
+       darkens toward the void instead of lifting off it. */
+    --aura-bloom-amber: 0.36;
+    --aura-bloom-iris: 0.5;
+
+    /* — hero gradient — the obsidian void behind the hero, now with the same
+       warm-source / cool-bounce split as the page field. Measured the same way
+       as the light block (panel + sheen + beam + sunburst, worst point of the
+       copy column): --text 9.73:1, --text-2 7.35:1, --text-3 4.70:1,
+       --text-accent 9.56:1. The two amber layers are held at 0.19 / 0.115
+       because a dark surface shows their lift far more than a light one: the
+       0.36 beam this replaces was the brightest thing on the page and pushed
+       --text-3 under the 4.5:1 floor wherever it crossed the body copy. */
+    --hero-grad:
+        radial-gradient(ellipse 58% 92% at 100% 0%, rgba(61, 107, 199, 0.16) 0%, transparent 62%),
+        radial-gradient(ellipse 66% 96% at 0% 100%, rgba(255, 184, 0, 0.12) 0%, transparent 64%),
+        linear-gradient(168deg, #0e0f14 0%, #0a0b0e 52%, #101117 100%);
+    --hero-grad:
+        radial-gradient(ellipse 58% 92% at 100% 0%, color-mix(in srgb, var(--action) 16%, transparent) 0%, transparent 62%),
+        radial-gradient(ellipse 66% 96% at 0% 100%, color-mix(in srgb, var(--color-ember-pulse) 12%, transparent) 0%, transparent 64%),
+        linear-gradient(168deg, #0e0f14 0%, #0a0b0e 52%, #101117 100%);
+
+    --hero-beam: linear-gradient(180deg,
+            rgba(255, 184, 0, 0.19) 0%,
+            rgba(255, 214, 148, 0.08) 52%,
+            rgba(255, 255, 255, 0) 100%);
+    --hero-sunburst: radial-gradient(circle,
+            rgba(255, 184, 0, 0.115) 0%,
+            rgba(255, 232, 196, 0.05) 34%,
+            transparent 70%);
+    --hero-bounce: radial-gradient(circle,
+            rgba(61, 107, 199, 0.22) 0%,
+            transparent 66%);
+    --hero-edge: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    /* On obsidian the same streak carries the iridescence: iris → white
+       filament → amber, which is what the dark hero was missing entirely. */
+    --hero-sheen: linear-gradient(112deg,
+            rgba(61, 107, 199, 0) 0%,
+            rgba(61, 107, 199, 0.10) 24%,
+            rgba(255, 255, 255, 0.055) 44%,
+            rgba(255, 184, 0, 0.10) 68%,
+            rgba(255, 184, 0, 0) 100%);
+    /* Logo halo — warm core, iris rim (see the light block). */
+    --logo-halo:
+        radial-gradient(circle at 40% 65%, rgba(255, 184, 0, 0.20) 0%, transparent 55%),
+        radial-gradient(circle at 62% 38%, rgba(255, 220, 161, 0.13) 0%, transparent 60%),
+        radial-gradient(circle at 80% 22%, rgba(61, 107, 199, 0.14) 0%, transparent 68%);
 
     /* — glow tokens — */
     --glow: rgba(255, 184, 0, 0.15);

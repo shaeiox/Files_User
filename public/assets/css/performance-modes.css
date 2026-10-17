@@ -26,26 +26,51 @@
    Strategy: Reduce heavy compositing tasks (blur intensity) and
    slow down infinite background animations to save GPU cycles.
    ─────────────────────────────────────────────────────────────── */
-/* Backdrop glows — Obsidian Kinetic (Phase 2).
+/* Backdrop glows — Obsidian Kinetic (Phase 2, layered field).
    Base blurs are 80px (glow-1) and 100px (glow-2); medium halves them and
-   dims opacity by ~30%. Glows stay STATIC at every tier (D5 — no animation). */
+   dims opacity by ~30%. Glows stay STATIC at every tier (D5 — no animation).
+   The opacities come from --aura-bloom-amber / --aura-bloom-iris, so each
+   tier scales the same two tokens rather than restating a per-theme number. */
 [data-perf="medium"] .aura-glow-1 {
     filter: blur(40px);
     /* Halved from 80px */
-    opacity: 0.42;
-    /* 0.6 x 0.7 */
+    opacity: calc(var(--aura-bloom-amber) * 0.7);
 }
 
 [data-perf="medium"] .aura-glow-2 {
     filter: blur(50px);
     /* Halved from 100px */
-    opacity: 0.28;
-    /* 0.4 x 0.7 */
+    opacity: calc(var(--aura-bloom-iris) * 0.7);
 }
 
+/* Medium drops the blended mesh (four gradient layers + a blend mode over the
+   whole viewport) and the lattice; the wash and the falloff stay, because
+   they cost nothing to composite and carry most of the "not flat" effect. */
 [data-perf="medium"] .aura-base {
-    background: var(--bg);
-    /* Flat — no vignette gradient */
+    background:
+        var(--aura-falloff),
+        var(--aura-wash);
+    background-blend-mode: normal;
+}
+
+[data-perf="medium"] .aura-backdrop::after {
+    display: none;
+}
+
+/* Hero light: same halving as the page field. */
+[data-perf="medium"] .hero-max::after {
+    filter: blur(24px);
+    /* Halved from 44px */
+}
+
+[data-perf="medium"] .hero-bg::before {
+    filter: blur(36px);
+    /* Halved from 72px */
+}
+
+[data-perf="medium"] .hero-bg::after {
+    filter: blur(24px);
+    /* Halved from 48px */
 }
 
 [data-perf="medium"] .nav-bar,
@@ -102,18 +127,21 @@
     border-color: var(--border);
 }
 
-/* Remove ambient background glows entirely */
+/* Remove ambient background glows entirely. The base wash survives: it is one
+   unblurred gradient, so keeping it costs nothing at this tier and the page
+   still does not read as a flat fill. */
 [data-perf="low"] .aura-glow-1,
 [data-perf="low"] .aura-glow-2,
+[data-perf="low"] .aura-backdrop::after,
 [data-perf="low"] .logo-shader {
     display: none;
 }
 
-/* Backdrop falls back to a single flat fill — no blur, no vignette gradient.
-   The Hero-scoped selector above is left untouched: it is frozen per D8/I21,
-   so its low-tier behaviour must not change. */
+/* Backdrop keeps the wash only — no mesh blend, no peripheral falloff.
+   The Hero-scoped rule below is left untouched: it must not change the panel's
+   own fallback behaviour. */
 [data-perf="low"] .aura-base {
-    background: var(--bg);
+    background: var(--aura-wash);
     filter: none !important;
 }
 
@@ -196,8 +224,16 @@
     box-shadow: none !important;
 }
 
-/* Remove decorative layout elements */
-[data-perf="low"] .hero-max::before {
+/* Remove decorative layout elements: the three blurred hero light layers —
+   beam (`.hero-bg::before`), cool bounce (`.hero-bg::after`) and sunburst
+   (`.hero-max::after`). The panel gradient and the sheen stay; neither is
+   filtered, so neither costs anything at this tier.
+   (`.hero-max::before` used to be listed here. No stylesheet ever gave that
+   pseudo-element `content`, so it never generated a box; the beam it was
+   meant to hide has lived on `.hero-bg::before` since the aurora hero.) */
+[data-perf="low"] .hero-bg::before,
+[data-perf="low"] .hero-bg::after,
+[data-perf="low"] .hero-max::after {
     display: none;
 }
 
@@ -234,11 +270,17 @@
     background: var(--bg-card);
 }
 
-/* Nuke all background aesthetics. */
+/* Nuke all background aesthetics: the whole fixed field (wash, mesh, blooms,
+   lattice) and every hero light layer. Hiding `.hero-bg` takes the beam and
+   the cool bounce with it — they are its pseudo-children — so they are not
+   listed. The panel keeps `--hero-grad`, which is a plain background, not an
+   effect. Potato does not inherit the `[data-perf="low"]` rules (the attribute
+   holds one value), so everything that has to go, goes here too. */
 [data-perf="potato"] .aura-glow-1,
 [data-perf="potato"] .aura-glow-2,
 [data-perf="potato"] .logo-shader,
-[data-perf="potato"] .hero-max::before,
+[data-perf="potato"] .hero-bg,
+[data-perf="potato"] .hero-max::after,
 [data-perf="potato"] .aura-backdrop {
     display: none !important;
 }

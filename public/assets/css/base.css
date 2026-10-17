@@ -121,14 +121,22 @@ img {
     }
 }
 
-/* ── Ambient backdrop — Obsidian Kinetic ──────────────────────────────
+/* ── Ambient backdrop — Obsidian Kinetic, a layered light field ─────────
    Pure CSS only, and fully static: no shader, no animation, no script (D5).
-   Layer order: body void -> .aura-base (wash + vignette)
-   -> .aura-glow-1 (amber bloom, top-right) -> .aura-glow-2 (iris bloom,
-   bottom-left). All sit behind .page (z-index 1) and behind .nav (z-index 50).
-   Colours come from --color-ember-pulse (accent) / --action (primary-action hue) via
-   color-mix(), with a literal rgba() declared first as a fallback for
-   engines without color-mix support. */
+   Paint order, bottom to top (pseudo-elements are box-tree children, so
+   ::before would fall *under* .aura-base and ::after over everything):
+     body void
+     → .aura-base        wash, blended mesh, falloff (the room's light)
+     → .aura-glow-1      amber bloom, top-left  — the light source
+     → .aura-glow-2      iris bloom, bottom-right — the bounce off the floor
+     → .aura-backdrop::after  lattice — dot grid + hairline rules, masked to
+                               the middle band where the card grid is
+   All sit behind .page (z-index 1) and behind .nav (z-index 50).
+   Colours come from --color-ember-pulse (accent) and --action (primary action)
+   through the per-theme --aura-* tokens in tokens.css, each with a literal
+   rgba() declared first as a fallback for engines without color-mix support.
+   One hue at one strength is what made this read as a flat yellow wash; the
+   field is now warm→cool across the diagonal and structured by the lattice. */
 .aura-backdrop {
     position: fixed;
     inset: 0;
@@ -137,89 +145,95 @@ img {
     z-index: 0;
 }
 
-/* Base wash + peripheral vignette (depth without an extra element). */
+/* Persian is a first-class locale (STYLEGUIDE §6): the whole field — wash,
+   mesh, both blooms — mirrors under RTL with one transform instead of six
+   mirrored rules. The lattice is symmetric, so it is unaffected. */
+[dir="rtl"] .aura-backdrop,
+html[lang="fa"] .aura-backdrop,
+body.rtl .aura-backdrop {
+    transform: scaleX(-1);
+}
+
+/* Wash + mesh + falloff in one element: `background-blend-mode` composes the
+   mesh *with* the wash (multiply on paper, screen on obsidian) so the two hues
+   cross as light rather than stacking alpha into a stain. */
 .aura-base {
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse 120% 95% at 50% 45%,
-            transparent 0%,
-            transparent 45%,
-            var(--bg) 100%);
+    background:
+        var(--aura-falloff),
+        var(--aura-mesh),
+        var(--aura-wash);
+    /* Five layers, because --aura-mesh is itself a three-gradient list: the
+       falloff sits on top unblended, all three mesh gradients blend with what
+       is underneath, and the wash is the base. */
+    background-blend-mode:
+        normal,
+        var(--aura-blend),
+        var(--aura-blend),
+        var(--aura-blend),
+        normal;
 }
 
 .aura-glow-1 {
     position: absolute;
-    top: -20%;
-    right: -10%;
-    width: 80vw;
-    height: 80vw;
+    top: -18%;
+    left: -14%;
+    width: 72vw;
+    height: 78vh;
     border-radius: 50%;
-    background: radial-gradient(circle at center,
-            rgba(255, 184, 0, 0.10) 0%,
-            rgba(255, 184, 0, 0.04) 40%,
+    background: radial-gradient(circle at 50% 50%,
+            rgba(255, 184, 0, 0.34) 0%,
+            rgba(255, 184, 0, 0.10) 42%,
             transparent 70%);
-    background: radial-gradient(circle at center,
-            color-mix(in srgb, var(--color-ember-pulse) 10%, transparent) 0%,
-            color-mix(in srgb, var(--color-ember-pulse) 4%, transparent) 40%,
+    background: radial-gradient(circle at 50% 50%,
+            color-mix(in srgb, var(--color-ember-pulse) 34%, transparent) 0%,
+            color-mix(in srgb, var(--color-ember-pulse) 10%, transparent) 42%,
             transparent 70%);
     filter: blur(80px);
-    opacity: 0.6;
+    opacity: var(--aura-bloom-amber);
     pointer-events: none;
 }
 
 .aura-glow-2 {
     position: absolute;
-    bottom: -15%;
-    left: -10%;
+    bottom: -22%;
+    right: -16%;
     width: 70vw;
-    height: 70vw;
+    height: 84vh;
     border-radius: 50%;
-    background: radial-gradient(circle at center,
-            rgba(61, 107, 199, 0.07) 0%,
-            transparent 65%);
-    background: radial-gradient(circle at center,
-            color-mix(in srgb, var(--action) 7%, transparent) 0%,
-            transparent 65%);
+    background: radial-gradient(circle at 50% 50%,
+            rgba(61, 107, 199, 0.30) 0%,
+            rgba(61, 107, 199, 0.09) 40%,
+            transparent 68%);
+    background: radial-gradient(circle at 50% 50%,
+            color-mix(in srgb, var(--action) 30%, transparent) 0%,
+            color-mix(in srgb, var(--action) 9%, transparent) 40%,
+            transparent 68%);
     filter: blur(100px);
-    opacity: 0.4;
+    opacity: var(--aura-bloom-iris);
     pointer-events: none;
 }
 
-[data-theme="dark"] .aura-glow-1 {
-    background: radial-gradient(circle at center,
-            rgba(255, 184, 0, 0.10) 0%,
-            rgba(255, 184, 0, 0.04) 40%,
-            transparent 70%);
-    background: radial-gradient(circle at center,
-            color-mix(in srgb, var(--color-ember-pulse) 10%, transparent) 0%,
-            color-mix(in srgb, var(--color-ember-pulse) 4%, transparent) 40%,
-            transparent 70%);
-}
-
-[data-theme="dark"] .aura-glow-2 {
-    background: radial-gradient(circle at center,
-            rgba(61, 107, 199, 0.07) 0%,
-            transparent 65%);
-    background: radial-gradient(circle at center,
-            color-mix(in srgb, var(--action) 7%, transparent) 0%,
-            transparent 65%);
-}
-
-/* Light theme: the obsidian aesthetic is dark-primary, so the backdrop is
-   barely perceptible — a faint warm tint only. */
-[data-theme="light"] .aura-glow-1 {
-    opacity: 0.08;
-}
-
-[data-theme="light"] .aura-glow-2 {
-    opacity: 0.05;
-}
-
-[data-theme="light"] .aura-base {
-    background: radial-gradient(ellipse 120% 95% at 50% 45%,
-            transparent 0%,
-            transparent 55%,
-            var(--bg) 100%);
+/* Lattice — the cheapest layer in the field (no blur, no filter) and the one
+   that keeps the wash from banding on wide, flat monitors. The mask puts its
+   weight in the middle band: the top of the page is covered by the hero panel
+   and the bottom by the footer, so a lattice pinned to the edges would only
+   ever show through the gutters. */
+.aura-backdrop::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--aura-lattice);
+    -webkit-mask-image: radial-gradient(ellipse 132% 96% at 50% 46%,
+            #000 0%,
+            rgba(0, 0, 0, 0.55) 52%,
+            transparent 84%);
+    mask-image: radial-gradient(ellipse 132% 96% at 50% 46%,
+            #000 0%,
+            rgba(0, 0, 0, 0.55) 52%,
+            transparent 84%);
+    pointer-events: none;
 }
 
 /* ── Animations (reduced-motion aware) ── */

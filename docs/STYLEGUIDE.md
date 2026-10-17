@@ -21,14 +21,14 @@ solely by `<link>` order in `public/index.html`. **Order is load-bearing.**
 
 ```
 index.html
-├── 1. tokens.css              (579 L)  @font-face + foundation + semantic tokens
-├── 2. base.css                (433 L)  reset, typography, container, backdrop, motion primitives
+├── 1. tokens.css              (766 L)  @font-face + foundation + semantic tokens
+├── 2. base.css                (447 L)  reset, typography, container, backdrop, motion primitives
 ├── 3. components.css        (1,346 L)  nav, buttons, inputs, cards, footer, controls
-├── 4. home.css              (2,250 L)  home page: hero, cards grid, results, states
+├── 4. home.css              (2,260 L)  home page: hero, cards grid, results, states
 │      route stylesheets, inserted here by router.js on their route only:
 │      browse.css            (2,255 L)  browse split panes, folder tree, table, inspector
 │      release.css             (489 L)  releases page
-├── 5. performance-modes.css   (884 L)  [data-perf] overrides
+├── 5. performance-modes.css   (926 L)  [data-perf] overrides
 └── 6. lenis.css                (26 L)  upstream Lenis requirements
 ```
 
@@ -117,6 +117,35 @@ trust them; they describe the value that is there now, not any value you are abo
 
 ---
 
+### The ambient light field
+
+`base.css` owns one fixed, static backdrop (`.aura-backdrop`, marked up in `public/index.html`);
+`home.css` owns the same field at panel scale inside the hero. Every value resolves to a token
+declared once per theme — the components name the layers, never the colours:
+
+| Layer | Selector | Token(s) | Job |
+|-------|----------|----------|-----|
+| Wash | `.aura-base` | `--aura-wash` | one diagonal: cool at the top, warm at the reading line |
+| Mesh | `.aura-base` | `--aura-mesh`, `--aura-blend` | two blooms in the two palette roles, blended *into* the wash — `multiply` on paper, `screen` on obsidian |
+| Falloff | `.aura-base` | `--aura-falloff` | peripheral darkening, so the wash has an edge |
+| Blooms | `.aura-glow-1`, `.aura-glow-2` | `--aura-bloom-amber`, `--aura-bloom-iris` | the source (block-start, inline-start) and the bounce (block-end, inline-end) |
+| Lattice | `.aura-backdrop::after` | `--aura-lattice`, `--aura-lattice-pitch`, `--aura-rule-pitch` | dot grid + hairline rules, masked to the band the card grid shows through |
+| Hero | `.hero-max`, `.hero-bg`, `.hero-max::after` | `--hero-grad`, `--hero-sheen`, `--hero-beam`, `--hero-bounce`, `--hero-sunburst`, `--hero-edge`, `--logo-halo` | the page's light story repeated inside the panel, so the two agree on where the light comes from |
+
+Three rules keep it from rotting back into one flat colour with a tint:
+
+- **Two hues, one per role** (D2): `--color-ember-pulse` and `--action`. A third hue in the field
+  is a token-contract violation, not a style choice.
+- **Warm and cool have to disagree along an axis.** Every layer names a direction and a strength;
+  a field where all the layers share one colour at one strength is a flat fill with extra steps.
+- **The field is static** (D5): no keyframes, no script. Blur exists at `high` and `medium` only;
+  `low` keeps the wash alone, `potato` hides the backdrop — see §5.
+
+The hero's amber layers are alpha-capped by measurement, not taste: the ratios quoted next to
+`--hero-grad` in each theme block are what `--text`, `--text-2`, `--text-3` and `--text-accent`
+reach at the worst point of the copy column *with* the sheen, beam and sunburst composited under
+them. Raise an alpha and that measurement has to be re-run.
+
 ## 3. Typography
 
 | Token | Family | Use |
@@ -171,8 +200,8 @@ Runtime device classification publishes `data-perf` on `<html>` (see
 | Tier | Effects |
 |------|---------|
 | `high` | Full |
-| `medium` | Blur radii roughly halved; aura reduced |
-| `low` | `backdrop-filter` disabled; aura and logo shader removed; FLIP reorder off |
+| `medium` | Blur radii roughly halved; the backdrop's blended mesh and the lattice dropped; aura blooms dimmed to 70% |
+| `low` | `backdrop-filter` disabled; aura blooms, lattice, hero light layers and logo shader removed (the base wash survives — one unblurred gradient); FLIP reorder off |
 | `potato` | No blur, no shadows, no transitions; reveal, route and hero motion off |
 
 The pre-paint default (inline script in `index.html`) is `high`, the unstyled baseline, so
