@@ -2093,6 +2093,14 @@ body.rtl .logo-shader {
     position: relative; /* containing block for cards animating out (FLIP) */
 }
 
+/* Full HD and wider the page runs full width, so three fixed tracks stretch
+   each card to ~800px. Add tracks instead: cards stay ~400-500px wide. */
+@media (min-width: 1920px) {
+    .resources-grid {
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    }
+}
+
 .resource-card.is-featured {
     grid-column: span 2;
     padding: var(--space-xl);

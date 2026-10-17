@@ -95,6 +95,14 @@ img {
     padding: 16px 0 32px;
 }
 
+/* Full HD and wider: every route fills the viewport (only the gutter remains).
+   Sets max-width directly so it beats the route sheets' --page-max overrides. */
+@media (min-width: 1920px) {
+    .page {
+        max-width: none;
+    }
+}
+
 @media (max-width: 768px) {
     .page {
         --page-gutter: 12px;
