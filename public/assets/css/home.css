@@ -1825,6 +1825,9 @@ body.rtl .logo-shader {
 
 .resource-card {
     padding: var(--space-lg);
+    /* Size container for the cqi-based titles below. The grid track sets the
+       card width, so inline-size containment changes no layout. */
+    container-type: inline-size;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
@@ -1878,6 +1881,10 @@ body.rtl .logo-shader {
 .resource-meta h3 {
     font-family: var(--font);
     font-size: var(--text-body-lg);
+    /* Scale with the card, not the viewport: the same card is ~200px wide
+       on a phone and ~500px on a desktop grid. Browsers without container
+       units keep the fixed size above. */
+    font-size: clamp(var(--text-body-md), 0.75rem + 1.5cqi, var(--text-body-lg));
     font-weight: 600;
     color: var(--text);
 }
@@ -1893,10 +1900,20 @@ body.rtl .logo-shader {
     font-size: var(--text-label-mono-sm);
     color: var(--text-3);
     font-variant-numeric: tabular-nums;
+    /* Narrow cards: the status drops to its own line instead of squeezing
+       the counts. Each chunk stays whole; the margin moves into the gap so a
+       wrapped status lines up with the icon above it. */
+    flex-wrap: wrap;
+    column-gap: 8px;
+    row-gap: 4px;
+}
+
+.resource-bottom > span {
+    white-space: nowrap;
 }
 
 .resource-status {
-    margin-inline-start: 6px;
+    margin-inline-start: 0;
 }
 
 .resource-arrow {
@@ -2117,6 +2134,7 @@ body.rtl .logo-shader {
 
 .resource-card.is-featured .resource-meta h3 {
     font-size: var(--text-headline-sm);
+    font-size: clamp(var(--text-body-lg), 0.75rem + 1.5cqi, var(--text-headline-sm));
 }
 
 .resource-featured-tag {
