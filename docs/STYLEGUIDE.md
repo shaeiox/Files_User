@@ -21,13 +21,13 @@ solely by `<link>` order in `public/index.html`. **Order is load-bearing.**
 
 ```
 index.html
-├── 1. tokens.css              (574 L)  @font-face + foundation + semantic tokens
-├── 2. base.css                (423 L)  reset, typography, container, backdrop, motion primitives
+├── 1. tokens.css              (579 L)  @font-face + foundation + semantic tokens
+├── 2. base.css                (425 L)  reset, typography, container, backdrop, motion primitives
 ├── 3. components.css        (1,346 L)  nav, buttons, inputs, cards, footer, controls
 ├── 4. home.css              (2,224 L)  home page: hero, cards grid, results, states
 │      route stylesheets, inserted here by router.js on their route only:
-│      browse.css            (1,386 L)  browse table, breadcrumbs, row grid, inspector
-│      release.css             (482 L)  releases page
+│      browse.css            (1,403 L)  browse table, breadcrumbs, row grid, inspector
+│      release.css             (489 L)  releases page
 ├── 5. performance-modes.css   (884 L)  [data-perf] overrides
 └── 6. lenis.css                (26 L)  upstream Lenis requirements
 ```
@@ -35,7 +35,7 @@ index.html
 | Layer | Owns |
 |-------|------|
 | `tokens.css` | Every design decision as a named custom property. No component selectors. |
-| `base.css` | Reset, body typography, the shared page container, ambient backdrop. |
+| `base.css` | Reset, body typography, the shared page container, ambient backdrop. The container is `100%` minus `--page-gutter` per side, capped at `--page-max` (1400px); `browse.css` and `release.css` raise `--page-max` to 2560px on their route only. |
 | `components.css` | Reusable UI: navbar, buttons, theme toggle, language pill, inputs, chips, cards, footer. |
 | `home.js`'s `home.css` | Home page composition only. |
 | `browse.css` | Browse page only; loaded by `router.js` when `/browse` is entered. |

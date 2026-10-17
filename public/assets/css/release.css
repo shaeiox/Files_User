@@ -5,6 +5,13 @@
    monospace only for real code (commands, digests, file names).
    ═══════════════════════════════════════════════════════════════ */
 
+/* Data-dense route: fill the viewport up to an ultra-wide ceiling. This sheet is
+   disabled off-route by router.js, so Home keeps the 1400px default
+   (fluid-full-width-layout D1/D3). */
+.page {
+    --page-max: 2560px;
+}
+
 /* Card separation: an edge a step stronger than --border, a hairline top
    highlight and the shared lift shadow, so cards read clearly off the page
    ground in both themes (Browse cards use the same 1px-edge convention). */

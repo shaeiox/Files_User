@@ -34,12 +34,12 @@ const Router = (function () {
             load: async () => HomePage,
         },
         browse: {
-            css: "/assets/css/browse.css?v=4.3.6",
-            load: async () => (await import("/assets/js/browse.js?v=4.3.6")).BrowsePage,
+            css: "/assets/css/browse.css?v=4.4.0",
+            load: async () => (await import("/assets/js/browse.js?v=4.4.0")).BrowsePage,
         },
         release: {
-            css: "/assets/css/release.css?v=4.3.6",
-            load: async () => (await import("/assets/js/releases.js?v=4.3.6")).ReleasePage,
+            css: "/assets/css/release.css?v=4.4.0",
+            load: async () => (await import("/assets/js/releases.js?v=4.4.0")).ReleasePage,
         },
     };
 

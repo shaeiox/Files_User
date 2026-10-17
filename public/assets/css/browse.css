@@ -18,6 +18,13 @@
    the fixed 26px that matches `.f-action { width: 26px }`.
    ═══════════════════════════════════════════════════════════════════════════════ */
 
+/* Data-dense route: fill the viewport up to an ultra-wide ceiling. This sheet is
+   disabled off-route by router.js, so Home keeps the 1400px default
+   (fluid-full-width-layout D1/D3). */
+.page {
+    --page-max: 2560px;
+}
+
 /* ── LAYOUT ROOT ───────────────────────────────────────────────────────── */
 .browse-layout {
     display: flex;
@@ -1298,6 +1305,16 @@
 }
 
 /* ── RESPONSIVE ────────────────────────────────────────────────────────── */
+/* Wide screens: the type/modified/size tracks grow with the viewport instead of
+   handing every extra pixel to the name track (fluid-full-width-layout D4).
+   Header and rows still share this one rule, so their boundaries stay identical;
+   the 26px action track is unchanged (see the contract above). */
+@media (min-width: 1600px) {
+    .file-tbl .trow {
+        grid-template-columns: 36px 40px minmax(0, 1fr) clamp(90px, 6vw, 140px) clamp(160px, 10vw, 220px) clamp(90px, 6vw, 140px) 26px;
+    }
+}
+
 @media (max-width: 900px) {
     .browse-search,
     .browse-search:focus-within {

@@ -82,20 +82,22 @@ img {
 
 /* ── Page container — fluid enterprise layout ──
    One shared container: navbar, hero, and every section align to it.
-   ui-craft-elevation 4.1: capped at 1400px (was 1720px). At 1720px the hero
-   text and its visual sat at opposite ends of an empty canvas. */
+   Width = viewport minus --page-gutter each side, capped at --page-max.
+   Home keeps the 1400px default (ui-craft-elevation 4.1: wider leaves an
+   empty band in the hero); browse.css and release.css raise --page-max
+   while their route is shown (fluid-full-width-layout). */
 .page {
     position: relative;
     z-index: 1;
-    width: calc(100% - 48px);
-    max-width: 1400px;
+    width: calc(100% - 2 * var(--page-gutter));
+    max-width: var(--page-max);
     margin: 0 auto;
     padding: 16px 0 32px;
 }
 
 @media (max-width: 768px) {
     .page {
-        width: calc(100% - 24px);
+        --page-gutter: 12px;
         padding: 12px 0 24px;
     }
 }
@@ -106,7 +108,7 @@ img {
    overflow. */
 @media (max-width: 480px) {
     .page {
-        width: calc(100% - 16px);
+        --page-gutter: 8px;
         padding: 10px 0 20px;
     }
 }

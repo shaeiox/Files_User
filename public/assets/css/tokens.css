@@ -207,6 +207,11 @@
     --z-toast: 99999;
     --z-modal: 999999;
 
+    /* Page container (fluid-full-width-layout D1/D2). Route stylesheets
+       override --page-max on .page while their route is shown. */
+    --page-max: 1400px;
+    --page-gutter: clamp(24px, 2.5vw, 48px);
+
     --nav-h: 56px;
     --nav-h-mobile: 52px;
 
