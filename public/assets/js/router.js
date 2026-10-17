@@ -20,6 +20,7 @@ const Router = (function () {
     // Internal State
     let currentPath = window.location.pathname;
     let navToken = 0;
+    let currentRoute = null; // route of the view now in #app
 
     function resolveRoute(path) {
         if (path === "/" || path === "/index.html") return "home";
@@ -29,17 +30,21 @@ const Router = (function () {
     }
 
     /* ── Route table: one explicit handle per route (no bare globals) ── */
+    const loadBrowse = async () => (await import("/assets/js/browse.js?v=4.4.2")).BrowsePage;
     const ROUTES = {
+        // Home embeds the Browse explorer below its hero, so it needs the same
+        // module and stylesheet (browse-split-explorer: home embed).
         home: {
-            load: async () => HomePage,
+            css: "/assets/css/browse.css?v=4.4.2",
+            load: async () => { HomePage.useBrowse(await loadBrowse()); return HomePage; },
         },
         browse: {
-            css: "/assets/css/browse.css?v=4.4.1",
-            load: async () => (await import("/assets/js/browse.js?v=4.4.1")).BrowsePage,
+            css: "/assets/css/browse.css?v=4.4.2",
+            load: loadBrowse,
         },
         release: {
-            css: "/assets/css/release.css?v=4.4.1",
-            load: async () => (await import("/assets/js/releases.js?v=4.4.1")).ReleasePage,
+            css: "/assets/css/release.css?v=4.4.2",
+            load: async () => (await import("/assets/js/releases.js?v=4.4.2")).ReleasePage,
         },
     };
 
@@ -117,10 +122,7 @@ const Router = (function () {
         const sig = JSON.stringify(folders);
         let prev = null;
         try { prev = sessionStorage.getItem("cav_nav_sig"); sessionStorage.setItem("cav_nav_sig", sig); } catch { /* storage blocked */ }
-        if (prev !== null && prev !== sig) {
-            ResourceService.clearCache();
-            if (currentPath === "/") HomePage.refreshResources();
-        }
+        if (prev !== null && prev !== sig) ResourceService.clearCache();
 
         group.querySelectorAll("[data-nav-folder]").forEach(el => el.remove());
         if (!folders.length) return;
@@ -170,10 +172,11 @@ const Router = (function () {
     }
 
     /** Commits the destination view. Runs inside the View Transition update. */
-    function commit(page, route, path) {
+    function commit(page, route, path, sameShell) {
         if (typeof Motion !== "undefined") Motion.teardown(); // outgoing observers
         activateStylesheet(ROUTES[route].css);
         page.render(app, path);
+        currentRoute = route;
 
         if (typeof applyLang === "function") applyLang(getLang());
 
@@ -182,7 +185,13 @@ const Router = (function () {
         syncNavTab(path);
         loadNavFolders(); // also catches admin navbar changes made since the last page
 
-        window.scrollTo({ top: 0, behavior: "instant" });
+        // Folder to folder inside Browse keeps the page where it is, unless the
+        // user has scrolled past the top of the panes (browse-split-explorer D4).
+        if (!sameShell) window.scrollTo({ top: 0, behavior: "instant" });
+        else {
+            const top = Math.max(0, app.getBoundingClientRect().top + window.scrollY - app.offsetTop);
+            if (window.scrollY > top) window.scrollTo({ top, behavior: "instant" });
+        }
         if (typeof Motion !== "undefined") Motion.reveal(app);
     }
 
@@ -215,18 +224,22 @@ const Router = (function () {
         }
         if (token !== navToken) return; // a newer navigation superseded this one
 
+        // Browse → Browse keeps its tree pane mounted; only the centre pane
+        // changes and animates itself, so the whole-view swap is skipped.
+        const sameShell = route === "browse" && currentRoute === "browse";
+
         // Nothing to transition from on the first render after a full load.
-        const animate = app.childElementCount > 0 && typeof Motion !== "undefined" && Motion.allowsMotion();
+        const animate = !sameShell && app.childElementCount > 0 && typeof Motion !== "undefined" && Motion.allowsMotion();
         if (animate && typeof document.startViewTransition === "function") {
             // A skipped transition (hidden tab, a newer one) still runs the
             // update; only its promises reject, so they must not go unhandled.
-            const vt = document.startViewTransition(() => commit(page, route, path));
+            const vt = document.startViewTransition(() => commit(page, route, path, false));
             vt.ready.catch(() => { });
             vt.finished.catch(() => { });
             return;
         }
 
-        commit(page, route, path);
+        commit(page, route, path, sameShell);
         if (animate) {
             app.classList.remove("route-enter");
             void app.offsetWidth; // restart the entrance on back-to-back navigations

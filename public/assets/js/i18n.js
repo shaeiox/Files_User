@@ -235,6 +235,21 @@ const i18n = {
         errorServerLoad: "Failed to load directory.",
         errorServerSub: "Network or server error.",
 
+        // Browse folder tree and panes (browse-split-explorer)
+        treeTitle: "Folders",
+        treeCollapse: "Collapse folders",
+        treeExpand: "Show folders",
+        treeRefresh: "Refresh folders",
+        treeLoading: "Loading…",
+        treeRetry: "Retry",
+        treeLoadError: "Couldn't load",
+        treeEmpty: "Nothing published yet",
+        foldersDrawer: "Folders",
+        resizeTree: "Resize folders panel",
+        resizeInspector: "Resize details panel",
+        fullScreen: "Full screen",
+        exitFullScreen: "Exit full screen",
+
         // Enterprise Footer (markup: Phase 5 / D10; keys: Phase 8)
         "footer.about": "CloudAvid builds virtualization and cloud infrastructure software and supports the teams that run it. This portal is where those release packages, images and templates are published.",
         "footer.linksTitle": "Useful Links",
@@ -482,6 +497,21 @@ const i18n = {
         btnBackPortal: "بازگشت به مرکز دانلود",
         errorServerLoad: "خطا در بارگذاری مسیر.",
         errorServerSub: "ارتباط با سرور قطع شده است.",
+
+        // Browse folder tree and panes (browse-split-explorer)
+        treeTitle: "پوشه‌ها",
+        treeCollapse: "جمع کردن پوشه‌ها",
+        treeExpand: "نمایش پوشه‌ها",
+        treeRefresh: "بازخوانی پوشه‌ها",
+        treeLoading: "در حال بارگذاری…",
+        treeRetry: "تلاش دوباره",
+        treeLoadError: "بارگذاری نشد",
+        treeEmpty: "هنوز چیزی منتشر نشده است",
+        foldersDrawer: "پوشه‌ها",
+        resizeTree: "تغییر اندازه پنل پوشه‌ها",
+        resizeInspector: "تغییر اندازه پنل جزئیات",
+        fullScreen: "تمام صفحه",
+        exitFullScreen: "خروج از تمام صفحه",
         // Enterprise Footer (markup: Phase 5 / D10; keys: Phase 8)
         "footer.about": "کلودآوید نرم‌افزارهای مجازی‌سازی و زیرساخت ابری می‌سازد و از تیم‌هایی که آن‌ها را راهبری می‌کنند پشتیبانی می‌کند. بسته‌های انتشار، ایمیج‌ها و قالب‌ها در همین پورتال منتشر می‌شوند.",
         "footer.linksTitle": "لینک‌های کاربردی",

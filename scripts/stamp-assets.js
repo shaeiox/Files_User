@@ -30,6 +30,7 @@ const TARGETS = [
     ['public/assets/js/router.js', /("\/assets\/(?:css|js)\/[^"?]+\.(?:css|js))(?:\?v=[^"]*)?"/g],
     ['public/assets/js/browse.js', /(from "\.\/[^"?]+\.js)(?:\?v=[^"]*)?"/g],
     ['public/assets/js/file-inspector.js', /(from "\.\/[^"?]+\.js)(?:\?v=[^"]*)?"/g],
+    ['public/assets/js/browse-tree.js', /(from "\.\/[^"?]+\.js)(?:\?v=[^"]*)?"/g],
 ];
 
 function stamp() {

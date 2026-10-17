@@ -39,8 +39,8 @@
  */
 
 // ES module, imported by router.js when its route is entered (ui-craft-elevation 5.2).
-import { BrowseIcons } from "./browse-icons.js?v=4.4.1";
-import { BulkDownload } from "./bulk-download.js?v=4.4.1";
+import { BrowseIcons } from "./browse-icons.js?v=4.4.2";
+import { BulkDownload } from "./bulk-download.js?v=4.4.2";
 
 const FileInspector = (function () {
     'use strict';
@@ -194,7 +194,7 @@ const FileInspector = (function () {
                 ? `${Number(item.size).toLocaleString(lang() === "fa" ? "fa-IR" : "en-US")} ${d.bytes || "bytes"} · ${humanSize(item.size)}`
                 : (d.folderSizeUnknown || "—")],
             [d.modified || "Modified", fmtDate(item.modified)],
-            [d.path || "Path", item.relPath],
+            [d.path || "Path", item.relPath, true],
         ];
 
         return `
@@ -225,8 +225,10 @@ const FileInspector = (function () {
       </div>` : ""}
 
       <dl class="insp-specs">
-        ${rows.map(([k, v]) => `
-          <div class="insp-spec"><dt>${escapeHtml(k)}</dt><dd title="${escapeHtml(String(v))}">${escapeHtml(String(v))}</dd></div>`).join("")}
+        ${rows.map(([k, v, isPath]) => `
+          <div class="insp-spec"><dt>${escapeHtml(k)}</dt><dd title="${escapeHtml(String(v))}">${
+            // A path wraps at its separators, not in the middle of a name.
+            isPath ? escapeHtml(String(v)).replace(/\//g, "/<wbr>") : escapeHtml(String(v))}</dd></div>`).join("")}
       </dl>
 
       ${isFile ? `

@@ -49,6 +49,34 @@
   class="bg-surface font-body-md text-on-surface min-h-screen flex flex-col selection:bg-primary-container selection:text-on-primary-container">
   <main class="w-full bg-surface flex-1">
     <div class="max-w-[1600px] mx-auto px-6 py-4">
+      <!-- Three-pane reference (browse-split-explorer): tree · handle · centre. The
+           inspector column further down sits behind a second handle the same way. -->
+      <div class="grid grid-cols-[272px_16px_minmax(0,1fr)] items-start">
+      <aside class="sticky top-4 h-[calc(100vh-2rem)] bg-surface-container-lowest rounded-xl flex flex-col overflow-hidden"
+        aria-label="Folders">
+        <div class="flex items-center gap-1 px-3 pt-3 pb-2">
+          <a class="flex-1 px-1.5 py-1 rounded-md font-semibold text-on-surface" href="#">Folders</a>
+          <button class="w-7 h-7 rounded-md text-outline" aria-label="Refresh folders">⟳</button>
+          <button class="w-7 h-7 rounded-md text-outline" aria-label="Collapse folders">▥</button>
+        </div>
+        <ul role="tree" class="relative px-1.5 text-sm text-on-surface-variant">
+          <li role="treeitem" aria-expanded="false" class="h-8 flex items-center gap-1.5 px-1.5 rounded-md">› AutoLogger</li>
+          <li role="treeitem" aria-expanded="true" class="flex flex-col">
+            <span class="h-8 flex items-center gap-1.5 px-1.5">⌄ release</span>
+            <ul role="group">
+              <li role="treeitem" aria-current="page"
+                class="h-8 flex items-center gap-1.5 ps-6 rounded-md bg-primary-container/15 text-primary font-semibold border-s-[3px] border-primary-container">
+                › v2rayN-windows-64</li>
+              <li role="treeitem" class="h-8 flex items-center gap-1.5 ps-6 text-outline">checksums.txt</li>
+            </ul>
+          </li>
+          <li role="treeitem" aria-expanded="false" class="h-8 flex items-center gap-1.5 px-1.5">› tmp</li>
+        </ul>
+      </aside>
+      <div role="separator" aria-orientation="vertical" aria-label="Resize folders panel" tabindex="0"
+        class="sticky top-4 h-[calc(100vh-2rem)] cursor-col-resize flex justify-center">
+        <span class="my-6 w-0.5 rounded bg-surface-variant"></span>
+      </div>
       <div class="flex flex-col w-full gap-5 pb-16">
         <!-- Top Navigation & Package Metadata Context Card -->
         <div class="w-full bg-surface-container-low rounded-xl p-5 shadow-lg flex flex-col gap-4">
@@ -794,6 +822,7 @@
             <span class="text-on-surface-variant">Filter</span>
           </div>
         </div>
+      </div>
       </div>
       <script>
         // Simple micro-interactions for key shortcut focus & copy notifications

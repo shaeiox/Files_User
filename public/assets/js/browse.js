@@ -38,9 +38,12 @@
  */
 
 // ES module, imported by router.js when its route is entered (ui-craft-elevation 5.2).
-import { BrowseIcons } from "./browse-icons.js?v=4.4.1";
-import { BulkDownload } from "./bulk-download.js?v=4.4.1";
-import { FileInspector } from "./file-inspector.js?v=4.4.1";
+import { BrowseIcons } from "./browse-icons.js?v=4.4.2";
+import { BulkDownload } from "./bulk-download.js?v=4.4.2";
+import { FileInspector } from "./file-inspector.js?v=4.4.2";
+import { BrowseTree } from "./browse-tree.js?v=4.4.2";
+import { PaneResize } from "./pane-resize.js?v=4.4.2";
+import { mapEntry, isHidden, toEntries } from "./browse-entries.js?v=4.4.2";
 
 const BrowsePage = (function () {
     'use strict';
@@ -70,23 +73,33 @@ const BrowsePage = (function () {
     /** @type {number} Guards against out-of-order search responses */
     let searchSeq = 0;
 
-    /** @brief Maps an API entry (listing or search hit) to a table row model. */
-    function mapEntry(x, relPath) {
-        return {
-            name: String(x.name),
-            relPath: x.path || (relPath ? relPath.replace(/\/+$/, "") + "/" + x.name : x.name),
-            type: x.type === "directory" ? "directory" : "file",
-            size: Number(x.size || 0),
-            modified: x.mtime || x.modified || x.time || 0,
-            // Admin policy: visible by name only until the visitor signs in.
-            locked: x.locked === true,
-            // Admin policy "view" level: listed, but not downloadable.
-            viewOnly: x.viewOnly === true
-        };
-    }
-
     /** @type {string} Active extension chip ('' means no extension filter) */
     let activeExt = "";
+
+    /** @type {string|null} File to select once its folder's rows render (tree file activation) */
+    let pendingSelect = null;
+
+    /** @type {number} Depth of the previous folder, for the centre pane's entrance direction */
+    let lastDepth = -1;
+
+    /** Pane defaults and limits (browse-explorer: resizable panes). */
+    const TREE_DEF = 272, TREE_MIN = 200, RAIL_W = 56, CENTRE_MIN = 480, HANDLE_W = 16;
+    const INSP_DEF = 340, INSP_MIN = 300, INSP_MAX = 520;
+
+    /** "/browse/a%20b/c/" → "a b/c": decoded, so it matches the server's entry paths. */
+    const relOf = (p) => p.replace(/^\/browse\/?/, "").split("/").filter(Boolean)
+        .map(s => { try { return decodeURIComponent(s); } catch { return s; } }).join("/");
+    const dictNow = () => (typeof window.getDict === 'function' ? window.getDict() : getDict());
+
+    /** Embedded on the home page: folder hops stay in place; "Full screen" opens the route. */
+    let embedded = false;
+    let host = null;
+
+    /** @brief Opens folder `rel`: in place when embedded, through the router otherwise. */
+    function go(rel) {
+        if (embedded) render(host, ResourceService.browseHref(rel), { embedded: true });
+        else Router.navigate(ResourceService.browseHref(rel));
+    }
 
     /* ═══════════════════════════════════════════════════════════════════════════════
      * MAIN RENDERER
@@ -96,9 +109,12 @@ const BrowsePage = (function () {
      * @brief   Initializes and renders the Browse page shell.
      * @param   {HTMLElement} container  The DOM element to render into.
      * @param   {string} path            The requested browse path (e.g. "/browse/el9").
+     * @param   {{embedded?: boolean}} [opts]  embedded: rendered inside the home page.
      */
-    function render(container, path) {
+    function render(container, path, opts = {}) {
         const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
+        embedded = !!opts.embedded;
+        host = container;
 
         // 1. Reset state for the new path navigation
         currentPath = path.endsWith("/") ? path : path + "/";
@@ -112,15 +128,35 @@ const BrowsePage = (function () {
         searchSeq++;
         activeExt = "";
 
-        document.title = d.browseTitle || "Downloads • CloudAvid";
+        if (!embedded) document.title = d.browseTitle || "Downloads • CloudAvid";
 
-        // 2. Inject Page Shell (Context header, Toolbar, Table + Inspector)
-        container.innerHTML = `
-      <div class="browse-layout anim-fade-up">
+        // Entrance direction for the centre rows: deeper enters from the reading end.
+        const depth = relOf(currentPath).split("/").filter(Boolean).length;
+        const enterDir = lastDepth < 0 || depth === lastDepth ? "" : depth > lastDepth ? "end" : "start";
+        lastDepth = depth;
+
+        // 2. Centre pane (context header, toolbar, table + inspector). The tree pane
+        //    beside it is built once and survives folder navigation.
+        const centre = `
+      <div class="browse-layout">
 
         <!-- CONTEXT HEADER -->
         <header class="browse-ctx">
-          <nav class="crumbs" id="breadcrumb" aria-label="${d.breadcrumb || "Breadcrumb"}"></nav>
+          <div class="browse-ctx-top">
+            <button type="button" class="tree-drawer-btn" id="treeDrawerBtn" aria-controls="treePane" aria-expanded="false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"/></svg>
+              <span>${d.foldersDrawer || "Folders"}</span>
+            </button>
+            <nav class="crumbs" id="breadcrumb" aria-label="${d.breadcrumb || "Breadcrumb"}"></nav>
+            <button type="button" class="browse-full-btn" id="browseFullBtn"
+              aria-label="${embedded ? (d.fullScreen || "Full screen") : (d.exitFullScreen || "Exit full screen")}"
+              title="${embedded ? (d.fullScreen || "Full screen") : (d.exitFullScreen || "Exit full screen")}">
+              ${embedded
+                ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>'
+                : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>'}
+              <span>${embedded ? (d.fullScreen || "Full screen") : (d.exitFullScreen || "Exit full screen")}</span>
+            </button>
+          </div>
           <div class="browse-title-row">
             <div class="browse-title-left">
               <div class="browse-name-line">
@@ -197,7 +233,9 @@ const BrowsePage = (function () {
 
         <!-- BODY: table + inspector column -->
         <div class="browse-body" id="browseBody">
-          <section class="file-tbl" id="tableContainer">
+          <!-- data-lenis-prevent: the table and the card scroll themselves; smooth
+               page scrolling (Lenis) must not take their wheel events. -->
+          <section class="file-tbl" id="tableContainer" data-lenis-prevent>
             <div class="trow thead">
               <div class="c-select"><input type="checkbox" id="selectAll" aria-label="${d.selectAll || "Select all"}" /></div>
               <div class="c-icon"></div>
@@ -236,11 +274,30 @@ const BrowsePage = (function () {
             </div>
           </section>
 
-          <aside class="browse-inspector" id="inspector" aria-live="polite"></aside>
+          <div class="pane-handle insp-handle" id="inspHandle" role="separator" tabindex="0"
+            aria-orientation="vertical" aria-controls="inspector" aria-label="${d.resizeInspector || "Resize details panel"}"></div>
+          <aside class="browse-inspector" id="inspector" aria-live="polite" data-lenis-prevent></aside>
         </div>
 
       </div>
     `;
+
+        // Reuse only this container's own shell: on Home → Browse the old home
+        // markup (with its embedded shell) is still inside #app.
+        const shell = container.querySelector(":scope > .browse-split");
+        let centreEl;
+        if (shell && shell.classList.contains("is-embedded") === embedded && BrowseTree.isMounted()) {
+            centreEl = shell.querySelector("#browseCenter");
+            centreEl.innerHTML = centre;
+        } else {
+            container.innerHTML = shellHtml(d, centre);
+            centreEl = container.querySelector("#browseCenter");
+            mountShell(container.querySelector(".browse-split"));
+        }
+        centreEl.dataset.enter = enterDir;
+        bindDrawerButton();
+        bindFullScreenButton();
+        bindInspectorHandle();
 
         // 3. Initialize components
         buildCrumbs();
@@ -248,13 +305,200 @@ const BrowsePage = (function () {
         // is dropped on every navigation (BulkDownload owns the selection set).
         if (typeof BulkDownload !== "undefined") {
             BulkDownload.clear();
-            BulkDownload.setDirectory(currentPath.replace(/^\/browse\/?/, ""));
+            BulkDownload.setDirectory(relOf(currentPath));
         }
         bindEvents();
         if (typeof BulkDownload !== "undefined") BulkDownload.mount();
         if (typeof FileInspector !== "undefined") FileInspector.mount();
         renderSkeletons();
+        // The table's listing goes first so the tree reuses the same request.
         fetchList();
+        BrowseTree.setCurrent(relOf(currentPath));
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════════
+     * SPLIT SHELL — tree pane · handle · centre pane (browse-explorer)
+     * ═══════════════════════════════════════════════════════════════════════════════ */
+
+    function shellHtml(d, centre) {
+        const saved = PaneResize.load();
+        return `
+      <div class="browse-split${saved.collapsed ? " is-collapsed" : ""}${embedded ? " is-embedded" : ""}" style="--tree-w:${Number(saved.tree) || TREE_DEF}px">
+        <aside class="browse-tree-pane" id="treePane" aria-label="${d.treeTitle || "Folders"}" data-i18n-aria="treeTitle"></aside>
+        <div class="pane-handle tree-handle" id="treeHandle" role="separator" tabindex="0"
+          aria-orientation="vertical" aria-controls="treePane" aria-label="${d.resizeTree || "Resize folders panel"}" data-i18n-aria="resizeTree"></div>
+        <div class="browse-center" id="browseCenter">${centre}</div>
+        <div class="tree-scrim" id="treeScrim" hidden></div>
+      </div>`;
+    }
+
+    /** @brief One-time wiring of the persistent half of the shell. */
+    function mountShell(split) {
+        const pane = split.querySelector("#treePane");
+
+        BrowseTree.mount(pane, {
+            onActivate: onTreeActivate,
+            onCollapse: () => setCollapsed(!split.classList.contains("is-collapsed")),
+        });
+        syncCollapseBtn(split);
+
+        const tree = PaneResize.attach(split.querySelector("#treeHandle"), {
+            host: split, prop: "--tree-w", key: "tree", def: TREE_DEF,
+            range: () => {
+                const w = split.clientWidth;
+                const insp = document.querySelector("#browseBody.has-inspector") ? (PaneResize.load().insp || INSP_DEF) + HANDLE_W : 0;
+                return [TREE_MIN, Math.min(w * 0.4, w - CENTRE_MIN - HANDLE_W - insp)];
+            },
+        });
+        // Widths stored on a large monitor are re-clamped on a smaller one.
+        window.addEventListener("resize", () => { if (split.isConnected) tree.set(tree.get()); });
+
+        split.querySelector("#treeScrim").addEventListener("click", () => setDrawer(false));
+        drawerMq.addEventListener("change", () => { if (!drawerMq.matches) setDrawer(false); syncInert(); });
+        syncInert();
+        pane.addEventListener("keydown", onDrawerKeydown);
+        // The pane title links to the root; following it closes the drawer too.
+        pane.addEventListener("click", (e) => { if (e.target.closest("a[href]")) setDrawer(false); });
+
+        // Embedded on the home page: every in-pane folder link (table rows, breadcrumb,
+        // tree title) opens in place instead of leaving the page. Bubble phase on the
+        // shell runs before the router's document listener, which this stops.
+        split.addEventListener("click", (e) => {
+            if (!split.classList.contains("is-embedded") || e.defaultPrevented) return;
+            const a = e.target.closest("a[href]");
+            if (!a || a.hasAttribute("data-file") || a.target === "_blank") return;
+            const url = new URL(a.href, location.origin);
+            if (url.origin !== location.origin || !(url.pathname === "/" || url.pathname.startsWith("/browse"))) return;
+            e.preventDefault();
+            e.stopPropagation();
+            go(relOf(url.pathname));
+        });
+    }
+
+    function bindFullScreenButton() {
+        const btn = document.getElementById("browseFullBtn");
+        if (!btn) return;
+        // Home → full Browse route; the router's View Transition morphs the shell
+        // (shared view-transition-name) up into place. Exit morphs it back.
+        btn.addEventListener("click", () => Router.navigate(embedded ? ResourceService.browseHref(relOf(currentPath)) : "/"));
+    }
+
+    function setCollapsed(on) {
+        const split = document.querySelector(".browse-split");
+        if (!split) return;
+        split.classList.toggle("is-collapsed", on);
+        PaneResize.save({ collapsed: on });
+        syncCollapseBtn(split);
+    }
+
+    function syncCollapseBtn(split) {
+        const d = dictNow();
+        const btn = split.querySelector("#treeCollapse");
+        if (!btn) return;
+        const collapsed = split.classList.contains("is-collapsed");
+        const label = collapsed ? (d.treeExpand || "Show folders") : (d.treeCollapse || "Collapse folders");
+        btn.setAttribute("aria-expanded", String(!collapsed));
+        btn.setAttribute("aria-label", label);
+        btn.title = label;
+    }
+
+    /** @brief Tree activation: folders navigate, files open their folder and select the file. */
+    function onTreeActivate(entry) {
+        if (entry.locked) {
+            FileActions.signIn(() => entry.type === "directory" ? go(entry.relPath) : Router.refresh());
+            return;
+        }
+        const folder = entry.type === "directory" ? entry.relPath
+            : entry.relPath.includes("/") ? entry.relPath.slice(0, entry.relPath.lastIndexOf("/")) : "";
+        if (entry.type === "file") pendingSelect = entry.relPath;
+        const fromDrawer = !!document.querySelector(".browse-split.drawer-open");
+        setDrawer(false);
+        if (folder === relOf(currentPath)) {
+            if (pendingSelect) applyPendingSelect();
+            return;
+        }
+        // The navigation re-renders the centre header, so focus its new Folders button.
+        drawerFocusPending = fromDrawer;
+        go(folder);
+    }
+
+    function applyPendingSelect() {
+        const rel = pendingSelect;
+        pendingSelect = null;
+        if (!rel || typeof BulkDownload === "undefined") return;
+        const row = [...document.querySelectorAll("#rows .trow")].find(r => r.dataset.rel === rel);
+        if (!row) return;
+        BulkDownload.clear();
+        BulkDownload.toggle(rel, true);
+        row.focus();
+        row.scrollIntoView({ block: "nearest" });
+    }
+
+    /* ── Drawer (narrow viewports) ── */
+
+    let drawerReturn = null;
+    let drawerFocusPending = false;
+    const drawerMq = window.matchMedia("(max-width: 767px)");
+
+    /** @brief A closed drawer is inert; on wider screens the pane is always live. */
+    function syncInert() {
+        const split = document.querySelector(".browse-split");
+        const pane = split && split.querySelector("#treePane");
+        if (pane) pane.inert = drawerMq.matches && !split.classList.contains("drawer-open");
+    }
+
+    function bindDrawerButton() {
+        const btn = document.getElementById("treeDrawerBtn");
+        if (!btn) return;
+        btn.addEventListener("click", () => setDrawer(true));
+        if (drawerFocusPending) { drawerFocusPending = false; btn.focus({ preventScroll: true }); }
+    }
+
+    function setDrawer(open) {
+        const split = document.querySelector(".browse-split");
+        if (!split || split.classList.contains("drawer-open") === open) return;
+        const scrim = split.querySelector("#treeScrim");
+        const btn = document.getElementById("treeDrawerBtn");
+        split.classList.toggle("drawer-open", open);
+        syncInert();
+        scrim.hidden = !open;
+        if (btn) btn.setAttribute("aria-expanded", String(open));
+        if (open) {
+            drawerReturn = btn;
+            const target = split.querySelector('#treePane [role="treeitem"][tabindex="0"]') || split.querySelector("#treePane .tree-title");
+            // Next frame: inherited visibility on tree rows settles first on low tiers.
+            if (target) requestAnimationFrame(() => target.focus());
+        } else if (drawerReturn && drawerReturn.isConnected) {
+            drawerReturn.focus();
+            drawerReturn = null;
+        }
+    }
+
+    /** @brief Escape closes the drawer; Tab cycles inside it while it is open. */
+    function onDrawerKeydown(e) {
+        const split = document.querySelector(".browse-split");
+        if (!split || !split.classList.contains("drawer-open")) return;
+        if (e.key === "Escape") { e.preventDefault(); setDrawer(false); return; }
+        if (e.key !== "Tab") return;
+        const pane = split.querySelector("#treePane");
+        const stops = [...pane.querySelectorAll('a[href], button:not([tabindex="-1"]), [role="treeitem"][tabindex="0"]')]
+            .filter(el => el.offsetParent !== null);
+        if (!stops.length) return;
+        const first = stops[0], last = stops[stops.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+
+    /* ── Inspector handle (one per centre render; #browseBody is rebuilt) ── */
+
+    function bindInspectorHandle() {
+        const body = document.getElementById("browseBody");
+        const handle = document.getElementById("inspHandle");
+        if (!body || !handle) return;
+        PaneResize.attach(handle, {
+            host: body, prop: "--insp-w", key: "insp", def: INSP_DEF, trailing: true,
+            range: () => [INSP_MIN, Math.max(INSP_MIN, Math.min(INSP_MAX, body.clientWidth - CENTRE_MIN - HANDLE_W))],
+        });
     }
 
     /* ═══════════════════════════════════════════════════════════════════════════════
@@ -268,13 +512,14 @@ const BrowsePage = (function () {
      */
     async function fetchList() {
         const d = typeof window.getDict === 'function' ? window.getDict() : getDict();
-        const relPath = currentPath.replace(/^\/browse\/?/, "");
+        const relPath = relOf(currentPath);
 
         try {
             if (typeof ResourceService === 'undefined') throw new Error("ResourceService missing");
 
-            const data = await ResourceService.listFiles(relPath);
-            if (!Array.isArray(data)) throw new Error("Bad JSON");
+            // Shared with the tree: one request per folder open, cached for both panes.
+            const data = await BrowseTree.load(relPath, { force: true });
+            if (relOf(currentPath) !== relPath) return; // navigated away meanwhile
 
             const authStatus = await ResourceService.checkAuthStatus();
             if (authStatus.enabled && authStatus.authenticated) {
@@ -288,13 +533,11 @@ const BrowsePage = (function () {
                 if (typeof IdleTimer !== "undefined") IdleTimer.stop();
             }
 
-            allFiles = data
-                .filter(x => x && x.name && x.name !== "." && x.name !== "..")
-                .filter(x => !isHidden(x.name))
-                .map(x => mapEntry(x, relPath));
+            allFiles = toEntries(data, relPath);
 
             renderChips(d);
             applyFiltersAndRender();
+            applyPendingSelect();
 
         } catch (err) {
             console.error("[BrowsePage] Fetch Error:", err);
@@ -667,6 +910,9 @@ const BrowsePage = (function () {
             return;
         }
 
+        // The tree and the splitters own their arrow keys.
+        if (target && target.closest && target.closest("#treePane, .pane-handle")) return;
+
         const rowsEl = document.getElementById("rows");
         if (!rowsEl) return;
         const rows = [...rowsEl.querySelectorAll(".trow")];
@@ -758,10 +1004,6 @@ const BrowsePage = (function () {
         }[tag]));
     }
 
-    function isHidden(n) {
-        const l = (n || "").toLowerCase();
-        return l === "index.html" || l === "index.php" || l.startsWith(".");
-    }
 
     function humanSize(b, lang) {
         if (!Number.isFinite(b) || b < 0) return "—";
@@ -835,7 +1077,7 @@ const BrowsePage = (function () {
         if (el) el.style.display = "none";
     }
 
-    return { render };
+    return { render, get currentPath() { return currentPath; } };
 })();
 
 export { BrowsePage };
