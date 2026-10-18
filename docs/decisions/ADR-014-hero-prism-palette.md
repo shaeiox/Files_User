@@ -39,3 +39,51 @@ of one hue at one strength is what made it forgettable — not the gold itself.
   remains `--action`.
 - Reverting is deleting the appended "NOIR PRISM HERO" block in
   home.css, the hero tokens, and the `hero-aurora` markup.
+
+## Amendment (2026-10-18, owner feedback)
+- The pointer-tracked sheen (mouse-hover effect) is removed entirely —
+  no `pointermove` handler remains in the hero.
+- The circular glow/disc behind the central logo is removed; only the
+  single prism hairline ring remains.
+- Seven product logos (`public/assets/icon/orbit/*.webp`, 256px) ride
+  that ring as satellites: a 64s linear orbit with counter-rotation so
+  marks stay upright. Hover/focus on a satellite pauses the orbit and
+  scales the chip ×1.32 with a soft overshoot ease; its name appears in
+  a glass label. Reduced-motion and low/potato tiers stop the orbit.
+
+## Amendment 2 (taste-skill pass, 2026-10-18)
+Satellite chips removed: the seven marks are transparent, so the chip
+disc was an invented container (taste-skill "no ornaments"). Assets were
+rebuilt optically normalised (trim + uniform re-pad; glyphs had ranged
+162–256px of frame), enlarged to `clamp(52px, 16cqw, 88px)`, and hover
+now uses an alpha-shaped drop-shadow instead of a box shadow. The
+central logo grows 52% → 66% of the emblem.
+
+## Amendment 3 (RTL bug fix, 2026-10-18)
+Two legacy-RTL defects on the FA switch: (1) the pre-redesign RTL rule
+parking `.hero-max::before` at `right:6%` collapsed the new full-frame
+prism border into a vertical line beside the FA hero text — now reset
+to `left/right:0` in the Noir Prism block; (2) satellite radius used
+`44cqw` against a container whose inline size resolves under the
+page direction, so logos bunched and breathed independently of the
+ring in FA. The orbit is rebuilt direction-proof: ring and orbit share
+one stage box, satellites are placed by rotating a full-stage layer
+(`.orbit-anchor` on the stage's top edge), and `.hero-emblem` is pinned
+`direction: ltr`. EN and FA now compute identical geometry.
+
+## Amendment 4 (2026-10-18)
+Orbit motion removed entirely: satellites are static on the ring.
+Straightening fix — the old counter-rotation cancelled only the
+orbit's spin, never each satellite's placement angle, so marks sat
+tilted by `--a`. `.orbit-logo` now applies `rotate(calc(-1 * var(--a)))`,
+so every logo is perfectly upright around the centre. Hover zoom
+(×1.35, counter-rotation preserved) remains.
+
+## Amendment 5 (2026-10-18)
+Smooth orbit restored by owner request, with the Amendment-4
+straightening kept: `.hero-orbit` spins 64s linear, `.orbit-spin`
+counter-spins the same duration (cancelling the orbit), and
+`.orbit-logo` statically counter-rotates `--a` (cancelling placement).
+Net logo orientation is 0deg at every frame — logos travel around the
+ring perfectly upright, never tilting. Both animations restart and
+pause together (hover/focus `:has` pause), so they cannot desync.

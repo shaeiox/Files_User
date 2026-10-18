@@ -54,8 +54,6 @@ const HomePage = (function () {
           <div class="hero-aurora hero-aurora--champagne"></div>
           <div class="hero-aurora hero-aurora--iris"></div>
           <div class="hero-aurora hero-aurora--glacier"></div>
-          <div class="hero-sheen"></div>
-          <div class="logo-shader"></div>
         </div>
 
         <div class="hero-content">
@@ -87,8 +85,14 @@ const HomePage = (function () {
 
         <div class="hero-visual">
           <div class="hero-emblem">
-            <span class="hero-ring hero-ring--outer" aria-hidden="true"></span>
-            <span class="hero-ring hero-ring--inner" aria-hidden="true"></span>
+            <span class="hero-ring" aria-hidden="true"></span>
+            <div class="hero-orbit">
+              ${[
+        ["durkad-logo", "Durkad"], ["fylad", "Fylad"], ["fylad-kiosk", "Fylad Kiosk"],
+        ["inad-logo", "Inad"], ["plaividlogo", "Plaivid"], ["pvmdesktop", "PVM Desktop"],
+        ["rakaard-logo", "Rakaard"],
+      ].map(([f, n], i) => `<span class="orbit-item" style="--a:${(i * 360 / 7).toFixed(1)}deg"><span class="orbit-anchor" tabindex="0" role="img" aria-label="${n}"><span class="orbit-spin"><span class="orbit-logo"><img src="/assets/icon/orbit/${f}.webp" alt="" draggable="false" loading="lazy"></span></span><span class="orbit-name">${n}</span></span></span>`).join("")}
+            </div>
             <div class="logo-swap" id="logoSwap">
               <img class="logo-layer logo-dark" src="/assets/icon/logo-2-dark.webp" alt="AVID Download" draggable="false">
               <img class="logo-layer logo-light" src="/assets/icon/logo-2-light.webp" alt="AVID Download" draggable="false">
@@ -160,31 +164,8 @@ const HomePage = (function () {
   // raised a hardcoded Persian alert(); it is removed.
   function bindEvents() {
     bindSearchEvents();
-    bindHeroSheen();
   }
 
-  /* Pointer-tracked sheen (ADR-014): writes two custom properties the CSS
-     consumes; no scroll listener, no rAF loop. Disabled for reduced motion,
-     coarse pointers and the potato tier, where the layer is display:none. */
-  function bindHeroSheen() {
-    const hero = document.getElementById("heroMax");
-    if (!hero) return;
-    if (document.documentElement.getAttribute("data-perf") === "potato") return;
-    try {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      if (window.matchMedia("(pointer: coarse)").matches) return;
-    } catch (_) { return; }
-    hero.addEventListener("pointermove", (e) => {
-      const r = hero.getBoundingClientRect();
-      if (!r.width || !r.height) return;
-      hero.style.setProperty("--hero-mx", `${((e.clientX - r.left) / r.width) * 100}%`);
-      hero.style.setProperty("--hero-my", `${((e.clientY - r.top) / r.height) * 100}%`);
-    });
-    hero.addEventListener("pointerleave", () => {
-      hero.style.setProperty("--hero-mx", "72%");
-      hero.style.setProperty("--hero-my", "18%");
-    });
-  }
 
 
   function bindSearchEvents() {

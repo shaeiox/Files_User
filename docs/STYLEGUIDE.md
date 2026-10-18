@@ -24,7 +24,7 @@ index.html
 ├── 1. tokens.css              (642 L)  @font-face + foundation + semantic tokens
 ├── 2. base.css                (375 L)  reset, typography, container, backdrop, motion primitives
 ├── 3. components.css        (1,357 L)  nav, buttons, inputs, cards, footer, controls
-├── 4. home.css              (2,446 L)  home page: hero, cards grid, results, states
+├── 4. home.css              (2,510 L)  home page: hero, cards grid, results, states
 │      route stylesheets, inserted here by router.js on their route only:
 │      browse.css            (2,279 L)  browse split panes, folder tree, table, inspector
 │      release.css             (489 L)  releases page

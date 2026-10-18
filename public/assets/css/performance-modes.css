@@ -871,18 +871,17 @@
     filter: blur(18px);
 }
 
-[data-perf="medium"] .hero-ring--outer,
-[data-perf="medium"] .hero-ring--inner {
-    animation-duration: 90s;
-}
-
-[data-perf="low"] .hero-aurora,
-[data-perf="low"] .hero-sheen {
+[data-perf="low"] .hero-aurora {
     display: none;
 }
 
-[data-perf="low"] .hero-ring--outer,
-[data-perf="low"] .hero-ring--inner,
+[data-perf="medium"] .hero-orbit,
+[data-perf="medium"] .orbit-spin {
+    animation-duration: 110s;
+}
+
+[data-perf="low"] .hero-orbit,
+[data-perf="low"] .orbit-spin,
 [data-perf="low"] .hero-status-dot {
     animation: none;
 }
@@ -894,7 +893,11 @@
 }
 
 [data-perf="potato"] .hero-aurora,
-[data-perf="potato"] .hero-sheen,
 [data-perf="potato"] .hero-ring {
     display: none !important;
+}
+
+[data-perf="potato"] .hero-orbit,
+[data-perf="potato"] .orbit-spin {
+    animation: none !important;
 }
