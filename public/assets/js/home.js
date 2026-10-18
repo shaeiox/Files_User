@@ -47,16 +47,20 @@ const HomePage = (function () {
      ═══════════════════════════════════════════════ */
   function renderHeroSection(d) {
     return `
-      <section class="hero-max">
-        
-        <!-- [NEW] Background Isolation Layer (overflow: hidden applied here via CSS) -->
-        <div class="hero-bg">
-          <!-- هاله نوری لوگو حالا اینجا حبس می‌شود -->
-          <div class="logo-shader" aria-hidden="true"></div>
+      <section class="hero-max" id="heroMax">
+
+        <!-- Background isolation layer: prism light fields, clipped here. -->
+        <div class="hero-bg" aria-hidden="true">
+          <div class="hero-aurora hero-aurora--champagne"></div>
+          <div class="hero-aurora hero-aurora--iris"></div>
+          <div class="hero-aurora hero-aurora--glacier"></div>
+          <div class="hero-sheen"></div>
+          <div class="logo-shader"></div>
         </div>
 
         <div class="hero-content">
           <div class="hero-pill">
+            <span class="hero-status-dot"></span>
             ${d.portalStatus || "YOUR INFRASTRUCTURE. WITH AVID."}
           </div>
           <h1>
@@ -74,13 +78,21 @@ const HomePage = (function () {
             <button class="btn btn-primary" id="searchBtn" type="button">${d.searchBtn || 'Search'}</button>
             <button class="btn" id="stopBtn" type="button" style="display:none">${d.stopBtn || 'Stop'}</button>
           </div>
+          <ul class="hero-meta" aria-label="Portal guarantees">
+            <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>${d.heroMetaVerified || 'SHA-256 verified'}</li>
+            <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><polyline points="3 8 12 13 21 8"/><line x1="12" y1="13" x2="12" y2="21"/></svg>${d.heroMetaFormats || 'ISO · Packages · Templates'}</li>
+            <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>${d.heroMetaAccess || 'Signed infrastructure delivery'}</li>
+          </ul>
         </div>
 
         <div class="hero-visual">
-          <!-- لوگوی شفاف اینجا می‌ماند، اما نورش به لایه بک‌گراند رفت -->
-          <div class="logo-swap" id="logoSwap">
-            <img class="logo-layer logo-dark" src="/assets/icon/logo-2-dark.webp" alt="AVID Download" draggable="false">
-            <img class="logo-layer logo-light" src="/assets/icon/logo-2-light.webp" alt="AVID Download" draggable="false">
+          <div class="hero-emblem">
+            <span class="hero-ring hero-ring--outer" aria-hidden="true"></span>
+            <span class="hero-ring hero-ring--inner" aria-hidden="true"></span>
+            <div class="logo-swap" id="logoSwap">
+              <img class="logo-layer logo-dark" src="/assets/icon/logo-2-dark.webp" alt="AVID Download" draggable="false">
+              <img class="logo-layer logo-light" src="/assets/icon/logo-2-light.webp" alt="AVID Download" draggable="false">
+            </div>
           </div>
         </div>
       </section>
@@ -148,6 +160,30 @@ const HomePage = (function () {
   // raised a hardcoded Persian alert(); it is removed.
   function bindEvents() {
     bindSearchEvents();
+    bindHeroSheen();
+  }
+
+  /* Pointer-tracked sheen (ADR-014): writes two custom properties the CSS
+     consumes; no scroll listener, no rAF loop. Disabled for reduced motion,
+     coarse pointers and the potato tier, where the layer is display:none. */
+  function bindHeroSheen() {
+    const hero = document.getElementById("heroMax");
+    if (!hero) return;
+    if (document.documentElement.getAttribute("data-perf") === "potato") return;
+    try {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (window.matchMedia("(pointer: coarse)").matches) return;
+    } catch (_) { return; }
+    hero.addEventListener("pointermove", (e) => {
+      const r = hero.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      hero.style.setProperty("--hero-mx", `${((e.clientX - r.left) / r.width) * 100}%`);
+      hero.style.setProperty("--hero-my", `${((e.clientY - r.top) / r.height) * 100}%`);
+    });
+    hero.addEventListener("pointerleave", () => {
+      hero.style.setProperty("--hero-mx", "72%");
+      hero.style.setProperty("--hero-my", "18%");
+    });
   }
 
 
@@ -226,11 +262,11 @@ const HomePage = (function () {
     // navigates to its page, which shows the sign-in state.
     const linkAttr = item.locked && item.type === "file" ? 'href="#" data-locked="true"'
       : item.viewOnly && item.type === "file" ? 'aria-disabled="true"'
-      : `href="${escapeHtml(item.href)}"${item.type === "file" ? ' data-file="true"' : ""}`;
+        : `href="${escapeHtml(item.href)}"${item.type === "file" ? ' data-file="true"' : ""}`;
     row.innerHTML = `
       <div class="res-info">
         <a ${linkAttr}>${escapeHtml(item.name)}</a>${item.locked ? ` <span class="badge badge-locked">${escapeHtml(d.lockedBadge || "Locked")}</span>`
-          : item.viewOnly && item.type === "file" ? ` <span class="badge badge-locked">${escapeHtml(d.viewOnlyBadge || "View only")}</span>` : ""}
+        : item.viewOnly && item.type === "file" ? ` <span class="badge badge-locked">${escapeHtml(d.viewOnlyBadge || "View only")}</span>` : ""}
         <div class="res-path">${escapeHtml(item.path || item.href)}</div>
       </div>
       <div>

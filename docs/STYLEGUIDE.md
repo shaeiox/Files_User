@@ -21,14 +21,14 @@ solely by `<link>` order in `public/index.html`. **Order is load-bearing.**
 
 ```
 index.html
-├── 1. tokens.css              (579 L)  @font-face + foundation + semantic tokens
-├── 2. base.css                (433 L)  reset, typography, container, backdrop, motion primitives
-├── 3. components.css        (1,346 L)  nav, buttons, inputs, cards, footer, controls
-├── 4. home.css              (2,250 L)  home page: hero, cards grid, results, states
+├── 1. tokens.css              (642 L)  @font-face + foundation + semantic tokens
+├── 2. base.css                (375 L)  reset, typography, container, backdrop, motion primitives
+├── 3. components.css        (1,357 L)  nav, buttons, inputs, cards, footer, controls
+├── 4. home.css              (2,446 L)  home page: hero, cards grid, results, states
 │      route stylesheets, inserted here by router.js on their route only:
-│      browse.css            (2,255 L)  browse split panes, folder tree, table, inspector
+│      browse.css            (2,279 L)  browse split panes, folder tree, table, inspector
 │      release.css             (489 L)  releases page
-├── 5. performance-modes.css   (884 L)  [data-perf] overrides
+├── 5. performance-modes.css   (880 L)  [data-perf] overrides
 └── 6. lenis.css                (26 L)  upstream Lenis requirements
 ```
 
@@ -84,6 +84,11 @@ Three layers, resolved in cascade order:
 Status colours (`--danger`, `--success`, `--warning`) are semantic, not accents. A component that
 needs another colour uses one of these roles; it does not get its own hue. `--ring` is an alias of
 `--border-focus`, so every focusable control draws the same ring in a given theme.
+
+**Hero exception ([ADR-014](decisions/ADR-014-hero-prism-palette.md)):** inside `.hero-max` only,
+champagne/iris/glacier may appear as decorative *light* (`--color-champagne`, `--color-iris`,
+`--color-glacier`, `--hero-*` surface tokens). They never carry text, state or control fills —
+hero text is `--hero-text`/`--hero-text-2`, the CTA stays `--action`, focus stays `--border-focus`.
 
 To check a token change is actually complete, look for literals that should have been
 tokens:

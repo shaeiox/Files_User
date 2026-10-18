@@ -2241,3 +2241,376 @@ body.rtl .logo-shader {
         padding: 16px;
     }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   NOIR PRISM HERO — ADR-014 (luxury redesign)
+   Champagne is heritage, not the whole story: iris + glacier light
+   fields refract across a noir (dark) / porcelain (light) ground.
+   Decorative hues never carry text or controls (tokens.css, ADR-014).
+   Appended last so it wins the cascade over the Part A hero rules;
+   responsive overrides live in the breakpoint blocks at the end.
+   ═══════════════════════════════════════════════════════════════ */
+.hero-max {
+    border-radius: clamp(20px, 3vw, 32px);
+    border: 1px solid var(--hero-border);
+    background: var(--hero-ground);
+    box-shadow: var(--hero-shadow);
+    isolation: isolate;
+}
+
+/* Gradient hairline: a 1px prism edge lit from the pointer side. */
+.hero-max::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(120deg,
+            color-mix(in srgb, var(--color-champagne) 55%, transparent),
+            color-mix(in srgb, var(--color-iris) 38%, transparent) 42%,
+            color-mix(in srgb, var(--color-glacier) 34%, transparent) 74%,
+            color-mix(in srgb, var(--color-rose-veil) 26%, transparent));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.hero-bg {
+    z-index: 0;
+}
+
+.hero-bg::before,
+.hero-bg::after {
+    display: none;
+}
+
+.hero-max::after {
+    display: none;
+}
+
+.hero-aurora {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    will-change: transform, opacity;
+}
+
+.hero-aurora--champagne {
+    width: 560px;
+    height: 560px;
+    top: -260px;
+    inset-inline-start: -120px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--color-champagne) 34%, transparent) 0%, transparent 68%);
+    filter: blur(28px);
+    animation: hero-drift-a 16s ease-in-out infinite alternate;
+}
+
+.hero-aurora--iris {
+    width: 640px;
+    height: 640px;
+    top: -300px;
+    inset-inline-end: -140px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--color-iris) 32%, transparent) 0%, transparent 68%);
+    filter: blur(36px);
+    animation: hero-drift-b 20s ease-in-out infinite alternate;
+}
+
+.hero-aurora--glacier {
+    width: 520px;
+    height: 520px;
+    bottom: -300px;
+    inset-inline-start: 34%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--color-glacier) 24%, transparent) 0%, transparent 68%);
+    filter: blur(40px);
+    animation: hero-drift-a 24s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes hero-drift-a {
+    from {
+        transform: translate3d(0, 0, 0) scale(1);
+        opacity: 0.85;
+    }
+
+    to {
+        transform: translate3d(36px, 22px, 0) scale(1.08);
+        opacity: 1;
+    }
+}
+
+@keyframes hero-drift-b {
+    from {
+        transform: translate3d(0, 0, 0) scale(1.06);
+        opacity: 1;
+    }
+
+    to {
+        transform: translate3d(-30px, 28px, 0) scale(0.98);
+        opacity: 0.8;
+    }
+}
+
+/* Pointer sheen: follows --hero-mx/--hero-my written by home.js. */
+.hero-sheen {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(420px circle at var(--hero-mx, 72%) var(--hero-my, 18%),
+            rgba(255, 255, 255, 0.14) 0%, transparent 65%);
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+[data-theme="light"] .hero-sheen {
+    background: radial-gradient(420px circle at var(--hero-mx, 72%) var(--hero-my, 18%),
+            rgba(255, 255, 255, 0.55) 0%, transparent 65%);
+}
+
+.hero-content h1 {
+    color: var(--hero-text);
+}
+
+.hero-content h1 .avid {
+    color: var(--hero-text);
+}
+
+.hero-content h1 .accent {
+    background: linear-gradient(92deg, var(--color-champagne) 0%, var(--color-rose-veil) 38%, var(--color-iris) 72%, var(--color-glacier) 105%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+[data-theme="light"] .hero-content h1 .accent {
+    background: linear-gradient(92deg, #8a5a00 0%, #9a4a6b 42%, #5546b8 78%, #0f766e 108%);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+.hero-desc {
+    color: var(--hero-text-2);
+}
+
+.hero-pill {
+    background: var(--hero-glass);
+    border: 1px solid var(--hero-glass-border);
+    color: var(--hero-text);
+    backdrop-filter: blur(14px) saturate(1.4);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.hero-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex: none;
+    background: var(--color-glacier);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-glacier) 22%, transparent);
+    animation: hero-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes hero-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.55;
+        transform: scale(0.82);
+    }
+}
+
+/* Glass search: token-driven so both themes stay legible. */
+.hero-search .input-wrap,
+[data-theme="light"] .hero-search .input-wrap {
+    background: var(--hero-input-bg);
+    border-color: var(--hero-glass-border);
+    backdrop-filter: blur(16px) saturate(1.5);
+    -webkit-backdrop-filter: blur(16px) saturate(1.5);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 10px 28px rgba(10, 8, 24, 0.14);
+    height: 54px;
+}
+
+.hero-search .input-wrap:focus-within,
+[data-theme="light"] .hero-search .input-wrap:focus-within {
+    border-color: color-mix(in srgb, var(--color-champagne) 65%, transparent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-iris) 22%, transparent), 0 14px 32px rgba(10, 8, 24, 0.16);
+    background: var(--hero-input-bg);
+}
+
+.hero-search .input-wrap input,
+[data-theme="light"] .hero-search .input-wrap input {
+    color: var(--hero-input-text);
+}
+
+.hero-search .input-wrap input::placeholder,
+[data-theme="light"] .hero-search .input-wrap input::placeholder {
+    color: var(--hero-input-placeholder);
+}
+
+.hero-search .input-wrap svg {
+    color: var(--hero-input-placeholder);
+}
+
+.hero-search .btn-primary {
+    height: 54px;
+    box-shadow: 0 10px 26px rgba(61, 107, 199, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.hero-search .btn-primary:active {
+    transform: translateY(1px) scale(0.99);
+}
+
+/* Trust meta strip: proof, not slogans (taste-skill: substance). */
+.hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+    margin-top: 22px;
+    padding: 0;
+    list-style: none;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: var(--hero-text-2);
+}
+
+.hero-meta li {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.hero-meta svg {
+    color: var(--color-champagne);
+    flex: none;
+}
+
+[data-theme="light"] .hero-meta svg {
+    color: #8a5a00;
+}
+
+/* Emblem: logo on concentric prism rings instead of a flat watermark. */
+.hero-emblem {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+}
+
+.hero-ring {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    border: 1px solid color-mix(in srgb, var(--color-champagne) 26%, transparent);
+}
+
+.hero-ring--outer {
+    width: 112%;
+    aspect-ratio: 1;
+    border-color: color-mix(in srgb, var(--color-iris) 24%, transparent);
+    animation: hero-spin 46s linear infinite;
+    background: conic-gradient(from 20deg, transparent 0deg, color-mix(in srgb, var(--color-champagne) 16%, transparent) 70deg, transparent 150deg, color-mix(in srgb, var(--color-glacier) 14%, transparent) 250deg, transparent 330deg);
+}
+
+.hero-ring--inner {
+    width: 88%;
+    aspect-ratio: 1;
+    border-style: dashed;
+    animation: hero-spin-rev 34s linear infinite;
+}
+
+@keyframes hero-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes hero-spin-rev {
+    from {
+        transform: rotate(360deg);
+    }
+
+    to {
+        transform: rotate(0deg);
+    }
+}
+
+.logo-swap {
+    opacity: 0.92;
+    filter: drop-shadow(0 18px 48px rgba(12, 8, 32, 0.35));
+    -webkit-mask-image: none;
+    mask-image: none;
+}
+
+[data-theme="light"] .logo-swap {
+    opacity: 0.95;
+    -webkit-mask-image: none;
+    mask-image: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .hero-aurora,
+    .hero-ring--outer,
+    .hero-ring--inner,
+    .hero-status-dot {
+        animation: none;
+    }
+
+    .hero-sheen {
+        display: none;
+    }
+}
+
+@media (max-width: 1024px) {
+    .hero-aurora--iris {
+        inset-inline-end: -220px;
+    }
+
+    .hero-meta {
+        justify-content: center;
+    }
+
+    .hero-ring--outer {
+        width: 104%;
+    }
+}
+
+@media (max-width: 640px) {
+    .hero-max {
+        border-radius: 20px;
+    }
+
+    .hero-aurora--champagne {
+        width: 340px;
+        height: 340px;
+    }
+
+    .hero-aurora--iris {
+        width: 360px;
+        height: 360px;
+    }
+
+    .hero-aurora--glacier {
+        display: none;
+    }
+
+    .hero-meta {
+        gap: 6px 14px;
+        font-size: 11px;
+    }
+
+    .hero-search .btn-primary {
+        height: 50px;
+    }
+}

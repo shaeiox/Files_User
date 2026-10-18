@@ -862,3 +862,39 @@
 .footer .perf-pill>svg:last-child {
     display: inline;
 }
+
+/* ── Noir Prism hero tiers (ADR-014) ──────────────────────────────
+   MEDIUM keeps one static field; LOW drops blur/animation; POTATO
+   (which kills animation globally above) drops the layers outright. */
+[data-perf="medium"] .hero-aurora {
+    animation: none;
+    filter: blur(18px);
+}
+
+[data-perf="medium"] .hero-ring--outer,
+[data-perf="medium"] .hero-ring--inner {
+    animation-duration: 90s;
+}
+
+[data-perf="low"] .hero-aurora,
+[data-perf="low"] .hero-sheen {
+    display: none;
+}
+
+[data-perf="low"] .hero-ring--outer,
+[data-perf="low"] .hero-ring--inner,
+[data-perf="low"] .hero-status-dot {
+    animation: none;
+}
+
+[data-perf="low"] .hero-pill,
+[data-perf="low"] .hero-search .input-wrap {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+[data-perf="potato"] .hero-aurora,
+[data-perf="potato"] .hero-sheen,
+[data-perf="potato"] .hero-ring {
+    display: none !important;
+}

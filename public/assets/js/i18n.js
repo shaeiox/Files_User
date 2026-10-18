@@ -47,6 +47,9 @@ const i18n = {
         searchPh: "Search for files, packages, templates...",
         searchBtn: "Search",
         stopBtn: "Stop",
+        heroMetaVerified: "SHA-256 verified",
+        heroMetaFormats: "ISO · Packages · Templates",
+        heroMetaAccess: "Signed infrastructure delivery",
 
         // Infrastructure Resources Cards
         infraTitle: "Infrastructure Resources",
@@ -313,6 +316,9 @@ const i18n = {
         searchPh: "جستجو در فایل‌ها، بسته‌ها، قالب‌ها...",
         searchBtn: "جستجو",
         stopBtn: "توقف",
+        heroMetaVerified: "تأییدشده با SHA-256",
+        heroMetaFormats: "ISO · بسته‌ها · قالب‌ها",
+        heroMetaAccess: "تحویل زیرساختی امضاشده",
 
         // Infrastructure Resources Cards
         infraTitle: "منابع زیرساخت",
