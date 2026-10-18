@@ -5,7 +5,8 @@ tokens, typography, theming, performance modes, and RTL support.
 
 **Design style:** "Obsidian Kinetic" — enterprise dark surface with a Cyber Amber accent;
 light mode is a calm editorial band (snow cards on linen canvas). Pills and tiered cards
-throughout.
+throughout. The shared backdrop is **Midnight Archive**: a matte ink/stone ground with a
+restrained, static amber aperture motif.
 
 Rationale for the token layer lives in [ADR-008](decisions/ADR-008-css-custom-property-tokens.md);
 runtime performance gating in [ADR-009](decisions/ADR-009-runtime-performance-tiers.md);
@@ -21,14 +22,14 @@ solely by `<link>` order in `public/index.html`. **Order is load-bearing.**
 
 ```
 index.html
-├── 1. tokens.css              (579 L)  @font-face + foundation + semantic tokens
-├── 2. base.css                (433 L)  reset, typography, container, backdrop, motion primitives
-├── 3. components.css        (1,346 L)  nav, buttons, inputs, cards, footer, controls
-├── 4. home.css              (2,250 L)  home page: hero, cards grid, results, states
+├── 1. tokens.css              (602 L)  @font-face + foundation + semantic tokens
+├── 2. base.css                (374 L)  reset, typography, container, backdrop, motion primitives
+├── 3. components.css        (1,337 L)  nav, buttons, inputs, cards, footer, controls
+├── 4. home.css              (2,241 L)  home page: hero, cards grid, results, states
 │      route stylesheets, inserted here by router.js on their route only:
-│      browse.css            (2,255 L)  browse split panes, folder tree, table, inspector
+│      browse.css            (2,279 L)  browse split panes, folder tree, table, inspector
 │      release.css             (489 L)  releases page
-├── 5. performance-modes.css   (884 L)  [data-perf] overrides
+├── 5. performance-modes.css   (863 L)  [data-perf] overrides
 └── 6. lenis.css                (26 L)  upstream Lenis requirements
 ```
 
@@ -45,6 +46,24 @@ index.html
 
 `public/index.html` is the only entry point (the unrouted `public/browse.html` was deleted).
 Route stylesheets are disabled while another route is shown, so their rules never leak.
+
+### Shared backdrop — Midnight Archive
+
+`base.css` is the sole owner of `.aura-backdrop`. It is one fixed, non-interactive layer at
+`z-index: 0`, below `.page` at `z-index: 1`. The high tier uses a deep ink/stone ground and two
+low-contrast, off-axis CSS aperture rings, keyed to the existing amber accent. The motif is static:
+no blur/filter, animation, canvas/WebGL, network asset, or backdrop-specific JavaScript. The medium
+tier sheds one paint layer, low keeps one contour, and potato retains the flat theme-aware ground.
+Theme-color in the browser chrome follows that same ground in both themes.
+
+### Scrollbars
+
+Native scrolling and keyboard behavior are preserved. Scroll areas use the themed
+`--scrollbar-thumb` tokens: browsers without WebKit scrollbar pseudos get a native thin scrollbar,
+while WebKit browsers get an inset capsule. The track stays transparent; the thumb is satin bronze
+in dark mode and dark brass in light mode, brightening on hover. Nested scroll regions reuse the
+same treatment. Potato mode narrows the WebKit gutter but keeps the rounded thumb; standard native
+scrollbars retain their browser-defined thin width.
 
 ---
 

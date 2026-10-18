@@ -1099,15 +1099,6 @@ body.rtl .logo-shader {
     font-size: 14px;
 }
 
-.aura-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    pointer-events: none;
-    z-index: -1;
-}
-
 /* ═══════════════════════════════════════════════════════════════
    6. AUTHENTICATION UI (LOCKED STATE & MODAL)
    ═══════════════════════════════════════════════════════════════ */

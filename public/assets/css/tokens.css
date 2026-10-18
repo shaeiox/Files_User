@@ -99,7 +99,7 @@
 
 :root {
     /* ── Huly core palette ── */
-    --color-obsidian-canvas: #303236;
+    --color-obsidian-canvas: #101110;
     --color-void: #090a0c;
     --color-charcoal-card: #111111;
     --color-slate-edge: #4a4b50;
@@ -152,6 +152,10 @@
     --r6: 30px;
     --r-full: 9999px;
     --radius: 12px;
+
+    /* Slim, inset native scrollbars: a comfortable hit-area with a fine thumb. */
+    --scrollbar-size: 12px;
+    --scrollbar-inset: 3px;
 
     --radius-tags: 9999px;
     --radius-cards: 12px;
@@ -312,6 +316,11 @@
     /* ─── surface roles (light Obsidian Kinetic) ────────────────────────── */
     --bg: #f5f5f0;
     --bg-card: #ffffff;
+
+    /* ─── shared backdrop: quiet stone + etched archive aperture ─────────── */
+    --backdrop-ground: #f5f5f0;
+    --backdrop-orbit: rgba(72, 61, 45, 0.09);
+    --backdrop-orbit-soft: rgba(72, 61, 45, 0.045);
     --bg-hover: #eeeee8;
     --bg-input: #f0f0ea;
     --bg-elevated: #ffffff;
@@ -323,6 +332,10 @@
        1.59:1 on --bg and 1.73:1 on --bg-card, under the 3:1 floor for a
        focus indicator; #8a5a00 measures 5.42:1 on --bg, 5.93:1 on --bg-card. */
     --border-focus: #8a5a00;
+
+    /* ─── scrollbar: satin brass; 5.42:1 on the page and 5.93:1 on cards ── */
+    --scrollbar-thumb: #8a5a00;
+    --scrollbar-thumb-hover: #6b4300;
 
     /* ─── text roles ─────────────────────────────────────────────────────── */
     --text: #1f1f23;
@@ -438,6 +451,12 @@
     /* — surface roles (Obsidian Kinetic) — */
     --bg: #121316;
     --bg-card: #1b1b1f;
+
+    /* The shared backdrop moves to a warmer, deeper ink; the rest of the
+       surface ramp stays unchanged so this treatment does not leak into cards. */
+    --backdrop-ground: var(--color-obsidian-canvas);
+    --backdrop-orbit: rgba(255, 184, 0, 0.065);
+    --backdrop-orbit-soft: rgba(255, 184, 0, 0.032);
     --bg-hover: #292a2d;
     --bg-input: #1f1f23;
     --bg-elevated: #343538;
@@ -449,6 +468,10 @@
     --border-hover: rgba(255, 255, 255, 0.12);
     /* 10.71:1 on --bg, 9.90:1 on --bg-card */
     --border-focus: #ffb800;
+
+    /* — soft bronze: 4.27:1 on ink and 3.87:1 on cards; amber on hover — */
+    --scrollbar-thumb: #92733a;
+    --scrollbar-thumb-hover: #ffb800;
 
     /* — text roles — */
     --text: #e3e2e6;

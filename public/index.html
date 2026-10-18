@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#303236" />
+  <meta name="theme-color" content="#f5f5f0" />
   <title>AVID Download • File Portal</title>
   <script>
     (function () {
@@ -32,11 +32,11 @@
       } catch (_) { }
 
       root.setAttribute('data-theme', theme);
+      var themeColor = document.querySelector('meta[name="theme-color"]');
+      if (themeColor) themeColor.content = theme === 'dark' ? '#101110' : '#f5f5f0';
 
-      // ui-craft-elevation D8: pre-paint default is `high`, the unstyled
-      // baseline (performance-modes.css has no high rules). Auto-detection
-      // can then only ever reduce cost after first paint, never add it, so
-      // capable devices no longer repaint the backdrop blur/opacity post-paint.
+      // Pre-paint defaults to `high`; auto-detection can only shed static
+      // backdrop layers after paint, never introduce expensive effects.
       var perfTier = 'high';
       var reducedMotion = false;
 
@@ -84,7 +84,7 @@
       }
     }, { once: true });
   </script>
-  <script src="/assets/js/banner.js?v=4.5.2"></script>
+  <script src="/assets/js/banner.js?v=4.6.0"></script>
 
 
   <!-- The two faces the hero headline paints with on first load (Cinzel for
@@ -97,23 +97,19 @@
        are route stylesheets: router.js inserts each one before
        performance-modes.css when its route is first entered, so that order
        still holds (ui-craft-elevation 5.3). -->
-  <link rel="stylesheet" href="/assets/css/tokens.css?v=4.5.2">
-  <link rel="stylesheet" href="/assets/css/base.css?v=4.5.2">
-  <link rel="stylesheet" href="/assets/css/components.css?v=4.5.2">
-  <link rel="stylesheet" href="/assets/css/home.css?v=4.5.2">
-  <link rel="stylesheet" href="/assets/css/performance-modes.css?v=4.5.2" id="perfModesCss">
-  <link rel="stylesheet" href="/assets/css/lenis.css?v=4.5.2">
+  <link rel="stylesheet" href="/assets/css/tokens.css?v=4.6.0">
+  <link rel="stylesheet" href="/assets/css/base.css?v=4.6.0">
+  <link rel="stylesheet" href="/assets/css/components.css?v=4.6.0">
+  <link rel="stylesheet" href="/assets/css/home.css?v=4.6.0">
+  <link rel="stylesheet" href="/assets/css/performance-modes.css?v=4.6.0" id="perfModesCss">
+  <link rel="stylesheet" href="/assets/css/lenis.css?v=4.6.0">
 
   <link rel="icon" href="/assets/icon/files-logo.webp">
 </head>
 
 <body>
 
-  <div class="aura-backdrop" aria-hidden="true">
-    <div class="aura-base"></div>
-    <div class="aura-glow-1"></div>
-    <div class="aura-glow-2"></div>
-  </div>
+  <div class="aura-backdrop" aria-hidden="true"></div>
 
 
   <div class="page">
@@ -385,18 +381,18 @@
   <!-- Shell scripts only. The Browse group (browse.js + browse-icons,
        bulk-download, file-inspector) and releases.js are ES modules that
        router.js imports when their route is entered (ui-craft-elevation 5.2). -->
-  <script src="/assets/js/services/resource-service.js?v=4.5.2" defer></script>
-  <script src="/assets/js/services/performance-monitor.js?v=4.5.2" defer></script>
-  <script src="/assets/js/motion.js?v=4.5.2" defer></script>
-  <script src="/assets/js/theme.js?v=4.5.2" defer></script>
-  <script src="/assets/js/i18n.js?v=4.5.2" defer></script>
-  <script src="/assets/js/autocomplete.js?v=4.5.2" defer></script>
-  <script src="/assets/js/home.js?v=4.5.2" defer></script>
-  <script src="/assets/js/file-actions.js?v=4.5.2" defer></script>
-  <script src="/assets/js/vendor/lenis.min.js?v=4.5.2" defer></script>
-  <script src="/assets/js/smooth-scroll.js?v=4.5.2" defer></script>
-  <script src="/assets/js/idle-timer.js?v=4.5.2" defer></script>
-  <script src="/assets/js/router.js?v=4.5.2" defer></script>
+  <script src="/assets/js/services/resource-service.js?v=4.6.0" defer></script>
+  <script src="/assets/js/services/performance-monitor.js?v=4.6.0" defer></script>
+  <script src="/assets/js/motion.js?v=4.6.0" defer></script>
+  <script src="/assets/js/theme.js?v=4.6.0" defer></script>
+  <script src="/assets/js/i18n.js?v=4.6.0" defer></script>
+  <script src="/assets/js/autocomplete.js?v=4.6.0" defer></script>
+  <script src="/assets/js/home.js?v=4.6.0" defer></script>
+  <script src="/assets/js/file-actions.js?v=4.6.0" defer></script>
+  <script src="/assets/js/vendor/lenis.min.js?v=4.6.0" defer></script>
+  <script src="/assets/js/smooth-scroll.js?v=4.6.0" defer></script>
+  <script src="/assets/js/idle-timer.js?v=4.6.0" defer></script>
+  <script src="/assets/js/router.js?v=4.6.0" defer></script>
 
 </body>
 

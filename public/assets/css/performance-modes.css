@@ -14,38 +14,23 @@
    ═══════════════════════════════════════════════════════════════ */
 
 /* ───────────────────────────────────────────────────────────────
-   1. TIER: HIGH (Default — Everything Enabled)
+   1. TIER: HIGH (Default — Full static backdrop detail)
    ───────────────────────────────────────────────────────────────
-   No CSS overrides are required. The system runs at maximum 
-   visual fidelity with full blurs, shadows, and animations.
+   The shared backdrop is CSS-only and static; no animation loop or blur.
    ─────────────────────────────────────────────────────────────── */
 
 /* ───────────────────────────────────────────────────────────────
    2. TIER: MEDIUM (Balanced)
    ───────────────────────────────────────────────────────────────
-   Strategy: Reduce heavy compositing tasks (blur intensity) and
-   slow down infinite background animations to save GPU cycles.
+   Strategy: retain the signature aperture while shedding one paint layer.
    ─────────────────────────────────────────────────────────────── */
-/* Backdrop glows — Obsidian Kinetic (Phase 2).
-   Base blurs are 80px (glow-1) and 100px (glow-2); medium halves them and
-   dims opacity by ~30%. Glows stay STATIC at every tier (D5 — no animation). */
-[data-perf="medium"] .aura-glow-1 {
-    filter: blur(40px);
-    /* Halved from 80px */
-    opacity: 0.42;
-    /* 0.6 x 0.7 */
-}
-
-[data-perf="medium"] .aura-glow-2 {
-    filter: blur(50px);
-    /* Halved from 100px */
-    opacity: 0.28;
-    /* 0.4 x 0.7 */
-}
-
-[data-perf="medium"] .aura-base {
-    background: var(--bg);
-    /* Flat — no vignette gradient */
+[data-perf="medium"] .aura-backdrop {
+    background-image:
+        radial-gradient(ellipse 84rem 54rem at 100% -8%,
+            transparent 70.8%,
+            var(--backdrop-orbit-soft) 70.95%,
+            var(--backdrop-orbit-soft) 71.08%,
+            transparent 71.26%);
 }
 
 [data-perf="medium"] .nav-bar,
@@ -102,23 +87,18 @@
     border-color: var(--border);
 }
 
-/* Remove ambient background glows entirely */
-[data-perf="low"] .aura-glow-1,
-[data-perf="low"] .aura-glow-2,
+/* Low tier keeps one static contour so the brand treatment remains present. */
+[data-perf="low"] .aura-backdrop {
+    background-image:
+        radial-gradient(ellipse 84rem 54rem at 100% -8%,
+            transparent 70.8%,
+            var(--backdrop-orbit-soft) 70.95%,
+            var(--backdrop-orbit-soft) 71.08%,
+            transparent 71.26%);
+}
+
 [data-perf="low"] .logo-shader {
     display: none;
-}
-
-/* Backdrop falls back to a single flat fill — no blur, no vignette gradient.
-   The Hero-scoped selector above is left untouched: it is frozen per D8/I21,
-   so its low-tier behaviour must not change. */
-[data-perf="low"] .aura-base {
-    background: var(--bg);
-    filter: none !important;
-}
-
-[data-perf="low"] .aura-backdrop {
-    background: var(--bg);
 }
 
 /* Simplify logo transition, remove blur filter */
@@ -234,13 +214,15 @@
     background: var(--bg-card);
 }
 
-/* Nuke all background aesthetics. */
-[data-perf="potato"] .aura-glow-1,
-[data-perf="potato"] .aura-glow-2,
+/* Drop decorative work, but retain the theme-aware backdrop ground. */
 [data-perf="potato"] .logo-shader,
-[data-perf="potato"] .hero-max::before,
-[data-perf="potato"] .aura-backdrop {
+[data-perf="potato"] .hero-max::before {
     display: none !important;
+}
+
+[data-perf="potato"] .aura-backdrop {
+    background-image: none;
+    background-color: var(--backdrop-ground);
 }
 
 /* ☢️ Force kill ALL animations and transitions globally */
@@ -307,13 +289,10 @@
     transition: none !important;
 }
 
-/* Highly simplified scrollbar */
+/* Keep the capsule shape in potato; only reclaim a little gutter width. */
 [data-perf="potato"] ::-webkit-scrollbar {
-    width: 4px;
-}
-
-[data-perf="potato"] ::-webkit-scrollbar-thumb {
-    border-radius: 0;
+    width: calc(var(--scrollbar-size) - 2px);
+    height: calc(var(--scrollbar-size) - 2px);
 }
 
 /* ───────────────────────────────────────────────────────────────

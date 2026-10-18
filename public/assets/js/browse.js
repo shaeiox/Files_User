@@ -38,12 +38,12 @@
  */
 
 // ES module, imported by router.js when its route is entered (ui-craft-elevation 5.2).
-import { BrowseIcons } from "./browse-icons.js?v=4.5.2";
-import { BulkDownload } from "./bulk-download.js?v=4.5.2";
-import { FileInspector } from "./file-inspector.js?v=4.5.2";
-import { BrowseTree } from "./browse-tree.js?v=4.5.2";
-import { PaneResize } from "./pane-resize.js?v=4.5.2";
-import { mapEntry, isHidden, toEntries } from "./browse-entries.js?v=4.5.2";
+import { BrowseIcons } from "./browse-icons.js?v=4.6.0";
+import { BulkDownload } from "./bulk-download.js?v=4.6.0";
+import { FileInspector } from "./file-inspector.js?v=4.6.0";
+import { BrowseTree } from "./browse-tree.js?v=4.6.0";
+import { PaneResize } from "./pane-resize.js?v=4.6.0";
+import { mapEntry, isHidden, toEntries } from "./browse-entries.js?v=4.6.0";
 
 const BrowsePage = (function () {
     'use strict';

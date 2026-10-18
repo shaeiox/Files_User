@@ -1011,15 +1011,6 @@ kbd {
     overflow-y: auto;
 }
 
-.ac-list::-webkit-scrollbar {
-    width: 5px;
-}
-
-.ac-list::-webkit-scrollbar-thumb {
-    background: var(--n-5);
-    border-radius: 3px;
-}
-
 .ac-item {
     display: flex;
     align-items: center;

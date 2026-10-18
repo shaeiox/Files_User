@@ -121,105 +121,32 @@ img {
     }
 }
 
-/* ── Ambient backdrop — Obsidian Kinetic ──────────────────────────────
-   Pure CSS only, and fully static: no shader, no animation, no script (D5).
-   Layer order: body void -> .aura-base (wash + vignette)
-   -> .aura-glow-1 (amber bloom, top-right) -> .aura-glow-2 (iris bloom,
-   bottom-left). All sit behind .page (z-index 1) and behind .nav (z-index 50).
-   Colours come from --color-ember-pulse (accent) / --action (primary-action hue) via
-   color-mix(), with a literal rgba() declared first as a fallback for
-   engines without color-mix support. */
+/* ── Shared backdrop — Midnight Archive / Aperture ────────────────────
+   A single static CSS layer: a deep ink/stone ground with two etched,
+   off-axis rings inspired by the portal's archive and transfer paths.
+   Keep the mark quiet, use only the brand's warm accent, and avoid blur,
+   filters, animation, canvas, or a per-frame script. The z-index is owned
+   here once: .page sits at 1, so the backdrop at 0 can never cover content.
+   Performance modes progressively shed the decorative layers. */
 .aura-backdrop {
     position: fixed;
     inset: 0;
+    z-index: 0;
     overflow: hidden;
     pointer-events: none;
-    z-index: 0;
-}
-
-/* Base wash + peripheral vignette (depth without an extra element). */
-.aura-base {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 120% 95% at 50% 45%,
-            transparent 0%,
-            transparent 45%,
-            var(--bg) 100%);
-}
-
-.aura-glow-1 {
-    position: absolute;
-    top: -20%;
-    right: -10%;
-    width: 80vw;
-    height: 80vw;
-    border-radius: 50%;
-    background: radial-gradient(circle at center,
-            rgba(255, 184, 0, 0.10) 0%,
-            rgba(255, 184, 0, 0.04) 40%,
-            transparent 70%);
-    background: radial-gradient(circle at center,
-            color-mix(in srgb, var(--color-ember-pulse) 10%, transparent) 0%,
-            color-mix(in srgb, var(--color-ember-pulse) 4%, transparent) 40%,
-            transparent 70%);
-    filter: blur(80px);
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-.aura-glow-2 {
-    position: absolute;
-    bottom: -15%;
-    left: -10%;
-    width: 70vw;
-    height: 70vw;
-    border-radius: 50%;
-    background: radial-gradient(circle at center,
-            rgba(61, 107, 199, 0.07) 0%,
-            transparent 65%);
-    background: radial-gradient(circle at center,
-            color-mix(in srgb, var(--action) 7%, transparent) 0%,
-            transparent 65%);
-    filter: blur(100px);
-    opacity: 0.4;
-    pointer-events: none;
-}
-
-[data-theme="dark"] .aura-glow-1 {
-    background: radial-gradient(circle at center,
-            rgba(255, 184, 0, 0.10) 0%,
-            rgba(255, 184, 0, 0.04) 40%,
-            transparent 70%);
-    background: radial-gradient(circle at center,
-            color-mix(in srgb, var(--color-ember-pulse) 10%, transparent) 0%,
-            color-mix(in srgb, var(--color-ember-pulse) 4%, transparent) 40%,
-            transparent 70%);
-}
-
-[data-theme="dark"] .aura-glow-2 {
-    background: radial-gradient(circle at center,
-            rgba(61, 107, 199, 0.07) 0%,
-            transparent 65%);
-    background: radial-gradient(circle at center,
-            color-mix(in srgb, var(--action) 7%, transparent) 0%,
-            transparent 65%);
-}
-
-/* Light theme: the obsidian aesthetic is dark-primary, so the backdrop is
-   barely perceptible — a faint warm tint only. */
-[data-theme="light"] .aura-glow-1 {
-    opacity: 0.08;
-}
-
-[data-theme="light"] .aura-glow-2 {
-    opacity: 0.05;
-}
-
-[data-theme="light"] .aura-base {
-    background: radial-gradient(ellipse 120% 95% at 50% 45%,
-            transparent 0%,
-            transparent 55%,
-            var(--bg) 100%);
+    background-color: var(--backdrop-ground);
+    background-image:
+        radial-gradient(ellipse 60rem 38rem at 100% -8%,
+            transparent 57.9%,
+            var(--backdrop-orbit) 58.05%,
+            var(--backdrop-orbit) 58.17%,
+            transparent 58.34%),
+        radial-gradient(ellipse 84rem 54rem at 100% -8%,
+            transparent 70.8%,
+            var(--backdrop-orbit-soft) 70.95%,
+            var(--backdrop-orbit-soft) 71.08%,
+            transparent 71.26%);
+    background-repeat: no-repeat;
 }
 
 /* ── Animations (reduced-motion aware) ── */
@@ -401,31 +328,45 @@ img {
     }
 }
 
-/* ── Scrollbar ── */
+/* ── Global scrollbar — inset satin-brass capsule ───────────────────── */
+/* Use the standard thin, themed scrollbar where WebKit pseudos are absent.
+   Keeping these declarations out of WebKit browsers preserves the capsule geometry. */
+@supports not selector(::-webkit-scrollbar) {
+    :where(*) {
+        scrollbar-color: var(--scrollbar-thumb) transparent;
+        scrollbar-width: thin;
+    }
+}
+
 ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: var(--scrollbar-size);
+    height: var(--scrollbar-size);
 }
 
 ::-webkit-scrollbar-track {
+    border-radius: var(--r-full);
     background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--n-5);
-    border-radius: 999px;
+    min-height: 36px;
+    border: var(--scrollbar-inset) solid transparent;
+    border-radius: var(--r-full);
+    background-color: var(--scrollbar-thumb);
+    background-clip: padding-box;
+    transition: background-color var(--dur-1) ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--n-6);
+    background-color: var(--scrollbar-thumb-hover);
 }
 
-[data-theme="dark"] ::-webkit-scrollbar-thumb {
-    background: #4a4b50;
+::-webkit-scrollbar-thumb:active {
+    background-color: var(--scrollbar-thumb-hover);
 }
 
-[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-    background: #6b6c6d;
+::-webkit-scrollbar-corner {
+    background: transparent;
 }
 
 :focus-visible {
