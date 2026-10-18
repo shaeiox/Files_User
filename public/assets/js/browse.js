@@ -38,12 +38,12 @@
  */
 
 // ES module, imported by router.js when its route is entered (ui-craft-elevation 5.2).
-import { BrowseIcons } from "./browse-icons.js?v=4.4.2";
-import { BulkDownload } from "./bulk-download.js?v=4.4.2";
-import { FileInspector } from "./file-inspector.js?v=4.4.2";
-import { BrowseTree } from "./browse-tree.js?v=4.4.2";
-import { PaneResize } from "./pane-resize.js?v=4.4.2";
-import { mapEntry, isHidden, toEntries } from "./browse-entries.js?v=4.4.2";
+import { BrowseIcons } from "./browse-icons.js?v=4.5.0";
+import { BulkDownload } from "./bulk-download.js?v=4.5.0";
+import { FileInspector } from "./file-inspector.js?v=4.5.0";
+import { BrowseTree } from "./browse-tree.js?v=4.5.0";
+import { PaneResize } from "./pane-resize.js?v=4.5.0";
+import { mapEntry, isHidden, toEntries } from "./browse-entries.js?v=4.5.0";
 
 const BrowsePage = (function () {
     'use strict';
@@ -143,10 +143,6 @@ const BrowsePage = (function () {
         <!-- CONTEXT HEADER -->
         <header class="browse-ctx">
           <div class="browse-ctx-top">
-            <button type="button" class="tree-drawer-btn" id="treeDrawerBtn" aria-controls="treePane" aria-expanded="false">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"/></svg>
-              <span>${d.foldersDrawer || "Folders"}</span>
-            </button>
             <nav class="crumbs" id="breadcrumb" aria-label="${d.breadcrumb || "Breadcrumb"}"></nav>
             <button type="button" class="browse-full-btn" id="browseFullBtn"
               aria-label="${embedded ? (d.fullScreen || "Full screen") : (d.exitFullScreen || "Exit full screen")}"
@@ -295,7 +291,6 @@ const BrowsePage = (function () {
             mountShell(container.querySelector(".browse-split"));
         }
         centreEl.dataset.enter = enterDir;
-        bindDrawerButton();
         bindFullScreenButton();
         bindInspectorHandle();
 
@@ -328,7 +323,6 @@ const BrowsePage = (function () {
         <div class="pane-handle tree-handle" id="treeHandle" role="separator" tabindex="0"
           aria-orientation="vertical" aria-controls="treePane" aria-label="${d.resizeTree || "Resize folders panel"}" data-i18n-aria="resizeTree"></div>
         <div class="browse-center" id="browseCenter">${centre}</div>
-        <div class="tree-scrim" id="treeScrim" hidden></div>
       </div>`;
     }
 
@@ -352,13 +346,6 @@ const BrowsePage = (function () {
         });
         // Widths stored on a large monitor are re-clamped on a smaller one.
         window.addEventListener("resize", () => { if (split.isConnected) tree.set(tree.get()); });
-
-        split.querySelector("#treeScrim").addEventListener("click", () => setDrawer(false));
-        drawerMq.addEventListener("change", () => { if (!drawerMq.matches) setDrawer(false); syncInert(); });
-        syncInert();
-        pane.addEventListener("keydown", onDrawerKeydown);
-        // The pane title links to the root; following it closes the drawer too.
-        pane.addEventListener("click", (e) => { if (e.target.closest("a[href]")) setDrawer(false); });
 
         // Embedded on the home page: every in-pane folder link (table rows, breadcrumb,
         // tree title) opens in place instead of leaving the page. Bubble phase on the
@@ -411,14 +398,10 @@ const BrowsePage = (function () {
         const folder = entry.type === "directory" ? entry.relPath
             : entry.relPath.includes("/") ? entry.relPath.slice(0, entry.relPath.lastIndexOf("/")) : "";
         if (entry.type === "file") pendingSelect = entry.relPath;
-        const fromDrawer = !!document.querySelector(".browse-split.drawer-open");
-        setDrawer(false);
         if (folder === relOf(currentPath)) {
             if (pendingSelect) applyPendingSelect();
             return;
         }
-        // The navigation re-renders the centre header, so focus its new Folders button.
-        drawerFocusPending = fromDrawer;
         go(folder);
     }
 
@@ -432,61 +415,6 @@ const BrowsePage = (function () {
         BulkDownload.toggle(rel, true);
         row.focus();
         row.scrollIntoView({ block: "nearest" });
-    }
-
-    /* ── Drawer (narrow viewports) ── */
-
-    let drawerReturn = null;
-    let drawerFocusPending = false;
-    const drawerMq = window.matchMedia("(max-width: 767px)");
-
-    /** @brief A closed drawer is inert; on wider screens the pane is always live. */
-    function syncInert() {
-        const split = document.querySelector(".browse-split");
-        const pane = split && split.querySelector("#treePane");
-        if (pane) pane.inert = drawerMq.matches && !split.classList.contains("drawer-open");
-    }
-
-    function bindDrawerButton() {
-        const btn = document.getElementById("treeDrawerBtn");
-        if (!btn) return;
-        btn.addEventListener("click", () => setDrawer(true));
-        if (drawerFocusPending) { drawerFocusPending = false; btn.focus({ preventScroll: true }); }
-    }
-
-    function setDrawer(open) {
-        const split = document.querySelector(".browse-split");
-        if (!split || split.classList.contains("drawer-open") === open) return;
-        const scrim = split.querySelector("#treeScrim");
-        const btn = document.getElementById("treeDrawerBtn");
-        split.classList.toggle("drawer-open", open);
-        syncInert();
-        scrim.hidden = !open;
-        if (btn) btn.setAttribute("aria-expanded", String(open));
-        if (open) {
-            drawerReturn = btn;
-            const target = split.querySelector('#treePane [role="treeitem"][tabindex="0"]') || split.querySelector("#treePane .tree-title");
-            // Next frame: inherited visibility on tree rows settles first on low tiers.
-            if (target) requestAnimationFrame(() => target.focus());
-        } else if (drawerReturn && drawerReturn.isConnected) {
-            drawerReturn.focus();
-            drawerReturn = null;
-        }
-    }
-
-    /** @brief Escape closes the drawer; Tab cycles inside it while it is open. */
-    function onDrawerKeydown(e) {
-        const split = document.querySelector(".browse-split");
-        if (!split || !split.classList.contains("drawer-open")) return;
-        if (e.key === "Escape") { e.preventDefault(); setDrawer(false); return; }
-        if (e.key !== "Tab") return;
-        const pane = split.querySelector("#treePane");
-        const stops = [...pane.querySelectorAll('a[href], button:not([tabindex="-1"]), [role="treeitem"][tabindex="0"]')]
-            .filter(el => el.offsetParent !== null);
-        if (!stops.length) return;
-        const first = stops[0], last = stops[stops.length - 1];
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     }
 
     /* ── Inspector handle (one per centre render; #browseBody is rebuilt) ── */
@@ -741,14 +669,14 @@ const BrowsePage = (function () {
             // file opens sign-in instead of a download (see FileActions download guard).
             const linkAttr = f.type === "directory" ? `href="${href}"`
                 : f.locked ? `href="#" data-locked="true"`
-                : f.viewOnly ? `aria-disabled="true"` : `href="${href}" data-file="true"`;
+                    : f.viewOnly ? `aria-disabled="true"` : `href="${href}" data-file="true"`;
             const iconStr = f.type === "directory" ? 'f-icon-dir' : 'f-icon-file';
             const badgeStr = f.type === "directory" ? 'badge-dir' : 'badge-file';
             const badgeLabel = f.type === "directory" ? (d.folder || 'Folder') : (d.file || 'File');
 
             const iconVerb = f.type === "directory" ? (d.btnOpen || 'Open')
                 : f.locked ? (d.signInToOpen || 'Sign in to open')
-                : f.viewOnly ? (d.viewOnlyBadge || 'View only') : (d.btnDownload || 'Download');
+                    : f.viewOnly ? (d.viewOnlyBadge || 'View only') : (d.btnDownload || 'Download');
             const noDownload = f.locked || (f.viewOnly && f.type !== "directory");
             const iconLabel = escapeHtml(iconVerb + " " + f.name);
             const selLabel = escapeHtml((d.select || "Select") + " " + f.name);

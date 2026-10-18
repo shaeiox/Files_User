@@ -60,14 +60,15 @@
    column (header · toolbar · table) whose table area takes the rest and scrolls
    inside itself. So the tree and #tableContainer always end on the same line,
    and whatever follows the explorer (trust band, footer) never moves when a
-   folder has more or fewer rows. Phones keep the natural flow (drawer layout). */
+   folder has more or fewer rows. Phones keep the natural flow (single-pane
+   drill-down: browse-layout only, no tree drawer). */
 @media (min-width: 768px) {
     .browse-split {
         height: var(--pane-h);
         align-items: stretch;
     }
 
-    .browse-split > .browse-tree-pane,
+    .browse-split>.browse-tree-pane,
     .browse-split .pane-handle {
         position: relative;
         top: auto;
@@ -75,13 +76,13 @@
         min-height: 0;
     }
 
-    .browse-split > .browse-center {
+    .browse-split>.browse-center {
         display: flex;
         flex-direction: column;
         min-height: 0;
     }
 
-    .browse-center > .browse-layout {
+    .browse-center>.browse-layout {
         flex: 1;
         min-height: 0;
     }
@@ -96,7 +97,7 @@
         grid-auto-rows: minmax(0, 40%);
     }
 
-    .browse-split .browse-body > .file-tbl {
+    .browse-split .browse-body>.file-tbl {
         display: flex;
         flex-direction: column;
         min-height: 0;
@@ -105,19 +106,19 @@
         scrollbar-width: thin;
     }
 
-    .browse-split .file-tbl > .thead {
+    .browse-split .file-tbl>.thead {
         position: sticky;
         top: 0;
         z-index: 2;
         flex-shrink: 0;
     }
 
-    .browse-split .file-tbl > #rows {
+    .browse-split .file-tbl>#rows {
         flex-shrink: 0;
     }
 
     /* The selection bar stays at the foot of the table while the rows scroll. */
-    .browse-split .file-tbl > .browse-bulkbar {
+    .browse-split .file-tbl>.browse-bulkbar {
         position: sticky;
         bottom: 0;
         z-index: 2;
@@ -344,19 +345,19 @@
     color: var(--text);
 }
 
-.tree-node:focus-visible > .tree-row {
+.tree-node:focus-visible>.tree-row {
     outline: 2px solid var(--border-focus);
     outline-offset: -2px;
 }
 
 /* The marker paints the current row; a hover fill must not cover it. */
-.tree-node[aria-current="page"] > .tree-row {
+.tree-node[aria-current="page"]>.tree-row {
     color: var(--text-accent);
     font-weight: 600;
     background: transparent;
 }
 
-.tree-node.is-file > .tree-row {
+.tree-node.is-file>.tree-row {
     color: var(--text-3);
     font-size: var(--text-body-md);
 }
@@ -369,7 +370,7 @@
     transition: transform var(--dur-2) var(--ease);
 }
 
-.tree-node[aria-expanded="true"] > .tree-row .tree-chev {
+.tree-node[aria-expanded="true"]>.tree-row .tree-chev {
     transform: rotate(90deg);
 }
 
@@ -377,7 +378,7 @@
     transform: scaleX(-1);
 }
 
-[dir="rtl"] .tree-node[aria-expanded="true"] > .tree-row .tree-chev {
+[dir="rtl"] .tree-node[aria-expanded="true"]>.tree-row .tree-chev {
     transform: rotate(-90deg);
 }
 
@@ -387,7 +388,7 @@
     color: var(--text-3);
 }
 
-.tree-node[aria-current="page"] > .tree-row .tree-ico {
+.tree-node[aria-current="page"]>.tree-row .tree-ico {
     color: var(--text-accent);
 }
 
@@ -413,12 +414,12 @@
     transition: grid-template-rows var(--dur-2) var(--ease-out), visibility 0s;
 }
 
-.tree-kids > ul {
+.tree-kids>ul {
     min-height: 0;
     overflow: hidden;
 }
 
-.tree-node[aria-expanded="false"] > .tree-kids {
+.tree-node[aria-expanded="false"]>.tree-kids {
     grid-template-rows: 0fr;
     visibility: hidden;
     transition: grid-template-rows var(--dur-1) var(--ease-out), visibility 0s var(--dur-1);
@@ -502,7 +503,7 @@
 }
 
 /* Rail: the pane keeps only its toggle. Resizing is off while collapsed.
-   Never applies to the phone drawer. */
+   Never applies below 768px (phones show no tree pane at all). */
 @media (min-width: 768px) {
     .is-collapsed .tree-head {
         flex-direction: column;
@@ -582,28 +583,7 @@ body.is-resizing .browse-inspector {
     pointer-events: none;
 }
 
-/* ── DRAWER (narrow viewports) ──────────────────────────────────────────── */
-.tree-drawer-btn {
-    display: none;
-    align-items: center;
-    gap: 6px;
-    min-height: 44px;
-    padding: 0 var(--s4);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-buttons);
-    background: var(--bg-hover);
-    color: var(--text);
-    font: inherit;
-    font-size: var(--text-body-md);
-    font-weight: 600;
-    cursor: pointer;
-    transition: background var(--dur-1) ease, transform var(--dur-1) var(--ease);
-}
-
-.tree-drawer-btn:active {
-    transform: scale(0.97);
-}
-
+/* ── CONTEXT HEADER ROW — breadcrumb path + full-screen toggle ────────────── */
 .browse-ctx-top {
     display: flex;
     align-items: center;
@@ -612,78 +592,47 @@ body.is-resizing .browse-inspector {
     min-width: 0;
 }
 
-.browse-ctx-top > .crumbs {
+.browse-ctx-top>.crumbs {
     flex: 1;
     min-width: 0;
 }
 
-.tree-scrim {
-    position: fixed;
-    inset: 0;
-    z-index: 1090;
-    background: rgba(0, 0, 0, 0.5);
-    animation: fadeIn var(--dur-2) ease both;
-}
-
-.tree-scrim[hidden] {
-    display: none;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-}
-
+/* ── MOBILE (<768px) — one screen: browse-layout only ───────────────────────
+   No tree pane and no drawer layer: the folder hierarchy is served by the
+   listing itself (tap a folder to enter it) plus the breadcrumb path at the
+   top of the pane (tap any ancestor to jump there). The tree pane stays
+   mounted for the desktop shell but is not part of the phone UI at all. */
 @media (max-width: 767px) {
+
     .browse-split,
     .browse-split.is-collapsed {
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .tree-handle,
-    .tree-collapse {
+    .browse-tree-pane,
+    .tree-handle {
         display: none;
     }
 
-    .tree-drawer-btn {
-        display: inline-flex;
+    /* The breadcrumb path is the phone's navigation rail: pinned at the top of
+       the pane and full width, so the current place in the folder tree is
+       always on screen and every ancestor is one tap away. */
+    .browse-ctx-top {
+        align-items: flex-start;
     }
 
-    /* Off-canvas: out of the layout, slid in from the reading-start edge. */
-    .browse-tree-pane {
-        position: fixed;
-        top: 0;
-        inset-inline-start: 0;
-        z-index: 1100;
-        width: min(320px, 86vw);
-        height: 100dvh;
-        border-radius: 0;
-        border-block: 0;
-        border-inline-start: 0;
-        box-shadow: var(--shadow-xl);
-        /* Closed, it is `inert` (browse.js), so it is out of focus order and the
-           accessibility tree without waiting on any transition. */
-        transform: translateX(-105%);
-        transition: transform var(--dur-3) var(--ease);
+    .browse-ctx-top>.crumbs {
+        flex: 1 1 auto;
     }
 
-    [dir="rtl"] .browse-tree-pane {
-        transform: translateX(105%);
-    }
-
-    .drawer-open .browse-tree-pane {
-        transform: none;
-    }
-
-    .tree-row,
-    .tree-status {
+    .crumb {
         min-height: 44px;
-        height: auto;
+        padding: 8px 12px;
     }
 
-    .tree-marker {
-        height: 44px;
+    /* Drill-down is the only way in: folder taps need a comfortable target. */
+    .file-tbl .f-link {
+        padding: 12px 0;
     }
 }
 
@@ -726,6 +675,7 @@ body.is-resizing .browse-inspector {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     .tree-marker,
     .tree-kids {
         transition: none !important;
@@ -989,6 +939,7 @@ body.is-resizing .browse-inspector {
    to two would snap instead of animate. Collapsing the second track to 0 rather than
    removing it is what makes the transition possible at all. */
 @media (min-width: 1280px) {
+
     /* Three tracks: table · resize handle · inspector. The handle track is the
        gutter, so the gap stays 0 and all three always exist (see above). */
     .browse-body {
@@ -1495,7 +1446,7 @@ body.is-resizing .browse-inspector {
         flex-direction: row;
     }
 
-    .insp-actions > * {
+    .insp-actions>* {
         flex: 1;
     }
 
@@ -1644,29 +1595,93 @@ body.is-resizing .browse-inspector {
 }
 
 /* File-type tint (BrowseIcons.kindOf). Unlisted kinds (text, file) stay neutral. */
-[data-kind="archive"] { --kind: #f5b74e; }
-[data-kind="disk"]    { --kind: #8fb4ff; }
-[data-kind="package"] { --kind: #b49cff; }
-[data-kind="code"]    { --kind: #6fd3b5; }
-[data-kind="secure"]  { --kind: #86d98f; }
-[data-kind="pdf"]     { --kind: #ff8a7a; }
-[data-kind="doc"]     { --kind: #7fb0ff; }
-[data-kind="sheet"]   { --kind: #6fcf97; }
-[data-kind="image"]   { --kind: #f08bd0; }
-[data-kind="video"]   { --kind: #ff9f6e; }
-[data-kind="audio"]   { --kind: #e3a6ff; }
+[data-kind="archive"] {
+    --kind: #f5b74e;
+}
 
-[data-theme="light"] [data-kind="archive"] { --kind: #a86500; }
-[data-theme="light"] [data-kind="disk"]    { --kind: #2f5fbf; }
-[data-theme="light"] [data-kind="package"] { --kind: #6a4fc4; }
-[data-theme="light"] [data-kind="code"]    { --kind: #11795d; }
-[data-theme="light"] [data-kind="secure"]  { --kind: #2d7d3a; }
-[data-theme="light"] [data-kind="pdf"]     { --kind: #c0392b; }
-[data-theme="light"] [data-kind="doc"]     { --kind: #2b5fb3; }
-[data-theme="light"] [data-kind="sheet"]   { --kind: #1f7a45; }
-[data-theme="light"] [data-kind="image"]   { --kind: #a83a85; }
-[data-theme="light"] [data-kind="video"]   { --kind: #b9541c; }
-[data-theme="light"] [data-kind="audio"]   { --kind: #8a3fb0; }
+[data-kind="disk"] {
+    --kind: #8fb4ff;
+}
+
+[data-kind="package"] {
+    --kind: #b49cff;
+}
+
+[data-kind="code"] {
+    --kind: #6fd3b5;
+}
+
+[data-kind="secure"] {
+    --kind: #86d98f;
+}
+
+[data-kind="pdf"] {
+    --kind: #ff8a7a;
+}
+
+[data-kind="doc"] {
+    --kind: #7fb0ff;
+}
+
+[data-kind="sheet"] {
+    --kind: #6fcf97;
+}
+
+[data-kind="image"] {
+    --kind: #f08bd0;
+}
+
+[data-kind="video"] {
+    --kind: #ff9f6e;
+}
+
+[data-kind="audio"] {
+    --kind: #e3a6ff;
+}
+
+[data-theme="light"] [data-kind="archive"] {
+    --kind: #a86500;
+}
+
+[data-theme="light"] [data-kind="disk"] {
+    --kind: #2f5fbf;
+}
+
+[data-theme="light"] [data-kind="package"] {
+    --kind: #6a4fc4;
+}
+
+[data-theme="light"] [data-kind="code"] {
+    --kind: #11795d;
+}
+
+[data-theme="light"] [data-kind="secure"] {
+    --kind: #2d7d3a;
+}
+
+[data-theme="light"] [data-kind="pdf"] {
+    --kind: #c0392b;
+}
+
+[data-theme="light"] [data-kind="doc"] {
+    --kind: #2b5fb3;
+}
+
+[data-theme="light"] [data-kind="sheet"] {
+    --kind: #1f7a45;
+}
+
+[data-theme="light"] [data-kind="image"] {
+    --kind: #a83a85;
+}
+
+[data-theme="light"] [data-kind="video"] {
+    --kind: #b9541c;
+}
+
+[data-theme="light"] [data-kind="audio"] {
+    --kind: #8a3fb0;
+}
 
 .insp-icon .ficon {
     color: var(--kind, currentColor);
@@ -2140,7 +2155,7 @@ body.is-resizing .browse-inspector {
             grid-template-columns: 36px 40px minmax(0, 1fr) 150px 80px 26px;
         }
 
-        .browse-split .file-tbl:not(.grid-mode) .trow > div:nth-child(4) {
+        .browse-split .file-tbl:not(.grid-mode) .trow>div:nth-child(4) {
             display: none;
         }
     }
@@ -2150,7 +2165,7 @@ body.is-resizing .browse-inspector {
             grid-template-columns: 36px 40px minmax(0, 1fr) 80px 26px;
         }
 
-        .browse-split .file-tbl:not(.grid-mode) .trow > div:nth-child(5) {
+        .browse-split .file-tbl:not(.grid-mode) .trow>div:nth-child(5) {
             display: none;
         }
     }
@@ -2168,6 +2183,7 @@ body.is-resizing .browse-inspector {
 }
 
 @media (max-width: 900px) {
+
     .browse-search,
     .browse-search:focus-within {
         width: 100%;
@@ -2222,13 +2238,14 @@ body.is-resizing .browse-inspector {
         font-size: var(--text-headline-sm);
     }
 }
+
 /* ── CARD ZIP ACTION ───────────────────────────────────────────────────── */
 /* Actions rise in one after another as the card opens. */
-.browse-inspector.is-open .insp-actions > * {
+.browse-inspector.is-open .insp-actions>* {
     animation: fadeUp 280ms var(--ease) both;
 }
 
-.browse-inspector.is-open .insp-actions > :nth-child(2) {
+.browse-inspector.is-open .insp-actions> :nth-child(2) {
     animation-delay: 70ms;
 }
 
@@ -2249,7 +2266,18 @@ body.is-resizing .browse-inspector {
 }
 
 @keyframes insp-zip-drop {
-    0%   { transform: translateY(-3px); opacity: 0.4; }
-    60%  { transform: translateY(2px);  opacity: 1; }
-    100% { transform: translateY(2px);  opacity: 0.4; }
+    0% {
+        transform: translateY(-3px);
+        opacity: 0.4;
+    }
+
+    60% {
+        transform: translateY(2px);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(2px);
+        opacity: 0.4;
+    }
 }
