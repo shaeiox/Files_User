@@ -17,8 +17,8 @@
  * leaving /browse and returning restores it.
  */
 
-import { BrowseIcons } from "./browse-icons.js?v=4.5.0";
-import { toEntries, byFoldersThenName } from "./browse-entries.js?v=4.5.0";
+import { BrowseIcons } from "./browse-icons.js?v=4.5.1";
+import { toEntries, byFoldersThenName } from "./browse-entries.js?v=4.5.1";
 
 const BrowseTree = (function () {
     'use strict';

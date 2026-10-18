@@ -30,21 +30,21 @@ const Router = (function () {
     }
 
     /* ── Route table: one explicit handle per route (no bare globals) ── */
-    const loadBrowse = async () => (await import("/assets/js/browse.js?v=4.5.0")).BrowsePage;
+    const loadBrowse = async () => (await import("/assets/js/browse.js?v=4.5.1")).BrowsePage;
     const ROUTES = {
         // Home embeds the Browse explorer below its hero, so it needs the same
         // module and stylesheet (browse-split-explorer: home embed).
         home: {
-            css: "/assets/css/browse.css?v=4.5.0",
+            css: "/assets/css/browse.css?v=4.5.1",
             load: async () => { HomePage.useBrowse(await loadBrowse()); return HomePage; },
         },
         browse: {
-            css: "/assets/css/browse.css?v=4.5.0",
+            css: "/assets/css/browse.css?v=4.5.1",
             load: loadBrowse,
         },
         release: {
-            css: "/assets/css/release.css?v=4.5.0",
-            load: async () => (await import("/assets/js/releases.js?v=4.5.0")).ReleasePage,
+            css: "/assets/css/release.css?v=4.5.1",
+            load: async () => (await import("/assets/js/releases.js?v=4.5.1")).ReleasePage,
         },
     };
 

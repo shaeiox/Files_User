@@ -26,7 +26,7 @@ index.html
 ├── 3. components.css        (1,346 L)  nav, buttons, inputs, cards, footer, controls
 ├── 4. home.css              (2,250 L)  home page: hero, cards grid, results, states
 │      route stylesheets, inserted here by router.js on their route only:
-│      browse.css            (2,203 L)  browse split panes, folder tree, table, inspector
+│      browse.css            (2,215 L)  browse split panes, folder tree, table, inspector
 │      release.css             (489 L)  releases page
 ├── 5. performance-modes.css   (884 L)  [data-perf] overrides
 └── 6. lenis.css                (26 L)  upstream Lenis requirements
