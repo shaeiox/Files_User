@@ -17,8 +17,8 @@
  * leaving /browse and returning restores it.
  */
 
-import { BrowseIcons } from "./browse-icons.js?v=4.4.2";
-import { toEntries, byFoldersThenName } from "./browse-entries.js?v=4.4.2";
+import { BrowseIcons } from "./browse-icons.js?v=4.5.0";
+import { toEntries, byFoldersThenName } from "./browse-entries.js?v=4.5.0";
 
 const BrowseTree = (function () {
     'use strict';
@@ -222,7 +222,7 @@ const BrowseTree = (function () {
         if (!markerEl) return;
         const li = current ? nodeFor(current) : null;
         const row = li && li.querySelector(":scope > .tree-row");
-        // Not laid out (rail, closed drawer): place it once the pane shows again.
+        // Not laid out (rail, hidden pane): place it once the pane shows again.
         const hidden = !row || !row.offsetHeight || li.parentElement.closest('[aria-expanded="false"]');
         if (hidden) { markerEl.classList.remove("is-on"); return; }
         const y = row.getBoundingClientRect().top - scrollEl.getBoundingClientRect().top + scrollEl.scrollTop;
@@ -371,7 +371,7 @@ const BrowseTree = (function () {
         if (typeof ResizeObserver !== "undefined") {
             const ro = new ResizeObserver(() => placeMarker());
             ro.observe(treeEl);   // rows move as folders open and close
-            ro.observe(scrollEl); // the pane reappears from the rail or drawer
+            ro.observe(scrollEl); // the pane reappears from the rail
         }
 
         paintedLang = typeof window.getLang === "function" ? window.getLang() : null;

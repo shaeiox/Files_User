@@ -60,7 +60,8 @@
    column (header · toolbar · table) whose table area takes the rest and scrolls
    inside itself. So the tree and #tableContainer always end on the same line,
    and whatever follows the explorer (trust band, footer) never moves when a
-   folder has more or fewer rows. Phones keep the natural flow (drawer layout). */
+   folder has more or fewer rows. Phones keep the natural flow (single-pane
+   drill-down: browse-layout only, no tree drawer). */
 @media (min-width: 768px) {
     .browse-split {
         height: var(--pane-h);
@@ -502,7 +503,7 @@
 }
 
 /* Rail: the pane keeps only its toggle. Resizing is off while collapsed.
-   Never applies to the phone drawer. */
+   Never applies below 768px (phones show no tree pane at all). */
 @media (min-width: 768px) {
     .is-collapsed .tree-head {
         flex-direction: column;
@@ -582,28 +583,7 @@ body.is-resizing .browse-inspector {
     pointer-events: none;
 }
 
-/* ── DRAWER (narrow viewports) ──────────────────────────────────────────── */
-.tree-drawer-btn {
-    display: none;
-    align-items: center;
-    gap: 6px;
-    min-height: 44px;
-    padding: 0 var(--s4);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-buttons);
-    background: var(--bg-hover);
-    color: var(--text);
-    font: inherit;
-    font-size: var(--text-body-md);
-    font-weight: 600;
-    cursor: pointer;
-    transition: background var(--dur-1) ease, transform var(--dur-1) var(--ease);
-}
-
-.tree-drawer-btn:active {
-    transform: scale(0.97);
-}
-
+/* ── CONTEXT HEADER ROW — breadcrumb path + full-screen toggle ────────────── */
 .browse-ctx-top {
     display: flex;
     align-items: center;
@@ -617,73 +597,41 @@ body.is-resizing .browse-inspector {
     min-width: 0;
 }
 
-.tree-scrim {
-    position: fixed;
-    inset: 0;
-    z-index: 1090;
-    background: rgba(0, 0, 0, 0.5);
-    animation: fadeIn var(--dur-2) ease both;
-}
-
-.tree-scrim[hidden] {
-    display: none;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-}
-
+/* ── MOBILE (<768px) — one screen: browse-layout only ───────────────────────
+   No tree pane and no drawer layer: the folder hierarchy is served by the
+   listing itself (tap a folder to enter it) plus the breadcrumb path at the
+   top of the pane (tap any ancestor to jump there). The tree pane stays
+   mounted for the desktop shell but is not part of the phone UI at all. */
 @media (max-width: 767px) {
     .browse-split,
     .browse-split.is-collapsed {
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .tree-handle,
-    .tree-collapse {
+    .browse-tree-pane,
+    .tree-handle {
         display: none;
     }
 
-    .tree-drawer-btn {
-        display: inline-flex;
+    /* The breadcrumb path is the phone's navigation rail: pinned at the top of
+       the pane and full width, so the current place in the folder tree is
+       always on screen and every ancestor is one tap away. */
+    .browse-ctx-top {
+        align-items: flex-start;
     }
 
-    /* Off-canvas: out of the layout, slid in from the reading-start edge. */
-    .browse-tree-pane {
-        position: fixed;
-        top: 0;
-        inset-inline-start: 0;
-        z-index: 1100;
-        width: min(320px, 86vw);
-        height: 100dvh;
-        border-radius: 0;
-        border-block: 0;
-        border-inline-start: 0;
-        box-shadow: var(--shadow-xl);
-        /* Closed, it is `inert` (browse.js), so it is out of focus order and the
-           accessibility tree without waiting on any transition. */
-        transform: translateX(-105%);
-        transition: transform var(--dur-3) var(--ease);
+    .browse-ctx-top > .crumbs {
+        flex: 1 1 auto;
     }
 
-    [dir="rtl"] .browse-tree-pane {
-        transform: translateX(105%);
-    }
-
-    .drawer-open .browse-tree-pane {
-        transform: none;
-    }
-
-    .tree-row,
-    .tree-status {
+    .crumb {
         min-height: 44px;
-        height: auto;
+        padding: 8px 12px;
     }
 
-    .tree-marker {
-        height: 44px;
+    /* Drill-down is the only way in: folder taps need a comfortable target. */
+    .file-tbl .f-link {
+        padding: 12px 0;
     }
 }
 
