@@ -15,115 +15,115 @@
    ─────────────────────────────────────────────────────────────── */
 
 @font-face {
-    font-family: 'Inter';
-    src: url('/assets/fonts/Inter-Regular.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
+   font-family: 'Inter';
+   src: url('/assets/fonts/Inter-Regular.woff2') format('woff2');
+   font-weight: 400;
+   font-style: normal;
+   font-display: swap;
 }
 
 @font-face {
-    font-family: 'Inter';
-    src: url('/assets/fonts/Inter-Medium.woff2') format('woff2');
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
+   font-family: 'Inter';
+   src: url('/assets/fonts/Inter-Medium.woff2') format('woff2');
+   font-weight: 500;
+   font-style: normal;
+   font-display: swap;
 }
 
 @font-face {
-    font-family: 'Inter';
-    src: url('/assets/fonts/Inter-SemiBold.woff2') format('woff2');
-    font-weight: 600;
-    font-style: normal;
-    font-display: swap;
+   font-family: 'Inter';
+   src: url('/assets/fonts/Inter-SemiBold.woff2') format('woff2');
+   font-weight: 600;
+   font-style: normal;
+   font-display: swap;
 }
 
 @font-face {
-    font-family: 'JetBrains Mono';
-    src: url('/assets/fonts/JetBrainsMono-Regular.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
+   font-family: 'JetBrains Mono';
+   src: url('/assets/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+   font-weight: 400;
+   font-style: normal;
+   font-display: swap;
 }
 
 @font-face {
-    font-family: 'JetBrains Mono';
-    src: url('/assets/fonts/JetBrainsMono-Medium.woff2') format('woff2');
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
+   font-family: 'JetBrains Mono';
+   src: url('/assets/fonts/JetBrainsMono-Medium.woff2') format('woff2');
+   font-weight: 500;
+   font-style: normal;
+   font-display: swap;
 }
 
 @font-face {
-    font-family: 'JetBrains Mono';
-    src: url('/assets/fonts/JetBrainsMono-SemiBold.woff2') format('woff2');
-    font-weight: 600;
-    font-style: normal;
-    font-display: swap;
+   font-family: 'JetBrains Mono';
+   src: url('/assets/fonts/JetBrainsMono-SemiBold.woff2') format('woff2');
+   font-weight: 600;
+   font-style: normal;
+   font-display: swap;
 }
 
 @font-face {
-    font-family: 'Vazirmatn';
-    src: url('/assets/fonts/Vazirmatn-Regular.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200F, U+FB50-FDFF, U+FE70-FEFF;
+   font-family: 'Vazirmatn';
+   src: url('/assets/fonts/Vazirmatn-Regular.woff2') format('woff2');
+   font-weight: 400;
+   font-style: normal;
+   font-display: swap;
+   unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200F, U+FB50-FDFF, U+FE70-FEFF;
 }
 
 @font-face {
-    font-family: 'Vazirmatn';
-    src: url('/assets/fonts/Vazirmatn-Medium.woff2') format('woff2');
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
-    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200F, U+FB50-FDFF, U+FE70-FEFF;
+   font-family: 'Vazirmatn';
+   src: url('/assets/fonts/Vazirmatn-Medium.woff2') format('woff2');
+   font-weight: 500;
+   font-style: normal;
+   font-display: swap;
+   unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200F, U+FB50-FDFF, U+FE70-FEFF;
 }
 
 @font-face {
-    font-family: 'Vazirmatn';
-    src: url('/assets/fonts/Vazirmatn-SemiBold.woff2') format('woff2');
-    font-weight: 600;
-    font-style: normal;
-    font-display: swap;
-    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200F, U+FB50-FDFF, U+FE70-FEFF;
+   font-family: 'Vazirmatn';
+   src: url('/assets/fonts/Vazirmatn-SemiBold.woff2') format('woff2');
+   font-weight: 600;
+   font-style: normal;
+   font-display: swap;
+   unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200F, U+FB50-FDFF, U+FE70-FEFF;
 }
 
 @font-face {
-    font-family: 'Cinzel';
-    src: url('/assets/fonts/Cinzel-SemiBold.woff2') format('woff2');
-    font-weight: 600;
-    font-style: normal;
-    font-display: swap;
+   font-family: 'Cinzel';
+   src: url('/assets/fonts/Cinzel-SemiBold.woff2') format('woff2');
+   font-weight: 600;
+   font-style: normal;
+   font-display: swap;
 }
 
 :root {
-    /* ── Huly core palette ── */
-    --color-obsidian-canvas: #101110;
-    --color-void: #090a0c;
-    --color-charcoal-card: #111111;
-    --color-slate-edge: #4a4b50;
-    --color-iron-veil: #6b6c6d;
-    --color-smoke: #95979e;
-    --color-ash: #a9a9aa;
-    --color-frost: #d1d1d1;
-    --color-linen: #e5e5e7;
-    --color-snow: #ffffff;
-    --color-ember-pulse: #ffb800;
-    --color-molasses: #5a250a;
+   /* ── Huly core palette ── */
+   --color-obsidian-canvas: #101110;
+   --color-void: #090a0c;
+   --color-charcoal-card: #111111;
+   --color-slate-edge: #4a4b50;
+   --color-iron-veil: #6b6c6d;
+   --color-smoke: #95979e;
+   --color-ash: #a9a9aa;
+   --color-frost: #d1d1d1;
+   --color-linen: #e5e5e7;
+   --color-snow: #ffffff;
+   --color-ember-pulse: #ffb800;
+   --color-molasses: #5a250a;
 
-    /* ── Hero "Noir Prism" palette (ADR-014) ─────────────────────────────
+   /* ── Hero "Noir Prism" palette (ADR-014) ─────────────────────────────
        The hero is the one surface allowed a multi-hue palette: champagne
        (heritage gold, desaturated), iris and glacier are decorative light
        only — never text, never a control fill — so the two-role rule for
        the rest of the product (D2) is untouched. Text on the hero keeps
        using --hero-text / --hero-text-2, measured per theme below. */
-    --color-champagne: #e6c87a;
-    --color-iris: #8b7cf6;
-    --color-glacier: #67d7c4;
-    --color-rose-veil: #e8a2b8;
+   --color-champagne: #e6c87a;
+   --color-iris: #8b7cf6;
+   --color-glacier: #67d7c4;
+   --color-rose-veil: #e8a2b8;
 
-    /* ── Colour roles (ui-craft-elevation D2) ──────────────────────────────
+   /* ── Colour roles (ui-craft-elevation D2) ──────────────────────────────
        The palette has exactly two hue roles. Nothing else may introduce a hue.
          ACCENT          amber. Fill/indicator: --color-ember-pulse.
                          Text: --text-accent. Tint: --glow*. Focus: --border-focus.
@@ -134,121 +134,121 @@
        floor for 13-14px button labels. Deepened one step within the same hue:
          #ffffff on --action       #3d6bc7  5.09:1
          #ffffff on --action-hover #2f5cb2  6.37:1 */
-    --action: #3d6bc7;
-    --action-hover: #2f5cb2;
-    --text-on-action: #ffffff;
+   --action: #3d6bc7;
+   --action-hover: #2f5cb2;
+   --text-on-action: #ffffff;
 
-    /* ── Spacing scale (4px base) ── */
-    --s1: 4px;
-    --s2: 8px;
-    --s3: 12px;
-    --s4: 16px;
-    --s5: 20px;
-    --s6: 24px;
-    --s7: 28px;
-    --s8: 32px;
-    --s10: 40px;
-    --s12: 48px;
-    --s14: 56px;
-    --s16: 64px;
-    --s20: 80px;
-    --s24: 96px;
+   /* ── Spacing scale (4px base) ── */
+   --s1: 4px;
+   --s2: 8px;
+   --s3: 12px;
+   --s4: 16px;
+   --s5: 20px;
+   --s6: 24px;
+   --s7: 28px;
+   --s8: 32px;
+   --s10: 40px;
+   --s12: 48px;
+   --s14: 56px;
+   --s16: 64px;
+   --s20: 80px;
+   --s24: 96px;
 
-    /* ── Radius (pill-first system) ── */
-    --r1: 4px;
-    --r2: 6px;
-    --r3: 8px;
-    --r4: 12px;
-    --r5: 16px;
-    --r6: 30px;
-    --r-full: 9999px;
-    --radius: 12px;
+   /* ── Radius (pill-first system) ── */
+   --r1: 4px;
+   --r2: 6px;
+   --r3: 8px;
+   --r4: 12px;
+   --r5: 16px;
+   --r6: 30px;
+   --r-full: 9999px;
+   --radius: 12px;
 
-    /* Slim, inset native scrollbars: a comfortable hit-area with a fine thumb. */
-    --scrollbar-size: 12px;
-    --scrollbar-inset: 3px;
+   /* Slim, inset native scrollbars: a comfortable hit-area with a fine thumb. */
+   --scrollbar-size: 12px;
+   --scrollbar-inset: 3px;
 
-    --radius-tags: 9999px;
-    --radius-cards: 12px;
-    --radius-inputs: 9999px;
-    --radius-panels: 0.5rem;
-    --radius-buttons: 9999px;
+   --radius-tags: 9999px;
+   --radius-cards: 12px;
+   --radius-inputs: 9999px;
+   --radius-panels: 0.5rem;
+   --radius-buttons: 9999px;
 
-    /* ── Semantic (status only — never brand accents) ── */
-    --danger: #ef4444;
-    --success: #10b981;
-    --warning: #ff8964;
+   /* ── Semantic (status only — never brand accents) ── */
+   --danger: #ef4444;
+   --success: #10b981;
+   --warning: #ff8964;
 
-    /* ── Motion ── */
-    --ease: cubic-bezier(0.16, 1, 0.3, 1);
-    --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
-    --dur-1: 150ms;
-    --dur-2: 200ms;
-    --dur-3: 350ms;
+   /* ── Motion ── */
+   --ease: cubic-bezier(0.16, 1, 0.3, 1);
+   --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+   --dur-1: 150ms;
+   --dur-2: 200ms;
+   --dur-3: 350ms;
 
-    /* ── Typography families (D6 — self-hosted) ──
+   /* ── Typography families (D6 — self-hosted) ──
        --font-hero (Cinzel) is the inscriptional display face for the Latin
        hero headline only; it is set with open tracking and leading >= 1
        (ui-craft-elevation D3). */
-    --font: 'Inter', 'Vazirmatn', ui-sans-serif, system-ui, -apple-system, sans-serif;
-    --font-display: 'Inter', 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
-    --font-heading: 'Inter', 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', 'Vazirmatn', ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
-    --font-hero: 'Cinzel', 'Sora', ui-sans-serif, system-ui, sans-serif;
-    --font-fa: 'Vazirmatn', 'Inter', ui-sans-serif, system-ui, sans-serif;
-    --mono: 'JetBrains Mono', 'Vazirmatn', 'SF Mono', ui-monospace, monospace;
+   --font: 'Inter', 'Vazirmatn', ui-sans-serif, system-ui, -apple-system, sans-serif;
+   --font-display: 'Inter', 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
+   --font-heading: 'Inter', 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
+   --font-mono: 'JetBrains Mono', 'Vazirmatn', ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+   --font-hero: 'Cinzel', 'Sora', ui-sans-serif, system-ui, sans-serif;
+   --font-fa: 'Vazirmatn', 'Inter', ui-sans-serif, system-ui, sans-serif;
+   --mono: 'JetBrains Mono', 'Vazirmatn', 'SF Mono', ui-monospace, monospace;
 
-    /* ── Obsidian Kinetic scales (D4/D6) ── */
-    --radius-sm: 0.125rem;
-    --radius-md: 0.375rem;
-    --radius-lg: 0.5rem;
-    --radius-xl: 0.75rem;
+   /* ── Obsidian Kinetic scales (D4/D6) ── */
+   --radius-sm: 0.125rem;
+   --radius-md: 0.375rem;
+   --radius-lg: 0.5rem;
+   --radius-xl: 0.75rem;
 
-    --space-xs: 0.25rem;
-    --space-sm: 0.5rem;
-    --space-md: 0.75rem;
-    --space-lg: 1rem;
-    --space-xl: 1.5rem;
-    --gutter: 1rem;
-    --gutter-desktop: 1.5rem;
+   --space-xs: 0.25rem;
+   --space-sm: 0.5rem;
+   --space-md: 0.75rem;
+   --space-lg: 1rem;
+   --space-xl: 1.5rem;
+   --gutter: 1rem;
+   --gutter-desktop: 1.5rem;
 
-    --z-base: 0;
-    --z-sticky: 50;
-    --z-dropdown: 100;
-    --z-dropdown-high: 200;
-    --z-autocomplete: 1000;
-    --z-banner: 9999;
-    --z-debug: 99998;
-    --z-toast: 99999;
-    --z-modal: 999999;
+   --z-base: 0;
+   --z-sticky: 50;
+   --z-dropdown: 100;
+   --z-dropdown-high: 200;
+   --z-autocomplete: 1000;
+   --z-banner: 9999;
+   --z-debug: 99998;
+   --z-toast: 99999;
+   --z-modal: 999999;
 
-    /* Page container (fluid-full-width-layout D1/D2). Route stylesheets
+   /* Page container (fluid-full-width-layout D1/D2). Route stylesheets
        override --page-max on .page while their route is shown. */
-    --page-max: 1400px;
-    --page-gutter: clamp(24px, 2.5vw, 48px);
+   --page-max: 1400px;
+   --page-gutter: clamp(24px, 2.5vw, 48px);
 
-    --nav-h: 56px;
-    --nav-h-mobile: 52px;
+   --nav-h: 56px;
+   --nav-h-mobile: 52px;
 
-    /* ── Type scale (Obsidian Kinetic) ── */
-    --text-headline-xl: 2.25rem;
-    --text-headline-xl-mobile: 1.75rem;
-    --text-headline-lg: 1.5rem;
-    --text-headline-sm: 1.125rem;
-    --text-body-lg: 0.9375rem;
-    --text-body-md: 0.8125rem;
-    --text-label-code: 0.75rem;
-    --text-label-mono-sm: 0.6875rem;
-    --text-label-kpi: 1.25rem;
+   /* ── Type scale (Obsidian Kinetic) ── */
+   --text-headline-xl: 2.25rem;
+   --text-headline-xl-mobile: 1.75rem;
+   --text-headline-lg: 1.5rem;
+   --text-headline-sm: 1.125rem;
+   --text-body-lg: 0.9375rem;
+   --text-body-md: 0.8125rem;
+   --text-label-code: 0.75rem;
+   --text-label-mono-sm: 0.6875rem;
+   --text-label-kpi: 1.25rem;
 
-    /* ── Legacy type scale (Huly) ── */
-    --text-caption: 11px;
-    --text-body: 14px;
-    --text-subheading: 18px;
-    --text-heading-sm: 22px;
-    --text-heading: 24px;
-    --text-display-sm: 32px;
-    --text-display: clamp(42px, 6.4vw, 80px);
+   /* ── Legacy type scale (Huly) ── */
+   --text-caption: 11px;
+   --text-body: 14px;
+   --text-subheading: 18px;
+   --text-heading-sm: 22px;
+   --text-heading: 24px;
+   --text-display-sm: 32px;
+   --text-display: clamp(42px, 6.4vw, 80px);
 }
 
 /* ───────────────────────────────────────────────────────────────
@@ -256,9 +256,9 @@
    ─────────────────────────────────────────────────────────────── */
 :root,
 [data-theme="light"] {
-    color-scheme: light;
+   color-scheme: light;
 
-    /* ─── OKLCH token foundation ─────────────────────────────────────────────
+   /* ─── OKLCH token foundation ─────────────────────────────────────────────
        Neutral ramp: hue 240, chroma ~0.006 (near-achromatic, cool lean)
        (The hue-224 iris "accent" ramp --a-1…--a-8 was removed by
        ui-craft-elevation task 2.6: a legacy hex copy in :root and this OKLCH
@@ -266,307 +266,307 @@
        hero pins and one debug button.)
     ─────────────────────────────────────────────────────────────────────── */
 
-    /* Neutral ramp — 12 steps, even lightness stride */
-    --n-0: oklch(100% 0 0);
-    /* pure white (overlay only)     */
-    --n-1: oklch(98% 0.004 240);
-    /* #f7f7f8 — page canvas         */
-    --n-2: oklch(96% 0.005 240);
-    /* #f0f0f2 — sunken / code bg    */
-    --n-3: oklch(94% 0.005 240);
-    /* #eaeaec — card bg             */
-    --n-4: oklch(91% 0.005 240);
-    /* #e3e3e5 — input bg            */
-    --n-5: oklch(86% 0.006 240);
-    /* #d5d5d8 — border default      */
-    --n-6: oklch(78% 0.007 240);
-    /* #c0c0c3 — border hover        */
-    --n-7: oklch(62% 0.008 240);
-    /* #959599 — muted text          */
-    --n-8: oklch(48% 0.008 240);
-    /* #6e6e72 — secondary text      */
-    --n-9: oklch(36% 0.007 240);
-    /* #505054 — body text (dim)     */
-    --n-10: oklch(24% 0.006 240);
-    /* #333337 — body text           */
-    --n-11: oklch(14% 0.005 240);
-    /* #1c1c1e — headings            */
-    --n-12: oklch(8% 0.004 240);
-    /* #0d0d0f — near-black          */
+   /* Neutral ramp — 12 steps, even lightness stride */
+   --n-0: oklch(100% 0 0);
+   /* pure white (overlay only)     */
+   --n-1: oklch(98% 0.004 240);
+   /* #f7f7f8 — page canvas         */
+   --n-2: oklch(96% 0.005 240);
+   /* #f0f0f2 — sunken / code bg    */
+   --n-3: oklch(94% 0.005 240);
+   /* #eaeaec — card bg             */
+   --n-4: oklch(91% 0.005 240);
+   /* #e3e3e5 — input bg            */
+   --n-5: oklch(86% 0.006 240);
+   /* #d5d5d8 — border default      */
+   --n-6: oklch(78% 0.007 240);
+   /* #c0c0c3 — border hover        */
+   --n-7: oklch(62% 0.008 240);
+   /* #959599 — muted text          */
+   --n-8: oklch(48% 0.008 240);
+   /* #6e6e72 — secondary text      */
+   --n-9: oklch(36% 0.007 240);
+   /* #505054 — body text (dim)     */
+   --n-10: oklch(24% 0.006 240);
+   /* #333337 — body text           */
+   --n-11: oklch(14% 0.005 240);
+   /* #1c1c1e — headings            */
+   --n-12: oklch(8% 0.004 240);
+   /* #0d0d0f — near-black          */
 
-    /* Semantic: destructive (hue 25 — warm red, not harsh) */
-    --e-surface: oklch(97% 0.020 25);
-    --e-border: oklch(80% 0.080 25);
-    --e-text: oklch(48% 0.180 25);
-    /* 6.79:1 on --n-1 ✓ (re-measured, ui-craft-elevation 2.9) */
+   /* Semantic: destructive (hue 25 — warm red, not harsh) */
+   --e-surface: oklch(97% 0.020 25);
+   --e-border: oklch(80% 0.080 25);
+   --e-text: oklch(48% 0.180 25);
+   /* 6.79:1 on --n-1 ✓ (re-measured, ui-craft-elevation 2.9) */
 
-    /* ─── shadcn-compatible semantic tokens ─────────────────────────────── */
-    --background: var(--n-1);
-    --foreground: var(--n-11);
+   /* ─── shadcn-compatible semantic tokens ─────────────────────────────── */
+   --background: var(--n-1);
+   --foreground: var(--n-11);
 
-    --card: var(--n-0);
-    --card-foreground: var(--n-11);
+   --card: var(--n-0);
+   --card-foreground: var(--n-11);
 
-    --popover: var(--n-0);
-    --popover-foreground: var(--n-11);
+   --popover: var(--n-0);
+   --popover-foreground: var(--n-11);
 
-    --secondary: var(--n-3);
-    --secondary-foreground: var(--n-10);
+   --secondary: var(--n-3);
+   --secondary-foreground: var(--n-10);
 
-    --muted: var(--n-2);
-    --muted-foreground: var(--n-7);
+   --muted: var(--n-2);
+   --muted-foreground: var(--n-7);
 
-    --destructive: var(--e-text);
-    --destructive-foreground: var(--n-0);
+   --destructive: var(--e-text);
+   --destructive-foreground: var(--n-0);
 
-    --border: rgba(0, 0, 0, 0.1);
-    --input: var(--n-4);
-    /* One focus colour per theme: --ring is an alias, never a second value. */
-    --ring: var(--border-focus);
+   --border: rgba(0, 0, 0, 0.1);
+   --input: var(--n-4);
+   /* One focus colour per theme: --ring is an alias, never a second value. */
+   --ring: var(--border-focus);
 
-    /* ─── surface roles (light Obsidian Kinetic) ────────────────────────── */
-    --bg: #f5f5f0;
-    --bg-card: #ffffff;
+   /* ─── surface roles (light Obsidian Kinetic) ────────────────────────── */
+   --bg: #f5f5f0;
+   --bg-card: #ffffff;
 
-    /* ─── shared backdrop: quiet stone + etched archive aperture ─────────── */
-    --backdrop-ground: #f5f5f0;
-    --backdrop-orbit: rgba(72, 61, 45, 0.09);
-    --backdrop-orbit-soft: rgba(72, 61, 45, 0.045);
-    --bg-hover: #eeeee8;
-    --bg-input: #f0f0ea;
-    --bg-elevated: #ffffff;
-    --bg-sunken: var(--n-2);
+   /* ─── shared backdrop: quiet stone + etched archive aperture ─────────── */
+   --backdrop-ground: #f5f5f0;
+   --backdrop-orbit: rgba(72, 61, 45, 0.09);
+   --backdrop-orbit-soft: rgba(72, 61, 45, 0.045);
+   --bg-hover: #eeeee8;
+   --bg-input: #f0f0ea;
+   --bg-elevated: #ffffff;
+   --bg-sunken: var(--n-2);
 
-    --border-default: rgba(0, 0, 0, 0.1);
-    --border-hover: rgba(0, 0, 0, 0.16);
-    /* Light focus ring = the light accent text colour. #ffb800 measured
+   --border-default: rgba(0, 0, 0, 0.1);
+   --border-hover: rgba(0, 0, 0, 0.16);
+   /* Light focus ring = the light accent text colour. #ffb800 measured
        1.59:1 on --bg and 1.73:1 on --bg-card, under the 3:1 floor for a
        focus indicator; #8a5a00 measures 5.42:1 on --bg, 5.93:1 on --bg-card. */
-    --border-focus: #8a5a00;
+   --border-focus: #8a5a00;
 
-    /* ─── scrollbar: satin brass; 5.42:1 on the page and 5.93:1 on cards ── */
-    --scrollbar-thumb: #8a5a00;
-    --scrollbar-thumb-hover: #6b4300;
+   /* ─── scrollbar: satin brass; 5.42:1 on the page and 5.93:1 on cards ── */
+   --scrollbar-thumb: #8a5a00;
+   --scrollbar-thumb-hover: #6b4300;
 
-    /* ─── text roles ─────────────────────────────────────────────────────── */
-    --text: #1f1f23;
-    /* headings / labels             */
-    --text-2: #343538;
-    /* body                          */
-    --text-3: #514532;
-    /* secondary                     */
-    /* Task 2.2 (a11y-ux-debt): this step used to resolve to #9e8f78, which
+   /* ─── text roles ─────────────────────────────────────────────────────── */
+   --text: #1f1f23;
+   /* headings / labels             */
+   --text-2: #343538;
+   /* body                          */
+   --text-3: #514532;
+   /* secondary                     */
+   /* Task 2.2 (a11y-ux-debt): this step used to resolve to #9e8f78, which
        measured 3.16:1 on --bg-card - below the 4.5:1 floor for body text. It
        is aliased to the step above because browse.css references it in six
        selectors. Re-measured (ui-craft-elevation 2.9): --text-3 #514532 is
        9.35:1 on --bg-card and 7.16:1 on --n-4. (The 4.37:1 figure previously
        quoted here was the dark theme's old #9e8f78 on --n-4, not this token.)
        Hierarchy at the quiet end is carried by font size and weight. */
-    --text-4: var(--text-3);
-    /* placeholder / disabled        */
-    --text-accent: #8a5a00;
-    /* inline links / accent text. Measured: 5.93:1 on --bg-card,
+   --text-4: var(--text-3);
+   /* placeholder / disabled        */
+   --text-accent: #8a5a00;
+   /* inline links / accent text. Measured: 5.93:1 on --bg-card,
        5.42:1 on --bg, 5.28:1 on --bg-sunken, 4.54:1 on --n-4 */
-    --text-on-accent: #ffffff;
+   --text-on-accent: #ffffff;
 
-    /* ─── Browse inspector snippet colour ───────────────────────────────────
+   /* ─── Browse inspector snippet colour ───────────────────────────────────
        browse-inspector-redesign added a cyan "tertiary" accent here. Under the
        two-role palette (D2) it is an alias of the accent text role, not a hue
        of its own (ui-craft-elevation 2.5). */
-    --info: var(--text-accent);
+   --info: var(--text-accent);
 
-    /* ─── glass / overlay surfaces ──────────────────────────────────────── */
-    --surface-glass: rgba(255, 255, 255, 0.75);
-    --nav-bg: rgba(255, 255, 255, 0.85);
-    --input-bg: #f0f0ea;
+   /* ─── glass / overlay surfaces ──────────────────────────────────────── */
+   --surface-glass: rgba(255, 255, 255, 0.75);
+   --nav-bg: rgba(255, 255, 255, 0.85);
+   --input-bg: #f0f0ea;
 
-    /* ─── hero gradient (light mode) — warm paper wash in the accent hue.
+   /* ─── hero gradient (light mode) — warm paper wash in the accent hue.
        The D8/I21 freeze that pinned the old iris tint is lifted (D1). ── */
-    --hero-grad: linear-gradient(160deg,
-            oklch(98% 0.018 80) 0%,
-            oklch(100% 0.004 80) 55%,
-            oklch(98% 0.010 80) 100%);
+   --hero-grad: linear-gradient(160deg,
+         oklch(98% 0.018 80) 0%,
+         oklch(100% 0.004 80) 55%,
+         oklch(98% 0.010 80) 100%);
 
-    /* ─── hero prism roles (light: porcelain prism, ADR-014) ──────────────
+   /* ─── hero prism roles (light: porcelain prism, ADR-014) ──────────────
        Ink on porcelain: #23202e on the lightest wash stop (#f6f3ec)
        measures >12:1; --hero-text-2 #5c566b measures >6.5:1. Decorative
        hues are washes only and carry no information. */
-    --hero-ground: linear-gradient(135deg, #fdfbf7 0%, #f4efe6 46%, #eceaf4 78%, #e6f2ef 100%);
-    --hero-text: #23202e;
-    --hero-text-2: #5c566b;
-    --hero-border: rgba(35, 32, 46, 0.14);
-    --hero-glass: rgba(255, 255, 255, 0.66);
-    --hero-glass-border: rgba(35, 32, 46, 0.12);
-    --hero-input-bg: rgba(255, 255, 255, 0.82);
-    --hero-input-text: #23202e;
-    --hero-input-placeholder: #7d768e;
-    --hero-shadow: 0 1px 2px rgba(35, 32, 46, 0.06), 0 12px 32px rgba(83, 66, 140, 0.10), 0 32px 72px rgba(35, 32, 46, 0.10);
+   --hero-ground: linear-gradient(135deg, #fdfbf7 0%, #f4efe6 46%, #eceaf4 78%, #e6f2ef 100%);
+   --hero-text: #23202e;
+   --hero-text-2: #5c566b;
+   --hero-border: rgba(35, 32, 46, 0.14);
+   --hero-glass: rgba(255, 255, 255, 0.66);
+   --hero-glass-border: rgba(35, 32, 46, 0.12);
+   --hero-input-bg: rgba(255, 255, 255, 0.82);
+   --hero-input-text: #23202e;
+   --hero-input-placeholder: #7d768e;
+   --hero-shadow: 0 1px 2px rgba(35, 32, 46, 0.06), 0 12px 32px rgba(83, 66, 140, 0.10), 0 32px 72px rgba(35, 32, 46, 0.10);
 
-    /* ─── glow / ambient color ───────────────────────────────────────────── */
-    --glow: rgba(255, 184, 0, 0.09);
-    --glow-strong: rgba(255, 184, 0, 0.21);
-    --glow-warm: rgba(255, 184, 0, 0.09);
-    /* amber warm accent      */
-    --ember-glow: rgba(255, 184, 0, 0.12);
+   /* ─── glow / ambient color ───────────────────────────────────────────── */
+   --glow: rgba(255, 184, 0, 0.09);
+   --glow-strong: rgba(255, 184, 0, 0.21);
+   --glow-warm: rgba(255, 184, 0, 0.09);
+   /* amber warm accent      */
+   --ember-glow: rgba(255, 184, 0, 0.12);
 
-    /* ─── shadow system (light: same geometry, ~50% opacity) ─────────────── */
-    --shadow-xs: 0 1px 2px rgba(28, 28, 30, 0.03);
-    --shadow-sm: 0 1px 2px rgba(28, 28, 30, 0.03),
-        0 2px 4px rgba(28, 28, 30, 0.02);
-    --shadow-md: 0 2px 8px rgba(28, 28, 30, 0.03),
-        0 4px 16px rgba(28, 28, 30, 0.025);
-    --shadow-lg: 0 4px 12px rgba(28, 28, 30, 0.025),
-        0 10px 30px rgba(28, 28, 30, 0.035);
-    --shadow-xl: 0 6px 24px rgba(28, 28, 30, 0.04),
-        0 20px 48px rgba(28, 28, 30, 0.03);
-    --shadow-card: 0 1px 2px rgba(28, 28, 30, 0.02),
-        0 1px 3px rgba(28, 28, 30, 0.015);
-    --shadow-subtle: 0 0 0 1px rgba(255, 184, 0, 0.25);
+   /* ─── shadow system (light: same geometry, ~50% opacity) ─────────────── */
+   --shadow-xs: 0 1px 2px rgba(28, 28, 30, 0.03);
+   --shadow-sm: 0 1px 2px rgba(28, 28, 30, 0.03),
+      0 2px 4px rgba(28, 28, 30, 0.02);
+   --shadow-md: 0 2px 8px rgba(28, 28, 30, 0.03),
+      0 4px 16px rgba(28, 28, 30, 0.025);
+   --shadow-lg: 0 4px 12px rgba(28, 28, 30, 0.025),
+      0 10px 30px rgba(28, 28, 30, 0.035);
+   --shadow-xl: 0 6px 24px rgba(28, 28, 30, 0.04),
+      0 20px 48px rgba(28, 28, 30, 0.03);
+   --shadow-card: 0 1px 2px rgba(28, 28, 30, 0.02),
+      0 1px 3px rgba(28, 28, 30, 0.015);
+   --shadow-subtle: 0 0 0 1px rgba(255, 184, 0, 0.25);
 
-    /* focus ring — amber halo */
-    --shadow-ring: 0 0 0 3px rgba(255, 184, 0, 0.25);
+   /* focus ring — amber halo */
+   --shadow-ring: 0 0 0 3px rgba(255, 184, 0, 0.25);
 }
 
 /* ───────────────────────────────────────────────────────────────
    DARK THEME — the Huly product surface: obsidian + charcoal
    ─────────────────────────────────────────────────────────────── */
 [data-theme="dark"] {
-    color-scheme: dark;
+   color-scheme: dark;
 
-    /* — shadcn semantic tokens — */
-    --background: 220 3% 20%;
-    --foreground: 0 0% 100%;
+   /* — shadcn semantic tokens — */
+   --background: 220 3% 20%;
+   --foreground: 0 0% 100%;
 
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 100%;
+   --card: 0 0% 7%;
+   --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 100%;
+   --popover: 0 0% 7%;
+   --popover-foreground: 0 0% 100%;
 
-    --secondary: 220 3% 26%;
-    --secondary-foreground: 0 0% 98%;
+   --secondary: 220 3% 26%;
+   --secondary-foreground: 0 0% 98%;
 
-    --muted: 220 3% 24%;
-    --muted-foreground: 225 1% 61%;
+   --muted: 220 3% 24%;
+   --muted-foreground: 225 1% 61%;
 
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 0 0% 98%;
+   --destructive: 0 62% 30%;
+   --destructive-foreground: 0 0% 98%;
 
-    --border: 225 4% 30%;
-    --input: 225 4% 30%;
-    /* Was `220 64% 60%` (a bare HSL triplet), so `outline: 2px solid
+   --border: 225 4% 30%;
+   --input: 225 4% 30%;
+   /* Was `220 64% 60%` (a bare HSL triplet), so `outline: 2px solid
        var(--ring)` was invalid in dark mode and buttons fell back to
        currentColor while every other control drew amber. Now an alias. */
-    --ring: var(--border-focus);
+   --ring: var(--border-focus);
 
-    /* — neutral ramp — */
-    --n-0: #090a0c;
-    --n-1: #111112;
-    --n-2: #1a1b1e;
-    --n-3: #232428;
-    --n-4: #2b2d31;
-    --n-5: #4a4b50;
-    --n-6: #6b6c6d;
-    --n-7: #95979e;
-    --n-8: #a9a9aa;
-    --n-9: #c7c8cb;
-    --n-10: #d1d1d1;
-    --n-11: #e9e9ea;
-    --n-12: #ffffff;
+   /* — neutral ramp — */
+   --n-0: #090a0c;
+   --n-1: #111112;
+   --n-2: #1a1b1e;
+   --n-3: #232428;
+   --n-4: #2b2d31;
+   --n-5: #4a4b50;
+   --n-6: #6b6c6d;
+   --n-7: #95979e;
+   --n-8: #a9a9aa;
+   --n-9: #c7c8cb;
+   --n-10: #d1d1d1;
+   --n-11: #e9e9ea;
+   --n-12: #ffffff;
 
-    /* — surface roles (Obsidian Kinetic) — */
-    --bg: #121316;
-    --bg-card: #1b1b1f;
+   /* — surface roles (Obsidian Kinetic) — */
+   --bg: #121316;
+   --bg-card: #1b1b1f;
 
-    /* The shared backdrop moves to a warmer, deeper ink; the rest of the
+   /* The shared backdrop moves to a warmer, deeper ink; the rest of the
        surface ramp stays unchanged so this treatment does not leak into cards. */
-    --backdrop-ground: var(--color-obsidian-canvas);
-    --backdrop-orbit: rgba(255, 184, 0, 0.065);
-    --backdrop-orbit-soft: rgba(255, 184, 0, 0.032);
-    --bg-hover: #292a2d;
-    --bg-input: #1f1f23;
-    --bg-elevated: #343538;
-    --bg-sunken: #0d0e11;
+   --backdrop-ground: var(--color-obsidian-canvas);
+   --backdrop-orbit: rgba(255, 184, 0, 0.065);
+   --backdrop-orbit-soft: rgba(255, 184, 0, 0.032);
+   --bg-hover: #292a2d;
+   --bg-input: #1f1f23;
+   --bg-elevated: #343538;
+   --bg-sunken: #0d0e11;
 
-    /* — border roles — */
-    --border: rgba(255, 255, 255, 0.07);
-    --border-default: rgba(255, 255, 255, 0.07);
-    --border-hover: rgba(255, 255, 255, 0.12);
-    /* 10.71:1 on --bg, 9.90:1 on --bg-card */
-    --border-focus: #ffb800;
+   /* — border roles — */
+   --border: rgba(255, 255, 255, 0.07);
+   --border-default: rgba(255, 255, 255, 0.07);
+   --border-hover: rgba(255, 255, 255, 0.12);
+   /* 10.71:1 on --bg, 9.90:1 on --bg-card */
+   --border-focus: #ffb800;
 
-    /* — soft bronze: 4.27:1 on ink and 3.87:1 on cards; amber on hover — */
-    --scrollbar-thumb: #92733a;
-    --scrollbar-thumb-hover: #ffb800;
+   /* — soft bronze: 4.27:1 on ink and 3.87:1 on cards; amber on hover — */
+   --scrollbar-thumb: #92733a;
+   --scrollbar-thumb-hover: #ffb800;
 
-    /* — text roles — */
-    --text: #e3e2e6;
-    --text-2: #d5c4ab;
-    /* Task 2.3 (a11y-ux-debt): #9e8f78 measured 5.44:1 on --bg-card but only
+   /* — text roles — */
+   --text: #e3e2e6;
+   --text-2: #d5c4ab;
+   /* Task 2.3 (a11y-ux-debt): #9e8f78 measured 5.44:1 on --bg-card but only
        4.37:1 on --n-4 and 3.89:1 on --bg-elevated, both below the floor.
        #a99d8a clears every surface: 6.44 on --bg-card, 5.17 on --n-4,
        4.60 on --bg-elevated. */
-    --text-3: #a99d8a;
-    /* Task 2.2 (a11y-ux-debt): aliased to the step above. This used to be
+   --text-3: #a99d8a;
+   /* Task 2.2 (a11y-ux-debt): aliased to the step above. This used to be
        #514532, which measured 1.84:1 on --bg-card. The token is kept (the
        frozen browse.css references it six times) but no longer resolves to a
        sub-AA value. */
-    --text-4: var(--text-3);
-    --text-accent: #ffdca1;
-    /* 13.08:1 on --bg-card, 14.71:1 on --bg-sunken, 9.35:1 on --bg-elevated */
-    --text-on-accent: #412d00;
-    /* 7.57:1 on --color-ember-pulse */
+   --text-4: var(--text-3);
+   --text-accent: #ffdca1;
+   /* 13.08:1 on --bg-card, 14.71:1 on --bg-sunken, 9.35:1 on --bg-elevated */
+   --text-on-accent: #412d00;
+   /* 7.57:1 on --color-ember-pulse */
 
-    /* — Browse inspector snippet colour: accent text alias (D2, task 2.5) — */
-    --info: var(--text-accent);
+   /* — Browse inspector snippet colour: accent text alias (D2, task 2.5) — */
+   --info: var(--text-accent);
 
-    /* — glass & overlays — */
-    --surface-glass: rgba(31, 31, 35, 0.75);
-    --nav-bg: rgba(27, 27, 31, 0.85);
-    --input-bg: rgba(31, 31, 35, 0.75);
+   /* — glass & overlays — */
+   --surface-glass: rgba(31, 31, 35, 0.75);
+   --nav-bg: rgba(27, 27, 31, 0.85);
+   --input-bg: rgba(31, 31, 35, 0.75);
 
-    /* — hero gradient — the obsidian void behind the hero (neutral). */
-    --hero-grad: linear-gradient(180deg, #090a0c 0%, #0d0e12 100%);
+   /* — hero gradient — the obsidian void behind the hero (neutral). */
+   --hero-grad: linear-gradient(180deg, #090a0c 0%, #0d0e12 100%);
 
-    /* — hero prism roles (dark: noir prism, ADR-014) —————
+   /* — hero prism roles (dark: noir prism, ADR-014) —————
        --hero-text #f4f1ea on the darkest ground stop (#0b0b13) measures
        >15:1; --hero-text-2 #b9b3c7 measures >8:1. Decorative hues are
        light fields only and carry no information. */
-    --hero-ground: linear-gradient(135deg, #0b0b13 0%, #12101f 48%, #0d1520 78%, #0a1214 100%);
-    --hero-text: #f4f1ea;
-    --hero-text-2: #b9b3c7;
-    --hero-border: rgba(244, 241, 234, 0.14);
-    --hero-glass: rgba(255, 255, 255, 0.055);
-    --hero-glass-border: rgba(255, 255, 255, 0.13);
-    --hero-input-bg: rgba(255, 255, 255, 0.065);
-    --hero-input-text: #ffffff;
-    --hero-input-placeholder: #9d97ad;
-    --hero-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 16px 40px rgba(0, 0, 0, 0.45), 0 40px 90px rgba(20, 14, 48, 0.45);
+   --hero-ground: linear-gradient(135deg, #0b0b13 0%, #12101f 48%, #0d1520 78%, #0a1214 100%);
+   --hero-text: #f4f1ea;
+   --hero-text-2: #b9b3c7;
+   --hero-border: rgba(244, 241, 234, 0.14);
+   --hero-glass: rgba(255, 255, 255, 0.055);
+   --hero-glass-border: rgba(255, 255, 255, 0.13);
+   --hero-input-bg: rgba(255, 255, 255, 0.065);
+   --hero-input-text: #ffffff;
+   --hero-input-placeholder: #9d97ad;
+   --hero-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 16px 40px rgba(0, 0, 0, 0.45), 0 40px 90px rgba(20, 14, 48, 0.45);
 
-    /* — glow tokens — */
-    --glow: rgba(255, 184, 0, 0.15);
-    --glow-strong: rgba(255, 184, 0, 0.35);
-    --glow-warm: rgba(255, 184, 0, 0.15);
-    --ember-glow: rgba(255, 184, 0, 0.18);
+   /* — glow tokens — */
+   --glow: rgba(255, 184, 0, 0.15);
+   --glow-strong: rgba(255, 184, 0, 0.35);
+   --glow-warm: rgba(255, 184, 0, 0.15);
+   --ember-glow: rgba(255, 184, 0, 0.18);
 
-    /*
+   /*
      * Dark-mode shadow philosophy (Obsidian Kinetic):
      * Dark surfaces separate via border contrast, so drop shadows stay
      * tight and low-opacity. --shadow-subtle is an amber focus halo.
      */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
-    --shadow-lg: 0 20px 40px -15px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(255, 255, 255, 0.08);
-    --shadow-xl: 0 6px 25px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-subtle: 0 0 0 1px rgba(255, 184, 0, 0.25);
-    --shadow-ring: 0 0 0 3px rgba(255, 184, 0, 0.25);
+   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
+   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+   --shadow-lg: 0 20px 40px -15px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(255, 255, 255, 0.08);
+   --shadow-xl: 0 6px 25px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2);
+   --shadow-subtle: 0 0 0 1px rgba(255, 184, 0, 0.25);
+   --shadow-ring: 0 0 0 3px rgba(255, 184, 0, 0.25);
 
-    /* — error surface roles — */
-    --e-surface: rgba(147, 0, 10, 0.12);
-    --e-border: rgba(255, 180, 171, 0.25);
-    --e-text: #ffb4ab;
+   /* — error surface roles — */
+   --e-surface: rgba(147, 0, 10, 0.12);
+   --e-border: rgba(255, 180, 171, 0.25);
+   --e-text: #ffb4ab;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -637,7 +637,7 @@
    Mono stacks already carry Vazirmatn as the second family. ── */
 :root[lang="fa"],
 :root[dir="rtl"] {
-    --font: var(--font-fa);
-    --font-display: var(--font-fa);
-    --font-heading: var(--font-fa);
+   --font: var(--font-fa);
+   --font-display: var(--font-fa);
+   --font-heading: var(--font-fa);
 }

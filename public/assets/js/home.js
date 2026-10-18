@@ -37,6 +37,7 @@ const HomePage = (function () {
     `;
 
     bindEvents();
+    HeroWave.mount(container.querySelector(".hero-wave canvas"));
     // The explorer below the hero: tree + folder table, browsed in place. It
     // reopens at the folder last shown, so "Exit full screen" lands where you were.
     if (BrowsePage) BrowsePage.render(document.getElementById("homeBrowse"), BrowsePage.currentPath, { embedded: true });
@@ -45,6 +46,140 @@ const HomePage = (function () {
   /* ═══════════════════════════════════════════════
      SECTION: HERO
      ═══════════════════════════════════════════════ */
+
+  /* Digital ground: a lit 3D dot terrain on <canvas>. A world grid (x across,
+     z into the screen) rides a slow swell and is pinhole-projected, so dot
+     size, spacing and opacity all fall off with depth into a fogged horizon.
+     Each dot is shaded from the surface normal: ivory by diffuse light, and a
+     champagne glint where the crest catches the key light (Blinn specular).
+     Colours come from --wave-dot / --wave-glint, so themes stay in CSS.
+     Animates at ~30fps only while on screen and motion is allowed; reduced
+     motion and the low/potato tiers get one still frame. */
+  const HeroWave = (() => {
+    const Z_NEAR = 0.85, Z_FAR = 6, STEP = 0.085, CAM_H = 1;
+    // Key light from far right, high; view ≈ toward the camera. H = L+V.
+    const HX = 0.33, HY = 0.93, HZ = -0.16;
+    const LX = 0.45, LY = 0.62, LZ = 0.64;
+    let cv, ctx, W = 0, H = 0, raf = 0, last = 0, visible = false, io, ro, mo;
+    const live = () => !document.hidden && visible &&
+      (window.Motion ? Motion.allowsMotion() && !/^(low|potato)$/.test(document.documentElement.getAttribute("data-perf") || "") : true);
+
+    // Per-column sin/cos of the three x-frequencies: time-independent, so
+    // built once per size; per dot only multiply-adds remain (angle sums).
+    const FX = [0.9, 1.6, 2.8];
+    let tab = null, iMax = 0;
+    const BUCKETS = 12;
+
+    function size() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = cv.clientWidth; H = cv.clientHeight;
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      iMax = Math.ceil(((W / 2 + 8) * Z_FAR) / (H * 0.8) / STEP);
+      tab = new Float32Array((2 * iMax + 1) * 6);
+      for (let i = -iMax, j = 0; i <= iMax; i++) {
+        for (const q of FX) { tab[j++] = Math.sin(q * i * STEP); tab[j++] = Math.cos(q * i * STEP); }
+      }
+    }
+
+    function draw(t) {
+      if (!W || !H || !tab) return;
+      const css = getComputedStyle(cv);
+      const dot = css.getPropertyValue("--wave-dot").trim() || "#f4f1ea";
+      const glint = css.getPropertyValue("--wave-glint").trim() || "#e6c87a";
+      const f = H * 0.8, hy = H * 0.06, cx = W / 2, k = H / 260;
+      // Dots are binned by alpha into a few paths: one fill per bin.
+      const bins = Array.from({ length: BUCKETS }, () => new Path2D());
+      const glints = [];
+      for (let z = Z_FAR; z >= Z_NEAR; z -= STEP) {
+        const fog = Math.pow(1 - (z - Z_NEAR) / (Z_FAR - Z_NEAR), 1.5);
+        if (fog < 0.02) continue;
+        const r = Math.min(1.7, Math.max(0.35, (1.15 * k) / z)), d = 2 * r;
+        // z/t phase of each component: A = qx·x + B.
+        const B0 = 0.55 * z + t, B1 = -0.85 * z + 0.7 * t + 1.3, B2 = 1.5 * z - 1.1 * t;
+        const s0 = Math.sin(B0), c0 = Math.cos(B0), s1 = Math.sin(B1), c1 = Math.cos(B1), s2 = Math.sin(B2), c2 = Math.cos(B2);
+        const n0 = Math.ceil((cx + 8) * z / f / STEP);
+        // Far rows: columns closer than ~2px merge into fog anyway; skip half.
+        const lod = f * STEP / z < 2 ? 1 : 0;
+        for (let i = -n0; i <= n0; i++) {
+          if (i & lod) continue;
+          const j = (i + iMax) * 6;
+          // sin(A+B) and cos(A+B) from the column table.
+          const sa = tab[j] * c0 + tab[j + 1] * s0, ca = tab[j + 1] * c0 - tab[j] * s0;
+          const sb = tab[j + 2] * c1 + tab[j + 3] * s1, cb = tab[j + 3] * c1 - tab[j + 2] * s1;
+          const sc = tab[j + 4] * c2 + tab[j + 5] * s2, cc = tab[j + 5] * c2 - tab[j + 4] * s2;
+          // Heightfield and its analytic slopes.
+          const h = 0.17 * sa + 0.09 * sb + 0.04 * sc;
+          const hx = 0.153 * ca + 0.144 * cb + 0.112 * cc;
+          const hz = 0.0935 * ca - 0.0765 * cb + 0.06 * cc;
+          const sy = hy + f * (CAM_H - h) / z;
+          if (sy > H + 2) continue;
+          const sx = cx + f * i * STEP / z;
+          const n = 1 / Math.sqrt(hx * hx + 1 + hz * hz);
+          const diffuse = Math.max(0, (-hx * LX + LY - hz * LZ) * n);
+          const alpha = fog * (0.16 + 0.5 * diffuse);
+          bins[Math.min(BUCKETS - 1, (alpha * BUCKETS / 0.66) | 0)].rect(sx - r, sy - r, d, d);
+          // Specular ^40 by squaring: (s^8)^5.
+          let s = Math.max(0, (-hx * HX + HY - hz * HZ) * n);
+          const s8 = (s *= s, s *= s, s * s);
+          const spec = s8 * s8 * s8 * s8 * s8;
+          if (spec * fog > 0.05) glints.push(sx, sy, r * 1.25, Math.min(1, spec * fog * 1.4));
+        }
+      }
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = dot;
+      for (let b = 0; b < BUCKETS; b++) {
+        ctx.globalAlpha = ((b + 0.5) / BUCKETS) * 0.66;
+        ctx.fill(bins[b]);
+      }
+      ctx.fillStyle = glint;
+      for (let i = 0; i < glints.length; i += 4) {
+        ctx.globalAlpha = glints[i + 3];
+        ctx.beginPath(); ctx.arc(glints[i], glints[i + 1], glints[i + 2], 0, 6.2832); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function tick(now) {
+      raf = 0;
+      if (!cv.isConnected) return unmount();
+      if (!live()) return;
+      if (now - last >= 33) { last = now; draw(now / 1000 * 0.22); }
+      raf = requestAnimationFrame(tick);
+    }
+    // Still frame when parked, otherwise resume the loop.
+    function wake() {
+      if (!cv || !cv.isConnected) return unmount();
+      if (live()) { if (!raf) raf = requestAnimationFrame(tick); }
+      else draw(performance.now() / 1000 * 0.22);
+    }
+
+    function unmount() {
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+      io && io.disconnect(); ro && ro.disconnect(); mo && mo.disconnect();
+      document.removeEventListener("visibilitychange", wake);
+      cv = null;
+    }
+
+    function mount(canvas) {
+      if (cv) unmount();
+      if (!canvas || !canvas.getContext) return;
+      cv = canvas; ctx = cv.getContext("2d");
+      size();
+      io = new IntersectionObserver((e) => { visible = e[0].isIntersecting; wake(); });
+      io.observe(cv);
+      ro = new ResizeObserver(() => { size(); draw(performance.now() / 1000 * 0.22); });
+      ro.observe(cv);
+      // Theme or perf tier changes: recolour / re-gate without a reload.
+      mo = new MutationObserver(wake);
+      mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "data-perf"] });
+      document.addEventListener("visibilitychange", wake);
+      draw(0);
+    }
+    return { mount };
+  })();
+
   function renderHeroSection(d) {
     return `
       <section class="hero-max" id="heroMax">
@@ -54,6 +189,11 @@ const HomePage = (function () {
           <div class="hero-aurora hero-aurora--champagne"></div>
           <div class="hero-aurora hero-aurora--iris"></div>
           <div class="hero-aurora hero-aurora--glacier"></div>
+
+          <!-- Digital ground: lit 3D dot terrain (see HeroWave). Canvas,
+               clipped by .hero-bg to the card radius; edges feathered by
+               a CSS mask. Spec: docs/decisions/ADR-014. -->
+          <div class="hero-wave"><canvas></canvas></div>
         </div>
 
         <div class="hero-content">

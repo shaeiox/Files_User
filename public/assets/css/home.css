@@ -2241,7 +2241,6 @@ body.rtl .logo-shader {
         padding: 16px;
     }
 }
-
 /* ═══════════════════════════════════════════════════════════════
    NOIR PRISM HERO — ADR-014 (luxury redesign)
    Champagne is heritage, not the whole story: iris + glacier light
@@ -2277,9 +2276,7 @@ body.rtl .logo-shader {
     z-index: 3;
 }
 
-.hero-bg {
-    z-index: 0;
-}
+.hero-bg { z-index: 0; }
 
 /* Legacy RTL overrides above park .hero-max::before at right:6% (the old
    beam). The prism border must span the full frame in both directions. */
@@ -2289,15 +2286,8 @@ body.rtl .hero-max::before {
     left: 0;
     right: 0;
 }
-
-.hero-bg::before,
-.hero-bg::after {
-    display: none;
-}
-
-.hero-max::after {
-    display: none;
-}
+.hero-bg::before, .hero-bg::after { display: none; }
+.hero-max::after { display: none; }
 
 .hero-aurora {
     position: absolute;
@@ -2305,70 +2295,69 @@ body.rtl .hero-max::before {
     pointer-events: none;
     will-change: transform, opacity;
 }
-
 .hero-aurora--champagne {
-    width: 560px;
-    height: 560px;
-    top: -260px;
-    inset-inline-start: -120px;
+    width: 560px; height: 560px; top: -260px; inset-inline-start: -120px;
     background: radial-gradient(circle, color-mix(in srgb, var(--color-champagne) 34%, transparent) 0%, transparent 68%);
     filter: blur(28px);
     animation: hero-drift-a 16s ease-in-out infinite alternate;
 }
-
 .hero-aurora--iris {
-    width: 640px;
-    height: 640px;
-    top: -300px;
-    inset-inline-end: -140px;
+    width: 640px; height: 640px; top: -300px; inset-inline-end: -140px;
     background: radial-gradient(circle, color-mix(in srgb, var(--color-iris) 32%, transparent) 0%, transparent 68%);
     filter: blur(36px);
     animation: hero-drift-b 20s ease-in-out infinite alternate;
 }
-
 .hero-aurora--glacier {
-    width: 520px;
-    height: 520px;
-    bottom: -300px;
-    inset-inline-start: 34%;
+    width: 520px; height: 520px; bottom: -300px; inset-inline-start: 34%;
     background: radial-gradient(circle, color-mix(in srgb, var(--color-glacier) 24%, transparent) 0%, transparent 68%);
     filter: blur(40px);
     animation: hero-drift-a 24s ease-in-out infinite alternate-reverse;
 }
-
 @keyframes hero-drift-a {
-    from {
-        transform: translate3d(0, 0, 0) scale(1);
-        opacity: 0.85;
-    }
-
-    to {
-        transform: translate3d(36px, 22px, 0) scale(1.08);
-        opacity: 1;
-    }
+    from { transform: translate3d(0, 0, 0) scale(1); opacity: 0.85; }
+    to   { transform: translate3d(36px, 22px, 0) scale(1.08); opacity: 1; }
 }
-
 @keyframes hero-drift-b {
-    from {
-        transform: translate3d(0, 0, 0) scale(1.06);
-        opacity: 1;
-    }
-
-    to {
-        transform: translate3d(-30px, 28px, 0) scale(0.98);
-        opacity: 0.8;
-    }
+    from { transform: translate3d(0, 0, 0) scale(1.06); opacity: 1; }
+    to   { transform: translate3d(-30px, 28px, 0) scale(0.98); opacity: 0.8; }
 }
 
 
-.hero-content h1 {
-    color: var(--hero-text);
+/* Digital ground: a lit 3D dot terrain drawn by HeroWave (home.js).
+   Absolute inside .hero-bg, which clips to the card radius, so it never
+   affects layout or input (pointer-events:none, aria-hidden parent). The
+   mask feathers the sides and dissolves the horizon into the noir ground.
+   Dot colour is ivory on noir; the champagne glint is the only accent. */
+.hero-wave {
+    --wave-dot: var(--hero-text);
+    --wave-glint: var(--color-champagne);
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    width: 100%;
+    height: clamp(120px, 18vw, 240px);
+    overflow: hidden;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent), linear-gradient(180deg, transparent, #000 38%);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent), linear-gradient(180deg, transparent, #000 38%);
+    mask-composite: intersect;
+}
+.hero-wave canvas { display: block; width: 100%; height: 100%; }
+
+/* Porcelain ground: graphite dots with an iris glint, kept quiet so the
+   field never muddies the light hero's ink. */
+[data-theme="light"] .hero-wave {
+    --wave-glint: var(--color-iris);
+    opacity: 0.55;
 }
 
-.hero-content h1 .avid {
-    color: var(--hero-text);
+@media (max-width: 640px) {
+    .hero-wave { height: clamp(96px, 30vw, 140px); }
 }
 
+.hero-content h1 { color: var(--hero-text); }
+.hero-content h1 .avid { color: var(--hero-text); }
 .hero-content h1 .accent {
     background: linear-gradient(92deg, var(--color-champagne) 0%, var(--color-rose-veil) 38%, var(--color-iris) 72%, var(--color-glacier) 105%);
     -webkit-background-clip: text;
@@ -2376,16 +2365,12 @@ body.rtl .hero-max::before {
     -webkit-text-fill-color: transparent;
     color: transparent;
 }
-
 [data-theme="light"] .hero-content h1 .accent {
     background: linear-gradient(92deg, #8a5a00 0%, #9a4a6b 42%, #5546b8 78%, #0f766e 108%);
     -webkit-background-clip: text;
     background-clip: text;
 }
-
-.hero-desc {
-    color: var(--hero-text-2);
-}
+.hero-desc { color: var(--hero-text-2); }
 
 .hero-pill {
     background: var(--hero-glass);
@@ -2395,29 +2380,15 @@ body.rtl .hero-max::before {
     -webkit-backdrop-filter: blur(14px) saturate(1.4);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
-
 .hero-status-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    flex: none;
+    width: 7px; height: 7px; border-radius: 50%; flex: none;
     background: var(--color-glacier);
     box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-glacier) 22%, transparent);
     animation: hero-pulse 2.6s ease-in-out infinite;
 }
-
 @keyframes hero-pulse {
-
-    0%,
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-
-    50% {
-        opacity: 0.55;
-        transform: scale(0.82);
-    }
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.55; transform: scale(0.82); }
 }
 
 /* Glass search: token-driven so both themes stay legible. */
@@ -2430,65 +2401,33 @@ body.rtl .hero-max::before {
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 10px 28px rgba(10, 8, 24, 0.14);
     height: 54px;
 }
-
 .hero-search .input-wrap:focus-within,
 [data-theme="light"] .hero-search .input-wrap:focus-within {
     border-color: color-mix(in srgb, var(--color-champagne) 65%, transparent);
     box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-iris) 22%, transparent), 0 14px 32px rgba(10, 8, 24, 0.16);
     background: var(--hero-input-bg);
 }
-
 .hero-search .input-wrap input,
-[data-theme="light"] .hero-search .input-wrap input {
-    color: var(--hero-input-text);
-}
-
+[data-theme="light"] .hero-search .input-wrap input { color: var(--hero-input-text); }
 .hero-search .input-wrap input::placeholder,
-[data-theme="light"] .hero-search .input-wrap input::placeholder {
-    color: var(--hero-input-placeholder);
-}
-
-.hero-search .input-wrap svg {
-    color: var(--hero-input-placeholder);
-}
-
+[data-theme="light"] .hero-search .input-wrap input::placeholder { color: var(--hero-input-placeholder); }
+.hero-search .input-wrap svg { color: var(--hero-input-placeholder); }
 .hero-search .btn-primary {
     height: 54px;
     box-shadow: 0 10px 26px rgba(61, 107, 199, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
-
-.hero-search .btn-primary:active {
-    transform: translateY(1px) scale(0.99);
-}
+.hero-search .btn-primary:active { transform: translateY(1px) scale(0.99); }
 
 /* Trust meta strip: proof, not slogans (taste-skill: substance). */
 .hero-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 22px;
-    margin-top: 22px;
-    padding: 0;
-    list-style: none;
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.01em;
+    display: flex; flex-wrap: wrap; gap: 8px 22px;
+    margin-top: 22px; padding: 0; list-style: none;
+    font-size: 12px; font-weight: 500; letter-spacing: 0.01em;
     color: var(--hero-text-2);
 }
-
-.hero-meta li {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-}
-
-.hero-meta svg {
-    color: var(--color-champagne);
-    flex: none;
-}
-
-[data-theme="light"] .hero-meta svg {
-    color: #8a5a00;
-}
+.hero-meta li { display: inline-flex; align-items: center; gap: 7px; }
+.hero-meta svg { color: var(--color-champagne); flex: none; }
+[data-theme="light"] .hero-meta svg { color: #8a5a00; }
 
 /* Emblem: central logo inside ONE circular line; the uploaded product
    logos ride that line as satellites (ADR-014 amendment). No disc or
@@ -2502,20 +2441,14 @@ body.rtl .hero-max::before {
    identical orbit, centred, at the identical radius, and the ring and
    the logos can never drift apart or breathe at different rates. */
 .hero-emblem {
-    position: relative;
-    display: grid;
-    place-items: center;
-    width: 100%;
-    aspect-ratio: 1;
+    position: relative; display: grid; place-items: center;
+    width: 100%; aspect-ratio: 1;
     direction: ltr;
     pointer-events: none;
 }
-
 .hero-ring {
-    position: absolute;
-    inset: 6%;
-    border-radius: 50%;
-    pointer-events: none;
+    position: absolute; inset: 6%;
+    border-radius: 50%; pointer-events: none;
     border: 1px solid color-mix(in srgb, var(--color-champagne) 38%, transparent);
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-iris) 10%, transparent), inset 0 0 32px color-mix(in srgb, var(--color-iris) 5%, transparent);
 }
@@ -2523,182 +2456,88 @@ body.rtl .hero-max::before {
 /* Orbit: the stage rotates slowly; each satellite counter-rotates so
    the logos stay upright. Only transform animates (motion contract). */
 .hero-orbit {
-    position: absolute;
-    inset: 6%;
+    position: absolute; inset: 6%;
     animation: hero-spin 64s linear infinite;
     pointer-events: none;
 }
-
 .orbit-item {
-    position: absolute;
-    inset: 0;
+    position: absolute; inset: 0;
     transform: rotate(var(--a));
     pointer-events: none;
     z-index: 2;
 }
-
 /* The satellite's centre sits exactly on the stage's top edge — which
    is the ring line itself — so logo and line share one radius by
    construction, in every language and at every width. */
 .orbit-anchor {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 19%;
-    aspect-ratio: 1;
+    position: absolute; top: 0; left: 50%;
+    width: 19%; aspect-ratio: 1;
     transform: translate(-50%, -50%);
     pointer-events: auto;
     outline: none;
 }
-
 .orbit-spin {
-    display: grid;
-    place-items: center;
-    width: 100%;
-    height: 100%;
+    display: grid; place-items: center;
+    width: 100%; height: 100%;
     animation: hero-spin-rev 64s linear infinite;
 }
-
 /* No chip, no disc, no background (taste-skill: trust the subject's own
    marks): the transparent logo itself sits on the line, optically
    normalised at build time so all seven read at one size. */
 .orbit-logo {
     display: block;
-    width: 100%;
-    aspect-ratio: 1;
+    width: 100%; aspect-ratio: 1;
     transform: rotate(calc(-1 * var(--a))) scale(1);
     transition: transform 550ms cubic-bezier(0.22, 1.4, 0.36, 1), filter 550ms ease;
 }
-
-.orbit-logo img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    display: block;
-}
-
+.orbit-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .orbit-name {
-    position: absolute;
-    top: calc(100% + 10px);
-    left: 50%;
+    position: absolute; top: calc(100% + 10px); left: 50%;
     transform: translate(-50%, 6px);
-    padding: 4px 9px;
-    border-radius: 999px;
-    white-space: nowrap;
-    background: var(--hero-glass);
-    border: 1px solid var(--hero-glass-border);
-    color: var(--hero-text);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    opacity: 0;
-    pointer-events: none;
+    padding: 4px 9px; border-radius: 999px; white-space: nowrap;
+    background: var(--hero-glass); border: 1px solid var(--hero-glass-border);
+    color: var(--hero-text); font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    opacity: 0; pointer-events: none;
     transition: opacity 350ms ease, transform 350ms ease;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
 }
-
 /* Hover / keyboard focus on a satellite: orbit pauses, logo grows softly. */
 .hero-emblem:has(.orbit-anchor:hover) .hero-orbit,
 .hero-emblem:has(.orbit-anchor:focus-visible) .hero-orbit,
 .hero-emblem:has(.orbit-anchor:hover) .orbit-spin,
-.hero-emblem:has(.orbit-anchor:focus-visible) .orbit-spin {
-    animation-play-state: paused;
-}
-
+.hero-emblem:has(.orbit-anchor:focus-visible) .orbit-spin { animation-play-state: paused; }
 .orbit-anchor:hover .orbit-logo,
 .orbit-anchor:focus-visible .orbit-logo {
     transform: rotate(calc(-1 * var(--a))) scale(1.35);
     /* Alpha-shaped glow: the shadow follows the glyph, not a box. */
     filter: drop-shadow(0 10px 22px rgba(5, 4, 16, 0.45)) drop-shadow(0 0 14px color-mix(in srgb, var(--color-champagne) 45%, transparent));
 }
-
 .orbit-anchor:hover .orbit-name,
-.orbit-anchor:focus-visible .orbit-name {
-    opacity: 1;
-    transform: translate(-50%, 0);
-}
+.orbit-anchor:focus-visible .orbit-name { opacity: 1; transform: translate(-50%, 0); }
 
 @keyframes hero-spin {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
-
 @keyframes hero-spin-rev {
-    from {
-        transform: rotate(360deg);
-    }
-
-    to {
-        transform: rotate(0deg);
-    }
+    from { transform: rotate(360deg); }
+    to { transform: rotate(0deg); }
 }
-
-.logo-swap {
-    width: 66%;
-    opacity: 0.96;
-    filter: drop-shadow(0 18px 48px rgba(12, 8, 32, 0.35));
-    -webkit-mask-image: none;
-    mask-image: none;
-}
-
-[data-theme="light"] .logo-swap {
-    opacity: 0.95;
-    -webkit-mask-image: none;
-    mask-image: none;
-}
+.logo-swap { width: 66%; opacity: 0.96; filter: drop-shadow(0 18px 48px rgba(12, 8, 32, 0.35)); -webkit-mask-image: none; mask-image: none; }
+[data-theme="light"] .logo-swap { opacity: 0.95; -webkit-mask-image: none; mask-image: none; }
 
 @media (prefers-reduced-motion: reduce) {
-
-    .hero-aurora,
-    .hero-orbit,
-    .orbit-spin,
-    .hero-status-dot {
-        animation: none;
-    }
+    .hero-aurora, .hero-orbit, .orbit-spin, .hero-status-dot { animation: none; }
 }
-
 @media (max-width: 1024px) {
-    .hero-aurora--iris {
-        inset-inline-end: -220px;
-    }
-
-    .hero-meta {
-        justify-content: center;
-    }
+    .hero-aurora--iris { inset-inline-end: -220px; }
+    .hero-meta { justify-content: center; }
 }
-
 @media (max-width: 640px) {
-    .hero-max {
-        border-radius: 20px;
-    }
-
-    .hero-aurora--champagne {
-        width: 340px;
-        height: 340px;
-    }
-
-    .hero-aurora--iris {
-        width: 360px;
-        height: 360px;
-    }
-
-    .hero-aurora--glacier {
-        display: none;
-    }
-
-    .hero-meta {
-        gap: 6px 14px;
-        font-size: 11px;
-    }
-
-    .hero-search .btn-primary {
-        height: 50px;
-    }
+    .hero-max { border-radius: 20px; }
+    .hero-aurora--champagne { width: 340px; height: 340px; }
+    .hero-aurora--iris { width: 360px; height: 360px; }
+    .hero-aurora--glacier { display: none; }
+    .hero-meta { gap: 6px 14px; font-size: 11px; }
+    .hero-search .btn-primary { height: 50px; }
 }
