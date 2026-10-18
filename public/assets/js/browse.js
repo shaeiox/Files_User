@@ -38,12 +38,12 @@
  */
 
 // ES module, imported by router.js when its route is entered (ui-craft-elevation 5.2).
-import { BrowseIcons } from "./browse-icons.js?v=4.5.1";
-import { BulkDownload } from "./bulk-download.js?v=4.5.1";
-import { FileInspector } from "./file-inspector.js?v=4.5.1";
-import { BrowseTree } from "./browse-tree.js?v=4.5.1";
-import { PaneResize } from "./pane-resize.js?v=4.5.1";
-import { mapEntry, isHidden, toEntries } from "./browse-entries.js?v=4.5.1";
+import { BrowseIcons } from "./browse-icons.js?v=4.5.2";
+import { BulkDownload } from "./bulk-download.js?v=4.5.2";
+import { FileInspector } from "./file-inspector.js?v=4.5.2";
+import { BrowseTree } from "./browse-tree.js?v=4.5.2";
+import { PaneResize } from "./pane-resize.js?v=4.5.2";
+import { mapEntry, isHidden, toEntries } from "./browse-entries.js?v=4.5.2";
 
 const BrowsePage = (function () {
     'use strict';
@@ -888,8 +888,11 @@ const BrowsePage = (function () {
         if (!el) return;
         el.innerHTML = "";
 
+        // Root crumb: the file tree's root (ResourceService.browseHref("") → /browse/),
+        // NOT the site home page. In full-screen Browse, "Home" must never eject the
+        // user to "/" — same target as the tree pane title (browse-tree.js).
         const home = document.createElement("a");
-        home.href = "/";
+        home.href = ResourceService.browseHref("");
         home.className = "crumb";
         home.innerHTML = `${BrowseIcons.get("folder_special", 14)}<span>${escapeHtml(d.root || "Home")}</span>`;
         el.appendChild(home);
