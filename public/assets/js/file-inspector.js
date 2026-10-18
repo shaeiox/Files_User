@@ -39,8 +39,8 @@
  */
 
 // ES module, imported by router.js when its route is entered (ui-craft-elevation 5.2).
-import { BrowseIcons } from "./browse-icons.js?v=4.5.2";
-import { BulkDownload } from "./bulk-download.js?v=4.5.2";
+import { BrowseIcons } from "./browse-icons.js?v=4.6.2";
+import { BulkDownload } from "./bulk-download.js?v=4.6.2";
 
 const FileInspector = (function () {
     'use strict';

@@ -1099,15 +1099,6 @@ body.rtl .logo-shader {
     font-size: 14px;
 }
 
-.aura-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    pointer-events: none;
-    z-index: -1;
-}
-
 /* ═══════════════════════════════════════════════════════════════
    6. AUTHENTICATION UI (LOCKED STATE & MODAL)
    ═══════════════════════════════════════════════════════════════ */
@@ -1451,14 +1442,14 @@ body.rtl .logo-shader {
         margin-inline: auto;
     }
 
-/* — Resources: 2-column card grid —
+    /* — Resources: 2-column card grid —
    minmax(0, 1fr) rather than bare 1fr: grid items default to
    min-width:auto, so a long unbroken string inside a card can push a
    track wider than its share and force horizontal overflow (I2).
    Phase 9 fix. */
-.resources-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-}
+    .resources-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 
     /* — Auth locked state — */
     .locked-state {
@@ -1908,7 +1899,7 @@ body.rtl .logo-shader {
     row-gap: 4px;
 }
 
-.resource-bottom > span {
+.resource-bottom>span {
     white-space: nowrap;
 }
 
@@ -2107,7 +2098,8 @@ body.rtl .logo-shader {
    The single-column collapse below 640px still applies: a 1-track grid
    cannot span 2, and the span is reset there explicitly. */
 .resources-grid {
-    position: relative; /* containing block for cards animating out (FLIP) */
+    position: relative;
+    /* containing block for cards animating out (FLIP) */
 }
 
 /* Full HD and wider the page runs full width, so three fixed tracks stretch
@@ -2226,6 +2218,7 @@ body.rtl .logo-shader {
     color: var(--text);
     overflow-wrap: anywhere;
 }
+
 /* ─────────────────────────────────────────────
    PHASE 8 (a11y-ux-debt) — small-viewport tightening
    Single-column cards at ≤640px get slimmer padding and gaps so the

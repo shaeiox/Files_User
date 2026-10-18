@@ -1,6 +1,6 @@
 /**
  * @file scripts/stamp-assets.js
- * @brief Stamps every first-party JS/CSS URL with `?v=<package.json version>`.
+ * @brief Stamps every first-party JS/CSS URL with `?v=4.6.2<package.json version>`.
  *
  * Production nginx serves CSS/JS with `expires 30d` + `immutable` (ADR-007), so a
  * returning visitor never re-fetches an unchanged URL. Without a version in the URL a
@@ -22,15 +22,15 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const { version } = require(path.join(ROOT, 'package.json'));
-const V = '?v=' + version;
+const V = '?v=4.6.2' + version;
 
 /** [file relative to ROOT, pattern whose group 1 is the URL without its query] */
 const TARGETS = [
-    ['public/index.html', /((?:href|src)="\/assets\/(?:css|js)\/[^"?]+\.(?:css|js))(?:\?v=[^"]*)?"/g],
-    ['public/assets/js/router.js', /("\/assets\/(?:css|js)\/[^"?]+\.(?:css|js))(?:\?v=[^"]*)?"/g],
-    ['public/assets/js/browse.js', /(from "\.\/[^"?]+\.js)(?:\?v=[^"]*)?"/g],
-    ['public/assets/js/file-inspector.js', /(from "\.\/[^"?]+\.js)(?:\?v=[^"]*)?"/g],
-    ['public/assets/js/browse-tree.js', /(from "\.\/[^"?]+\.js)(?:\?v=[^"]*)?"/g],
+    ['public/index.html', /((?:href|src)="\/assets\/(?:css|js)\/[^"?]+\.(?:css|js))(?:\?v=4.6.2[^"]*)?"/g],
+    ['public/assets/js/router.js', /("\/assets\/(?:css|js)\/[^"?]+\.(?:css|js))(?:\?v=4.6.2[^"]*)?"/g],
+    ['public/assets/js/browse.js', /(from "\.\/[^"?]+\.js)(?:\?v=4.6.2[^"]*)?"/g],
+    ['public/assets/js/file-inspector.js', /(from "\.\/[^"?]+\.js)(?:\?v=4.6.2[^"]*)?"/g],
+    ['public/assets/js/browse-tree.js', /(from "\.\/[^"?]+\.js)(?:\?v=4.6.2[^"]*)?"/g],
 ];
 
 function stamp() {

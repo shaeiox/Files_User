@@ -103,7 +103,6 @@
         min-height: 0;
         overflow: auto;
         overscroll-behavior: contain;
-        scrollbar-width: thin;
     }
 
     .browse-split .file-tbl>.thead {
@@ -131,7 +130,6 @@
         min-height: 0;
         overflow: auto;
         overscroll-behavior: contain;
-        scrollbar-width: thin;
     }
 }
 
@@ -306,7 +304,6 @@
     overflow: auto;
     overscroll-behavior: contain;
     padding: 2px 6px var(--s3);
-    scrollbar-width: thin;
 }
 
 .tree,
@@ -1356,18 +1353,6 @@ body.is-resizing .browse-inspector {
     border-radius: var(--radius-lg);
     padding: var(--space-md);
     scrollbar-gutter: stable;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-hover) transparent;
-}
-
-.browse-inspector::-webkit-scrollbar {
-    width: 8px;
-}
-
-.browse-inspector::-webkit-scrollbar-thumb {
-    border: 2px solid transparent;
-    border-radius: 8px;
-    background: var(--border-hover) padding-box;
 }
 
 /* Name, kind and Close stay in view while the details scroll beneath them. */

@@ -143,7 +143,7 @@
     background: var(--border);
 }
 
-.nav-tab-folder > span {
+.nav-tab-folder>span {
     max-width: 16ch;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -155,6 +155,7 @@
 }
 
 @media (min-width: 901px) {
+
     /* With folders the group joins the bar's flow and takes exactly the
        space between logo and actions (absolute centring would overlap them);
        extra links scroll sideways. Block padding keeps the active underline
@@ -1011,15 +1012,6 @@ kbd {
     overflow-y: auto;
 }
 
-.ac-list::-webkit-scrollbar {
-    width: 5px;
-}
-
-.ac-list::-webkit-scrollbar-thumb {
-    background: var(--n-5);
-    border-radius: 3px;
-}
-
 .ac-item {
     display: flex;
     align-items: center;
@@ -1241,6 +1233,7 @@ kbd {
    (F1) — the pills just become the same 44px icon button as theme / auth /
    disclosure. */
 @media (max-width: 480px) {
+
     /* A build badge inside the brand link. Metadata, not navigation. */
     .nav-version {
         display: none;
@@ -1248,8 +1241,8 @@ kbd {
 
     /* Icon-only pills. `:last-child` is the chevron, structurally — hiding the
        label span above never moves it. */
-    .lang-pill > span,
-    .lang-pill > svg:last-child {
+    .lang-pill>span,
+    .lang-pill>svg:last-child {
         display: none;
     }
 
@@ -1285,6 +1278,7 @@ kbd {
 [data-theme="light"] .perf-dropdown-wrap.show .perf-pill {
     background: rgba(28, 28, 30, 0.04);
 }
+
 /* ─────────────────────────────────────────────
    Navbar version label + sign-in toggle
    ───────────────────────────────────────────── */
@@ -1325,12 +1319,30 @@ kbd {
 }
 
 /* The arrow nudges toward the door on hover: in for sign-in, out for sign-out. */
-.auth-btn:hover:not(.is-auth) .icon-login { transform: translateX(2px); }
-.auth-btn.is-auth:hover .icon-logout { transform: translateX(2px); }
-.auth-btn:active { transform: scale(0.94); }
-.auth-btn:disabled { cursor: progress; opacity: 0.6; }
-.auth-btn:not([hidden]) { animation: scaleIn 260ms var(--ease) both; }
-.auth-btn[hidden] { display: none; }
+.auth-btn:hover:not(.is-auth) .icon-login {
+    transform: translateX(2px);
+}
+
+.auth-btn.is-auth:hover .icon-logout {
+    transform: translateX(2px);
+}
+
+.auth-btn:active {
+    transform: scale(0.94);
+}
+
+.auth-btn:disabled {
+    cursor: progress;
+    opacity: 0.6;
+}
+
+.auth-btn:not([hidden]) {
+    animation: scaleIn 260ms var(--ease) both;
+}
+
+.auth-btn[hidden] {
+    display: none;
+}
 
 /* Download feedback (ui-craft-elevation 6.7): busy control + in-place note. */
 a[data-file][aria-busy="true"] {

@@ -220,11 +220,11 @@ test('routing: the shell loads no route-only script or stylesheet; one navigate(
         assert.match(read(path.join(JS, f)), /^export \{ \w+ \};/m, f + ' is an ES module');
     }
     assert.doesNotMatch(indexHtml, /href="\/assets\/css\/(browse|release)\.css"/);
-    assert.match(indexHtml, /src="\/assets\/js\/idle-timer\.js\?v=[^"]+" defer/);
+    assert.match(indexHtml, /src="\/assets\/js\/idle-timer\.js\?v=4.6.2[^"]+" defer/);
     assert.match(indexHtml, /var perfTier = 'high';/);
     const router = read(path.join(JS, 'router.js'));
     assert.strictEqual((router.match(/function navigate\(/g) || []).length, 1);
-    assert.match(router, /import\("\/assets\/js\/browse\.js\?v=[^"]+"\)/);
+    assert.match(router, /import\("\/assets\/js\/browse\.js\?v=4.6.2[^"]+"\)/);
     assert.match(router, /startViewTransition/);
     assert.doesNotMatch(router, /setTimeout\(/);
     assert.doesNotMatch(router, /app\.style\.transition/);
@@ -256,7 +256,7 @@ test('deploy: every first-party JS/CSS URL carries the package version (cache bu
         const urls = [...src.matchAll(new RegExp(re.source, 'g'))];
         assert.ok(urls.length > 0, rel + ' has asset URLs');
         for (const m of urls) {
-            assert.ok(m[0].endsWith('?v=' + version + '"'), `${rel}: ${m[0]} — run: node scripts/stamp-assets.js`);
+            assert.ok(m[0].endsWith('?v=4.6.2' + version + '"'), `${rel}: ${m[0]} — run: node scripts/stamp-assets.js`);
         }
     }
 });
