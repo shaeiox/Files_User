@@ -868,7 +868,11 @@
    (which kills animation globally above) drops the layers outright. */
 [data-perf="medium"] .hero-aurora {
     animation: none;
-    filter: blur(18px);
+}
+
+/* The medium field's softer blur(18px) look, pre-baked (see home.css). */
+[data-perf="medium"] .hero-aurora::before {
+    background: var(--aurora-medium);
 }
 
 [data-perf="low"] .hero-aurora {

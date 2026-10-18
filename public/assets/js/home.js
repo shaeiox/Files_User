@@ -53,96 +53,187 @@ const HomePage = (function () {
      Each dot is shaded from the surface normal: ivory by diffuse light, and a
      champagne glint where the crest catches the key light (Blinn specular).
      Colours come from --wave-dot / --wave-glint, so themes stay in CSS.
-     Animates at ~30fps only while on screen and motion is allowed; reduced
-     motion and the low/potato tiers get one still frame. */
+
+     Rendered with WebGL: the grid is a static vertex buffer and the swell,
+     lighting and projection run in the vertex shader, so a frame costs the
+     CPU one uniform update (the Canvas 2D version spent ~6ms of main thread
+     per frame on ~15k dots and halved the page's frame rate). Animates at
+     ~30fps only while on screen and motion is allowed; reduced motion and
+     the low/potato tiers get one still frame. Without WebGL, draw2D paints
+     the same field as a still frame. */
   const HeroWave = (() => {
     const Z_NEAR = 0.85, Z_FAR = 6, STEP = 0.085, CAM_H = 1;
     // Key light from far right, high; view ≈ toward the camera. H = L+V.
     const HX = 0.33, HY = 0.93, HZ = -0.16;
     const LX = 0.45, LY = 0.62, LZ = 0.64;
-    let cv, ctx, W = 0, H = 0, raf = 0, last = 0, visible = false, io, ro, mo;
-    const live = () => !document.hidden && visible &&
+    const TAU = Math.PI * 2;
+    let cv, gl = null, ctx = null, prog, count = 0, u = {}, W = 0, H = 0;
+    let raf = 0, last = 0, visible = false, io, ro, mo;
+    let dot = [1, 1, 1], glint = [1, 1, 1], dotCss = "", glintCss = "";
+    // The 2D fallback never animates: a still frame costs nothing after paint.
+    const live = () => gl && !document.hidden && visible &&
       (window.Motion ? Motion.allowsMotion() && !/^(low|potato)$/.test(document.documentElement.getAttribute("data-perf") || "") : true);
 
-    // Per-column sin/cos of the three x-frequencies: time-independent, so
-    // built once per size; per dot only multiply-adds remain (angle sums).
-    const FX = [0.9, 1.6, 2.8];
-    let tab = null, iMax = 0;
-    const BUCKETS = 12;
+    // Same terrain as draw2D, per vertex. Phases are wrapped on the CPU so
+    // float32 sin() stays precise however long the page has been open.
+    const VS = `
+      attribute vec2 aP;
+      uniform vec2 uView; uniform vec3 uPh; uniform float uDpr;
+      uniform mediump float uPass;   // shared with FS: precisions must match to link
+      varying float vA, vS;
+      void main() {
+        float x = aP.x, z = aP.y, W = uView.x, H = uView.y;
+        float f = H * 0.8, k = H / 260.0;
+        float fog = pow(1.0 - (z - ${Z_NEAR.toFixed(3)}) / ${(Z_FAR - Z_NEAR).toFixed(3)}, 1.5);
+        float r = clamp(1.15 * k / z, 0.35, 1.7);
+        float A = 0.9 * x + 0.55 * z + uPh.x, B = 1.6 * x - 0.85 * z + uPh.y, C = 2.8 * x + 1.5 * z + uPh.z;
+        float h = 0.17 * sin(A) + 0.09 * sin(B) + 0.04 * sin(C);
+        float hx = 0.153 * cos(A) + 0.144 * cos(B) + 0.112 * cos(C);
+        float hz = 0.0935 * cos(A) - 0.0765 * cos(B) + 0.06 * cos(C);
+        float sx = W * 0.5 + f * x / z, sy = H * 0.06 + f * (1.0 - h) / z;
+        float n = inversesqrt(hx * hx + 1.0 + hz * hz);
+        float a, d;
+        if (uPass < 0.5) {
+          a = fog * (0.16 + 0.5 * max(0.0, (-hx * ${LX.toFixed(2)} + ${LY.toFixed(2)} - hz * ${LZ.toFixed(2)}) * n));
+          d = 2.0 * r * uDpr;
+        } else {
+          float g = pow(max(0.0, (-hx * ${HX.toFixed(2)} + ${HY.toFixed(2)} - hz * ${HZ.toFixed(2)}) * n), 40.0) * fog;
+          a = g > 0.05 ? min(1.0, g * 1.4) : 0.0;
+          d = 2.5 * r * uDpr;
+        }
+        vA = a; vS = d;
+        gl_PointSize = d + 2.0;   // 1px margin each side for edge coverage
+        gl_Position = (a <= 0.0 || sy > H + 2.0)
+          ? vec4(2.0, 2.0, 0.0, 1.0)
+          : vec4(sx / W * 2.0 - 1.0, 1.0 - sy / H * 2.0, 0.0, 1.0);
+      }`;
+    // Dots: exact box coverage of a d×d square (what a 2D canvas fillRect
+    // antialiases to, sub-pixel dots included). Glints: an antialiased disc.
+    const FS = `
+      precision mediump float;
+      uniform vec3 uCol; uniform float uPass;
+      varying float vA, vS;
+      void main() {
+        vec2 p = (gl_PointCoord - 0.5) * (vS + 2.0);
+        float a = vA;
+        if (uPass < 0.5) {
+          vec2 c = max(vec2(0.0), min(vec2(vS * 0.5), p + 0.5) - max(vec2(-vS * 0.5), p - 0.5));
+          a *= c.x * c.y;
+        } else {
+          a *= clamp(vS * 0.5 - length(p) + 0.5, 0.0, 1.0);
+        }
+        if (a <= 0.0) discard;
+        gl_FragColor = vec4(uCol * a, a);
+      }`;
+
+    function initGL() {
+      gl = cv.getContext("webgl", { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false, powerPreference: "low-power" });
+      if (!gl) return false;
+      const shader = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+      prog = gl.createProgram();
+      gl.attachShader(prog, shader(gl.VERTEX_SHADER, VS));
+      gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, FS));
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { gl = null; return false; }
+      gl.useProgram(prog);
+      for (const n of ["uView", "uPh", "uDpr", "uPass", "uCol"]) u[n] = gl.getUniformLocation(prog, n);
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      const loc = gl.getAttribLocation(prog, "aP");
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);   // premultiplied "source-over"
+      return true;
+    }
+
+    // The grid, far → near so nearer dots paint over farther ones.
+    function grid(fn) {
+      const f = H * 0.8, cx = W / 2;
+      for (let z = Z_FAR; z >= Z_NEAR; z -= STEP) {
+        const fog = Math.pow(1 - (z - Z_NEAR) / (Z_FAR - Z_NEAR), 1.5);
+        if (fog < 0.02) continue;
+        const n0 = Math.ceil((cx + 8) * z / f / STEP);
+        // Far rows: columns closer than ~2px merge into fog anyway; skip half.
+        const lod = f * STEP / z < 2 ? 1 : 0;
+        for (let i = -n0; i <= n0; i++) if (!(i & lod)) fn(i, z, fog);
+      }
+    }
 
     function size() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       W = cv.clientWidth; H = cv.clientHeight;
       cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      iMax = Math.ceil(((W / 2 + 8) * Z_FAR) / (H * 0.8) / STEP);
-      tab = new Float32Array((2 * iMax + 1) * 6);
-      for (let i = -iMax, j = 0; i <= iMax; i++) {
-        for (const q of FX) { tab[j++] = Math.sin(q * i * STEP); tab[j++] = Math.cos(q * i * STEP); }
+      if (!W || !H) return;
+      if (gl) {
+        const pts = [];
+        grid((i, z) => pts.push(i * STEP, z));
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(pts), gl.STATIC_DRAW);
+        count = pts.length / 2;
+        gl.viewport(0, 0, cv.width, cv.height);
+      } else if (ctx) {
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
     }
 
-    function draw(t) {
-      if (!W || !H || !tab) return;
+    // CSS colour → [r,g,b] in 0..1, via the browser's own colour parser.
+    function rgb(v) {
+      cv.style.color = v;
+      const m = getComputedStyle(cv).color.match(/[\d.]+/g) || ["255", "255", "255"];
+      cv.style.color = "";
+      return m.slice(0, 3).map((c) => c / 255);
+    }
+    function readColors() {
       const css = getComputedStyle(cv);
-      const dot = css.getPropertyValue("--wave-dot").trim() || "#f4f1ea";
-      const glint = css.getPropertyValue("--wave-glint").trim() || "#e6c87a";
+      dotCss = css.getPropertyValue("--wave-dot").trim() || "#f4f1ea";
+      glintCss = css.getPropertyValue("--wave-glint").trim() || "#e6c87a";
+      if (gl) { dot = rgb(dotCss); glint = rgb(glintCss); }
+    }
+
+    function draw(t) {
+      if (!W || !H) return;
+      if (!gl) return draw2D(t);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.uniform2f(u.uView, W, H);
+      gl.uniform1f(u.uDpr, cv.width / W);
+      gl.uniform3f(u.uPh, t % TAU, (0.7 * t + 1.3) % TAU, (-1.1 * t) % TAU);
+      gl.uniform1f(u.uPass, 0); gl.uniform3fv(u.uCol, dot); gl.drawArrays(gl.POINTS, 0, count);
+      gl.uniform1f(u.uPass, 1); gl.uniform3fv(u.uCol, glint); gl.drawArrays(gl.POINTS, 0, count);
+    }
+
+    // Fallback (no WebGL): the same field, one still frame on Canvas 2D.
+    function draw2D(t) {
+      if (!ctx) return;
       const f = H * 0.8, hy = H * 0.06, cx = W / 2, k = H / 260;
-      // Dots are binned by alpha into a few paths: one fill per bin.
-      const bins = Array.from({ length: BUCKETS }, () => new Path2D());
       const glints = [];
-      for (let z = Z_FAR; z >= Z_NEAR; z -= STEP) {
-        const fog = Math.pow(1 - (z - Z_NEAR) / (Z_FAR - Z_NEAR), 1.5);
-        if (fog < 0.02) continue;
-        const r = Math.min(1.7, Math.max(0.35, (1.15 * k) / z)), d = 2 * r;
-        // z/t phase of each component: A = qx·x + B.
-        const B0 = 0.55 * z + t, B1 = -0.85 * z + 0.7 * t + 1.3, B2 = 1.5 * z - 1.1 * t;
-        const s0 = Math.sin(B0), c0 = Math.cos(B0), s1 = Math.sin(B1), c1 = Math.cos(B1), s2 = Math.sin(B2), c2 = Math.cos(B2);
-        const n0 = Math.ceil((cx + 8) * z / f / STEP);
-        // Far rows: columns closer than ~2px merge into fog anyway; skip half.
-        const lod = f * STEP / z < 2 ? 1 : 0;
-        for (let i = -n0; i <= n0; i++) {
-          if (i & lod) continue;
-          const j = (i + iMax) * 6;
-          // sin(A+B) and cos(A+B) from the column table.
-          const sa = tab[j] * c0 + tab[j + 1] * s0, ca = tab[j + 1] * c0 - tab[j] * s0;
-          const sb = tab[j + 2] * c1 + tab[j + 3] * s1, cb = tab[j + 3] * c1 - tab[j + 2] * s1;
-          const sc = tab[j + 4] * c2 + tab[j + 5] * s2, cc = tab[j + 5] * c2 - tab[j + 4] * s2;
-          // Heightfield and its analytic slopes.
-          const h = 0.17 * sa + 0.09 * sb + 0.04 * sc;
-          const hx = 0.153 * ca + 0.144 * cb + 0.112 * cc;
-          const hz = 0.0935 * ca - 0.0765 * cb + 0.06 * cc;
-          const sy = hy + f * (CAM_H - h) / z;
-          if (sy > H + 2) continue;
-          const sx = cx + f * i * STEP / z;
-          const n = 1 / Math.sqrt(hx * hx + 1 + hz * hz);
-          const diffuse = Math.max(0, (-hx * LX + LY - hz * LZ) * n);
-          const alpha = fog * (0.16 + 0.5 * diffuse);
-          bins[Math.min(BUCKETS - 1, (alpha * BUCKETS / 0.66) | 0)].rect(sx - r, sy - r, d, d);
-          // Specular ^40 by squaring: (s^8)^5.
-          let s = Math.max(0, (-hx * HX + HY - hz * HZ) * n);
-          const s8 = (s *= s, s *= s, s * s);
-          const spec = s8 * s8 * s8 * s8 * s8;
-          if (spec * fog > 0.05) glints.push(sx, sy, r * 1.25, Math.min(1, spec * fog * 1.4));
-        }
-      }
       ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = dot;
-      for (let b = 0; b < BUCKETS; b++) {
-        ctx.globalAlpha = ((b + 0.5) / BUCKETS) * 0.66;
-        ctx.fill(bins[b]);
-      }
-      ctx.fillStyle = glint;
+      ctx.fillStyle = dotCss;
+      grid((i, z, fog) => {
+        const x = i * STEP, r = Math.min(1.7, Math.max(0.35, (1.15 * k) / z));
+        const a = 0.9 * x + 0.55 * z + t, b = 1.6 * x - 0.85 * z + 0.7 * t + 1.3, c = 2.8 * x + 1.5 * z - 1.1 * t;
+        const h = 0.17 * Math.sin(a) + 0.09 * Math.sin(b) + 0.04 * Math.sin(c);
+        const hx = 0.153 * Math.cos(a) + 0.144 * Math.cos(b) + 0.112 * Math.cos(c);
+        const hz = 0.0935 * Math.cos(a) - 0.0765 * Math.cos(b) + 0.06 * Math.cos(c);
+        const sy = hy + f * (CAM_H - h) / z;
+        if (sy > H + 2) return;
+        const sx = cx + f * x / z;
+        const n = 1 / Math.sqrt(hx * hx + 1 + hz * hz);
+        ctx.globalAlpha = fog * (0.16 + 0.5 * Math.max(0, (-hx * LX + LY - hz * LZ) * n));
+        ctx.fillRect(sx - r, sy - r, 2 * r, 2 * r);
+        const g = Math.pow(Math.max(0, (-hx * HX + HY - hz * HZ) * n), 40) * fog;
+        if (g > 0.05) glints.push(sx, sy, r * 1.25, Math.min(1, g * 1.4));
+      });
+      ctx.fillStyle = glintCss;
       for (let i = 0; i < glints.length; i += 4) {
         ctx.globalAlpha = glints[i + 3];
-        ctx.beginPath(); ctx.arc(glints[i], glints[i + 1], glints[i + 2], 0, 6.2832); ctx.fill();
+        ctx.beginPath(); ctx.arc(glints[i], glints[i + 1], glints[i + 2], 0, TAU); ctx.fill();
       }
       ctx.globalAlpha = 1;
     }
 
     function tick(now) {
       raf = 0;
-      if (!cv.isConnected) return unmount();
+      if (!cv || !cv.isConnected) return unmount();
       if (!live()) return;
       if (now - last >= 33) { last = now; draw(now / 1000 * 0.22); }
       raf = requestAnimationFrame(tick);
@@ -150,6 +241,7 @@ const HomePage = (function () {
     // Still frame when parked, otherwise resume the loop.
     function wake() {
       if (!cv || !cv.isConnected) return unmount();
+      readColors();
       if (live()) { if (!raf) raf = requestAnimationFrame(tick); }
       else draw(performance.now() / 1000 * 0.22);
     }
@@ -159,14 +251,29 @@ const HomePage = (function () {
       raf = 0;
       io && io.disconnect(); ro && ro.disconnect(); mo && mo.disconnect();
       document.removeEventListener("visibilitychange", wake);
-      cv = null;
+      // Free the GPU context now; re-renders of home would otherwise pile up
+      // contexts until GC (browsers cap live WebGL contexts).
+      const lose = gl && gl.getExtension("WEBGL_lose_context");
+      if (lose) lose.loseContext();
+      cv = null; gl = null; ctx = null;
     }
 
     function mount(canvas) {
       if (cv) unmount();
       if (!canvas || !canvas.getContext) return;
-      cv = canvas; ctx = cv.getContext("2d");
+      cv = canvas;
+      if (!initGL()) {
+        // A canvas that already handed out a WebGL context can't give a 2D
+        // one, so the fallback draws on a fresh copy of the element.
+        const fresh = cv.cloneNode(false);
+        cv.replaceWith(fresh);
+        cv = canvas = fresh;
+        ctx = cv.getContext("2d");
+      }
+      cv.addEventListener("webglcontextlost", (e) => { e.preventDefault(); if (raf) cancelAnimationFrame(raf); raf = 0; });
+      cv.addEventListener("webglcontextrestored", () => { if (cv === canvas && initGL()) { size(); wake(); } });
       size();
+      readColors();
       io = new IntersectionObserver((e) => { visible = e[0].isIntersecting; wake(); });
       io.observe(cv);
       ro = new ResizeObserver(() => { size(); draw(performance.now() / 1000 * 0.22); });

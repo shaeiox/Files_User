@@ -2295,22 +2295,97 @@ body.rtl .hero-max::before {
     pointer-events: none;
     will-change: transform, opacity;
 }
+/* Each field is a soft radial glow. It used to be a hard-edged radial
+   gradient under filter: blur(), which the GPU re-ran over the whole
+   surface every frame anything near it changed (the hero wave, drift),
+   halving the frame rate on integrated GPUs. The Gaussian blur of that
+   radial profile is itself radial, so it is baked here into gradient
+   stops (within 2/255 alpha of Chrome's own blur), painted on a ::before
+   that bleeds past the box by the blur's reach. Same pixels, no filter.
+   --aurora-medium is the same field at the medium tier's blur(18px). */
+.hero-aurora::before {
+    content: "";
+    position: absolute;
+    inset: calc(-1 * var(--aurora-bleed));
+    background: var(--aurora);
+}
 .hero-aurora--champagne {
     width: 560px; height: 560px; top: -260px; inset-inline-start: -120px;
-    background: radial-gradient(circle, color-mix(in srgb, var(--color-champagne) 34%, transparent) 0%, transparent 68%);
-    filter: blur(28px);
+    --aurora-bleed: 32px;
+    --aurora: radial-gradient(circle closest-side,
+        color-mix(in srgb, var(--color-champagne) 29.57%, transparent) 0px,
+        color-mix(in srgb, var(--color-champagne) 29.12%, transparent) 18px,
+        color-mix(in srgb, var(--color-champagne) 27.73%, transparent) 38px,
+        color-mix(in srgb, var(--color-champagne) 24.64%, transparent) 68px,
+        color-mix(in srgb, var(--color-champagne) 14.35%, transparent) 152px,
+        color-mix(in srgb, var(--color-champagne) 4.55%, transparent) 232px,
+        color-mix(in srgb, var(--color-champagne) 2.19%, transparent) 256px,
+        color-mix(in srgb, var(--color-champagne) 0.86%, transparent) 278px,
+        color-mix(in srgb, var(--color-champagne) 0.19%, transparent) 302px,
+        color-mix(in srgb, var(--color-champagne) 0.09%, transparent) 310px,
+        transparent 312px);
+    --aurora-medium: radial-gradient(circle closest-side,
+        color-mix(in srgb, var(--color-champagne) 31.15%, transparent) 0px,
+        color-mix(in srgb, var(--color-champagne) 30.73%, transparent) 14px,
+        color-mix(in srgb, var(--color-champagne) 29.35%, transparent) 30px,
+        color-mix(in srgb, var(--color-champagne) 24.86%, transparent) 70px,
+        color-mix(in srgb, var(--color-champagne) 2.86%, transparent) 246px,
+        color-mix(in srgb, var(--color-champagne) 1.15%, transparent) 264px,
+        color-mix(in srgb, var(--color-champagne) 0.30%, transparent) 282px,
+        color-mix(in srgb, var(--color-champagne) 0.09%, transparent) 292px,
+        transparent 294px);
     animation: hero-drift-a 16s ease-in-out infinite alternate;
 }
 .hero-aurora--iris {
     width: 640px; height: 640px; top: -300px; inset-inline-end: -140px;
-    background: radial-gradient(circle, color-mix(in srgb, var(--color-iris) 32%, transparent) 0%, transparent 68%);
-    filter: blur(36px);
+    --aurora-bleed: 43px;
+    --aurora: radial-gradient(circle closest-side,
+        color-mix(in srgb, var(--color-iris) 27.31%, transparent) 0px,
+        color-mix(in srgb, var(--color-iris) 26.88%, transparent) 22px,
+        color-mix(in srgb, var(--color-iris) 25.56%, transparent) 46px,
+        color-mix(in srgb, var(--color-iris) 22.69%, transparent) 80px,
+        color-mix(in srgb, var(--color-iris) 14.12%, transparent) 168px,
+        color-mix(in srgb, var(--color-iris) 4.79%, transparent) 260px,
+        color-mix(in srgb, var(--color-iris) 2.29%, transparent) 292px,
+        color-mix(in srgb, var(--color-iris) 0.94%, transparent) 318px,
+        color-mix(in srgb, var(--color-iris) 0.22%, transparent) 348px,
+        color-mix(in srgb, var(--color-iris) 0.09%, transparent) 362px,
+        transparent 363px);
+    --aurora-medium: radial-gradient(circle closest-side,
+        color-mix(in srgb, var(--color-iris) 29.65%, transparent) 0px,
+        color-mix(in srgb, var(--color-iris) 29.21%, transparent) 16px,
+        color-mix(in srgb, var(--color-iris) 27.66%, transparent) 36px,
+        color-mix(in srgb, var(--color-iris) 20.61%, transparent) 108px,
+        color-mix(in srgb, var(--color-iris) 2.22%, transparent) 286px,
+        color-mix(in srgb, var(--color-iris) 0.76%, transparent) 306px,
+        color-mix(in srgb, var(--color-iris) 0.13%, transparent) 326px,
+        color-mix(in srgb, var(--color-iris) 0.09%, transparent) 330px,
+        transparent 331px);
     animation: hero-drift-b 20s ease-in-out infinite alternate;
 }
 .hero-aurora--glacier {
     width: 520px; height: 520px; bottom: -300px; inset-inline-start: 34%;
-    background: radial-gradient(circle, color-mix(in srgb, var(--color-glacier) 24%, transparent) 0%, transparent 68%);
-    filter: blur(40px);
+    --aurora-bleed: 51px;
+    --aurora: radial-gradient(circle closest-side,
+        color-mix(in srgb, var(--color-glacier) 19.19%, transparent) 0px,
+        color-mix(in srgb, var(--color-glacier) 18.76%, transparent) 24px,
+        color-mix(in srgb, var(--color-glacier) 17.47%, transparent) 50px,
+        color-mix(in srgb, var(--color-glacier) 14.70%, transparent) 86px,
+        color-mix(in srgb, var(--color-glacier) 4.16%, transparent) 206px,
+        color-mix(in srgb, var(--color-glacier) 1.97%, transparent) 238px,
+        color-mix(in srgb, var(--color-glacier) 0.75%, transparent) 266px,
+        color-mix(in srgb, var(--color-glacier) 0.14%, transparent) 302px,
+        color-mix(in srgb, var(--color-glacier) 0.09%, transparent) 310px,
+        transparent 311px);
+    --aurora-medium: radial-gradient(circle closest-side,
+        color-mix(in srgb, var(--color-glacier) 21.83%, transparent) 0px,
+        color-mix(in srgb, var(--color-glacier) 21.38%, transparent) 16px,
+        color-mix(in srgb, var(--color-glacier) 19.74%, transparent) 40px,
+        color-mix(in srgb, var(--color-glacier) 10.74%, transparent) 136px,
+        color-mix(in srgb, var(--color-glacier) 1.90%, transparent) 230px,
+        color-mix(in srgb, var(--color-glacier) 0.61%, transparent) 250px,
+        color-mix(in srgb, var(--color-glacier) 0.10%, transparent) 270px,
+        transparent 272px);
     animation: hero-drift-a 24s ease-in-out infinite alternate-reverse;
 }
 @keyframes hero-drift-a {
@@ -2535,8 +2610,64 @@ body.rtl .hero-max::before {
 }
 @media (max-width: 640px) {
     .hero-max { border-radius: 20px; }
-    .hero-aurora--champagne { width: 340px; height: 340px; }
-    .hero-aurora--iris { width: 360px; height: 360px; }
+    .hero-aurora--champagne {
+        width: 340px; height: 340px;
+        --aurora-bleed: 41px;
+        --aurora: radial-gradient(circle closest-side,
+            color-mix(in srgb, var(--color-champagne) 26.70%, transparent) 0px,
+            color-mix(in srgb, var(--color-champagne) 26.25%, transparent) 14px,
+            color-mix(in srgb, var(--color-champagne) 24.98%, transparent) 28px,
+            color-mix(in srgb, var(--color-champagne) 22.61%, transparent) 44px,
+            color-mix(in srgb, var(--color-champagne) 18.02%, transparent) 70px,
+            color-mix(in srgb, var(--color-champagne) 7.08%, transparent) 128px,
+            color-mix(in srgb, var(--color-champagne) 4.01%, transparent) 146px,
+            color-mix(in srgb, var(--color-champagne) 2.11%, transparent) 162px,
+            color-mix(in srgb, var(--color-champagne) 0.87%, transparent) 180px,
+            color-mix(in srgb, var(--color-champagne) 0.20%, transparent) 200px,
+            color-mix(in srgb, var(--color-champagne) 0.10%, transparent) 210px,
+            transparent 211px);
+        --aurora-medium: radial-gradient(circle closest-side,
+            color-mix(in srgb, var(--color-champagne) 29.30%, transparent) 0px,
+            color-mix(in srgb, var(--color-champagne) 28.88%, transparent) 10px,
+            color-mix(in srgb, var(--color-champagne) 27.56%, transparent) 22px,
+            color-mix(in srgb, var(--color-champagne) 24.77%, transparent) 40px,
+            color-mix(in srgb, var(--color-champagne) 16.53%, transparent) 82px,
+            color-mix(in srgb, var(--color-champagne) 5.02%, transparent) 138px,
+            color-mix(in srgb, var(--color-champagne) 2.53%, transparent) 154px,
+            color-mix(in srgb, var(--color-champagne) 1.07%, transparent) 166px,
+            color-mix(in srgb, var(--color-champagne) 0.30%, transparent) 180px,
+            color-mix(in srgb, var(--color-champagne) 0.09%, transparent) 190px,
+            transparent 192px);
+    }
+    .hero-aurora--iris {
+        width: 360px; height: 360px;
+        --aurora-bleed: 56px;
+        --aurora: radial-gradient(circle closest-side,
+            color-mix(in srgb, var(--color-iris) 23.66%, transparent) 0px,
+            color-mix(in srgb, var(--color-iris) 23.25%, transparent) 16px,
+            color-mix(in srgb, var(--color-iris) 21.99%, transparent) 32px,
+            color-mix(in srgb, var(--color-iris) 19.66%, transparent) 52px,
+            color-mix(in srgb, var(--color-iris) 15.46%, transparent) 80px,
+            color-mix(in srgb, var(--color-iris) 7.05%, transparent) 132px,
+            color-mix(in srgb, var(--color-iris) 3.98%, transparent) 156px,
+            color-mix(in srgb, var(--color-iris) 2.06%, transparent) 176px,
+            color-mix(in srgb, var(--color-iris) 0.84%, transparent) 196px,
+            color-mix(in srgb, var(--color-iris) 0.19%, transparent) 224px,
+            color-mix(in srgb, var(--color-iris) 0.09%, transparent) 234px,
+            transparent 236px);
+        --aurora-medium: radial-gradient(circle closest-side,
+            color-mix(in srgb, var(--color-iris) 27.82%, transparent) 0px,
+            color-mix(in srgb, var(--color-iris) 27.38%, transparent) 12px,
+            color-mix(in srgb, var(--color-iris) 26.02%, transparent) 24px,
+            color-mix(in srgb, var(--color-iris) 22.98%, transparent) 44px,
+            color-mix(in srgb, var(--color-iris) 11.94%, transparent) 106px,
+            color-mix(in srgb, var(--color-iris) 4.08%, transparent) 150px,
+            color-mix(in srgb, var(--color-iris) 1.97%, transparent) 166px,
+            color-mix(in srgb, var(--color-iris) 0.79%, transparent) 178px,
+            color-mix(in srgb, var(--color-iris) 0.16%, transparent) 194px,
+            color-mix(in srgb, var(--color-iris) 0.09%, transparent) 200px,
+            transparent 201px);
+    }
     .hero-aurora--glacier { display: none; }
     .hero-meta { gap: 6px 14px; font-size: 11px; }
     .hero-search .btn-primary { height: 50px; }
