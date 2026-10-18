@@ -634,6 +634,18 @@ body.is-resizing .browse-inspector {
     .file-tbl .f-link {
         padding: 12px 0;
     }
+
+    /* Touch must be able to page-scroll over the listing. The hover-scroll trap
+       (data-lenis-prevent → lenis.css `overscroll-behavior: contain`) cuts scroll
+       chaining to the viewport, and below 768px the table is in normal page flow
+       (overflow-x: auto makes it a scroll container), so a finger on the file
+       list could not scroll the page at all. Restore vertical chaining here —
+       the selector out-specifies `.lenis [data-lenis-prevent]` (0,3,0 > 0,2,0)
+       and therefore wins even though lenis.css loads after this sheet. Desktop
+       keeps the trap untouched. */
+    .lenis .browse-split [data-lenis-prevent] {
+        overscroll-behavior-y: auto;
+    }
 }
 
 /* ── CENTRE ENTRANCE — rows arrive from the side the user moved toward ──── */

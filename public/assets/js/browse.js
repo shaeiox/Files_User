@@ -38,12 +38,12 @@
  */
 
 // ES module, imported by router.js when its route is entered (ui-craft-elevation 5.2).
-import { BrowseIcons } from "./browse-icons.js?v=4.5.0";
-import { BulkDownload } from "./bulk-download.js?v=4.5.0";
-import { FileInspector } from "./file-inspector.js?v=4.5.0";
-import { BrowseTree } from "./browse-tree.js?v=4.5.0";
-import { PaneResize } from "./pane-resize.js?v=4.5.0";
-import { mapEntry, isHidden, toEntries } from "./browse-entries.js?v=4.5.0";
+import { BrowseIcons } from "./browse-icons.js?v=4.5.1";
+import { BulkDownload } from "./bulk-download.js?v=4.5.1";
+import { FileInspector } from "./file-inspector.js?v=4.5.1";
+import { BrowseTree } from "./browse-tree.js?v=4.5.1";
+import { PaneResize } from "./pane-resize.js?v=4.5.1";
+import { mapEntry, isHidden, toEntries } from "./browse-entries.js?v=4.5.1";
 
 const BrowsePage = (function () {
     'use strict';
@@ -230,7 +230,9 @@ const BrowsePage = (function () {
         <!-- BODY: table + inspector column -->
         <div class="browse-body" id="browseBody">
           <!-- data-lenis-prevent: the table and the card scroll themselves; smooth
-               page scrolling (Lenis) must not take their wheel events. -->
+               page scrolling (Lenis) must not take their wheel events. Below 768px
+               browse.css restores vertical scroll chaining so touch can still
+               page-scroll over the listing. -->
           <section class="file-tbl" id="tableContainer" data-lenis-prevent>
             <div class="trow thead">
               <div class="c-select"><input type="checkbox" id="selectAll" aria-label="${d.selectAll || "Select all"}" /></div>
