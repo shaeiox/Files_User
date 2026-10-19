@@ -42,12 +42,11 @@
  * logic is duplicated here or in the Browse Page row construction.
  *
  * ── PRESERVED ITEM BEHAVIOR ────────────────────────────────────────────────────
- * Directory items: the primary icon and the name both navigate into the directory, and the
- *   directory has NO dedicated File Action — `render()` still emits an empty `.f-actions`
- *   container so the row keeps a uniform child count.
+ * Directory items: the primary icon and the name both navigate into the directory. The
+ *   one dedicated File Action is "Download folder as ZIP" (folder-zip-and-range-selection).
+ *   It is a download target, not navigation, so it duplicates no existing target. Locked
+ *   and view-only folders get no ZIP action (the server would refuse it).
  * File items: the dedicated Download action below remains present and unchanged.
- *   A directory-scoped File Action is deliberately not modeled; the primary icon already
- *   provides that navigation, so re-adding one would duplicate a target.
  *
  * Key Responsibilities:
  *   - Maintain the flat action definition list (id, appliesTo, render).
@@ -87,6 +86,22 @@ const FileActions = (function () {
                 return `<a class="f-action" href="${href}" data-file="true" title="${label}" aria-label="${label}">` +
                     `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">` +
                     `<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>` +
+                    `</svg></a>`;
+            }
+        },
+        {
+            // The whole folder as one server-built ZIP. It is an `a[data-file]`, so the
+            // app-wide download guard below runs the HEAD preflight (which also walks
+            // the folder), opens sign-in on 401 and refreshes on 404. No second
+            // download path exists. The archive name comes from Content-Disposition.
+            id: "download-folder",
+            appliesTo: (item) => item.type === "directory" && !item.locked && !item.viewOnly,
+            render: (item, d) => {
+                const label = escapeHtml(((d && d.btnDownloadFolder) || "Download folder as ZIP") + " · " + (item.name || ""));
+                const href = escapeHtml(ResourceService.folderZipHref(item.relPath));
+                return `<a class="f-action f-action-zip" href="${href}" data-file="true" title="${label}" aria-label="${label}">` +
+                    `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">` +
+                    `<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><polyline points="9 13 12 16 15 13"/><line x1="12" y1="10" x2="12" y2="16"/>` +
                     `</svg></a>`;
             }
         },
@@ -135,8 +150,9 @@ const FileActions = (function () {
 
     /**
      * @brief HEAD-probes a download URL without leaving the page.
-     * @returns {Promise<"ok"|"locked"|"missing"|"error">}  `locked` = sign-in needed (401),
-     *          `missing` = gone or not visible to this caller (404).
+     * @returns {Promise<"ok"|"locked"|"missing"|"too-large"|"error"|"unreachable">}  `locked` =
+     *          sign-in needed (401), `missing` = gone or not visible to this caller (404),
+     *          `too-large` = a ZIP over the classic-ZIP ceilings (413).
      */
     async function preflight(href) {
         try {
@@ -144,6 +160,7 @@ const FileActions = (function () {
             if (res.ok) return "ok";
             if (res.status === 401) return "locked";
             if (res.status === 404) return "missing";
+            if (res.status === 413) return "too-large";
             return "error";
         } catch {
             return "unreachable";
@@ -186,7 +203,9 @@ const FileActions = (function () {
         const d = typeof window.getDict === "function" ? window.getDict() : {};
         const msg = outcome === "unreachable"
             ? (d.downloadUnreachable || "The server could not be reached. Check your connection and try again.")
-            : (d.downloadUnavailable || "The download is temporarily unavailable. Try again shortly.");
+            : outcome === "too-large"
+                ? (d.bulkTooLarge || "Too large for one ZIP (max 4 GB / 65,535 items)")
+                : (d.downloadUnavailable || "The download is temporarily unavailable. Try again shortly.");
         const note = document.createElement("span");
         note.className = "dl-error";
         note.setAttribute("role", "alert");

@@ -287,6 +287,33 @@ const HomePage = (function () {
     return { mount };
   })();
 
+  /* Orbit satellites (ADR-014 Amendments 6 and 7). Each logo runs ONE CSS
+     transform animation around the ring. Its place on the ring and the
+     shared clock are both a negative animation-delay:
+       delay_i = -((now mod P) + i * P / N)
+     Taking `now` from ONE page-clock reading keeps the seven evenly spaced,
+     and a re-render (language switch, returning to Home) resumes the angle
+     the orbit had reached instead of snapping to the start. `--a` is the
+     same placement, used by the still (reduced-motion) transform.
+     ORBIT_PERIOD_MS must equal the CSS duration of .orbit-anchor (pinned
+     by test/hero-orbit.test.js). */
+  const ORBIT_PERIOD_MS = 64000;
+  const ORBIT_LOGOS = [
+    ["durkad-logo", "Durkad"], ["fylad", "Fylad"], ["fylad-kiosk", "Fylad Kiosk"],
+    ["inad-logo", "Inad"], ["plaividlogo", "Plaivid"], ["pvmdesktop", "PVM Desktop"],
+    ["rakaard-logo", "Rakaard"],
+  ];
+
+  function renderOrbit() {
+    const now = performance.now() % ORBIT_PERIOD_MS;
+    const n = ORBIT_LOGOS.length;
+    return ORBIT_LOGOS.map(([file, name], i) => {
+      const angle = (i * 360 / n).toFixed(3);
+      const delay = (-((now + i * ORBIT_PERIOD_MS / n) % ORBIT_PERIOD_MS) / 1000).toFixed(3);
+      return `<span class="orbit-anchor" style="--a:${angle}deg;--orbit-delay:${delay}s" tabindex="0" role="img" aria-label="${name}"><span class="orbit-logo"><img src="/assets/icon/orbit/${file}.webp" alt="" draggable="false" loading="lazy"></span><span class="orbit-name">${name}</span></span>`;
+    }).join("");
+  }
+
   function renderHeroSection(d) {
     return `
       <section class="hero-max" id="heroMax">
@@ -333,13 +360,7 @@ const HomePage = (function () {
         <div class="hero-visual">
           <div class="hero-emblem">
             <span class="hero-ring" aria-hidden="true"></span>
-            <div class="hero-orbit">
-              ${[
-        ["durkad-logo", "Durkad"], ["fylad", "Fylad"], ["fylad-kiosk", "Fylad Kiosk"],
-        ["inad-logo", "Inad"], ["plaividlogo", "Plaivid"], ["pvmdesktop", "PVM Desktop"],
-        ["rakaard-logo", "Rakaard"],
-      ].map(([f, n], i) => `<span class="orbit-item" style="--a:${(i * 360 / 7).toFixed(1)}deg"><span class="orbit-anchor" tabindex="0" role="img" aria-label="${n}"><span class="orbit-spin"><span class="orbit-logo"><img src="/assets/icon/orbit/${f}.webp" alt="" draggable="false" loading="lazy"></span></span><span class="orbit-name">${n}</span></span></span>`).join("")}
-            </div>
+            <div class="hero-orbit">${renderOrbit()}</div>
             <div class="logo-swap" id="logoSwap">
               <img class="logo-layer logo-dark" src="/assets/icon/logo-2-dark.webp" alt="AVID Download" draggable="false">
               <img class="logo-layer logo-light" src="/assets/icon/logo-2-light.webp" alt="AVID Download" draggable="false">

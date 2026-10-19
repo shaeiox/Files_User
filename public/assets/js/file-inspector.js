@@ -39,8 +39,8 @@
  */
 
 // ES module, imported by router.js when its route is entered (ui-craft-elevation 5.2).
-import { BrowseIcons } from "./browse-icons.js?v=4.6.2";
-import { BulkDownload } from "./bulk-download.js?v=4.6.2";
+import { BrowseIcons } from "./browse-icons.js?v=4.6.24.6.6";
+import { BulkDownload } from "./bulk-download.js?v=4.6.24.6.6";
 
 const FileInspector = (function () {
     'use strict';
@@ -178,9 +178,9 @@ const FileInspector = (function () {
         });
     }
 
-    /** @brief How many selected files the ZIP will hold — folders are not archived. */
+    /** @brief How many selected items the ZIP will hold — files and (whole) folders. */
     function zipCount() {
-        const n = tabItems.filter(t => t.type === "file").length || 1;
+        const n = tabItems.filter(t => !t.locked && !t.viewOnly).length || 1;
         return escapeHtml((dict().bulkSelected || "%n selected").replace("%n", n.toLocaleString(lang() === "fa" ? "fa-IR" : "en-US")));
     }
 
@@ -222,6 +222,19 @@ const FileInspector = (function () {
           ${BrowseIcons.get("download", 16)}<span>${escapeHtml(d.bulkZip || "Download ZIP")}</span>
           <span class="insp-btn-sub">${zipCount()}</span>
         </button>
+      </div>` : ""}
+
+      ${!isFile && !item.locked && !item.viewOnly ? `
+      <div class="insp-actions">
+        <a class="insp-btn insp-btn-primary" href="${escapeHtml(ResourceService.folderZipHref(item.relPath))}" data-file="true">
+          ${BrowseIcons.get("download", 16)}<span>${escapeHtml(d.btnDownloadFolder || "Download folder as ZIP")}</span>
+        </a>
+        ${tabItems.length > 1 ? `
+        <button class="insp-btn insp-btn-ghost insp-zip" id="inspZip" type="button"
+                title="${escapeHtml(d.bulkZipTitle || "Download as ZIP")}">
+          ${BrowseIcons.get("download", 16)}<span>${escapeHtml(d.bulkZip || "Download ZIP")}</span>
+          <span class="insp-btn-sub">${zipCount()}</span>
+        </button>` : ""}
       </div>` : ""}
 
       <dl class="insp-specs">

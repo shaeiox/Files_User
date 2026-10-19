@@ -41,6 +41,17 @@ const ResourceService = (function () {
     }
 
     /**
+     * @brief   Builds the ZIP-download URL for one whole folder.
+     * @details The folder is the only item, scoped to its parent directory, so the
+     *          server names the archive after the folder. Works for a row in any
+     *          listing, recursive search results included.
+     */
+    function folderZipHref(relPath) {
+        const parts = String(relPath || "").replace(/\\/g, "/").split("/").filter(Boolean);
+        return zipDownloadHref(parts.slice(0, -1).join("/"), [parts.join("/")]);
+    }
+
+    /**
      * @brief   Builds the SHA-256 verification URL for one file.
      * @details Stays here so this module remains the only place target URLs are
      *          constructed, alongside browseHref / downloadHref / zipDownloadHref.
@@ -284,6 +295,7 @@ const ResourceService = (function () {
         browseHref,
         downloadHref,
         zipDownloadHref,
+        folderZipHref,
         hashHref,
         encodeRelPath,
         inferIcon,

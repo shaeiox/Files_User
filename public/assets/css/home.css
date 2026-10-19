@@ -2528,33 +2528,36 @@ body.rtl .hero-max::before {
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-iris) 10%, transparent), inset 0 0 32px color-mix(in srgb, var(--color-iris) 5%, transparent);
 }
 
-/* Orbit: the stage rotates slowly; each satellite counter-rotates so
-   the logos stay upright. Only transform animates (motion contract). */
+/* Orbit (ADR-014 Amendment 7): the stage is STATIC, the same box as the
+   ring. Each satellite runs ONE transform animation:
+       rotate(θ) translateY(-R) rotate(-θ)
+   Both angles come from one progress value in the same frame, so every
+   logo is exactly upright and exactly on the ring line at every frame.
+   The old design (a rotating stage plus a counter-spin per logo) made
+   uprightness the difference of two animations, and any clock skew between
+   them showed up as stepping. Only transform animates (motion contract).
+   Placement and the shared clock are a negative animation-delay per logo
+   (`--orbit-delay`, set by home.js from ONE page-clock reading), so a
+   re-render resumes the angle instead of snapping to the start. Tier rules
+   may only pause the orbit (performance-modes.css): changing the duration
+   rescales elapsed/duration and the orbit jumps. */
 .hero-orbit {
     position: absolute; inset: 6%;
-    animation: hero-spin 64s linear infinite;
     pointer-events: none;
 }
-.orbit-item {
-    position: absolute; inset: 0;
-    transform: rotate(var(--a));
-    pointer-events: none;
-    z-index: 2;
-}
-/* The satellite's centre sits exactly on the stage's top edge — which
-   is the ring line itself — so logo and line share one radius by
-   construction, in every language and at every width. */
+/* Geometry: `inset: 40.5%` centres a 19% square in the stage.
+   translateY(%) resolves against the satellite's own height, so the
+   ring radius (50% of the stage) is 50 / 19 = 263.1579% of it. The base
+   transform is the same list at the placement angle `--a`, so when the
+   animation is off (reduced motion) the logo sits where it would be. */
 .orbit-anchor {
-    position: absolute; top: 0; left: 50%;
-    width: 19%; aspect-ratio: 1;
-    transform: translate(-50%, -50%);
+    position: absolute; inset: 40.5%;
+    z-index: 2;
+    transform: rotate(var(--a)) translateY(-263.1579%) rotate(calc(-1 * var(--a)));
+    animation: orbit-path 64s linear var(--orbit-delay, 0s) infinite;
+    will-change: transform;
     pointer-events: auto;
     outline: none;
-}
-.orbit-spin {
-    display: grid; place-items: center;
-    width: 100%; height: 100%;
-    animation: hero-spin-rev 64s linear infinite;
 }
 /* No chip, no disc, no background (taste-skill: trust the subject's own
    marks): the transparent logo itself sits on the line, optically
@@ -2562,7 +2565,7 @@ body.rtl .hero-max::before {
 .orbit-logo {
     display: block;
     width: 100%; aspect-ratio: 1;
-    transform: rotate(calc(-1 * var(--a))) scale(1);
+    transform: scale(1);
     transition: transform 550ms cubic-bezier(0.22, 1.4, 0.36, 1), filter 550ms ease;
 }
 .orbit-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
@@ -2577,32 +2580,29 @@ body.rtl .hero-max::before {
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
 }
 /* Hover / keyboard focus on a satellite: orbit pauses, logo grows softly. */
-.hero-emblem:has(.orbit-anchor:hover) .hero-orbit,
-.hero-emblem:has(.orbit-anchor:focus-visible) .hero-orbit,
-.hero-emblem:has(.orbit-anchor:hover) .orbit-spin,
-.hero-emblem:has(.orbit-anchor:focus-visible) .orbit-spin { animation-play-state: paused; }
+.hero-emblem:has(.orbit-anchor:hover) .orbit-anchor,
+.hero-emblem:has(.orbit-anchor:focus-visible) .orbit-anchor { animation-play-state: paused; }
 .orbit-anchor:hover .orbit-logo,
 .orbit-anchor:focus-visible .orbit-logo {
-    transform: rotate(calc(-1 * var(--a))) scale(1.35);
+    transform: scale(1.35);
     /* Alpha-shaped glow: the shadow follows the glyph, not a box. */
     filter: drop-shadow(0 10px 22px rgba(5, 4, 16, 0.45)) drop-shadow(0 0 14px color-mix(in srgb, var(--color-champagne) 45%, transparent));
 }
 .orbit-anchor:hover .orbit-name,
 .orbit-anchor:focus-visible .orbit-name { opacity: 1; transform: translate(-50%, 0); }
 
-@keyframes hero-spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-@keyframes hero-spin-rev {
-    from { transform: rotate(360deg); }
-    to { transform: rotate(0deg); }
+/* Same function list at both ends, so it interpolates per function (not
+   by matrix decomposition): θ runs 0 → 360deg and the trailing rotate
+   cancels it exactly at every progress value. */
+@keyframes orbit-path {
+    from { transform: rotate(0deg) translateY(-263.1579%) rotate(0deg); }
+    to { transform: rotate(360deg) translateY(-263.1579%) rotate(-360deg); }
 }
 .logo-swap { width: 66%; opacity: 0.96; filter: drop-shadow(0 18px 48px rgba(12, 8, 32, 0.35)); -webkit-mask-image: none; mask-image: none; }
 [data-theme="light"] .logo-swap { opacity: 0.95; -webkit-mask-image: none; mask-image: none; }
 
 @media (prefers-reduced-motion: reduce) {
-    .hero-aurora, .hero-orbit, .orbit-spin, .hero-status-dot { animation: none; }
+    .hero-aurora, .orbit-anchor, .hero-status-dot { animation: none; }
 }
 @media (max-width: 1024px) {
     .hero-aurora--iris { inset-inline-end: -220px; }

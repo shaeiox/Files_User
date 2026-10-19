@@ -887,13 +887,15 @@
     display: none !important;
 }
 
-[data-perf="medium"] .hero-orbit,
-[data-perf="medium"] .orbit-spin {
-    animation-duration: 110s;
+/* Orbit: tiers switch at runtime (live FPS), so they may only PAUSE it.
+   Changing its duration or removing its animation would make the angle
+   jump (ADR-014 Amendment 6). A paused compositor transform costs nothing,
+   and when the tier recovers the orbit resumes from the same angle. Medium keeps the
+   normal speed: a compositor-driven rotation costs the same at any speed. */
+[data-perf="low"] .orbit-anchor {
+    animation-play-state: paused;
 }
 
-[data-perf="low"] .hero-orbit,
-[data-perf="low"] .orbit-spin,
 [data-perf="low"] .hero-status-dot {
     animation: none;
 }
@@ -909,7 +911,6 @@
     display: none !important;
 }
 
-[data-perf="potato"] .hero-orbit,
-[data-perf="potato"] .orbit-spin {
-    animation: none !important;
+[data-perf="potato"] .orbit-anchor {
+    animation-play-state: paused !important;
 }

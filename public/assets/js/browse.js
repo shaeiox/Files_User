@@ -38,12 +38,13 @@
  */
 
 // ES module, imported by router.js when its route is entered (ui-craft-elevation 5.2).
-import { BrowseIcons } from "./browse-icons.js?v=4.6.2";
-import { BulkDownload } from "./bulk-download.js?v=4.6.2";
-import { FileInspector } from "./file-inspector.js?v=4.6.2";
-import { BrowseTree } from "./browse-tree.js?v=4.6.2";
-import { PaneResize } from "./pane-resize.js?v=4.6.2";
-import { mapEntry, isHidden, toEntries } from "./browse-entries.js?v=4.6.2";
+import { BrowseIcons } from "./browse-icons.js?v=4.6.24.6.6";
+import { BulkDownload } from "./bulk-download.js?v=4.6.24.6.6";
+import { MarqueeSelect } from "./marquee-select.js?v=4.6.24.6.6";
+import { FileInspector } from "./file-inspector.js?v=4.6.24.6.6";
+import { BrowseTree } from "./browse-tree.js?v=4.6.24.6.6";
+import { PaneResize } from "./pane-resize.js?v=4.6.24.6.6";
+import { mapEntry, isHidden, toEntries } from "./browse-entries.js?v=4.6.24.6.6";
 
 const BrowsePage = (function () {
     'use strict';
@@ -254,6 +255,7 @@ const BrowsePage = (function () {
                 <span class="bulk-dot">·</span>
                 <span class="bulk-size" id="bulkSize">—</span>
                 <span class="bulk-status" id="bulkStatus"></span>
+                <span class="bulk-hint" id="bulkHint" hidden></span>
               </div>
               <div class="bulk-actions">
                 <button class="bulk-btn bulk-btn-primary" id="bulkDownload" type="button" disabled>
@@ -305,7 +307,10 @@ const BrowsePage = (function () {
             BulkDownload.setDirectory(relOf(currentPath));
         }
         bindEvents();
-        if (typeof BulkDownload !== "undefined") BulkDownload.mount();
+        if (typeof BulkDownload !== "undefined") {
+            BulkDownload.mount();
+            MarqueeSelect.mount(document.getElementById("tableContainer"), BulkDownload);
+        }
         if (typeof FileInspector !== "undefined") FileInspector.mount();
         renderSkeletons();
         // The table's listing goes first so the tree reuses the same request.
@@ -848,7 +853,8 @@ const BrowsePage = (function () {
         const rows = [...rowsEl.querySelectorAll(".trow")];
         if (!rows.length) return;
 
-        // Arrow keys move focus between rendered rows.
+        // Arrow keys move focus between rendered rows; with Shift they also extend
+        // the selection from the anchor (the focused row anchors a fresh range).
         if (e.key === "ArrowDown" || e.key === "ArrowUp") {
             if (typing) return;
             const cur = rows.indexOf(document.activeElement);
@@ -857,8 +863,37 @@ const BrowsePage = (function () {
                 : (cur <= 0 ? 0 : cur - 1);
             if (cur === -1 && e.key === "ArrowUp") return;
             e.preventDefault();
+            if (e.shiftKey && typeof BulkDownload !== "undefined") {
+                const from = rows[cur];
+                if (from && BulkDownload.order().includes(from.dataset.rel) && !BulkDownload.has(from.dataset.rel)) {
+                    BulkDownload.toggle(from.dataset.rel, true);
+                }
+                BulkDownload.extendTo(rows[next].dataset.rel);
+            }
             rows[next].focus();
             return;
+        }
+
+        // Selection keys act only while focus is inside the table, so they never
+        // take over page-wide shortcuts (Ctrl+A in a text field, Esc in a dialog).
+        const inTable = target && target.closest && target.closest("#tableContainer");
+        if (inTable && !typing && typeof BulkDownload !== "undefined") {
+            const row = target.classList && target.classList.contains("trow") ? target : null;
+            if (e.key === " " && row && BulkDownload.order().includes(row.dataset.rel)) {
+                e.preventDefault();
+                if (e.shiftKey) BulkDownload.extendTo(row.dataset.rel); else BulkDownload.toggle(row.dataset.rel);
+                return;
+            }
+            if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === "a") {
+                e.preventDefault();
+                BulkDownload.selectAllVisible(true);
+                return;
+            }
+            if (e.key === "Escape" && BulkDownload.count() > 0) {
+                e.preventDefault();
+                BulkDownload.clearSelection();
+                return;
+            }
         }
 
         // Enter activates the focused row's primary target. Clicking the existing

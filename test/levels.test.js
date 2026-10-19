@@ -11,6 +11,7 @@
 const { test, before, after } = require('node:test');
 const assert = require('assert');
 const { createFixture, applyEnv, client } = require('./helpers/admin-fixture');
+const { zipNames } = require('./helpers/zip-reader');
 
 const TTL_MS = 1000;
 const afterSync = () => new Promise((r) => setTimeout(r, TTL_MS + 150));
@@ -21,6 +22,8 @@ const fx = createFixture({
         'team/build.iso': 'iso',
         'team/notes/plan.txt': 'plan',
         'showcase/demo.iso': 'demo',
+        'mixed/open.txt': 'open',
+        'mixed/preview.iso': 'preview',
     },
 });
 
@@ -59,6 +62,10 @@ before(async () => {
     // Everyone, visitors included, may browse /showcase but not download.
     fx.setPolicy('/showcase', { mode: 'public', isDirectory: true });
     fx.setDefaultLevel('/showcase', 'view');
+
+    // An open folder holding one view-only file.
+    fx.setPolicy('/mixed/preview.iso', { mode: 'public' });
+    fx.setDefaultLevel('/mixed/preview.iso', 'view');
 
     fx.setNav([{ path: '/team', label: 'Team' }]);
     base = await fx.start({ ADMIN_SYNC_TTL_MS: String(TTL_MS) });
@@ -100,6 +107,22 @@ test('"view" lists the entry marked viewOnly and refuses its download with 403',
     assert.strictEqual(res.json.code, 'VIEW_ONLY');
     assert.strictEqual((await anon().get('/api/hash/showcase/demo.iso')).status, 403);
     assert.strictEqual((await anon().get('/api/download-zip?dir=showcase&items=showcase%2Fdemo.iso')).status, 403);
+});
+
+test('folder ZIP: a view-only folder is refused with 403; a view-only descendant is left out', async () => {
+    assert.strictEqual((await anon().get('/api/download-zip?dir=&items=showcase')).status, 403);
+    const res = await anon().get('/api/download-zip?dir=&items=mixed');
+    assert.strictEqual(res.status, 200);
+    assert.deepStrictEqual(zipNames(res.body), ['mixed/', 'mixed/open.txt']);
+});
+
+test('folder ZIP: a deny inside a granted folder is honoured per member', async () => {
+    const dev = zipNames((await (await as('dev')).get('/api/download-zip?dir=&items=team')).body);
+    assert.ok(dev.includes('team/notes/plan.txt'), dev.join(', '));
+    const intern = zipNames((await (await as('intern')).get('/api/download-zip?dir=&items=team')).body);
+    assert.ok(intern.includes('team/build.iso'), intern.join(', '));
+    assert.ok(!intern.some((n) => n.startsWith('team/notes')), intern.join(', '));
+    assert.strictEqual((await (await as('outsider')).get('/api/download-zip?dir=&items=team')).status, 404);
 });
 
 test('membership changes apply on the next snapshot', async () => {

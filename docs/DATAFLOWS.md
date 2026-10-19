@@ -116,13 +116,19 @@ keystroke, so a selection stored in the DOM would be destroyed by typing. Naviga
 because a new directory is a different item universe.
 
 ```
-Row click / checkbox
-  → BulkDownload.toggle(relPath)
+Row click / checkbox                → BulkDownload.toggle(rel)        (anchor = rel)
+Shift + click (row or checkbox)     → BulkDownload.extendTo(rel)      (anchor..rel = anchor's state)
+Drag (marquee-select.js)            → BulkDownload.paint(hits, mode, from, {quiet}) per frame
+                                      → BulkDownload.flush() once on pointerup
+Keyboard in the table               → Space toggle · Shift+↑/↓ extend · Ctrl/Cmd+A all · Esc clear
+  every path → SelectionModel (pure, returns a new state)
+             → BulkDownload.commit(): repaint ONLY changed rows, bar once, listeners once
     → row click bails on a[href], button, input, select  (existing targets keep working)
-    → selection Set updated; row, checkbox, bulk bar repainted
 ```
 
-Header select-all iterates the **rendered** rows only, so a filtered-out row is never selected.
+Header select-all, Shift ranges and drags all scope to the **rendered** selectable rows, so a
+filtered-out, locked or view-only row is never selected. A drag notifies listeners (the inspector)
+once, when it ends, not once per frame.
 
 ### Multi-file download
 
@@ -142,16 +148,24 @@ it never claims "completed".
 ### ZIP download
 
 ```
-GET /api/download-zip?dir={dir}&items={relPath,relPath,...}
-  → lib/api-router.js
+GET /api/download-zip?dir={dir}&items={relPath,relPath,...}      items may be files or folders
+  → lib/routes/content.js
     → decodeURIComponent per item (client encodes each segment, then the query value)
     → auth: pathRequiresAuth() evaluated against synthetic /api/files/<rel> for dir AND every
             item, because this route carries its target in the query, not the pathname
-    → archiveService.createArchive(projectRoot, dirRel, relPaths)
-      → for each entry: filesService.resolveReadableFile()  ← same containment + hidden policy
-      → ENTRY_OUTSIDE_DIR if an entry is not under the browsed directory
-      → ceilings: ≤65535 entries, ≤4 GiB total  → 413 before any byte is written
+    → gate(): dir (view) and every NAMED item (download); one refusal refuses the archive
+    → archiveService.createArchive(projectRoot, dirRel, relPaths, { allow: ctx.mayDownload })
+      → archive-selection.resolveSelection()
+        → file:   filesService.resolveReadableFile()  ← same containment + hidden policy
+        → folder: filesService.resolveReadableDir() → depth-first walk from its realpath
+                  each child: skip hidden names and symlinks; skip (and do not enter) when
+                  allow(rel) is false (admin policy @download + legacy release gate)
+                  → directory entry "name/" + file entries
+        → ENTRY_OUTSIDE_DIR if a named entry is not under the browsed directory
+        → dedupe (folder + a file inside it) · ceilings: ≤65535 entries, ≤4 GiB, depth ≤64
+          → 413 before any byte is written
       → streams: local header → deflate/store data → data descriptor (CRC + sizes)
+                 (directory entries: zero-length STORE, no descriptor)
       → central directory → end-of-central-directory
   → static-handler.js streamArchive()  → chunked, no Content-Length
 ```

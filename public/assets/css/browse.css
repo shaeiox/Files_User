@@ -1923,6 +1923,54 @@ body.is-resizing .browse-inspector {
     color: var(--danger);
 }
 
+/* ── DRAG SELECTION (marquee-select.js) ─────────────────────────────────── */
+/* While a drag is armed nothing in the table can start a text selection, and
+   hover tints are suppressed so only the selection state shows under the band. */
+.file-tbl.is-marquee,
+.file-tbl.is-marquee * {
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: default;
+}
+
+.file-tbl.is-marquee .trow:not(.thead):not(.is-selected):hover {
+    background: transparent;
+}
+
+/* Appended to <body> and positioned in client space with a transform, so no
+   transformed ancestor (view transitions, pane slides) can offset it. */
+.marquee-band {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--z-dropdown);
+    pointer-events: none;
+    border: 1px solid var(--border-focus);
+    border-radius: var(--radius-sm);
+    background: var(--glow);
+    will-change: transform, width, height;
+}
+
+/* First-selection hint: how to select many at once. */
+.bulk-hint {
+    color: var(--text-4);
+}
+
+.bulk-hint::before {
+    content: "· ";
+}
+
+.bulk-hint[hidden] {
+    display: none;
+}
+
+/* Touch has no Shift key and a drag scrolls, so the hint would mislead. */
+@media (hover: none) {
+    .bulk-hint {
+        display: none;
+    }
+}
+
 /* ── EMPTY & ERROR STATES (Browse context) ─────────────────────────────── */
 /* These were previously inline-styled per instance. They are declared here so the
    states keep the same appearance now that the markup carries no inline style. */

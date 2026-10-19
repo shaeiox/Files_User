@@ -14,6 +14,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const { applyEnv, client } = require('./helpers/admin-fixture');
 const authService = require('../lib/auth-service');
+const { zipNames } = require('./helpers/zip-reader');
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'portal-legacy-'));
 const usersFile = path.join(dir, 'users.json');
@@ -84,6 +85,30 @@ test('legacy release gate is not bypassed via the query string or an extra separ
         assert.strictEqual(ok.body.toString(), 'r9');
     } finally {
         applyEnv({ RELEASE_PVM: undefined });
+    }
+});
+
+test('legacy release gate screens folder ZIP descendants', async () => {
+    fs.mkdirSync(path.join(dir, 'storage', 'bundle', 'rel'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'storage', 'bundle', 'open.txt'), 'open');
+    fs.writeFileSync(path.join(dir, 'storage', 'bundle', 'rel', 'pkg.tgz'), 'gated');
+    applyEnv({ RELEASE_PVM: path.join(dir, 'storage', 'bundle', 'rel') });
+    const url = '/api/download-zip?dir=&items=bundle';
+    try {
+        const anon = await client(base).get(url);
+        assert.strictEqual(anon.status, 200);
+        assert.deepStrictEqual(zipNames(anon.body), ['bundle/', 'bundle/open.txt']);
+        assert.ok(!anon.body.includes(Buffer.from('gated')));
+        // Naming the gated folder itself is refused, as before.
+        assert.strictEqual((await client(base).get('/api/download-zip?dir=bundle&items=bundle%252Frel')).status, 401);
+
+        const c = client(base);
+        assert.strictEqual((await c.login('legacy1', 'password123')).status, 200);
+        const names = zipNames((await c.get(url)).body);
+        assert.ok(names.includes('bundle/rel/pkg.tgz'), names.join(', '));
+    } finally {
+        applyEnv({ RELEASE_PVM: undefined });
+        fs.rmSync(path.join(dir, 'storage', 'bundle'), { recursive: true, force: true });
     }
 });
 

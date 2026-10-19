@@ -23,6 +23,15 @@
  * download contract keep working exactly as before. Selection therefore never
  * cancels or competes with an existing control.
  *
+ * ── RANGE, DRAG AND KEYBOARD SELECTION ───────────────────────────────────────
+ * The set, the range anchor and the Shift-run baseline change only through
+ * SelectionModel (selection-model.js), which is pure and returns a new state. Each
+ * change goes through ONE path, `commit()`. It repaints only the rows whose state
+ * changed, repaints the bar once, and notifies listeners once. A drag
+ * (marquee-select.js) commits with `quiet: true` on every frame and calls
+ * `flush()` at the end, so the inspector re-renders once per gesture instead of
+ * once per frame.
+ *
  * ── PER-FILE DOWNLOAD REPORTING ──────────────────────────────────────────────
  * The browser owns an anchor-triggered transfer, so its outcome is not observable
  * from script. To report a genuine failure rather than assume success, each file is
@@ -32,20 +41,43 @@
  * starts is reported "started", never "completed" — the browser owns completion.
  *
  * Dependencies:
+ *   - SelectionModel (selection-model.js) — pure selection transitions
  *   - ResourceService (resource-service.js) — the only source of target URLs
+ *   - FileActions (file-actions.js) — HEAD preflight and sign-in
  *   - getDict() (from i18n engine)
  *
  * @author      ShaiyaAzizi
- * @version     1.0.0
+ * @version     2.0.0
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 
 // ES module, imported by router.js when its route is entered (ui-craft-elevation 5.2).
+import { SelectionModel } from "./selection-model.js?v=4.6.24.6.6";
+
 const BulkDownload = (function () {
     'use strict';
 
-    /** @type {Set<string>} Selected relPaths. Survives re-render; cleared on navigation. */
+    /**
+     * Above this URL length the ZIP request would exceed nginx's default 8 KiB request
+     * line (`large_client_header_buffers`) and fail with 414. The user is asked to
+     * select the parent folder instead, which is one short item.
+     */
+    const MAX_ZIP_URL = 8000;
+
+    /** @type {Set<string>} Selected relPaths. Survives re-render; cleared on navigation. Replaced, never mutated. */
     let selection = new Set();
+
+    /** @type {string|null} Range anchor: the last row toggled without Shift. */
+    let anchor = null;
+
+    /** @type {Set<string>|null} Selection when the current Shift run started (rubber band). */
+    let baseline = null;
+
+    /** @type {boolean} A quiet commit happened and listeners have not heard about it yet. */
+    let pendingNotify = false;
+
+    /** @type {Map<string,HTMLElement>} relPath → rendered row, rebuilt with the rows. */
+    let rowIndex = new Map();
 
     /** @type {Map<string,object>} relPath → { relPath, name, type, size } for KNOWN items. */
     let known = new Map();
@@ -98,8 +130,12 @@ const BulkDownload = (function () {
      * @brief Clears the selection. Called by BrowsePage on every navigation.
      */
     function clear() {
-        selection.clear();
-        known.clear();
+        selection = new Set();
+        anchor = null;
+        baseline = null;
+        pendingNotify = false;
+        known = new Map();
+        rowIndex = new Map();
         rendered = [];
         dirRel = "";
         cancelBatch();
@@ -122,8 +158,17 @@ const BulkDownload = (function () {
     function setRendered(items) {
         rendered = Array.isArray(items) ? items.slice() : [];
         rendered.forEach(it => known.set(it.relPath, it));
+        indexRows();
         syncRowStates();
         render();
+    }
+
+    /** @brief Rebuilds the relPath → row map after BrowsePage rewrote `#rows`. */
+    function indexRows() {
+        rowIndex = new Map();
+        document.querySelectorAll("#rows .trow").forEach(row => {
+            if (row.dataset.rel) rowIndex.set(row.dataset.rel, row);
+        });
     }
 
     /**
@@ -148,19 +193,92 @@ const BulkDownload = (function () {
         return item;
     }
 
+    /* ── TRANSITIONS (all through SelectionModel + commit) ────────────────── */
+
+    function modelState() {
+        return { selected: selection, anchor, baseline };
+    }
+
     /**
-     * @brief Toggles one item's membership in the selection.
+     * @brief The single write path for selection state.
+     * @param {{selected:Set<string>, anchor:?string, baseline:?Set<string>}} next
+     * @param {{quiet?:boolean}} [opts]  quiet = repaint now, notify listeners on flush().
+     */
+    function commit(next, opts) {
+        const prev = selection;
+        selection = next.selected;
+        anchor = next.anchor;
+        baseline = next.baseline;
+        syncChangedRows(prev, selection);
+        if (opts && opts.quiet) {
+            pendingNotify = true;
+            paintBar();
+        } else {
+            pendingNotify = false;
+            render();
+        }
+    }
+
+    /** @brief Delivers a deferred change notification (end of a drag). */
+    function flush() {
+        if (!pendingNotify) return;
+        pendingNotify = false;
+        notify();
+    }
+
+    /** Selectable rows in listing order: the scope of ranges, drags and select-all. */
+    function order() {
+        return rendered.map(it => it.relPath);
+    }
+
+    /**
+     * @brief Toggles one item's membership in the selection and makes it the range anchor.
      */
     function toggle(relPath, on) {
         if (!relPath) return;
         resolve(relPath);
-        const next = (on === undefined) ? !selection.has(relPath) : !!on;
-        if (next) selection.add(relPath); else selection.delete(relPath);
-        const row = rowFor(relPath);
-        if (row) row.classList.toggle("is-selected", next);
-        const cb = row && row.querySelector(".row-select");
-        if (cb) cb.checked = next;
-        render();
+        commit(SelectionModel.toggle(modelState(), relPath, on));
+    }
+
+    /**
+     * @brief Shift-extends the selection from the anchor to `relPath` (visible rows only).
+     */
+    function extendTo(relPath) {
+        if (!relPath) return;
+        resolve(relPath);
+        commit(SelectionModel.extendTo(modelState(), order(), relPath));
+    }
+
+    /**
+     * @brief Applies one drag frame: `from` with `hits` added or removed.
+     * @param {string[]}       hits
+     * @param {"add"|"remove"} mode
+     * @param {Set<string>}    from   Selection when the drag started (see snapshot()).
+     * @param {{quiet?:boolean}} [opts]
+     */
+    function paint(hits, mode, from, opts) {
+        commit({ selected: SelectionModel.paint(from, hits, mode), anchor, baseline: null }, opts);
+    }
+
+    /** @brief Puts back a selection captured with snapshot() (Escape during a drag). */
+    function restore(from, opts) {
+        commit({ selected: new Set(from), anchor, baseline: null }, opts);
+    }
+
+    /** @brief A copy of the current selection, safe to hold across commits. */
+    function snapshot() {
+        return new Set(selection);
+    }
+
+    /** @brief Selects (or clears) every visible selectable row. */
+    function selectAllVisible(on) {
+        commit(SelectionModel.setAll(modelState(), order(), on !== false));
+    }
+
+    /** @brief Clears the whole selection, visible or filtered out (Escape). */
+    function clearSelection() {
+        if (!selection.size) return;
+        commit(SelectionModel.setAll(modelState(), [...selection], false));
     }
 
     /** @brief Reports whether an item is selected. */
@@ -180,6 +298,8 @@ const BulkDownload = (function () {
     }
 
     function rowFor(relPath) {
+        const cached = rowIndex.get(relPath);
+        if (cached && cached.isConnected) return cached;
         return document.querySelector(`#rows .trow[data-rel="${cssEscape(relPath)}"]`);
     }
 
@@ -190,9 +310,17 @@ const BulkDownload = (function () {
     /* ── RENDERING ────────────────────────────────────────────────────────── */
 
     /**
-     * @brief Repaints the bulk bar from the live selection.
+     * @brief Repaints the bulk bar from the live selection and notifies listeners.
      */
     function render() {
+        paintBar();
+        notify();
+    }
+
+    /**
+     * @brief Repaints the bulk bar only (no listener notification).
+     */
+    function paintBar() {
         const d = dict();
         const bar = document.getElementById("bulkBar");
         if (!bar) return;
@@ -229,7 +357,12 @@ const BulkDownload = (function () {
             all.disabled = rendered.length === 0;
         }
 
-        notify();
+        // Discoverability: the first selection shows how to pick many at once.
+        const hint = document.getElementById("bulkHint");
+        if (hint) {
+            hint.textContent = d.bulkHint || "Shift+click for a range · drag to select many";
+            hint.hidden = n !== 1;
+        }
     }
 
     function currentLang() {
@@ -238,12 +371,22 @@ const BulkDownload = (function () {
 
     /** @brief Applies selection state to every rendered checkbox and row. */
     function syncRowStates() {
-        document.querySelectorAll("#rows .trow").forEach(row => {
-            const on = selection.has(row.dataset.rel);
-            row.classList.toggle("is-selected", on);
-            const cb = row.querySelector(".row-select");
-            if (cb) cb.checked = on;
-        });
+        document.querySelectorAll("#rows .trow").forEach(syncRow);
+    }
+
+    /** @brief Applies selection state to one row and its checkbox. */
+    function syncRow(row) {
+        if (!row) return;
+        const on = selection.has(row.dataset.rel);
+        row.classList.toggle("is-selected", on);
+        const cb = row.querySelector(".row-select");
+        if (cb) cb.checked = on;
+    }
+
+    /** @brief Repaints only the rows whose membership differs between two sets. */
+    function syncChangedRows(prev, next) {
+        prev.forEach(rel => { if (!next.has(rel)) syncRow(rowFor(rel)); });
+        next.forEach(rel => { if (!prev.has(rel)) syncRow(rowFor(rel)); });
     }
 
     /* ── ACTIONS ──────────────────────────────────────────────────────────── */
@@ -342,33 +485,42 @@ const BulkDownload = (function () {
     }
 
     /**
-     * @brief Downloads the selection as one server-generated ZIP archive.
+     * @brief Downloads the selection (files AND folders) as one server-generated ZIP.
      * @details The primary bulk action: one user action produces one browser download,
      *          which sidesteps the browser's throttling of multiple automatic downloads.
-     *          Only files are included — the endpoint rejects directories, and folders
-     *          have no byte total to archive.
+     *          Folders are expanded on the server, which leaves out every descendant
+     *          the caller may not download. View-only folders are left out here,
+     *          because the server would refuse the whole archive for them.
      */
     async function downloadZip() {
         const d = dict();
-        const files = selectedItems().filter(it => it.type === "file");
-        if (!files.length) {
-            flash("bulkZip", d.bulkNoFiles || "Select files first", true);
-            return;
-        }
-        if (!dirRel) {
-            flash("bulkZip", d.bulkNoFiles || "Select files first", true);
+        const items = selectedItems().filter(it => !it.locked && !it.viewOnly);
+        if (!items.length) {
+            flash("bulkZip", d.bulkNoFiles || "Select files or folders first", true);
             return;
         }
 
-        const href = ResourceService.zipDownloadHref(dirRel, files.map(it => it.relPath));
-        // The server refuses the whole archive if any file is no longer allowed:
+        const href = ResourceService.zipDownloadHref(dirRel, items.map(it => it.relPath));
+        if (href.length > MAX_ZIP_URL) {
+            flash("bulkZip", d.bulkTooMany || "Too many items for one request — select the parent folder instead", true);
+            return;
+        }
+
+        // The server refuses the whole archive if any named item is no longer allowed:
         // 401 opens sign-in, 404 means part of the selection is gone or hidden.
-        const outcome = await FileActions.preflight(href);
+        // A folder's walk happens during this HEAD, so show that work is in progress.
+        setBusy(true, d.bulkZipPreparing || "Preparing ZIP…");
+        let outcome;
+        try { outcome = await FileActions.preflight(href); }
+        finally { setBusy(false); }
+
         if (outcome === "locked") { FileActions.signIn(); return; }
         if (outcome !== "ok") {
             flash("bulkZip", outcome === "missing"
                 ? (d.bulkUnavailable || "Selection is no longer available")
-                : (d.downloadUnavailable || "Download unavailable, try again"), true);
+                : outcome === "too-large"
+                    ? (d.bulkTooLarge || "Too large for one ZIP (max 4 GB / 65,535 items)")
+                    : (d.downloadUnavailable || "Download unavailable, try again"), true);
             return;
         }
 
@@ -381,7 +533,7 @@ const BulkDownload = (function () {
         fireAnchor(a);
 
         flash("bulkZip", (d.bulkZipStarted || "ZIP started (%n)")
-            .replace("%n", String(files.length)));
+            .replace("%n", String(items.length)));
     }
 
     /** @brief Hands one file to the browser as a download via a transient anchor. */
@@ -452,6 +604,7 @@ const BulkDownload = (function () {
         if (table) {
             table.addEventListener("click", onRowClick);
             table.addEventListener("change", onRowChange);
+            table.addEventListener("mousedown", onRowMouseDown);
         }
 
         const all = document.getElementById("selectAll");
@@ -474,13 +627,34 @@ const BulkDownload = (function () {
     }
 
     function onRowClick(e) {
+        // Shift on a row checkbox selects the range instead of flipping the box.
+        // Cancelling the click stops the native toggle (and its `change` event).
+        // The browser restores the box's old state AFTER the handlers run, so the
+        // row is re-synced on the next task.
+        const cb = e.target.closest(".row-select");
+        if (cb && e.shiftKey) {
+            const row = cb.closest(".trow");
+            if (!row || !row.dataset.rel || cb.disabled) return;
+            e.preventDefault();
+            extendTo(row.dataset.rel);
+            setTimeout(() => syncRow(row), 0);
+            return;
+        }
+
         // Yield to every pre-existing target: anchors (router navigation / download),
         // the row checkbox, and any button. Only inert row area toggles selection.
         if (e.target.closest('a[href], button, input, select, [role="button"]')) return;
         const row = e.target.closest(".trow");
         if (!row || !row.dataset.rel || row.classList.contains("is-locked")) return;
-        toggle(row.dataset.rel);
-        row.focus();
+        if (e.shiftKey) extendTo(row.dataset.rel); else toggle(row.dataset.rel);
+        row.focus({ preventScroll: true });
+    }
+
+    /** Shift + press on a row would extend a native text selection. Stop that, keep the click. */
+    function onRowMouseDown(e) {
+        if (!e.shiftKey || e.button !== 0) return;
+        if (e.target.closest('a[href], button, select, textarea')) return;
+        if (e.target.closest("#rows .trow")) e.preventDefault();
     }
 
     function onRowChange(e) {
@@ -492,17 +666,17 @@ const BulkDownload = (function () {
     }
 
     function onSelectAll(e) {
-        const want = e.target.checked;
         // Scope is the rendered rows only — search, type, and extension filters are
         // already applied by the time #rows exists, so filtered-out rows are never hit.
-        rendered.forEach(it => {
-            if (want) selection.add(it.relPath); else selection.delete(it.relPath);
-        });
-        syncRowStates();
-        render();
+        selectAllVisible(e.target.checked);
     }
 
-    return { mount, setRendered, setDirectory, clear, toggle, has, count, selectedItems, onChange, downloadAll, downloadZip, copyList };
+    return {
+        mount, setRendered, setDirectory, clear, toggle, has, count, selectedItems, onChange,
+        downloadAll, downloadZip, copyList,
+        // Range / drag / keyboard selection
+        extendTo, paint, restore, snapshot, flush, order, selectAllVisible, clearSelection
+    };
 })();
 
 export { BulkDownload };

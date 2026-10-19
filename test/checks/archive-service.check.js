@@ -65,6 +65,24 @@ function has(cmd, args) {
     catch { return false; }
 }
 
+/**
+ * PowerShell 7 is `pwsh` on every platform, the Linux CI runners included.
+ * Windows PowerShell 5.1 is `powershell`, on Windows only. Probing only
+ * `powershell` made this check report "tool missing" on Linux.
+ */
+const POWERSHELL = ['pwsh', 'powershell'].find(bin => has(bin, ['-NoProfile', '-Command', 'exit 0'])) || null;
+
+/** Lists an archive with .NET's ZipArchive: { count, names[] }. Throws if .NET cannot open it. */
+function dotnetList(zipPath) {
+    const script = `$ErrorActionPreference='Stop'; Add-Type -A System.IO.Compression.FileSystem;` +
+        `$z=[IO.Compression.ZipFile]::OpenRead('${zipPath.replace(/'/g, "''")}');` +
+        `$n=$z.Entries.Count; $names=($z.Entries|ForEach-Object{$_.FullName}) -join ',';` +
+        `$z.Dispose(); Write-Output "$n|$names";`;
+    const out = execFileSync(POWERSHELL, ['-NoProfile', '-Command', script], { encoding: 'utf8' }).trim();
+    const [count, names] = out.split('|');
+    return { count: Number(count), names: names ? names.split(',') : [] };
+}
+
 (async () => {
     /* ── 1. Happy path: build, write, extract, compare ─────────────────── */
     const entries = [
@@ -123,17 +141,13 @@ function has(cmd, args) {
     }
 
     /* ── 3. Independent validator #2: .NET ZipArchive via PowerShell ───── */
-    if (has('powershell', ['-NoProfile', '-Command', 'exit 0'])) {
-        const script = `$ErrorActionPreference='Stop'; Add-Type -A System.IO.Compression.FileSystem;` +
-            `$z=[IO.Compression.ZipFile]::OpenRead('${zipPath.replace(/'/g, "''")}');` +
-            `$n=$z.Entries.Count; $names=($z.Entries|ForEach-Object{$_.FullName}) -join ',';` +
-            `$z.Dispose(); Write-Output "$n|$names";`;
-        let dotnetOut = null;
-        try { dotnetOut = execFileSync('powershell', ['-NoProfile', '-Command', script], { encoding: 'utf8' }).trim(); }
+    if (POWERSHELL) {
+        let listed = null;
+        try { listed = dotnetList(zipPath); }
         catch (e) { check('.NET opens the archive', false, String(e.message).slice(0, 160)); }
-        if (dotnetOut) {
-            const [count, names] = dotnetOut.split('|');
-            check('.NET ZipArchive opens the archive', Number(count) === entries.length, `${count} entries`);
+        if (listed) {
+            const names = listed.names.join(',');
+            check('.NET ZipArchive opens the archive', listed.count === entries.length, `${listed.count} entries (${POWERSHELL})`);
             check('.NET sees both duplicate base names',
                 /sub\/same\.txt/.test(names) && /other\/same\.txt/.test(names), names);
         }
@@ -188,7 +202,41 @@ function has(cmd, args) {
             err ? `${err.code} / ${err.httpStatus}` : 'NOT REFUSED');
     }
 
-    /* ── 6. Degenerate input ──────────────────────────────────────────── */
+    /* ── 6. Folder archive: directory entries validated by unzip and .NET ── */
+    fs.mkdirSync(path.join(ROOT, 'pkg', 'nested', 'empty'), { recursive: true });
+    const folderBuf = await collect(await archiveService.createArchive(process.cwd(), 'pkg', ['pkg/nested'], { allow: () => true }));
+    const folderZip = path.join(ROOT, 'folder.zip');
+    fs.writeFileSync(folderZip, folderBuf);
+    if (has('unzip', ['-v'])) {
+        const t = execFileSync('unzip', ['-t', folderZip], { encoding: 'utf8' });
+        check('folder archive: unzip -t reports no errors', /No errors detected/i.test(t), t.trim().split('\n').pop());
+        const fnames = execFileSync('unzip', ['-Z1', folderZip], { encoding: 'utf8' }).trim().split('\n').sort();
+        check('folder archive: directory entries and nested file present',
+            JSON.stringify(fnames) === JSON.stringify(['nested/', 'nested/deep.bin', 'nested/empty/']), fnames.join(', '));
+        const exDir = path.join(ROOT, 'ex2');
+        fs.mkdirSync(exDir);
+        execFileSync('unzip', ['-q', '-o', folderZip, '-d', exDir]);
+        check('folder archive: empty folder extracts as a directory',
+            fs.statSync(path.join(exDir, 'nested', 'empty')).isDirectory(), '');
+        check('folder archive: nested file is byte-identical',
+            fs.readFileSync(path.join(exDir, 'nested', 'deep.bin')).equals(BIG), '');
+    }
+    if (POWERSHELL) {
+        let listed = null;
+        try { listed = dotnetList(folderZip); }
+        catch (e) { check('folder archive: .NET opens it', false, String(e.message).slice(0, 160)); }
+        if (listed) {
+            const names = [...listed.names].sort();
+            check('folder archive: .NET sees the directory entries and the nested file',
+                JSON.stringify(names) === JSON.stringify(['nested/', 'nested/deep.bin', 'nested/empty/']), names.join(', '));
+        }
+    }
+    let noAllow = null;
+    try { await archiveService.createArchive(process.cwd(), 'pkg', ['pkg/nested']); } catch (e) { noAllow = e; }
+    check('folder without an authorizer is refused (fail closed)', noAllow && noAllow.code === 'NOT_A_FILE',
+        noAllow ? noAllow.code : 'no error');
+
+    /* ── 7. Degenerate input ──────────────────────────────────────────── */
     let empty = null;
     try { await archiveService.createArchive(process.cwd(), 'pkg', []); } catch (e) { empty = e; }
     check('rejects an empty selection', empty && empty.code === 'NO_ENTRIES', empty ? empty.code : 'no error');

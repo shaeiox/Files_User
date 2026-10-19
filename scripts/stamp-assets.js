@@ -31,6 +31,8 @@ const TARGETS = [
     ['public/assets/js/browse.js', /(from "\.\/[^"?]+\.js)(?:\?v=4.6.2[^"]*)?"/g],
     ['public/assets/js/file-inspector.js', /(from "\.\/[^"?]+\.js)(?:\?v=4.6.2[^"]*)?"/g],
     ['public/assets/js/browse-tree.js', /(from "\.\/[^"?]+\.js)(?:\?v=4.6.2[^"]*)?"/g],
+    ['public/assets/js/bulk-download.js', /(from "\.\/[^"?]+\.js)(?:\?v=4.6.2[^"]*)?"/g],
+    ['public/assets/js/marquee-select.js', /(from "\.\/[^"?]+\.js)(?:\?v=4.6.2[^"]*)?"/g],
 ];
 
 function stamp() {

@@ -87,3 +87,59 @@ counter-spins the same duration (cancelling the orbit), and
 Net logo orientation is 0deg at every frame — logos travel around the
 ring perfectly upright, never tilting. Both animations restart and
 pause together (hover/focus `:has` pause), so they cannot desync.
+
+## Amendment 6 (2026-10-19, owner bug report: orbit moves in jumps)
+Root cause: the orbit's angle is `elapsed / animation-duration`, and the
+performance monitor switches `data-perf` at runtime from live FPS (down
+after 3 s below 50 fps, up after 5 s of recovery). `medium` changed the
+duration from 64s to 110s, which rescaled the elapsed time and made every
+logo jump along the ring. `low`/`potato` set `animation: none`, which
+snapped the orbit to 0deg and restarted it from 0deg on recovery. On a
+hero with a live WebGL field, FPS sits near the threshold, so the tier
+flipped repeatedly and the motion read as stepped. A hero re-render
+(language switch, returning to Home) also restarted the orbit at 0deg.
+
+Fix (sync rule of Amendment 5 kept: one clock for stage and counter-spin):
+- Tier rules only pause the orbit (`animation-play-state: paused`). It
+  freezes where it is and resumes from the same angle. `medium` keeps
+  the normal speed, because a compositor-driven rotation costs the same
+  at any speed.
+- A negative `animation-delay` from the page clock
+  (`performance.now() % 64000`), so a re-rendered orbit continues at the
+  angle it had reached (now per satellite, see Amendment 7).
+- `will-change: transform` on the animated layers keeps them promoted, so
+  pausing (hover or tier) never re-rasters them.
+- Reduced motion still stops the orbit (`animation: none`), by user
+  preference.
+- Contract pinned by `test/hero-orbit.test.js`.
+
+## Amendment 7 (2026-10-19, owner report repeated: logos' angle still steps)
+Supersedes Amendment 5's mechanism; its outcome (upright logos) is kept.
+A logo's orientation was the difference of two separate animations: the
+stage turned +θ and each logo's `.orbit-spin` turned −θ. The browser
+restarts them separately (after a pause, a tier change or a re-render)
+and may tick them on different paths, so any skew between the two clocks
+showed up directly as the logo's angle wobbling or stepping.
+
+New structure: the stage `.hero-orbit` is static, the same box as the
+ring. Each `.orbit-anchor` is a 19% square centred in it (`inset: 40.5%`)
+and runs ONE animation, `orbit-path`:
+`rotate(θ) translateY(-263.1579%) rotate(-θ)`, with θ from 0 to 360deg.
+The two lists have the same shape, so the browser interpolates per
+function, and both angles come from one progress value in the same frame:
+the logo is exactly upright and exactly on the ring line (50/19 of its own
+height) at every frame. The placement angle and the shared clock are a
+per-logo negative `animation-delay` (`--orbit-delay`), computed by
+home.js from ONE `performance.now()` reading. The base `transform` is the
+same list at `--a`, so with reduced motion the logos sit still where they
+would have been. `.orbit-item` and `.orbit-spin` are removed, and so is
+`.orbit-logo`'s static counter-rotation: it only scales on hover now.
+Animated layers drop from 8 to 7. `test/hero-orbit.test.js` proves the
+geometry numerically (radius and tilt at 721 progress values) and pins
+the tier, hover and clock rules.
+
+Delivery: production serves CSS/JS `immutable` for 30 days (ADR-007), so
+the asset stamp was bumped (package.json 4.6.5 → 4.6.6,
+`node scripts/stamp-assets.js`). Without it, returning visitors keep the
+old stylesheet.
+

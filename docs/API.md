@@ -478,14 +478,21 @@ empty files, size cap, path policy, and flat memory on a 128 MiB file).
 **Auth:** Conditional (when `AUTH_ENABLED=true` and the browsed directory or any requested entry
 targets `RELEASE_PVM`)
 
-Streams a classic ZIP archive of a multi-file selection. The archive is produced on the fly and is
-never materialised on disk.
+Streams a classic ZIP archive of a selection of files and folders. The archive is produced on the
+fly and is never materialised on disk.
+
+A selected **folder** is included recursively as directory entries (`name/`, so empty folders are
+kept) plus its files. Every descendant is decided individually with the same access decision as
+`/api/download` (admin policy at `download` level, and the legacy release gate). A descendant the
+caller may not download is left out, together with everything beneath it. Hidden names and
+symbolic links are never included. A **named** item that is refused still refuses the whole request
+(401 / 403 / 404, as for a file).
 
 **Query Parameters:**
 | Parameter | Description |
 |-----------|-------------|
 | `dir` | Relative path of the directory being browsed (e.g. `el9/packages`) |
-| `items` | Comma-separated relative paths of the selected files |
+| `items` | Comma-separated relative paths of the selected files and/or folders |
 
 Items are percent-encoded per path segment by the client and decoded per item by the server. Commas
 are safe as a separator because `encodeURIComponent` encodes them as `%2C`.
@@ -494,30 +501,36 @@ are safe as a separator because `encodeURIComponent` encodes them as `%2C`.
 
 Headers:
 - `Content-Type`: `application/zip`
-- `Content-Disposition`: `attachment; filename="<dir>-<n>-files.zip"`
+- `Content-Disposition`: `attachment; filename="<folder>.zip"` when the selection is exactly one
+  folder, otherwise `attachment; filename="<dir>-<n>-files.zip"` (`n` = files in the archive)
 - No `Content-Length` — the size is not known up front, so the response is chunked.
 
 **Error Responses:**
 | Code | Status | Meaning |
 |------|--------|---------|
 | `NO_ENTRIES` | 400 | empty selection |
-| `INVALID_PATH` / `NOT_A_FILE` | 400 | malformed path, or a directory was requested |
+| `INVALID_PATH` | 400 | malformed path |
+| `NOT_A_DIRECTORY` | 400 | an item is neither a regular file nor a folder |
 | `PATH_TRAVERSAL` / `SYMLINK_TRAVERSAL` | 403 | resolves outside `FILES_ROOT` |
 | `FORBIDDEN_ENTRY` | 403 | hidden-file policy |
 | `ENTRY_OUTSIDE_DIR` | 403 | an entry is not inside the browsed directory |
 | `NOT_FOUND` | 404 | an entry does not exist |
-| `DUPLICATE_ENTRY` | 409 | two selections map to one archive entry name |
-| `TOO_MANY_ENTRIES` | 413 | more than 65535 entries requested |
+| `TOO_MANY_ENTRIES` | 413 | more than 65535 entries (directory entries included) |
 | `ARCHIVE_TOO_LARGE` | 413 | total exceeds the 4 GiB classic-ZIP limit |
+| `TOO_DEEP` | 413 | a selected folder nests deeper than 64 levels |
+
+A file that a selected folder already covers is included once (no `409`).
 
 Classic ZIP only — no ZIP64. Oversized selections are refused rather than truncated, so a corrupt
 archive is never produced.
 
-**Source:** `lib/api-router.js` → `if (pathname === "/api/download-zip")` → `lib/archive-service.js` → `createArchive()` → `lib/files-service.js` → `resolveReadableFile()` → `lib/static-handler.js` → `streamArchive()`
+**Source:** `lib/routes/content.js` → `download-zip` → `lib/archive-service.js` → `createArchive()` → `lib/archive-selection.js` → `resolveSelection()` → `lib/files-service.js` → `resolveReadableFile()` / `resolveReadableDir()` → `lib/static-handler.js` → `streamArchive()`. Per-descendant authorization: `lib/request-context.js` → `mayDownload()`
 
 **Verification:** `node test/checks/archive-service.check.js` (validates the output against both `unzip`
-and .NET `ZipArchive`, checks byte-identical extraction, duplicate entry names, both ceilings, and
-the path policy).
+and .NET `ZipArchive`, checks byte-identical extraction, duplicate entry names, both ceilings,
+the path policy, and folder archives with empty directories). `test/archive-selection.test.js`
+covers expansion and pruning. `test/endpoints.test.js`, `test/levels.test.js` and
+`test/legacy-auth.test.js` cover descendant authorization over HTTP.
 
 ---
 

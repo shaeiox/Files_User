@@ -16,6 +16,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 const { createFixture, applyEnv, client } = require('./helpers/admin-fixture');
 const adminDb = require('../lib/admin-db');
+const { zipNames } = require('./helpers/zip-reader');
 
 const TTL_MS = 1000;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -44,6 +45,11 @@ const fx = createFixture({
         'release/el9/pvm-release-2.0.0-el9.tgz': 'r2',
         'release/el9/pvm-release-3.0.0-el9.tgz': 'r3',
         'release/el8/pvm-release-1.0.0-el8.tgz': 'r8',
+        'bundle/open.txt': 'bundle-open',
+        'bundle/gate.txt': 'bundle-gate',
+        'bundle/crew.txt': 'bundle-crew',
+        'bundle/vault/x.txt': 'bundle-vault',
+        'bundle/nested/deep.txt': 'bundle-deep',
     },
 });
 
@@ -75,6 +81,9 @@ before(async () => {
     fx.setPolicy('/release/el9/pvm-release-2.0.0-el9.tgz', { mode: 'public', published: 0 });
     fx.setPolicy('/release/el9/pvm-release-3.0.0-el9.tgz', { mode: 'public', locked: 1 });
     fx.setPolicy('/release/el8/pvm-release-1.0.0-el8.tgz', { mode: 'public', locked: 1 });
+    fx.setPolicy('/bundle/gate.txt', { mode: 'public', locked: 1 });
+    fx.setPolicy('/bundle/crew.txt', { mode: 'authenticated' });
+    fx.setPolicy('/bundle/vault', { mode: 'public', published: 0, isDirectory: true });
 
     base = await fx.start({ ADMIN_SYNC_TTL_MS: String(TTL_MS) });
 });
@@ -227,6 +236,50 @@ describe('ZIP archives', () => {
     });
     test('contents of an unpublished folder cannot be zipped', async () => {
         assert.strictEqual((await (await as('bob')).get(zip('private', ['private/secret.iso']))).status, 404);
+    });
+});
+
+describe('folder ZIP archives', () => {
+    const zip = (dir, items) => `/api/download-zip?dir=${encodeURIComponent(dir)}&items=${encodeURIComponent(items.map(encodeURIComponent).join(','))}`;
+
+    test('a visitor gets the folder without locked, members-only or unpublished descendants', async () => {
+        const res = await anon().get(zip('', ['bundle']));
+        assert.strictEqual(res.status, 200);
+        assert.deepStrictEqual(zipNames(res.body), ['bundle/', 'bundle/nested/', 'bundle/nested/deep.txt', 'bundle/open.txt']);
+        for (const leaked of ['bundle-gate', 'bundle-crew', 'bundle-vault']) {
+            assert.ok(!res.body.includes(Buffer.from(leaked)), leaked);
+        }
+    });
+    test('a signed-in user also gets what their session unlocks, never unpublished content', async () => {
+        const res = await (await as('alice')).get(zip('', ['bundle']));
+        assert.strictEqual(res.status, 200);
+        const names = zipNames(res.body);
+        assert.ok(names.includes('bundle/gate.txt'));
+        assert.ok(names.includes('bundle/crew.txt'));
+        assert.ok(!names.some((n) => n.startsWith('bundle/vault')), names.join(', '));
+    });
+    test('the single-folder archive is named after the folder', async () => {
+        const res = await anon().get(zip('', ['bundle']));
+        assert.match(res.headers.get('content-disposition'), /filename="bundle\.zip"/);
+    });
+    test('a locked named folder refuses the archive with 401; an unpublished one with 404', async () => {
+        assert.strictEqual((await anon().get(zip('', ['beta']))).status, 401);
+        assert.strictEqual((await (await as('bob')).get(zip('', ['private']))).status, 404);
+        assert.strictEqual((await anon().head(zip('', ['beta']))).status, 401);
+    });
+    test('an unpublished sub-folder cannot be named directly', async () => {
+        assert.strictEqual((await anon().get(zip('bundle', ['bundle/vault']))).status, 404);
+    });
+    test('an empty folder is kept as a directory entry', async () => {
+        const empty = path.join(fx.filesRoot, 'bundle', 'nested', 'void');
+        fs.mkdirSync(empty, { recursive: true });
+        try {
+            const res = await anon().get(zip('bundle', ['bundle/nested']));
+            assert.strictEqual(res.status, 200);
+            assert.ok(zipNames(res.body).includes('nested/void/'));
+        } finally {
+            fs.rmSync(empty, { recursive: true, force: true });
+        }
     });
 });
 

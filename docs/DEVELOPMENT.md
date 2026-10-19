@@ -333,7 +333,8 @@ Stylesheets follow the same model: `tokens.css` must be the first `<link>`, or t
 design-token layer resolves to nothing. There is no `@import` and no bundler, so `<link>`
 order *is* the cascade order.
 
-> The Browse group (`browse.js`, `browse-icons.js`, `bulk-download.js`, `file-inspector.js`) and
+> The Browse group (`browse.js`, `browse-icons.js`, `bulk-download.js`, `selection-model.js`,
+> `marquee-select.js`, `file-inspector.js`) and
 > `releases.js` are ES modules that `router.js` imports when their route is entered; they have no
 > `<script>` tag. Their stylesheets are loaded the same way.
 

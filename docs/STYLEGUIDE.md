@@ -24,11 +24,11 @@ index.html
 ├── 1. tokens.css              (642 L)  @font-face + foundation + semantic tokens
 ├── 2. base.css                (375 L)  reset, typography, container, backdrop, motion primitives
 ├── 3. components.css        (1,357 L)  nav, buttons, inputs, cards, footer, controls
-├── 4. home.css              (2,510 L)  home page: hero, cards grid, results, states
+├── 4. home.css              (2,673 L)  home page: hero, cards grid, results, states
 │      route stylesheets, inserted here by router.js on their route only:
-│      browse.css            (2,279 L)  browse split panes, folder tree, table, inspector
+│      browse.css            (2,327 L)  browse split panes, folder tree, table, inspector, drag selection
 │      release.css             (489 L)  releases page
-├── 5. performance-modes.css   (880 L)  [data-perf] overrides
+├── 5. performance-modes.css   (915 L)  [data-perf] overrides
 └── 6. lenis.css                (26 L)  upstream Lenis requirements
 ```
 
@@ -186,6 +186,13 @@ auto-detection after first paint can only reduce cost, never add it.
 `performance-modes.css` is organised by tier and **must be updated for any new expensive
 effect.** An effect with no `POTATO` override defeats the mechanism on exactly the devices
 it exists to protect.
+
+Tiers switch **at runtime**: `performance-monitor.js` moves down after 3 s of low FPS and back
+up after 5 s of recovery. A tier override for a looping animation (the hero orbit, for example)
+may therefore only **pause** it (`animation-play-state: paused`). Never change its
+`animation-duration` and never set `animation: none`. A CSS animation's position is
+`elapsed / duration`, so either one makes the element jump mid-flight every time the tier
+flips. Pinned for the orbit by `test/hero-orbit.test.js` (ADR-014 Amendments 6 and 7).
 
 **Test every visual change at every tier.** Local development only ever shows `high`:
 

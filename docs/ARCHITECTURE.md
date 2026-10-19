@@ -76,7 +76,7 @@ HTTP Request
       → lib/request-context.js createRequestContext() (sessions, gates)
       → legacy release gate (auth-service pathRequiresAuth)
       → first matching route in lib/routes/index.js ROUTES
-        → lib/files-service.js / archive-service / hash-service
+        → lib/files-service.js / archive-service (+ archive-selection) / hash-service
         → lib/static-handler.js (SPA, 404, static files; last entry)
 ```
 
@@ -88,7 +88,7 @@ HTTP Request
 |--------|---------|--------|
 | `router.js` | SPA routing, page navigation | `public/assets/js/router.js` |
 | `home.js` | HomePage component, resource cards, search | `public/assets/js/home.js` |
-| `file-actions.js` | File Actions module (dedicated per-item actions: Download for files) | `public/assets/js/file-actions.js` |
+| `file-actions.js` | File Actions module (dedicated per-item actions: Download for files, Download folder as ZIP for folders) | `public/assets/js/file-actions.js` |
 | `browse.js` | BrowsePage component, file table | `public/assets/js/browse.js` |
 | `resource-service.js` | API client, caching, auth status | `public/assets/js/services/resource-service.js` |
 | `i18n.js` | Internationalization (`en`, `fa`); sets `<html lang>` and `dir` | `public/assets/js/i18n.js` |
@@ -100,7 +100,8 @@ HTTP Request
 | `vendor/lenis.min.js` | Vendored third-party smooth-scroll library | `public/assets/js/vendor/lenis.min.js` |
 
 Shell modules are IIFEs exposing a single global. The route-only modules (`browse.js`,
-`browse-icons.js`, `bulk-download.js`, `file-inspector.js`, `releases.js`) are native ES modules
+`browse-icons.js`, `bulk-download.js`, `selection-model.js`, `marquee-select.js`, `file-inspector.js`,
+`releases.js`) are native ES modules
 that `router.js` loads with `import()` when their route is entered (ui-craft-elevation 5.2). There is no build step and no bundler —
 see [ADR-006](decisions/ADR-006-vanilla-js-spa-no-build.md).
 
