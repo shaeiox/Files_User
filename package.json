@@ -1,6 +1,6 @@
 {
   "name": "cloudavid-file-portal",
-  "version": "4.6.6",
+  "version": "4.7.0",
   "private": true,
   "description": "CloudAvid File Portal — filesystem-driven download portal",
   "main": "server.js",
