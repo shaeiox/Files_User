@@ -123,3 +123,55 @@ test('--check-config on a clean configuration says so and exits 0', () => {
     assert.match(res.stdout, /Configuration is usable/);
     assert.deepStrictEqual(fs.readdirSync(res.dataDir), [], 'no trace file is written');
 });
+
+/* ─── Root isolation (isolate-app-roots) ─── */
+
+test.describe('root isolation', () => {
+    const { isolationProblems } = require('../lib/load-env');
+    const base = fs.mkdtempSync(path.join(os.tmpdir(), 'portal-iso-'));
+    const code = path.join(base, 'relocated portal');
+    const state = path.join(base, 'state');
+    const files = path.join(base, 'files');
+    for (const d of [path.join(code, 'data'), state, files]) fs.mkdirSync(d, { recursive: true });
+    const iso = (env) => isolationProblems(env, code);
+
+    test('state and FILES_ROOT outside the code folder: no problem', () => {
+        assert.deepStrictEqual(iso({ PORTAL_DATA_DIR: state, LOG_FILE: path.join(state, 'portal.log'), FILES_ROOT: files }), []);
+    });
+
+    test('PORTAL_DATA_DIR or the LOG_FILE folder inside the code folder is reported', () => {
+        const p = iso({ PORTAL_DATA_DIR: path.join(code, 'data'), LOG_FILE: path.join(code, 'data', 'portal.log'), FILES_ROOT: files });
+        assert.ok(p.some((m) => m.startsWith('PORTAL_DATA_DIR')), p.join('\n'));
+        assert.ok(p.some((m) => m.startsWith('LOG_FILE')), p.join('\n'));
+    });
+
+    test('AUTH_USERS_FILE counts in legacy mode only', () => {
+        const users = path.join(code, 'data', 'users.json');
+        assert.ok(iso({ AUTH_USERS_FILE: users }).some((m) => m.startsWith('AUTH_USERS_FILE')));
+        assert.deepStrictEqual(iso({ AUTH_USERS_FILE: users, ADMIN_INTEGRATION_ENABLED: 'true' }), []);
+    });
+
+    test('FILES_ROOT containing the portal is reported', () => {
+        const p = iso({ PORTAL_DATA_DIR: state, FILES_ROOT: base });
+        assert.ok(p.some((m) => m.includes('overlaps the portal code folder')), p.join('\n'));
+        assert.ok(p.some((m) => m.includes('overlaps PORTAL_DATA_DIR')), p.join('\n'));
+    });
+
+    test('a symlink cannot hide the overlap', (t) => {
+        const link = path.join(base, 'link');
+        try { fs.symlinkSync(code, link, 'dir'); } catch { return t.skip('symlinks unavailable'); }
+        assert.ok(iso({ PORTAL_DATA_DIR: state, FILES_ROOT: link }).some((m) => m.includes('overlaps the portal code folder')));
+    });
+
+    test('LOG_FILE=off and relative values are not judged here', () => {
+        assert.deepStrictEqual(iso({ LOG_FILE: 'off', PORTAL_DATA_DIR: 'data', FILES_ROOT: 'files' }), []);
+    });
+
+    test('production refuses the real code folder as data folder; development does not', () => {
+        const real = path.join(__dirname, '..', 'data');
+        const prod = settings.problems({ NODE_ENV: 'production', PORTAL_DATA_DIR: real, FILES_ROOT: files });
+        const dev = settings.problems({ NODE_ENV: 'development', PORTAL_DATA_DIR: real, FILES_ROOT: files });
+        assert.ok(prod.some((m) => m.includes("inside the portal's code folder")), prod.join('\n'));
+        assert.ok(!dev.some((m) => m.includes("inside the portal's code folder")), dev.join('\n'));
+    });
+});

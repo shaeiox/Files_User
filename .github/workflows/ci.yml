@@ -27,3 +27,35 @@ jobs:
       - run: npm run test:coverage
       - run: npm run test:checks
       - run: npm audit --omit=dev --audit-level=high
+
+  # isolate-app-roots: the whole suite from a read-only copy at a fresh path
+  # with a space in its name, with no .env, data/ or sibling repository.
+  relocation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: bash scripts/relocation-check.sh
+
+  # The image runs as `node` from a code layer it cannot write; state only in
+  # the PORTAL_DATA_DIR volume.
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t files-portal:ci .
+      - name: code layer is read-only for the runtime user
+        run: |
+          if docker run --rm --entrypoint sh files-portal:ci -c 'touch /app/probe 2>/dev/null || touch /app/lib/probe 2>/dev/null'; then
+            echo "the runtime user can write the code layer" >&2; exit 1
+          fi
+      - name: smoke start
+        run: |
+          mkdir -p "$RUNNER_TEMP/files/docs"
+          docker run -d --name portal -p 4000:4000 -v "$RUNNER_TEMP/files:/srv/files:ro" files-portal:ci
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:4000/readyz && exit 0; sleep 1; done
+          docker logs portal; exit 1

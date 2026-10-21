@@ -20,9 +20,18 @@ Internet
 
 Portal (Node, 127.0.0.1:4000)
   ├─ reads files under FILES_ROOT (never writes)
-  ├─ reads the admin database ADMIN_DB_PATH read-only (integration mode)
+  ├─ polls the admin's contract  ADMIN_API_URL  (integration mode; token ADMIN_SERVICE_TOKEN)
+  ├─ answers the admin on /api/ops/log and /api/ops/access-check (same token)
   └─ writes only PORTAL_DATA_DIR (users.json lastLogin in legacy mode, portal.log)
 ```
+
+- **No shared folders.** The portal names no path of the admin, and the admin names none of
+  the portal. The only link is a URL and a token on each side, so the two may live in any
+  folders, on one host or two (isolate-app-roots).
+- **Isolation rules (refuse startup in production).** `PORTAL_DATA_DIR`, the `LOG_FILE` folder and
+  (legacy) the `AUTH_USERS_FILE` folder must be outside the code folder. `FILES_ROOT` must not
+  contain, or sit inside, the code folder or `PORTAL_DATA_DIR`, or the portal would serve its own
+  source and state.
 
 - **Web root = `<checkout>/public/`.** `server.js`, `lib/`, `package.json`, `data/` and
   `docs/` sit one level above it and cannot be served by nginx or by Node.
@@ -88,7 +97,7 @@ sudo setfacl -R -m u:portal:rX  /srv/storage && sudo setfacl -R -d -m u:portal:r
 | `/var/www/html/files-server-web` | root, world-readable | code; nginx reads `public/` |
 | `PORTAL_DATA_DIR` (`/var/lib/files-portal`) | `portal`, rw | `users.json`, `portal.log` |
 | `FILES_ROOT` | `portal` read (`r` files, `rX` dirs) | served content |
-| `ADMIN_DB_PATH` **and its directory** | `portal` read (`r` file, `rx` dir) | The admin keeps `/var/lib/dimension` at `dimension:dimension 0750`. Grant read with `sudo usermod -aG dimension portal`, and check that `admin.sqlite` is group-readable. SQLite also needs to see the `-journal` file next to it |
+| `ADMIN_DB_PATH` **and its directory** (deprecated SQLite link only) | `portal` read (`r` file, `rx` dir) | The admin keeps `/var/lib/dimension` at `dimension:dimension 0750`. Grant read with `sudo usermod -aG dimension portal`, and check that `admin.sqlite` is group-readable. SQLite also needs to see the `-journal` file next to it |
 | `/etc/files-portal/portal.env` | root:portal `0640` | secrets |
 
 ---
@@ -121,6 +130,7 @@ NODE_ENV=production
 PORT=4000
 
 # Content: the admin's STORAGE_ROOT, or any folder inside it. Absolute path.
+# A dedicated tree: it must not contain this checkout or PORTAL_DATA_DIR.
 FILES_ROOT=/srv/storage
 
 # Portal-owned data (portal.log; users.json in legacy mode). Absolute, outside the checkout.
@@ -134,12 +144,14 @@ AUTH_SESSION_MINUTES=30
 AUTH_MAX_FAILED_ATTEMPTS=5
 AUTH_LOCKOUT_MINUTES=15
 
-# Admin Files Manager link (read-only)
+# Admin Files Manager link: a URL and a token, nothing else (admin ADR-011).
+# https unless the admin is on this host. The token is the admin's AFM_PORTAL_SERVICE_TOKEN.
 ADMIN_INTEGRATION_ENABLED=true
-ADMIN_DB_PATH=/var/lib/dimension/admin.sqlite
+ADMIN_API_URL=http://127.0.0.1:3000
+ADMIN_SERVICE_TOKEN=<the same 48-byte hex value as the admin>
 ADMIN_SYNC_TTL_MS=5000
 
-# Trace log read by the admin's Logs pane (admin PORTAL_LOG_FILE must name the same file)
+# Trace log; the admin's Logs pane reads it through GET /api/ops/log.
 LOG_FILE=/var/lib/files-portal/portal.log
 
 # nginx on this host is the only trusted proxy
@@ -185,8 +197,9 @@ sessions on the next request.
 | `NODE_ENV` | — | `production` requires `PORTAL_DATA_DIR` and absolute paths for every path variable, or startup is refused |
 | `PORT` | `4000` | Must match nginx `proxy_pass` (range 1–65535) |
 | `FILES_ROOT` | — | **Required.** Served content, read-only |
+| `FILES_ROOT_ADMIN_PATH` | — | Optional: the admin folder `FILES_ROOT` stands for when it is not inside the admin storage (default: the published Portal folder, else `/`). `FILES_ROOT` may be any folder |
 | `RELEASE_PVM` | — | Legacy / pre-v5 admin only: release folder (inside `FILES_ROOT`) that needs sign-in |
-| `PORTAL_DATA_DIR` | `<checkout>/data` | Base for `users.json` and `portal.log` |
+| `PORTAL_DATA_DIR` | `<checkout>/data` | Base for `users.json`, `portal.log` and `portal-state.sqlite`. Production: required, absolute, outside the checkout |
 | `AUTH_ENABLED` | `false` | `true` turns sign-in on |
 | `AUTH_JWT_SECRET` | — | **Required with auth**, ≥ 32 chars. Signs session cookies. Rotating it logs everyone out |
 | `AUTH_SESSION_MINUTES` | `30` | Idle timeout (sliding). A v5 admin's value overrides it (range 1–10080) |
@@ -196,8 +209,10 @@ sessions on the next request.
 | `AUTH_BASIC_ALLOW_HTTP` | `false` | `true` accepts `curl -u` over plain HTTP. Leave off behind TLS |
 | `AUTH_MAX_FAILED_ENTRIES` | `5000` | Cap on tracked usernames (locked accounts are evicted last) (range 100–10000000) |
 | `AUTH_FAILED_IDLE_MS` | `86400000` | Forget failed-attempt counters after this idle time (range 60000–2678400000) |
-| `ADMIN_INTEGRATION_ENABLED` | `false` | Set together with `ADMIN_DB_PATH`; setting only one refuses startup |
-| `ADMIN_DB_PATH` | — | Admin SQLite database, opened read-only |
+| `ADMIN_INTEGRATION_ENABLED` | `false` | `true` together with exactly one of `ADMIN_API_URL` / `ADMIN_DB_PATH`; anything partial refuses startup |
+| `ADMIN_API_URL` | — | The admin's origin. `https` unless on this host; no path. Startup fetches one snapshot and refuses if it fails |
+| `ADMIN_SERVICE_TOKEN` | — | **Secret**, ≥ 32 chars: the admin's `AFM_PORTAL_SERVICE_TOKEN`. Also enables `/api/ops/log` and `/api/ops/access-check` |
+| `ADMIN_DB_PATH` | — | **Deprecated** (removed next release): read the admin SQLite database directly, read-only |
 | `ADMIN_SYNC_TTL_MS` | `5000` | How often admin changes are re-read (1000–60000) |
 | `LOG_FILE` | `<PORTAL_DATA_DIR>/portal.log` | JSON-lines trace; `off` disables it |
 | `TRUSTED_PROXIES` | `127.0.0.1,::1,::ffff:127.0.0.1` | Peers whose `X-Forwarded-For/-Proto` are believed |
@@ -211,7 +226,22 @@ sessions on the next request.
 
 `ADMIN_STORAGE_ROOT` is obsolete: it is ignored, and a warning is logged.
 
-### 5.4 Admin storage volume (v5 admin)
+### 5.4 Moving to the HTTP link (isolate-app-roots)
+
+1. Upgrade the admin first (it adds the contract endpoints; nothing changes for the portal yet).
+2. Stop the portal. Move `PORTAL_DATA_DIR` out of the checkout (for example to
+   `/var/lib/files-portal`), keeping `portal.log`, `users.json` and `portal-state.sqlite*`.
+3. If `FILES_ROOT` contains a checkout (for example `/opt/`), point it at a dedicated tree. Move the
+   storage with its `.dimension-volume` (see the admin's `DEPLOYMENT.md`, "Moving the storage").
+4. Set `ADMIN_API_URL` and `ADMIN_SERVICE_TOKEN`, remove `ADMIN_DB_PATH`, and drop the portal user
+   from the admin's group (§4 no longer applies).
+5. Start the portal. `--check-config` performs the same live check first:
+   `node server.js --check-config`.
+
+Switching from `ADMIN_DB_PATH` to the URL ends existing portal sessions once (the password claim
+changes form).
+
+### 5.5 Admin storage volume (v5 admin)
 
 The admin stamps its `STORAGE_ROOT` with a `.dimension-volume` marker. The portal
 refuses to start unless `FILES_ROOT` (or a parent) carries the **same** marker, so a

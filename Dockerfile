@@ -14,7 +14,9 @@ COPY server.js ./
 COPY lib ./lib
 COPY public ./public
 
-# The portal only writes PORTAL_DATA_DIR (trace log, security state, legacy users.json).
+# The code layer stays root-owned, so the `node` user cannot write it (checked in CI,
+# isolate-app-roots). The portal only writes PORTAL_DATA_DIR (trace log, security
+# state, legacy users.json).
 RUN mkdir -p /var/lib/files-portal && chown node:node /var/lib/files-portal
 VOLUME ["/var/lib/files-portal"]
 USER node

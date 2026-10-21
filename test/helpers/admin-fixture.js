@@ -3,7 +3,7 @@
  * @brief Temp admin.sqlite + FILES_ROOT + in-process portal for integration tests.
  *
  * The schema SQL and password hashing below are copied verbatim from the
- * Admin Files Manager (D:\Projects\Admin-Files-Manager-fixed @ 856a64c:
+ * Admin Files Manager (admin repository @ 856a64c:
  * src/db/schema.js MIGRATIONS v1+v2, src/utils/crypto.js hashPassword), so the
  * portal is tested against the real admin shape, not a look-alike. Mutations
  * open, write and close the DB each time, like the admin's own single writer.

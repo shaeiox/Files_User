@@ -1,12 +1,16 @@
 # Integration: CloudAvid File Portal ↔ Dimension Files Manager
 
-The Admin Files Manager (`D:\Projects\Admin-Files-Manager-fixed`) is where administrators manage
+The Admin Files Manager (a separate application and repository) is where administrators manage
 users and file policies. This portal is the user-facing side and the **only** place those policies
 are enforced: the admin application stores them in `admin.sqlite` but does not apply them to any
 download (its ADR-009 §4).
 
-The portal reads `admin.sqlite` **read-only** and is never a second source of truth. An
-administrator configures users, restrictions and permissions once, in the admin app.
+The portal reads the admin's data through the admin's **HTTP integration contract v1**
+(isolate-app-roots, admin ADR-011) and is never a second source of truth. An administrator
+configures users, restrictions and permissions once, in the admin app. The only admin-specific
+configuration here is a URL and a token. Neither application needs the other's folders, host or
+database schema. Reading `admin.sqlite` directly (`ADMIN_DB_PATH`) still works for one release and
+is **deprecated**.
 
 Change record: `openspec/changes/enforce-admin-file-policies/` (proposal, specs, design, tasks).
 
@@ -17,10 +21,13 @@ Change record: `openspec/changes/enforce-admin-file-policies/` (proposal, specs,
 | Variable | Meaning |
 |---|---|
 | `ADMIN_INTEGRATION_ENABLED` | `true` to enforce admin policies. |
-| `ADMIN_DB_PATH` | Path to the admin's `admin.sqlite`. Relative paths resolve against this project's folder. |
+| `ADMIN_API_URL` | The admin's origin, e.g. `http://127.0.0.1:3000` or `https://admin.example.internal`. `https` is required unless the admin is on this host. No path. |
+| `ADMIN_SERVICE_TOKEN` | The admin's `AFM_PORTAL_SERVICE_TOKEN` (one of them, during a rotation): at least 32 characters. It also enables the two endpoints the admin calls here (§10). |
+| `ADMIN_DB_PATH` | **Deprecated**, removed next release. Reads the admin's `admin.sqlite` directly instead of the URL. Exactly one of `ADMIN_API_URL` / `ADMIN_DB_PATH` may be set. |
 | `ADMIN_SYNC_TTL_MS` | How often admin data is re-read, in ms. Default `5000`, clamped to `1000`–`60000`. |
 | `AUTH_ENABLED` | Must be `true` in integration mode. |
 | `FILES_ROOT` | The admin storage **or any folder in it**, wherever it is mounted on this host. The portal works out which admin folder it is (its *position*, §1.1), and portal path `a/b` is admin client path `<position>/a/b`. Nothing in the admin has to match. |
+| `FILES_ROOT_ADMIN_PATH` | Optional. The admin folder `FILES_ROOT` stands for (`/`, `/Downloads`, …). Set it when `FILES_ROOT` is not inside the admin storage and you want a folder other than the published Portal folder. It always wins over a marker. An invalid value refuses startup. |
 | `RELEASE_PVM` | Legacy mode and admin schema < 5 only. With a v5 admin the release folder is set in Admin → File portal and this is ignored (logged). |
 
 `ADMIN_STORAGE_ROOT` is no longer used; if set, the server logs that it is ignored.
@@ -44,9 +51,9 @@ The admin stamps its `STORAGE_ROOT` with `.dimension-volume`
 | Trusted marker at or above `FILES_ROOT` | Startup | While running |
 |---|---|---|
 | Found | integration mode; logs `FILES_ROOT is the admin folder <position>` | serves |
-| None (or no UUID in the database) | **refused**, saying how to fix it | `503 POLICY_UNAVAILABLE` until one is found again |
+| None (or no UUID in the database) | starts, **mapped**: `FILES_ROOT_ADMIN_PATH`, else the published Portal folder, else `/` (logged once as unverified) | keeps serving under that position |
 
-Example: admin `STORAGE_ROOT=C:\Users\eleven`, portal `FILES_ROOT=C:\Users\eleven\Downloads`,
+Example: admin `STORAGE_ROOT=/srv/storage`, portal `FILES_ROOT=/mnt/share/Downloads` (the same storage, mounted elsewhere),
 nothing set in the admin. The position is `/Downloads`, so portal path `docs/a.txt` is decided as
 `/Downloads/docs/a.txt`, under the policies on `/`, `/Downloads`, `/Downloads/docs` and the file.
 A policy on `/docs` does not apply. Several portals may serve different folders of one storage.
@@ -82,15 +89,28 @@ Change record: `openspec/changes/decouple-storage-and-release-paths/`.
 | unset or `false` | set | **refused**: inconsistent |
 | `true` | unset | **refused** |
 | `true` | missing file, not the admin schema, schema newer than v5, or unreadable | **refused** |
-| `true` | v5, but `FILES_ROOT` is not the admin's storage volume (§1.1) | **refused** |
+| `true` | v5, but `FILES_ROOT` is not inside the admin's storage volume (§1.1) | integration, **mapped** (`FILES_ROOT_ADMIN_PATH`, else the published Portal folder, else `/`; logged as unverified) |
 | `true` | valid | integration mode (also requires `AUTH_ENABLED=true`) |
 
 ---
 
 ## 2. What the portal reads
 
-Every `ADMIN_SYNC_TTL_MS`, in one read transaction on a connection opened read-only for that read
-only:
+Over HTTP, every `0.8 × ADMIN_SYNC_TTL_MS` the portal sends
+`GET <ADMIN_API_URL>/api/v1/integration/portal/snapshot` with `Authorization: Bearer` and
+`If-None-Match`:
+- An unchanged admin answers `304`, and the copy in use is renewed.
+- A `200` carries the whole contract document (users, policies, grants, groups, navbar, settings),
+  which the admin builds in one read transaction. The document is specified in the admin's
+  `docs/CONTRACTS.md` and pinned by `test/contract/portal-v1/*.json`, which are byte-identical in
+  both repositories.
+- The document carries **no password records**. Users carry a `credentialStamp` instead (§5).
+
+Values are mapped to the same rows the SQLite source reads and validated identically, so the
+transport cannot change a decision (`test/admin-http.test.js` checks both sources for equality).
+
+The deprecated SQLite source reads the tables below, every `ADMIN_SYNC_TTL_MS`, in one read
+transaction on a connection opened read-only for that read only:
 
 | Admin table | Columns used | Purpose |
 |---|---|---|
@@ -203,9 +223,14 @@ change or an 8.3 short name, therefore cannot reach a governed file under anothe
 
 ## 5. Authentication
 
-- Login checks the admin `users` table only: usernames are trimmed and case-insensitive (any
-  username the admin can store, up to 255 characters); passwords use the admin's scrypt format
-  `"<saltHex>:<hashHex>"` with the salt string used as-is.
+- Over HTTP the **admin checks the password**:
+  `POST <ADMIN_API_URL>/api/v1/integration/portal/credentials/verify`, sent with the caller's
+  address (`X-Portal-Client-IP`, after this portal's trusted-proxy rules) for the admin's
+  per-client throttle. The portal holds no password record. If the admin cannot answer, sign-in
+  gives `503 SERVER_ERROR`.
+- Usernames are trimmed and case-insensitive (any username the admin can store, up to 255
+  characters). With the deprecated SQLite source, passwords use the admin's scrypt format
+  `"<saltHex>:<hashHex>"` and are checked here.
 - Unknown user, wrong password and disabled account get the **same** response. An active
   `locked_until` gives `429 LOCKED_OUT` with `retryAfterMs`. Unreadable admin data gives
   `503 SERVER_ERROR`.
@@ -216,7 +241,7 @@ change or an 8.3 short name, therefore cannot reach a governed file under anothe
 | Admin action | Portal reason |
 |---|---|
 | Disables or deletes the user | `USER_REVOKED` |
-| Resets the password | `PASSWORD_CHANGED` (sessions carry a fingerprint of the stored hash) |
+| Resets the password | `PASSWORD_CHANGED` (sessions carry the admin's `credentialStamp`; over SQLite, a fingerprint of the stored hash) |
 | Uses **Revoke sessions** | `SESSION_REVOKED` (sessions carry their original login time; renewals never extend it) |
 
 ---
@@ -227,7 +252,16 @@ All admin changes (users, policies, grants, denies, windows, revocations) take e
 `ADMIN_SYNC_TTL_MS` (default **5 seconds**) without a restart. A download that is already streaming
 is not cut off.
 
-A failed refresh drops the cached copy instead of reusing it; the next request retries.
+A failed refresh drops the cached copy instead of reusing it. Governed requests answer
+`503 POLICY_UNAVAILABLE` until a refresh succeeds. Over HTTP, requests never wait on the network:
+a background poller keeps the copy fresh, and a request that finds none fails closed at once.
+Failures that drop the copy:
+- an unreachable admin, a timeout, or `401`/`5xx`;
+- a contract newer than this portal understands;
+- a storage-volume mismatch.
+
+Switching a host from the SQLite source to HTTP ends existing portal sessions once, because their
+password claim changes form. Users sign in again.
 
 ---
 
@@ -276,3 +310,20 @@ admin's exact schema (`test/helpers/admin-fixture.js`):
 | `test/access-policy.test.js` | Every row of the rule table, folders, grants/denies, invalid data |
 | `test/auth.test.js` | Login, status, locks, throttle, disable/delete/reset/revoke |
 | `test/endpoints.test.js` | Every endpoint, 503, aliases and traversal, admin changes over time |
+
+---
+
+## 10. Endpoints the admin calls (isolate-app-roots)
+
+They exist only when `ADMIN_SERVICE_TOKEN` is set (otherwise they are unknown paths). Each needs
+`Authorization: Bearer <token>`, compared in constant time. Ten failures per minute from one
+address answer `429`, even with the right token.
+
+| Endpoint | Answer | Used by |
+|---|---|---|
+| `GET /api/ops/log?limit=1..1000` | `{ available, entries }`, newest first, from the end of `LOG_FILE` (`available:false` with `LOG_FILE=off`) | Admin → Logs → File portal |
+| `POST /api/ops/access-check` `{clientPath:"/a/b", userId:number\|null}` | `{ outcome, policies:[{path, outcome}] }` from the same rules as every request (`access-policy.explain`); `404` unknown user; `503` without a snapshot | Admin "Check access" |
+
+The admin therefore needs neither this portal's disk (its log) nor a copy of its rules (its
+decisions).
+

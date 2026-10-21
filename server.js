@@ -34,41 +34,56 @@ if (configProblems.length) {
     for (const problem of configProblems) logger.error("  • " + problem);
     process.exit(1);
 }
-if (CHECK_ONLY) {
-    logger.info("Configuration is usable.");
-    process.exit(0);
+// Outside production the root-isolation rules only warn, so <project>/data keeps working.
+if (settings.raw("NODE_ENV") !== "production") {
+    for (const problem of require("./lib/load-env").isolationProblems()) logger.warn(problem);
 }
+let server = null;
 
-// Integration mode: RELEASE_PVM no longer implies sign-in; the admin lock on the
-// release folder does. Say so once when that folder is open to anonymous callers.
-const releaseRel = adminDb.isIntegrationEnabled() && filesService.releaseRel(PROJECT_ROOT);
-if (releaseRel && accessPolicy.decide(releaseRel, null).result === "allow") {
-    logger.warn(`Release folder "${releaseRel}" is public. Lock it in the Admin Files Manager to require sign-in for releases.`);
-}
+(async function main() {
+    // Integration over HTTP: one live snapshot before anything is served (admin
+    // reachable, token accepted, contract understood, storage volume located).
+    const liveProblems = await adminDb.start();
+    if (liveProblems.length) {
+        logger.error(CHECK_ONLY ? "Configuration is not usable:" : "Configuration is not usable — refusing to start:");
+        for (const problem of liveProblems) logger.error("  • " + problem);
+        process.exit(1);
+    }
+    if (CHECK_ONLY) {
+        logger.info("Configuration is usable.");
+        process.exit(0);
+    }
 
-// AUTH_BASIC_ALLOW_HTTP accepts CLI credentials over plain HTTP, so the password
-// crosses the wire in cleartext. Allowed only for deliberate plain-HTTP setups;
-// say it loudly at startup so it is never enabled by accident.
-if (settings.get("AUTH_BASIC_ALLOW_HTTP") && settings.get("NODE_ENV").toLowerCase() === "production") {
-    logger.warn("AUTH_BASIC_ALLOW_HTTP=true: CLI Basic-auth credentials are accepted over plain HTTP. Prefer HTTPS.");
-}
+    // Integration mode: RELEASE_PVM no longer implies sign-in; the admin lock on the
+    // release folder does. Say so once when that folder is open to anonymous callers.
+    const releaseRel = adminDb.isIntegrationEnabled() && filesService.releaseRel(PROJECT_ROOT);
+    if (releaseRel && accessPolicy.decide(releaseRel, null).result === "allow") {
+        logger.warn(`Release folder "${releaseRel}" is public. Lock it in the Admin Files Manager to require sign-in for releases.`);
+    }
 
-const HOST = "0.0.0.0";
-const PORT = settings.get("PORT");
+    // AUTH_BASIC_ALLOW_HTTP accepts CLI credentials over plain HTTP, so the password
+    // crosses the wire in cleartext. Allowed only for deliberate plain-HTTP setups;
+    // say it loudly at startup so it is never enabled by accident.
+    if (settings.get("AUTH_BASIC_ALLOW_HTTP") && settings.get("NODE_ENV").toLowerCase() === "production") {
+        logger.warn("AUTH_BASIC_ALLOW_HTTP=true: CLI Basic-auth credentials are accepted over plain HTTP. Prefer HTTPS.");
+    }
 
-const server = http.createServer((req, res) => {
-    apiRouter.handleRequest(req, res, PROJECT_ROOT, PORT);
-});
+    const HOST = "0.0.0.0";
+    const PORT = settings.get("PORT");
 
-server.listen(PORT, HOST, () => {
-    const peek = filesService.peekRootSync(PROJECT_ROOT);
-    logger.info(`Portal started on port ${PORT} (auth ${settings.get('AUTH_ENABLED') ? 'on' : 'off'}, admin gate ${adminDb.isIntegrationEnabled() ? 'on' : 'off'})`);
-    const rootState = !peek.configured ? `${c.yellow}FILES_ROOT is not set${c.reset}`
-        : !peek.exists ? `${c.yellow}FILES_ROOT path was not found${c.reset}`
-            : !peek.isDirectory ? `${c.yellow}FILES_ROOT is not a directory${c.reset}`
-                : `${c.green}FILES_ROOT is configured${c.reset}`;
+    server = http.createServer((req, res) => {
+        apiRouter.handleRequest(req, res, PROJECT_ROOT, PORT);
+    });
 
-    console.log(`
+    server.listen(PORT, HOST, () => {
+        const peek = filesService.peekRootSync(PROJECT_ROOT);
+        logger.info(`Portal started on port ${PORT} (auth ${settings.get('AUTH_ENABLED') ? 'on' : 'off'}, admin gate ${adminDb.isIntegrationEnabled() ? 'on' : 'off'})`);
+        const rootState = !peek.configured ? `${c.yellow}FILES_ROOT is not set${c.reset}`
+            : !peek.exists ? `${c.yellow}FILES_ROOT path was not found${c.reset}`
+                : !peek.isDirectory ? `${c.yellow}FILES_ROOT is not a directory${c.reset}`
+                    : `${c.green}FILES_ROOT is configured${c.reset}`;
+
+        console.log(`
 ${c.cyan}${c.bold}
   ╔══════════════════════════════════════════════════╗
   ║     CloudAvid File Portal — File API Server      ║
@@ -79,16 +94,18 @@ ${c.cyan}${c.bold}
   ${c.green}➜${c.reset}  Files API:   http://localhost:${PORT}/api/files/
   ${c.green}➜${c.reset}  Auth Status: http://localhost:${PORT}/api/auth/status
 
-  ${c.green}➜${c.reset}  Admin gate:  ${adminDb.isIntegrationEnabled() ? `${c.green}enabled (admin.sqlite read-only)` : `${c.dim}legacy — all content public`}${c.reset}
+  ${c.green}➜${c.reset}  Admin gate:  ${adminDb.isIntegrationEnabled() ? `${c.green}enabled (${adminDb.source() === 'http' ? 'admin API' : 'admin.sqlite read-only, deprecated'})` : `${c.dim}legacy — all content public`}${c.reset}
 
   ${rootState}
   ${c.dim}Press Ctrl+C to stop${c.reset}
 `);
-});
+    });
+})();
 
 // SIGTERM: systemd stop / docker stop (as PID 1, node ignores it without a handler).
 for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => {
     logger.warn("\nShutting down file portal…");
+    if (!server) process.exit(0);
     server.close(() => process.exit(0));
     setTimeout(() => process.exit(0), 5000).unref(); // open downloads keep close() waiting
 });

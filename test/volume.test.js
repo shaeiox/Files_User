@@ -41,32 +41,29 @@ describe('storage volume check', () => {
         assert.deepStrictEqual(adminDb.validateStartup(), []);
     });
 
-    test('a missing, foreign or unreadable marker refuses startup', () => {
+    test('a missing, foreign or unreadable marker still starts: FILES_ROOT is mapped to "/" (isolate-app-roots)', () => {
         const other = '00000000-0000-4000-8000-000000000000';
         try {
             for (const marker of [() => fx.writeMarker(other), () => fx.writeMarker(null, '/', 'not json')]) {
                 marker();
-                const problems = adminDb.validateStartup();
-                assert.strictEqual(problems.length, 1, problems.join('\n'));
-                assert.match(problems[0], /Storage volume mismatch/);
-                assert.ok(problems[0].includes(volumeId), 'names the expected volume');
+                assert.deepStrictEqual(adminDb.validateStartup(), []);
+                assert.deepStrictEqual(adminDb.locate(volumeId, null), { position: '/', verified: false });
             }
             fx.setSetting('volume_id', null);
-            assert.match(adminDb.validateStartup()[0], /no storage volume id/);
+            assert.deepStrictEqual(adminDb.validateStartup(), []);
         } finally {
             fx.setSetting('volume_id', volumeId);
             fx.writeMarker(volumeId);
         }
     });
 
-    test('a marker that changes while running fails closed until it matches again', async () => {
+    test('a marker that changes while running keeps serving under the mapped position', async () => {
         assert.strictEqual((await anon().get('/api/files/docs')).status, 200);
         fx.writeMarker('00000000-0000-4000-8000-000000000000');
         await afterSync();
         try {
-            const res = await anon().get('/api/files/docs');
-            assert.strictEqual(res.status, 503);
-            assert.strictEqual(res.json.code, 'POLICY_UNAVAILABLE');
+            assert.strictEqual((await anon().get('/api/files/docs')).status, 200);
+            assert.strictEqual(adminDb.position(), '/');
         } finally {
             fx.writeMarker(volumeId);
         }
@@ -303,7 +300,7 @@ describe('FILES_ROOT anywhere in the admin storage (admin <tmp>/, portal <tmp>/s
         const saved = process.env.FILES_ROOT;
         process.env.FILES_ROOT = path.join(sub.filesRoot, 'docs', 'team');
         try {
-            assert.deepStrictEqual(located(), { position: '/storage/docs/team' });
+            assert.deepStrictEqual(located(), { position: '/storage/docs/team', verified: true });
         } finally {
             process.env.FILES_ROOT = saved;
         }
@@ -335,32 +332,33 @@ describe('FILES_ROOT anywhere in the admin storage (admin <tmp>/, portal <tmp>/s
         for (const stale of [{ clientPath: '/' }, { clientPath: '/old' }]) {
             fsMod.writeFileSync(OWN_MARKER, JSON.stringify({ volumeId: subId, ...stale }));
             try {
-                assert.deepStrictEqual(located(), { position: '/storage' }, JSON.stringify(stale));
+                assert.deepStrictEqual(located(), { position: '/storage', verified: true }, JSON.stringify(stale));
             } finally {
                 fsMod.rmSync(OWN_MARKER);
             }
         }
     });
 
-    test('a host that cannot see the storage root needs the folder marker the admin published', () => {
+    test('a host that cannot see the storage root: the published folder marker verifies, otherwise it is mapped', () => {
         fsMod.rmSync(ROOT_MARKER);
         fsMod.writeFileSync(OWN_MARKER, JSON.stringify({ volumeId: subId, clientPath: '/storage' }));
         try {
-            assert.match(adminDb.locate(subId, null).problem, /not inside the admin storage/);
-            assert.deepStrictEqual(adminDb.locate(subId, '/storage'), { position: '/storage' });
-            assert.match(adminDb.locate(subId, '/other').problem, /Portal folder/);
+            assert.deepStrictEqual(adminDb.locate(subId, null), { position: '/', verified: false });
+            assert.deepStrictEqual(adminDb.locate(subId, '/storage'), { position: '/storage', verified: true });
+            assert.deepStrictEqual(adminDb.locate(subId, '/other'), { position: '/other', verified: false });
         } finally {
             fsMod.rmSync(OWN_MARKER);
             writeRootMarker();
         }
     });
 
-    test('losing every trusted marker while running fails closed until one is back', async () => {
+    test('losing every trusted marker while running maps FILES_ROOT to "/" instead of refusing', async () => {
         assert.strictEqual((await anonSub().get('/api/files/docs')).status, 200);
         fsMod.rmSync(ROOT_MARKER);
         await afterSync();
         try {
-            assert.strictEqual((await anonSub().get('/api/files/docs')).status, 503);
+            assert.strictEqual((await anonSub().get('/api/files/docs')).status, 200);
+            assert.strictEqual(adminDb.position(), '/');
         } finally {
             writeRootMarker();
         }
@@ -394,3 +392,45 @@ describe('FILES_ROOT anywhere in the admin storage (admin <tmp>/, portal <tmp>/s
         }
     });
 });
+
+describe('FILES_ROOT at any path (isolate-app-roots)', () => {
+    const fsMod = require('fs');
+    const os = require('os');
+    const elsewhere = fsMod.mkdtempSync(path.join(os.tmpdir(), 'portal-anywhere-'));
+    fsMod.mkdirSync(path.join(elsewhere, 'docs'));
+    fsMod.writeFileSync(path.join(elsewhere, 'docs', 'readme.txt'), 'hi');
+    const withEnv = async (vars, fn) => {
+        const saved = Object.fromEntries(Object.keys(vars).map((k) => [k, process.env[k]]));
+        applyEnv(vars);
+        adminDb.resetSnapshot();
+        try { return await fn(); } finally { applyEnv(saved); adminDb.resetSnapshot(); }
+    };
+    after(() => fsMod.rmSync(elsewhere, { recursive: true, force: true }));
+
+    test('a folder unrelated to the admin storage starts and is served', () => withEnv({ FILES_ROOT: elsewhere }, async () => {
+        assert.deepStrictEqual(adminDb.validateStartup(), []);
+        assert.strictEqual(adminDb.position(), '/');
+        assert.strictEqual((await anon().get('/api/files/docs')).status, 200);
+    }));
+
+    test('admin policies apply by path under the mapped folder', () => withEnv({ FILES_ROOT: elsewhere }, async () => {
+        fx.setPolicy('/docs', { mode: 'public', published: 0, isDirectory: true });
+        adminDb.resetSnapshot();
+        try {
+            assert.strictEqual((await anon().get('/api/files/docs')).status, 404);
+        } finally {
+            fx.deletePolicy('/docs');
+        }
+    }));
+
+    test('FILES_ROOT_ADMIN_PATH names the admin folder explicitly, even over a marker', () => withEnv({ FILES_ROOT: elsewhere, FILES_ROOT_ADMIN_PATH: '/Downloads/' }, () => {
+        assert.deepStrictEqual(adminDb.validateStartup(), []);
+        assert.deepStrictEqual(adminDb.locate(volumeId, null), { position: '/Downloads', verified: false });
+        assert.strictEqual(adminDb.position(), '/Downloads');
+    }));
+
+    test('an invalid FILES_ROOT_ADMIN_PATH refuses startup', () => withEnv({ FILES_ROOT: elsewhere, FILES_ROOT_ADMIN_PATH: 'Downloads/../x' }, () => {
+        assert.match(adminDb.validateStartup().join('\n'), /FILES_ROOT_ADMIN_PATH must be an absolute admin client path/);
+    }));
+});
+
